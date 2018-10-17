@@ -17,6 +17,7 @@ import org.scijava.ItemIO;
 import org.scijava.app.StatusService;
 import org.scijava.command.Command;
 import org.scijava.command.CommandService;
+import org.scijava.display.DisplayService;
 import org.scijava.log.LogService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
@@ -48,6 +49,9 @@ public class MISACommand implements Command {
 	@Parameter
     DatasetIOService datasetIO;
 
+	@Parameter
+	DisplayService display;
+
 	private static MISADialog dialog = null;
 	/**
 	 * show a dialog and give the dialog access to required IJ2 Services
@@ -65,6 +69,7 @@ public class MISACommand implements Command {
 			dialog.setThread(thread);
 			dialog.setUi(ui);
 			dialog.setDatasetIO(datasetIO);
+			dialog.setDisplay(display);
 		});
 	}
 

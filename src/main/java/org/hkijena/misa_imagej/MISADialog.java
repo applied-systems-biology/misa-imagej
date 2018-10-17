@@ -16,6 +16,7 @@ import org.hkijena.misa_imagej.data.MISAExportedData;
 import org.hkijena.misa_imagej.json_schema.JSONSchemaObject;
 import org.scijava.app.StatusService;
 import org.scijava.command.CommandService;
+import org.scijava.display.DisplayService;
 import org.scijava.log.LogService;
 import org.scijava.thread.ThreadService;
 import org.scijava.ui.UIService;
@@ -27,6 +28,7 @@ public class MISADialog extends JFrame {
     private ThreadService thread;
     private UIService ui;
     private DatasetIOService datasetIO;
+    private DisplayService display;
 
     private AlgorithmParametersEditor algorithmParametersEditor;
     private RuntimeParametersEditor runtimeParametersEditor;
@@ -263,5 +265,13 @@ public class MISADialog extends JFrame {
 
     public void setDatasetIO(DatasetIOService datasetIO) {
         this.datasetIO = datasetIO;
+    }
+
+    public DisplayService getDisplay() {
+        return display;
+    }
+
+    public void setDisplay(DisplayService display) {
+        this.display = display;
     }
 }

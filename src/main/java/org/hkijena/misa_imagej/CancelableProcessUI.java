@@ -27,6 +27,7 @@ public class CancelableProcessUI extends JDialog {
 
         this.process = process;
 
+        setTitle("Working ...");
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         setSize(400, 100);
         setLayout(new BorderLayout(8, 8));
