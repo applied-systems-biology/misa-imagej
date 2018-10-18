@@ -1,41 +1,37 @@
 package org.hkijena.misa_imagej.data;
 
 import ij.ImagePlus;
-import ij.plugin.TextFileReader;
 import ij.text.TextWindow;
-import net.imagej.Dataset;
-import net.imglib2.img.display.imagej.ImageJFunctions;
 import org.hkijena.misa_imagej.MISADialog;
 import org.hkijena.misa_imagej.json_schema.JSONSchemaObject;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class MISAExportedData extends MISAData {
 
-    private ExportedDataAction exportedDataAction;
+    private MISAExportedDataAction exportedDataAction;
 
     public MISAExportedData(JSONSchemaObject schema) {
-        super(schema, DataIOType.Exported);
+        super(schema, MISADataIOType.Exported);
 
         // Auto-select exported data action
         switch (getType()) {
             case image_stack:
             case image_file:
             case exportable_meta_data:
-                exportedDataAction = ExportedDataAction.Import;
+                exportedDataAction = MISAExportedDataAction.Import;
                 break;
             default:
-                exportedDataAction = ExportedDataAction.Nothing;
+                exportedDataAction = MISAExportedDataAction.Nothing;
         }
     }
 
-    public ExportedDataAction getExportedDataAction() {
+    public MISAExportedDataAction getExportedDataAction() {
         return exportedDataAction;
     }
 
-    public void setExportedDataAction(ExportedDataAction exportedDataAction) {
+    public void setExportedDataAction(MISAExportedDataAction exportedDataAction) {
         this.exportedDataAction = exportedDataAction;
     }
 
@@ -46,9 +42,9 @@ public class MISAExportedData extends MISAData {
      * @param exportedPath
      */
     public void applyImportImageJAction(MISADialog app, Path exportedPath) throws IOException {
-        if (exportedDataAction == ExportedDataAction.Import) {
+        if (exportedDataAction == MISAExportedDataAction.Import) {
             Path resolvedPath = exportedPath.resolve(getRelativePath()).toAbsolutePath();
-            app.getLog().info("Importing " + getType().toString() + " " + getRelativePath().toString());
+            app.getLogService().info("Importing " + getType().toString() + " " + getRelativePath().toString());
             switch (getType()) {
                 case image_stack: {
                     ImagePlus ip = ij.plugin.FolderOpener.open(resolvedPath.toString(), "virtual");

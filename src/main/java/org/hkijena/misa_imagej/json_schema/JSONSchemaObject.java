@@ -2,7 +2,7 @@ package org.hkijena.misa_imagej.json_schema;
 
 import com.google.gson.annotations.SerializedName;
 import org.hkijena.misa_imagej.data.MISAData;
-import org.hkijena.misa_imagej.data.DataType;
+import org.hkijena.misa_imagej.data.MISADataType;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.beans.PropertyChangeListener;
@@ -175,6 +175,18 @@ public class JSONSchemaObject implements Cloneable {
         return result;
     }
 
+    public boolean hasPropertyFromPath(String... path) {
+        JSONSchemaObject current = this;
+        for(String v : path) {
+            if(current.properties.containsKey(v))
+                current = current.properties.get(v);
+            else {
+                return false;
+            }
+        }
+        return true;
+    }
+
     private void flatten_(List<JSONSchemaObject> result) {
         result.add(this);
         for(Map.Entry<String, JSONSchemaObject> kv : properties.entrySet()) {
@@ -188,10 +200,10 @@ public class JSONSchemaObject implements Cloneable {
         return result;
     }
 
-    public DataType getFilesystemDataType() {
+    public MISADataType getFilesystemDataType() {
         if(filesystemData != null)
             return filesystemData.getType();
-        return DataType.None;
+        return MISADataType.None;
     }
 
     public void addPropertyChangeListener( PropertyChangeListener l )

@@ -1,7 +1,9 @@
 package org.hkijena.misa_imagej.filesystem;
 
+import org.hkijena.misa_imagej.MISADialog;
 import org.hkijena.misa_imagej.UIHelper;
 import org.hkijena.misa_imagej.data.MISAImportedData;
+import org.hkijena.misa_imagej.data.importing.MISAImporterSourceEditor;
 import org.hkijena.misa_imagej.json_schema.JSONSchemaObject;
 
 import javax.swing.*;
@@ -13,9 +15,11 @@ import java.util.List;
  * Editor that allows setting up the imported filesystem
  */
 public class ImportedFilesystemEditor extends JPanel {
+    private MISADialog app;
     private JSONSchemaObject jsonSchemaObject;
 
-    public ImportedFilesystemEditor(JSONSchemaObject importedFilesystem, String name) {
+    public ImportedFilesystemEditor(MISADialog app, JSONSchemaObject importedFilesystem, String name) {
+        this.app = app;
         jsonSchemaObject = importedFilesystem.properties.get("children").properties.get(name);
         initialize();
     }
@@ -26,7 +30,7 @@ public class ImportedFilesystemEditor extends JPanel {
                         object.getType().toString(), row, 0)),
                 object.getType().toColor());
         UIHelper.borderedJLabel(UIHelper.createDescriptionLabelUI(this, "/" + object.getRelativePath().toString(), row, 1));
-        add(new ImporterSourceEditor(jsonSchemaObject), new GridBagConstraints() {
+        add(new MISAImporterSourceEditor(app, object), new GridBagConstraints() {
             {
                 gridx = 2;
                 gridy = row;

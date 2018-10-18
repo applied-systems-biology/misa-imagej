@@ -69,7 +69,7 @@ public class CancelableProcessUI extends JDialog {
         if(getStatus() != Status.Ready)
             throw new RuntimeException("Worker is not ready!");
         setStatus(Status.Running);
-        setModal(true);
+        setModal(false);
         setVisible(true);
     }
 
@@ -78,7 +78,6 @@ public class CancelableProcessUI extends JDialog {
     }
 
     private void setStatus(Status status) {
-        System.out.println(status.toString());
         Status old = this.status;
         this.status = status;
         propertyChangeSupport.firePropertyChange("status", old, status);

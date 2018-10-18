@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.hkijena.misa_imagej.data.*;
 import org.hkijena.misa_imagej.json_schema.JSONSchemaObject;
-import org.scijava.log.LogService;
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,7 +11,6 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.file.Path;
 import java.util.*;
@@ -44,15 +42,13 @@ public class MISAParameterSchema {
     }
 
     private void importFilesystem() {
-        ArrayList<JSONSchemaObject> leaves = new ArrayList<>();
-        getFilesystemLeaves(getImportedFilesystemSchema(), leaves);
-        for(JSONSchemaObject object : leaves) {
-            object.filesystemData = new MISAImportedData(object);
+        for(JSONSchemaObject object : getImportedFilesystemSchema().flatten()) {
+            if(object.hasPropertyFromPath("data-type"))
+                object.filesystemData = new MISAImportedData(object);
         }
-        leaves.clear();
-        getFilesystemLeaves(getExportedFilesystemSchema(), leaves);
-        for(JSONSchemaObject object : leaves) {
-            object.filesystemData = new MISAExportedData(object);
+        for(JSONSchemaObject object : getExportedFilesystemSchema().flatten()) {
+            if(object.hasPropertyFromPath("data-type"))
+                object.filesystemData = new MISAExportedData(object);
         }
 
     }
@@ -122,7 +118,7 @@ public class MISAParameterSchema {
             JSONSchemaObject object = flat.get(i);
             if(object.filesystemData != null) {
                 MISAImportedData data = (MISAImportedData)object.filesystemData;
-                app.getLog().info("[" + (i + 1) + " / " + flat.size() + "] Importing data " + data.getRelativePath().toString() + " into " + importedDirectory.toString());
+                app.getLogService().info("[" + (i + 1) + " / " + flat.size() + "] Importing data " + data.getRelativePath().toString() + " into " + importedDirectory.toString());
                 data.getImportSource().runImport(importedDirectory, forceCopy);
             }
         }
@@ -218,7 +214,7 @@ public class MISAParameterSchema {
 
         prepareImportedFiles(app, importedDirectory, forceCopy);
 
-        app.getLog().info("Writing parameter schema into " + parameterSchema.toString());
+        app.getLogService().info("Writing parameter schema into " + parameterSchema.toString());
         GsonBuilder builder = new GsonBuilder().setPrettyPrinting().serializeNulls();
         Gson gson = builder.create();
         try(OutputStreamWriter w = new OutputStreamWriter(new FileOutputStream(parameterSchema.toString()))) {

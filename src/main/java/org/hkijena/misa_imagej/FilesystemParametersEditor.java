@@ -9,12 +9,14 @@ import java.awt.*;
 
 public class FilesystemParametersEditor extends JPanel {
 
+    private MISADialog app;
     private JList<String> objectList;
     private JPanel objectEditor;
     private MISAParameterSchema parameterSchema = null;
     private String currentObject = null;
 
-    public FilesystemParametersEditor() {
+    public FilesystemParametersEditor(MISADialog app) {
+        this.app = app;
         initialize();
     }
 
@@ -40,7 +42,7 @@ public class FilesystemParametersEditor extends JPanel {
         objectEditor.removeAll();
         objectEditor.setLayout(new GridBagLayout());
 
-        objectEditor.add(new ImportedFilesystemEditor(parameterSchema.getImportedFilesystemSchema(), name), new GridBagConstraints() {
+        objectEditor.add(new ImportedFilesystemEditor(app, parameterSchema.getImportedFilesystemSchema(), name), new GridBagConstraints() {
             {
                 anchor = GridBagConstraints.PAGE_START;
                 gridx = 1;

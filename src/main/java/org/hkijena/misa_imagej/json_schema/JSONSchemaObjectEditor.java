@@ -136,7 +136,7 @@ public class JSONSchemaObjectEditor extends JPanel {
                 add(panel, new GridBagConstraints() {
                     {
                         anchor = GridBagConstraints.PAGE_START;
-                        gridx = 1;
+                        gridx = 0;
                         gridy = row;
                         fill = GridBagConstraints.HORIZONTAL;
                         weightx = 1;

@@ -10,6 +10,7 @@ import javax.swing.SwingUtilities;
 
 import ij.plugin.ImagesToStack;
 import io.scif.services.DatasetIOService;
+import net.imagej.DatasetService;
 import net.imagej.ImageJ;
 import net.imagej.ops.OpService;
 
@@ -52,24 +53,16 @@ public class MISACommand implements Command {
 	@Parameter
 	DisplayService display;
 
-	private static MISADialog dialog = null;
+	@Parameter
+    DatasetService datasetService;
 	/**
 	 * show a dialog and give the dialog access to required IJ2 Services
 	 */
 	@Override
 	public void run() {
-
 		SwingUtilities.invokeLater(() -> {
-			if (dialog == null) {
-				dialog = new MISADialog();
-			}
+		    MISADialog dialog = new MISADialog(this);
 			dialog.setVisible(true);
-			dialog.setLog(log);
-			dialog.setStatus(status);
-			dialog.setThread(thread);
-			dialog.setUi(ui);
-			dialog.setDatasetIO(datasetIO);
-			dialog.setDisplay(display);
 		});
 	}
 

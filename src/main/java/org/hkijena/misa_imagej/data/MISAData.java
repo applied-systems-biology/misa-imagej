@@ -8,13 +8,13 @@ import java.nio.file.Paths;
 
 public class MISAData {
     private JSONSchemaObject schemaObject;
-    private DataIOType ioType;
-    private DataType type;
+    private MISADataIOType ioType;
+    private MISADataType type;
     private Path relativePath;
 
-    public MISAData(JSONSchemaObject schema, DataIOType ioType) {
+    public MISAData(JSONSchemaObject schema, MISADataIOType ioType) {
         this.schemaObject = schema;
-        this.type = Enum.valueOf(DataType.class, schema.getPropertyFromPath("data-type").getValue().toString());
+        this.type = Enum.valueOf(MISADataType.class, schema.getPropertyFromPath("data-type").getValue().toString());
         this.ioType = ioType;
         this.relativePath = getFilesystemValuePath(schema);
     }
@@ -40,7 +40,7 @@ public class MISAData {
         return Paths.get(result);
     }
 
-    public DataType getType() {
+    public MISADataType getType() {
         return type;
     }
 
@@ -48,7 +48,7 @@ public class MISAData {
         return relativePath;
     }
 
-    public DataIOType getIoType() {
+    public MISADataIOType getIoType() {
         return ioType;
     }
 

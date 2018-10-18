@@ -12,10 +12,10 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.scif.services.DatasetIOService;
 
+import net.imagej.DatasetService;
 import org.hkijena.misa_imagej.data.MISAExportedData;
 import org.hkijena.misa_imagej.json_schema.JSONSchemaObject;
 import org.scijava.app.StatusService;
-import org.scijava.command.CommandService;
 import org.scijava.display.DisplayService;
 import org.scijava.log.LogService;
 import org.scijava.thread.ThreadService;
@@ -23,12 +23,7 @@ import org.scijava.ui.UIService;
 
 public class MISADialog extends JFrame {
 
-    private LogService log;
-    private StatusService status;
-    private ThreadService thread;
-    private UIService ui;
-    private DatasetIOService datasetIO;
-    private DisplayService display;
+    private MISACommand command;
 
     private AlgorithmParametersEditor algorithmParametersEditor;
     private RuntimeParametersEditor runtimeParametersEditor;
@@ -41,9 +36,10 @@ public class MISADialog extends JFrame {
     /**
      * Create the dialog.
      */
-    public MISADialog() {
+    public MISADialog(MISACommand command) {
+        this.command = command;
         initialize();
-        loadSchema(MISADialog.class.getResourceAsStream("/param_schema.json"));
+        loadSchema(MISADialog.class.getResourceAsStream("/parameter-schema.json"));
     }
 
     /**
@@ -66,7 +62,7 @@ public class MISADialog extends JFrame {
             e.printStackTrace();
         }
 
-        parameterSchema.addObject("object1");
+        parameterSchema.addObject("sample1");
 
         algorithmParametersEditor.setSchema(parameterSchema);
         runtimeParametersEditor.setSchema(parameterSchema);
@@ -76,7 +72,7 @@ public class MISADialog extends JFrame {
 
     private void writeParameterSchema(Path parameterSchema, Path importedDirectory, Path exportedDirectory, boolean forceCopy, boolean relativeDirectories) {
         setEnabled(false);
-        getUi().getDefaultUI().getConsolePane().show();
+        getUiService().getDefaultUI().getConsolePane().show();
         this.parameterSchema.writeParameterJSON(this, parameterSchema, importedDirectory, exportedDirectory, forceCopy, relativeDirectories);
         setEnabled(true);
     }
@@ -136,9 +132,22 @@ public class MISADialog extends JFrame {
         }
     }
 
+    private void importMISAOutputData(Path exportedPath) {
+        getLogService().info("Importing results back into ImageJ ...");
+        for(JSONSchemaObject obj : parameterSchema.getExportedFilesystemSchema().flatten()) {
+            if(obj.filesystemData != null) {
+                try {
+                    ((MISAExportedData)obj.filesystemData).applyImportImageJAction(this, exportedPath);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
     private void runMISA() {
 
-        getUi().getDefaultUI().getConsolePane().show();
+        getUiService().getDefaultUI().getConsolePane().show();
 
         if (!parameterSchema.canWriteParameterJSON(this))
             return;
@@ -168,26 +177,32 @@ public class MISADialog extends JFrame {
                 writeParameterSchema(dialog.getParameterFilePath(), dialog.getImportedPath(), dialog.getExportedPath(), false, false);
 
                 // Run the executable
-                getLog().info("Starting worker process ...");
+                getLogService().info("Starting worker process ...");
                 ProcessBuilder pb = new ProcessBuilder(dialog.getExecutablePath().toString(), "--parameters", dialog.getParameterFilePath().toString());
                 Process p = pb.start();
-                new ProcessStreamToStringGobbler(p.getInputStream(), s -> getLog().info(s)).start();
-                new ProcessStreamToStringGobbler(p.getErrorStream(), s -> getLog().error(s)).start();
+                new ProcessStreamToStringGobbler(p.getInputStream(), s -> getLogService().info(s)).start();
+                new ProcessStreamToStringGobbler(p.getErrorStream(), s -> getLogService().error(s)).start();
 
                 CancelableProcessUI processUI = new CancelableProcessUI(p);
                 processUI.setLocationRelativeTo(this);
+
+                // React to changes in status
+                processUI.addPropertyChangeListener(propertyChangeEvent -> {
+                    if(processUI.getStatus() == CancelableProcessUI.Status.Done ||
+                            processUI.getStatus() == CancelableProcessUI.Status.Failed ||
+                            processUI.getStatus() == CancelableProcessUI.Status.Canceled) {
+                        setEnabled(true);
+                        if(processUI.getStatus() == CancelableProcessUI.Status.Failed) {
+                            JOptionPane.showMessageDialog(this, "There was an error during calculation. Please check the console to see the cause of this error.", "Error", JOptionPane.ERROR_MESSAGE);
+                            return;
+                        }
+
+                        importMISAOutputData(dialog.getExportedPath());
+                    }
+                });
+
+                setEnabled(false);
                 processUI.showDialog();
-
-                if(processUI.getStatus() == CancelableProcessUI.Status.Failed) {
-                    JOptionPane.showMessageDialog(this, "There was an error during calculation. Please check the console to see the cause of this error.", "Error", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-
-                getLog().info("Importing results back into ImageJ ...");
-                for(JSONSchemaObject obj : parameterSchema.getExportedFilesystemSchema().flatten()) {
-                    if(obj.filesystemData != null)
-                        ((MISAExportedData)obj.filesystemData).applyImportImageJAction(this, dialog.getExportedPath());
-                }
 
             } catch (IOException e) {
                 e.printStackTrace();
@@ -201,7 +216,7 @@ public class MISADialog extends JFrame {
         objectParametersEditor = new ObjectParametersEditor();
         algorithmParametersEditor = new AlgorithmParametersEditor();
         runtimeParametersEditor = new RuntimeParametersEditor();
-        filesystemParametersEditor = new FilesystemParametersEditor();
+        filesystemParametersEditor = new FilesystemParametersEditor(this);
 
         JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.addTab("Data", filesystemParametersEditor);
@@ -227,51 +242,30 @@ public class MISADialog extends JFrame {
         buttonPanel.add(runButton);
     }
 
-    public LogService getLog() {
-        return log;
+    public LogService getLogService() {
+        return command.log;
     }
 
-    public void setLog(final LogService log) {
-        this.log = log;
+    public StatusService getStatusService() {
+        return command.status;
     }
 
-    public StatusService getStatus() {
-        return status;
+    public ThreadService getThreadService() {
+        return command.thread;
     }
 
-    public void setStatus(final StatusService status) {
-        this.status = status;
+    public UIService getUiService() {
+        return command.ui;
     }
 
-    public ThreadService getThread() {
-        return thread;
+    public DatasetIOService getDatasetIOService() {
+        return command.datasetIO;
     }
 
-    public void setThread(final ThreadService thread) {
-        this.thread = thread;
+    public DisplayService getDisplayService() {
+        return command.display;
     }
-
-    public UIService getUi() {
-        return ui;
-    }
-
-    public void setUi(final UIService ui) {
-        this.ui = ui;
-    }
-
-    public DatasetIOService getDatasetIO() {
-        return datasetIO;
-    }
-
-    public void setDatasetIO(DatasetIOService datasetIO) {
-        this.datasetIO = datasetIO;
-    }
-
-    public DisplayService getDisplay() {
-        return display;
-    }
-
-    public void setDisplay(DisplayService display) {
-        this.display = display;
+    public DatasetService getDatasetService() {
+        return command.datasetService;
     }
 }

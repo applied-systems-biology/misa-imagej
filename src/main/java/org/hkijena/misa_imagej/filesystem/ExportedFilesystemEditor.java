@@ -1,12 +1,11 @@
 package org.hkijena.misa_imagej.filesystem;
 
 import org.hkijena.misa_imagej.UIHelper;
-import org.hkijena.misa_imagej.data.ExportedDataAction;
+import org.hkijena.misa_imagej.data.MISAExportedDataAction;
 import org.hkijena.misa_imagej.data.MISAExportedData;
 import org.hkijena.misa_imagej.json_schema.JSONSchemaObject;
 
 import javax.swing.*;
-import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.List;
 import java.awt.*;
@@ -30,7 +29,7 @@ public class ExportedFilesystemEditor extends JPanel {
         UIHelper.borderedJLabel(UIHelper.createDescriptionLabelUI(this,
                 "/" + object.getRelativePath().toString(), row, 1));
 
-        JComboBox<ExportedDataAction> comboBox = new JComboBox<>(ExportedDataAction.values());
+        JComboBox<MISAExportedDataAction> comboBox = new JComboBox<>(MISAExportedDataAction.values());
         add(comboBox, new GridBagConstraints() {
             {
                 anchor = GridBagConstraints.PAGE_START;
@@ -44,7 +43,7 @@ public class ExportedFilesystemEditor extends JPanel {
         comboBox.setSelectedItem(object.getExportedDataAction());
 
         comboBox.addActionListener(actionEvent -> {
-            object.setExportedDataAction((ExportedDataAction)comboBox.getSelectedItem());
+            object.setExportedDataAction((MISAExportedDataAction)comboBox.getSelectedItem());
         });
     }
 
