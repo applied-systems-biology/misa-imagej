@@ -2,12 +2,9 @@ package org.hkijena.misa_imagej.data.importing;
 
 import ij.ImagePlus;
 import ij.WindowManager;
-import net.imagej.Dataset;
-import net.imglib2.img.display.imagej.ImageJFunctions;
 import org.hkijena.misa_imagej.MISADialog;
 import org.hkijena.misa_imagej.UIHelper;
 import org.hkijena.misa_imagej.data.ImagePlusJMenuItem;
-import org.hkijena.misa_imagej.data.MISADataType;
 import org.hkijena.misa_imagej.data.MISAImportedData;
 
 import javax.swing.*;
@@ -47,11 +44,14 @@ public class MISAImporterSourceEditor extends JPanel {
         boolean hasImageJData = false;
         for(int i = 1; i <= WindowManager.getImageCount(); ++i) {
             final ImagePlus image = WindowManager.getImage(WindowManager.getNthImageID(i));
-            if(MISAImageJImportSource.canHold(dataObject, image)) {
+            if(MISAImageJStackImportSource.canHold(dataObject, image)) {
                 ImagePlusJMenuItem item = new ImagePlusJMenuItem(image);
                 item.addActionListener(actionEvent -> {
-                    dataObject.setImportSource(new MISAImageJImportSource(dataObject, image));
-                    updateDisplay();
+                    MISAImageJStackImportSource src = MISAImageJStackImportSource.createWithDialog(dataObject, image);
+                    if(src != null) {
+                        dataObject.setImportSource(src);
+                        updateDisplay();
+                    }
                 });
                 selectOptions.add(item);
                 hasImageJData = true;

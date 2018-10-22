@@ -8,13 +8,10 @@ package org.hkijena.misa_imagej;/*
 
 import javax.swing.SwingUtilities;
 
-import ij.plugin.ImagesToStack;
 import io.scif.services.DatasetIOService;
 import net.imagej.DatasetService;
 import net.imagej.ImageJ;
 import net.imagej.ops.OpService;
-
-import org.scijava.ItemIO;
 import org.scijava.app.StatusService;
 import org.scijava.command.Command;
 import org.scijava.command.CommandService;
@@ -22,7 +19,6 @@ import org.scijava.display.DisplayService;
 import org.scijava.log.LogService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
-import org.scijava.text.TextService;
 import org.scijava.thread.ThreadService;
 import org.scijava.ui.UIService;
 

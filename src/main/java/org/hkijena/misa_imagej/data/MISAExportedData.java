@@ -48,7 +48,11 @@ public class MISAExportedData extends MISAData {
             switch (getType()) {
                 case image_stack: {
                     ImagePlus ip = ij.plugin.FolderOpener.open(resolvedPath.toString(), "virtual");
-                    ip.setTitle(getRelativePath().toString());
+                    if(ip == null) {
+                        app.getLogService().error("Could not import image stack from " + getRelativePath().toString());
+                        return;
+                    }
+                    ip.setTitle(getRelativePath().toString().replace("/", "_").replace("\\", "_"));
                     ip.show();
                 }
                 break;

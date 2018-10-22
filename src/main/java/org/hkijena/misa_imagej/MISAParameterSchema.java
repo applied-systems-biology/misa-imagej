@@ -118,8 +118,9 @@ public class MISAParameterSchema {
             JSONSchemaObject object = flat.get(i);
             if(object.filesystemData != null) {
                 MISAImportedData data = (MISAImportedData)object.filesystemData;
-                app.getLogService().info("[" + (i + 1) + " / " + flat.size() + "] Importing data " + data.getRelativePath().toString() + " into " + importedDirectory.toString());
-                data.getImportSource().runImport(importedDirectory, forceCopy);
+                Path subpath = importedDirectory.resolve(data.getRelativePath());
+                app.getLogService().info("[" + (i + 1) + " / " + flat.size() + "] Importing data " + data.getRelativePath().toString() + " into " + subpath.toString());
+                data.getImportSource().runImport(subpath, forceCopy);
             }
         }
     }
