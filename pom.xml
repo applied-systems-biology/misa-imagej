@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.hkijena</groupId>
-    <artifactId>misa_imagej</artifactId>
+    <artifactId>misa_imagej_template</artifactId>
     <version>1.0-SNAPSHOT</version>
     <name>misa_imagej</name>
     <description>Allows running MISA++ workloads from within ImageJ</description>
@@ -88,6 +88,11 @@
             <artifactId>guava</artifactId>
             <version>26.0-jre</version>
         </dependency>
+        <dependency>
+            <groupId>com.atlassian.commonmark</groupId>
+            <artifactId>commonmark</artifactId>
+            <version>0.11.0</version>
+        </dependency>
     </dependencies>
 
     <properties>
@@ -95,7 +100,73 @@
         <maven.compiler.target>1.8</maven.compiler.target>
         <license.licenseName>cc0</license.licenseName>
         <license.copyrightOwners>N/A</license.copyrightOwners>
-        <license.projectName>ImageJ software for multidimensional image processing and analysis.</license.projectName>
+        <license.projectName>MISA ImageJ</license.projectName>
     </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>templating-maven-plugin</artifactId>
+                <version>1.0.0</version>
+                <executions>
+                    <execution>
+                        <id>filtering-java-templates</id>
+                        <goals>
+                            <goal>filter-sources</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!--<plugin>
+                <groupId>com.coderplus.maven.plugins</groupId>
+                <artifactId>copy-rename-maven-plugin</artifactId>
+                <version>1.0</version>
+                <executions>
+                    <execution>
+                        <id>copy-rename</id>
+                        <goals>
+                            <goal>rename</goal>
+                        </goals>
+                        <configuration>
+                            <sourceFile>${project.build.directory}/generated-sources/java-templates/misa_imagej_template</sourceFile>
+                            <destinationFile>${project.build.directory}/generated-sources/java-templates/${project.artifactId}</destinationFile>
+                            <overWrite>true</overWrite>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>-->
+            <plugin>
+                <groupId>com.google.code.maven-replacer-plugin</groupId>
+                <artifactId>replacer</artifactId>
+                <version>1.5.2</version>
+                <executions>
+                    <execution>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>replace</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <ignoreMissingFile>false</ignoreMissingFile>
+                    <basedir>${project.build.directory}/generated-sources/java-templates/misa_imagej_template</basedir>
+                    <includes>
+                        <include>**/*.java</include>
+                    </includes>
+                    <replacements>
+                        <replacement>
+                            <token>package misa_imagej_template</token>
+                            <value>package ${project.groupId}.${project.artifactId}</value>
+                        </replacement>
+                        <replacement>
+                            <token>import misa_imagej_template</token>
+                            <value>import ${project.groupId}.${project.artifactId}</value>
+                        </replacement>
+                    </replacements>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>
