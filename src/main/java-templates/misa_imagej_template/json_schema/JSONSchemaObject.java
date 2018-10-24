@@ -79,7 +79,18 @@ public class JSONSchemaObject implements Cloneable {
         obj.id = name;
         obj.parent = this;
         obj.update();
+
+        // Notify the change
+        triggerStructureChangedEvent();
+
         return obj;
+    }
+
+    public void removeAdditionalProperty(String name) {
+        properties.remove(name);
+
+        // Notify the change
+        triggerStructureChangedEvent();
     }
 
     public void update() {
@@ -228,5 +239,11 @@ public class JSONSchemaObject implements Cloneable {
 
     public boolean hasValue() {
         return type.equals("object") || value != null;
+    }
+
+    private void triggerStructureChangedEvent() {
+        propertyChangeSupport.firePropertyChange("structure", null, null);
+        if(parent != null)
+            parent.triggerStructureChangedEvent();
     }
 }

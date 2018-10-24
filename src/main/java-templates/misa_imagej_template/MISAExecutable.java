@@ -1,29 +1,40 @@
 package misa_imagej_template;
 
-import com.google.common.io.ByteStreams;
+import com.google.common.base.Charsets;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.attribute.PosixFilePermission;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 
 public class MISAExecutable {
 
-    private String resourcePath;
+    private OSHelper.OperatingSystem operatingSystem;
 
-    public MISAExecutable(String resourcePath) {
-        this.resourcePath = resourcePath;
+    public MISAExecutable(OSHelper.OperatingSystem operatingSystem) {
+        this.operatingSystem = operatingSystem;
     }
 
-    private static void tryAddExecutable(OSHelper.OperatingSystem os, String resourcePath, Map<OSHelper.OperatingSystem, MISAExecutable> result) {
-        if(MISAExecutable.class.getResource(resourcePath) != null) {
-            result.put(os, new MISAExecutable(resourcePath));
+    /**
+     * Returns the base name of the executable. The executables contained in the resources should be consistent with it
+     * @return
+     */
+    public static String getExecutableBaseName() {
+        // Do not change this code even if the IDE tells you.
+        // This code is in here to allow debugging of the application in IDEA
+        if("${project.artifactId}".equals("${project.artifactId}")) {
+            return "misa_imagej";
+        }
+        else {
+            return "${project.artifactId}";
+        }
+    }
+
+    private static void tryAddExecutable(OSHelper.OperatingSystem os, Map<OSHelper.OperatingSystem, MISAExecutable> result) {
+        if(MISAExecutable.class.getResource( "/" + os.name().toString().toLowerCase(Locale.ENGLISH) + ".zip") != null) {
+            result.put(os, new MISAExecutable(os));
         }
     }
 
@@ -49,31 +60,92 @@ public class MISAExecutable {
 
     public static Map<OSHelper.OperatingSystem, MISAExecutable> getAvailableExecutables() {
         Map<OSHelper.OperatingSystem, MISAExecutable> result = new HashMap<>();
-        tryAddExecutable(OSHelper.OperatingSystem.Windows_amd64, "/windows_amd64.exe", result);
-        tryAddExecutable(OSHelper.OperatingSystem.Windows_x86, "/windows_x86.exe", result);
-        tryAddExecutable(OSHelper.OperatingSystem.Linux_amd64, "/linux_amd64", result);
-        tryAddExecutable(OSHelper.OperatingSystem.Linux_x86, "/linux_x86", result);
+        tryAddExecutable(OSHelper.OperatingSystem.Windows_amd64, result);
+        tryAddExecutable(OSHelper.OperatingSystem.Windows_x86, result);
+        tryAddExecutable(OSHelper.OperatingSystem.Linux_amd64, result);
+        tryAddExecutable(OSHelper.OperatingSystem.Linux_x86, result);
         return result;
     }
 
-    public void writeToFile(Path path) throws IOException {
-        try(InputStream inputStream = MISAExecutable.class.getResourceAsStream(resourcePath)) {
-            try(FileOutputStream outputStream = new FileOutputStream(path.toString())) {
-                ByteStreams.copy(inputStream, outputStream);
+    /**
+     * Installs the executable into the root directory and returns the path of the executable
+     * @param rootPath
+     * @param withRunner Create a standard runner that runs the executable with
+     * @param runnerParameters
+     * @return Path of the executable
+     * @throws IOException
+     */
+    public Path install(Path rootPath, boolean withRunner, String runnerParameters) throws IOException {
+        Path executablePath = rootPath.resolve(getName()).resolve(getExecutableName());
+        Path installPath = rootPath.resolve(getName());
+        Files.createDirectories(installPath);
+
+        // Unpack the zip file
+        ZipUtils.unzip(MISAExecutable.class.getResourceAsStream(getResourcePath()), installPath.toFile());
+        FilesystemHelper.addPosixExecutionPermission(executablePath);
+
+        // Install runner if enabled
+        if(withRunner) {
+            switch(operatingSystem) {
+                case Linux_amd64:
+                case Linux_x86: {
+                    String content = "#!/bin/bash\n" +
+                            "./" + getName() + "/" + getExecutableName() + " " + runnerParameters;
+                    Files.write(rootPath.resolve(getRunnerScriptName()), content.getBytes(Charsets.UTF_8));
+                }
+                case Windows_x86:
+                case Windows_amd64: {
+                    String content = "@echo off\r\n" +
+                            ".\\" + getName() + "\\" + getExecutableName() + " " + runnerParameters;
+                    Files.write(rootPath.resolve(getRunnerScriptName()), content.getBytes(Charsets.UTF_8));
+                }
+                default:
+                    throw new RuntimeException("Unsupported operating system!");
             }
         }
-        if(OSHelper.detect() == OSHelper.OperatingSystem.Linux_x86 || OSHelper.detect() == OSHelper.OperatingSystem.Linux_amd64) {
-            Set<PosixFilePermission> perms = Files.getPosixFilePermissions(path);
-            perms.add(PosixFilePermission.OWNER_EXECUTE);
-            Files.setPosixFilePermissions(path, perms);
+
+        return executablePath;
+    }
+
+    /**
+     * Returns the name of the script that runs the executable
+     * @return
+     */
+    public String getRunnerScriptName() {
+        switch(operatingSystem) {
+            case Linux_amd64:
+            case Linux_x86:
+                return getName() + ".sh";
+            case Windows_x86:
+            case Windows_amd64:
+                return getName() + ".bat";
+            default:
+                throw new RuntimeException("Unsupported operating system!");
         }
     }
 
-    public Path getName() {
-        return Paths.get(resourcePath).getFileName();
+    /**
+     * Returns the name of the executable
+     * @return
+     */
+    public String getExecutableName() {
+        switch(operatingSystem) {
+            case Linux_amd64:
+            case Linux_x86:
+                return getExecutableBaseName();
+            case Windows_x86:
+            case Windows_amd64:
+                return getExecutableBaseName() + ".exe";
+            default:
+                throw new RuntimeException("Unsupported operating system!");
+        }
+    }
+
+    public String getName() {
+        return operatingSystem.name().toLowerCase(Locale.ENGLISH);
     }
 
     public String getResourcePath() {
-        return resourcePath;
+        return "/" + getName() + ".zip";
     }
 }

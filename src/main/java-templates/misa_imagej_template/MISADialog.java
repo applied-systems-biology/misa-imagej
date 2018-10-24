@@ -110,7 +110,7 @@ public class MISADialog extends JFrame {
 
                 // Export all available executables
                 for (Map.Entry<OSHelper.OperatingSystem, MISAExecutable> entry : MISAExecutable.getAvailableExecutables().entrySet()) {
-                    entry.getValue().writeToFile(exportRunPath.resolve(entry.getValue().getName()));
+                    entry.getValue().install(exportRunPath, true, "--parameters parameters.json");
                 }
 
                 // Write the parameter schema
@@ -171,14 +171,14 @@ public class MISADialog extends JFrame {
                 }
 
                 // Export only the matching executable
-                MISAExecutable.getBestMatchingExecutable().writeToFile(dialog.getExecutablePath());
+                Path executableFile = MISAExecutable.getBestMatchingExecutable().install(dialog.getExecutablePath(), false, null);
 
                 // Write the parameter schema
                 writeParameterSchema(dialog.getParameterFilePath(), dialog.getImportedPath(), dialog.getExportedPath(), false, false);
 
                 // Run the executable
                 getLogService().info("Starting worker process ...");
-                ProcessBuilder pb = new ProcessBuilder(dialog.getExecutablePath().toString(), "--parameters", dialog.getParameterFilePath().toString());
+                ProcessBuilder pb = new ProcessBuilder(executableFile.toString(), "--parameters", dialog.getParameterFilePath().toString());
                 Process p = pb.start();
                 new ProcessStreamToStringGobbler(p.getInputStream(), s -> getLogService().info(s)).start();
                 new ProcessStreamToStringGobbler(p.getErrorStream(), s -> getLogService().error(s)).start();
@@ -228,8 +228,26 @@ public class MISADialog extends JFrame {
 
         JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.LINE_AXIS));
+
+        JButton addSampleButton = new JButton("Add sample ...");
+        addSampleButton.setToolTipText("Adds a new sample.");
+        addSampleButton.addActionListener(actionEvent -> addSample());
+        buttonPanel.add(addSampleButton);
+
+        JButton batchMenuButton = new JButton("Batch ...");
+        {
+            JPopupMenu popupMenu = UIHelper.addPopupMenuToComponent(batchMenuButton);
+            JMenuItem itemBatchFromStructure = new JMenuItem("Import from folder structure");
+            itemBatchFromStructure.setToolTipText("Imports objects from a folder structure that mirrors the structure as seen in the input data editor.");
+            popupMenu.add(itemBatchFromStructure);
+
+            JMenuItem itemMergeSingle = new JMenuItem("Import for data type");
+            itemMergeSingle.setToolTipText("Import matching data from a selection of files and folders");
+            popupMenu.add(itemMergeSingle);
+        }
+        buttonPanel.add(batchMenuButton);
+
         buttonPanel.add(Box.createHorizontalGlue());
-        add(buttonPanel, BorderLayout.SOUTH);
 
         JButton exportButton = new JButton("Export");
         exportButton.setToolTipText("Instead of running the MISA++ module, export all necessary files into a folder. This folder for example can be put onto a server.");
@@ -240,6 +258,15 @@ public class MISADialog extends JFrame {
         runButton.setToolTipText("Runs the MISA++ module.");
         runButton.addActionListener(actionEvent -> runMISA());
         buttonPanel.add(runButton);
+
+        add(buttonPanel, BorderLayout.SOUTH);
+    }
+
+    private void addSample() {
+        String result = JOptionPane.showInputDialog(this, "Sample name", "Add sample", JOptionPane.PLAIN_MESSAGE);
+        if(result != null && !result.isEmpty()) {
+            parameterSchema.addObject(result);
+        }
     }
 
     public LogService getLogService() {

@@ -34,11 +34,29 @@ public class MISAParameterSchema {
     public void addObject(String name) {
         List<String> old = new ArrayList<>(objectNames);
         objectNames.add(name);
-        propertyChangeSupport.firePropertyChange("objectNames", old, objectNames);
         getObjectParameters().addAdditionalProperty(name);
         getFilesystemSchema().getPropertyFromPath("json-data", "imported", "children").addAdditionalProperty(name);
         getFilesystemSchema().getPropertyFromPath("json-data", "exported", "children").addAdditionalProperty(name);
         importFilesystem();
+        propertyChangeSupport.firePropertyChange("objectNames", old, objectNames);
+    }
+
+    public void removeObject(String name) {
+        List<String> old = new ArrayList<>(objectNames);
+        objectNames.remove(name);
+        getObjectParameters().removeAdditionalProperty(name);
+        getFilesystemSchema().getPropertyFromPath("json-data", "imported", "children").removeAdditionalProperty(name);
+        getFilesystemSchema().getPropertyFromPath("json-data", "exported", "children").removeAdditionalProperty(name);
+        propertyChangeSupport.firePropertyChange("objectNames", old, objectNames);
+    }
+
+    /**
+     * Ensures that an object of given name exists
+     * @param name
+     */
+    public void ensureObject(String name) {
+        if(!objectNames.contains(name))
+            addObject(name);
     }
 
     private void importFilesystem() {

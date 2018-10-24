@@ -41,11 +41,33 @@ public class FilesystemParametersEditor extends JPanel {
         objectEditor.removeAll();
         objectEditor.setLayout(new GridBagLayout());
 
+        JButton removeObject = new JButton("Remove sample");
+        removeObject.addActionListener(actionEvent -> removeSample());
+        objectEditor.add(removeObject, new GridBagConstraints() {
+            {
+                anchor = GridBagConstraints.WEST;
+                gridx = 0;
+                gridy = 0;
+                insets = UIHelper.UI_PADDING;
+            }
+        });
+
+        objectEditor.add(new JSeparator(), new GridBagConstraints() {
+            {
+                anchor = GridBagConstraints.PAGE_START;
+                gridx = 0;
+                gridy = 1;
+                gridwidth = 2;
+                fill = GridBagConstraints.HORIZONTAL;
+                insets = UIHelper.UI_PADDING;
+            }
+        });
+
         objectEditor.add(new ImportedFilesystemEditor(app, parameterSchema.getImportedFilesystemSchema(), name), new GridBagConstraints() {
             {
                 anchor = GridBagConstraints.PAGE_START;
-                gridx = 1;
-                gridy = 0;
+                gridx = 0;
+                gridy = 2;
                 fill = GridBagConstraints.HORIZONTAL;
                 weightx = 1;
                 gridwidth = 2;
@@ -53,11 +75,11 @@ public class FilesystemParametersEditor extends JPanel {
             }
         });
 
-        objectEditor.add(new ExportedFilesystemEditor(parameterSchema.getExportedFilesystemSchema()), new GridBagConstraints() {
+        objectEditor.add(new ExportedFilesystemEditor(parameterSchema.getExportedFilesystemSchema(), name), new GridBagConstraints() {
             {
                 anchor = GridBagConstraints.PAGE_START;
-                gridx = 1;
-                gridy = 1;
+                gridx = 0;
+                gridy = 3;
                 fill = GridBagConstraints.HORIZONTAL;
                 weightx = 1;
                 gridwidth = 2;
@@ -68,13 +90,21 @@ public class FilesystemParametersEditor extends JPanel {
         objectEditor.add(new JPanel(), new GridBagConstraints() {
             {
                 anchor = GridBagConstraints.PAGE_START;
-                gridx = 1;
-                gridy = 2;
+                gridx = 0;
+                gridy = 4;
                 fill = GridBagConstraints.HORIZONTAL | GridBagConstraints.VERTICAL;
                 weightx = 1;
                 weighty = 1;
             }
         });
+
+        objectEditor.revalidate();
+    }
+
+    private void removeSample() {
+        if(JOptionPane.showConfirmDialog(this, "Do you really want to remove this sample?", "Remove sample", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+            parameterSchema.removeObject(currentObject);
+        }
     }
 
     private void updateObjectList() {
@@ -85,6 +115,10 @@ public class FilesystemParametersEditor extends JPanel {
         }
         if(model.size() > 0) {
             objectList.setSelectedIndex(0);
+        }
+        else {
+            objectEditor.removeAll();
+            objectEditor.revalidate();
         }
     }
 

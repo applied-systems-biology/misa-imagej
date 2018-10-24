@@ -16,8 +16,8 @@ import java.awt.*;
 public class ExportedFilesystemEditor extends JPanel {
     private JSONSchemaObject jsonSchemaObject;
 
-    public ExportedFilesystemEditor(JSONSchemaObject object) {
-        jsonSchemaObject = object;
+    public ExportedFilesystemEditor(JSONSchemaObject exportedFilesystem, String name) {
+        jsonSchemaObject = exportedFilesystem.getPropertyFromPath("children", name);
         initialize();
     }
 

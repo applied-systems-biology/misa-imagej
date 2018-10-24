@@ -49,6 +49,12 @@ public class JSONSchemaEditor extends JPanel {
     public void setSchema(JSONSchemaObject jsonSchema) {
         jsonTree.setModel(new DefaultTreeModel(jsonSchema.toTreeNode()));
         editJSONSchema(jsonSchema);
+        jsonSchema.addPropertyChangeListener(propertyChangeEvent -> {
+            if(jsonSchema == currentObject) {
+                jsonTree.setModel(new DefaultTreeModel(jsonSchema.toTreeNode()));
+                refreshEditor();
+            }
+        });
     }
 
     public void refreshEditor() {

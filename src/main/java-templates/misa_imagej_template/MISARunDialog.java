@@ -27,7 +27,7 @@ public class MISARunDialog extends JDialog {
         try {
             Path tmppath = Files.createTempDirectory("ImageJMISA");
             parameterFilePath.setPath(tmppath.resolve("parameters.json"));
-            executableFilePath.setPath(tmppath.resolve(MISAExecutable.getBestMatchingExecutable().getName()));
+            executableFilePath.setPath(tmppath);
             importedPath.setPath(tmppath.resolve("imported"));
             exportedPath.setPath(tmppath.resolve("exported"));
         } catch (IOException e) {
@@ -48,9 +48,9 @@ public class MISARunDialog extends JDialog {
         parameterFilePath.getFileChooser().setFileSelectionMode(JFileChooser.FILES_ONLY);
 
         executableFilePath = new FileSelection();
-        executableFilePath.getFileChooser().setDialogTitle("Select executable file path");
+        executableFilePath.getFileChooser().setDialogTitle("Select executable install path");
         executableFilePath.getFileChooser().setMultiSelectionEnabled(false);
-        executableFilePath.getFileChooser().setFileSelectionMode(JFileChooser.FILES_ONLY);
+        executableFilePath.getFileChooser().setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 
         importedPath = new FileSelection();
         importedPath.getFileChooser().setDialogTitle("Select temporary path for imported data");

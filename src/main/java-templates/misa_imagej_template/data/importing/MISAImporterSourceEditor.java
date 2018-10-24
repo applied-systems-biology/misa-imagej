@@ -39,8 +39,8 @@ public class MISAImporterSourceEditor extends JPanel {
         }
     }
 
-    private void createPopup() {
-        selectOptions = new JPopupMenu("Select import source");
+    private void createPopup(JButton selectButton) {
+        selectOptions = UIHelper.addPopupMenuToComponent(selectButton);
         boolean hasImageJData = false;
         for(int i = 1; i <= WindowManager.getImageCount(); ++i) {
             final ImagePlus image = WindowManager.getImage(WindowManager.getNthImageID(i));
@@ -75,7 +75,7 @@ public class MISAImporterSourceEditor extends JPanel {
         // Allow refresh of menu
         JMenuItem refresh = new JMenuItem("Refresh list");
         refresh.addActionListener(actionEvent -> {
-            createPopup();
+            createPopup(selectButton);
         });
         selectOptions.add(refresh);
     }
@@ -106,15 +106,7 @@ public class MISAImporterSourceEditor extends JPanel {
             }
         });
 
-        createPopup();
-
-        selectButton.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent mouseEvent) {
-                super.mouseClicked(mouseEvent);
-                selectOptions.show(mouseEvent.getComponent(), mouseEvent.getX(), mouseEvent.getY());
-            }
-        });
+        createPopup(selectButton);
 
         updateDisplay();
     }

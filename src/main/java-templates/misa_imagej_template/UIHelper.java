@@ -4,6 +4,8 @@ import misa_imagej_template.json_schema.JSONSchemaObject;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class UIHelper {
 
@@ -63,6 +65,18 @@ public class UIHelper {
                 weighty = 1;
             }
         });
+    }
+
+    public static JPopupMenu addPopupMenuToComponent(Component target) {
+        JPopupMenu popupMenu = new JPopupMenu();
+        target.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent mouseEvent) {
+                super.mouseClicked(mouseEvent);
+                popupMenu.show(mouseEvent.getComponent(), mouseEvent.getX(), mouseEvent.getY());
+            }
+        });
+        return popupMenu;
     }
 
 }
