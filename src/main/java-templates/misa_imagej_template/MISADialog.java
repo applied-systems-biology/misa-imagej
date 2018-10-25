@@ -56,7 +56,7 @@ public class MISADialog extends JFrame {
             schema.id = "parameters";
             schema.update();
             parameterSchema = new MISAParameterSchema(schema);
-            setTitle("MISA++ ${project.name}");
+            setTitle("${project.name}".startsWith("MISA++") ? "${project.name}" : "MISA++ ${project.name}");
 
         } catch (IOException e) {
             e.printStackTrace();
