@@ -92,6 +92,7 @@ public class MISAExecutable {
                     String content = "#!/bin/bash\n" +
                             "./" + getName() + "/" + getExecutableName() + " " + runnerParameters;
                     Files.write(rootPath.resolve(getRunnerScriptName()), content.getBytes(Charsets.UTF_8));
+                    FilesystemHelper.addPosixExecutionPermission(rootPath.resolve(getRunnerScriptName()));
                 }
                 break;
                 case Windows_x86:
