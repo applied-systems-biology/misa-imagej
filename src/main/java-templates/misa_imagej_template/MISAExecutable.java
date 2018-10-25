@@ -24,7 +24,7 @@ public class MISAExecutable {
     public static String getExecutableBaseName() {
         // Do not change this code even if the IDE tells you.
         // This code is in here to allow debugging of the application in IDEA
-        if("${project.artifactId}".equals("${project.artifactId}")) {
+        if("${project.artifactId}".contains("{")) {
             return "misa_imagej";
         }
         else {
