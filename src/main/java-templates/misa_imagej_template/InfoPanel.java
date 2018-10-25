@@ -1,13 +1,11 @@
 package misa_imagej_template;
 
-import org.commonmark.node.Node;
-import org.commonmark.parser.Parser;
-import org.commonmark.renderer.html.HtmlRenderer;
+import com.google.common.base.Charsets;
+import com.google.common.io.Resources;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
-import java.io.InputStreamReader;
 
 public class InfoPanel extends JPanel {
 
@@ -26,11 +24,8 @@ public class InfoPanel extends JPanel {
         description.setEditable(false);
         description.setContentType("text/html");
 
-        Parser parser = Parser.builder().build();
         try {
-            Node document = parser.parseReader(new InputStreamReader(InfoPanel.class.getResourceAsStream("/description.md")));
-            HtmlRenderer renderer = HtmlRenderer.builder().build();
-            description.setText(renderer.render(document));
+            description.setText(Resources.toString(Resources.getResource(InfoPanel.class, "/description.html"), Charsets.UTF_8));
         } catch (IOException e) {
             e.printStackTrace();
         }

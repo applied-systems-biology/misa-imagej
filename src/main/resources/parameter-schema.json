@@ -308,7 +308,7 @@
                     "type": "object"
                 },
                 "source": {
-                    "default": "structured-data",
+                    "default": "json",
                     "type": "string"
                 }
             },

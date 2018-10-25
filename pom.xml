@@ -88,11 +88,6 @@
             <artifactId>guava</artifactId>
             <version>26.0-jre</version>
         </dependency>
-        <dependency>
-            <groupId>com.atlassian.commonmark</groupId>
-            <artifactId>commonmark</artifactId>
-            <version>0.11.0</version>
-        </dependency>
     </dependencies>
 
     <properties>
