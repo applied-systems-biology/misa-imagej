@@ -33,7 +33,7 @@ public class MISAExecutable {
     }
 
     private static void tryAddExecutable(OSHelper.OperatingSystem os, Map<OSHelper.OperatingSystem, MISAExecutable> result) {
-        if(MISAExecutable.class.getResource( "/" + os.name().toString().toLowerCase(Locale.ENGLISH) + ".zip") != null) {
+        if(ResourceHelper.getPluginResource(os.name().toString().toLowerCase(Locale.ENGLISH) + ".zip") != null) {
             result.put(os, new MISAExecutable(os));
         }
     }
@@ -81,7 +81,7 @@ public class MISAExecutable {
         Files.createDirectories(installPath);
 
         // Unpack the zip file
-        ZipUtils.unzip(MISAExecutable.class.getResourceAsStream(getResourcePath()), installPath.toFile());
+        ZipUtils.unzip(ResourceHelper.getPluginResourceAsStream(getResourcePath()), installPath.toFile());
         FilesystemHelper.addPosixExecutionPermission(executablePath);
 
         // Install runner if enabled

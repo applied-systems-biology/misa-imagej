@@ -39,7 +39,7 @@ public class MISADialog extends JFrame {
     public MISADialog(MISACommand command) {
         this.command = command;
         initialize();
-        loadSchema(MISADialog.class.getResourceAsStream("/parameter-schema.json"));
+        loadSchema(ResourceHelper.getPluginResourceAsStream("parameter-schema.json"));
     }
 
     /**

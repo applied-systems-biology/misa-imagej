@@ -16,7 +16,7 @@ public class InfoPanel extends JPanel {
     private void initialize() {
         setLayout(new BorderLayout());
         JLabel logo = new JLabel();
-        logo.setIcon(new ImageIcon(new ImageIcon(getClass().getResource("/logo.png")).getImage().getScaledInstance(-1, 100, Image.SCALE_SMOOTH)));
+        logo.setIcon(new ImageIcon(new ImageIcon(ResourceHelper.getPluginResource("logo.png")).getImage().getScaledInstance(-1, 100, Image.SCALE_SMOOTH)));
         logo.setHorizontalAlignment(JLabel.CENTER);
         add(logo, BorderLayout.NORTH);
 
@@ -25,7 +25,7 @@ public class InfoPanel extends JPanel {
         description.setContentType("text/html");
 
         try {
-            description.setText(Resources.toString(Resources.getResource(InfoPanel.class, "/description.html"), Charsets.UTF_8));
+            description.setText(Resources.toString(ResourceHelper.getPluginResource("description.html"), Charsets.UTF_8));
         } catch (IOException e) {
             e.printStackTrace();
         }
