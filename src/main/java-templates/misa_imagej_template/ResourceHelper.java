@@ -9,7 +9,7 @@ import java.net.URL;
 public class ResourceHelper {
 
     public static String getResourceBasePath() {
-        return "/" + PluginHelper.getPluginFullyQualifiedName();
+        return "/" + PluginHelper.getPluginFullyQualifiedName().replace(".", "/");
     }
 
     public static String getResourcePath(String internalResourcePath) {
