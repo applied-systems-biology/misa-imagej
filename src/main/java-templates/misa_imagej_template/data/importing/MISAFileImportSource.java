@@ -24,9 +24,8 @@ public class MISAFileImportSource implements MISADataImportSource {
     }
 
     @Override
-    public void runImport(Path importedDirectory, boolean forceCopy) {
+    public void runImport(Path fullpath, boolean forceCopy) {
         if(forceCopy) {
-            Path fullpath = importedDirectory.resolve(importedData.getRelativePath());
             try {
                 Files.createDirectories(fullpath.getParent());
                 IOHelper.copyFileOrFolder(path, fullpath);
