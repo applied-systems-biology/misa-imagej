@@ -93,12 +93,14 @@ public class MISAExecutable {
                             "./" + getName() + "/" + getExecutableName() + " " + runnerParameters;
                     Files.write(rootPath.resolve(getRunnerScriptName()), content.getBytes(Charsets.UTF_8));
                 }
+                break;
                 case Windows_x86:
                 case Windows_amd64: {
                     String content = "@echo off\r\n" +
                             ".\\" + getName() + "\\" + getExecutableName() + " " + runnerParameters;
                     Files.write(rootPath.resolve(getRunnerScriptName()), content.getBytes(Charsets.UTF_8));
                 }
+                break;
                 default:
                     throw new RuntimeException("Unsupported operating system!");
             }
