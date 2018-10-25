@@ -220,7 +220,7 @@ public class MISADialog extends JFrame {
 
         JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.addTab("Data", filesystemParametersEditor);
-        tabbedPane.addTab("Object parameters", objectParametersEditor);
+        tabbedPane.addTab("Sample parameters", objectParametersEditor);
         tabbedPane.addTab("Algorithm parameters", algorithmParametersEditor);
         tabbedPane.addTab("Runtime", runtimeParametersEditor);
         tabbedPane.addTab("Info", new InfoPanel());
