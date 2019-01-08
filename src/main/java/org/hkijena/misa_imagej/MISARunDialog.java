@@ -1,5 +1,6 @@
 package org.hkijena.misa_imagej;
 
+import org.hkijena.misa_imagej.utils.ui.FileSelection;
 import org.hkijena.misa_imagej.utils.UIUtils;
 
 import javax.swing.*;

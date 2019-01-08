@@ -1,4 +1,4 @@
-package org.hkijena.misa_imagej;
+package org.hkijena.misa_imagej.utils;
 
 import java.io.BufferedReader;
 import java.io.IOException;

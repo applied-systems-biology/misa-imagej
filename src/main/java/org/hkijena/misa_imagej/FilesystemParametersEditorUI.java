@@ -1,21 +1,21 @@
 package org.hkijena.misa_imagej;
 
 import org.hkijena.misa_imagej.utils.UIUtils;
-import org.hkijena.misa_imagej.filesystem.ExportedFilesystemEditor;
-import org.hkijena.misa_imagej.filesystem.ImportedFilesystemEditor;
+import org.hkijena.misa_imagej.filesystem.ExportedFilesystemEditorUI;
+import org.hkijena.misa_imagej.filesystem.ImportedFilesystemEditorUI;
 
 import javax.swing.*;
 import java.awt.*;
 
-public class FilesystemParametersEditor extends JPanel {
+public class FilesystemParametersEditorUI extends JPanel {
 
-    private MISADialog app;
+    private MISAModuleUI app;
     private JList<String> objectList;
     private JPanel objectEditor;
     private MISAParameterSchema parameterSchema = null;
     private String currentObject = null;
 
-    public FilesystemParametersEditor(MISADialog app) {
+    public FilesystemParametersEditorUI(MISAModuleUI app) {
         this.app = app;
         initialize();
     }
@@ -64,7 +64,7 @@ public class FilesystemParametersEditor extends JPanel {
             }
         });
 
-        objectEditor.add(new ImportedFilesystemEditor(app, parameterSchema.getImportedFilesystemSchema(), name), new GridBagConstraints() {
+        objectEditor.add(new ImportedFilesystemEditorUI(app, parameterSchema.getImportedFilesystemSchema(), name), new GridBagConstraints() {
             {
                 anchor = GridBagConstraints.PAGE_START;
                 gridx = 0;
@@ -76,7 +76,7 @@ public class FilesystemParametersEditor extends JPanel {
             }
         });
 
-        objectEditor.add(new ExportedFilesystemEditor(parameterSchema.getExportedFilesystemSchema(), name), new GridBagConstraints() {
+        objectEditor.add(new ExportedFilesystemEditorUI(parameterSchema.getExportedFilesystemSchema(), name), new GridBagConstraints() {
             {
                 anchor = GridBagConstraints.PAGE_START;
                 gridx = 0;

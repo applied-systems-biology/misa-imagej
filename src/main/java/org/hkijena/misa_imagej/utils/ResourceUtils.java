@@ -9,7 +9,7 @@ import java.net.URL;
 public class ResourceUtils {
 
     public static String getResourceBasePath() {
-        return "/" + PluginUtils.getPluginFullyQualifiedName().replace(".", "/");
+        return "/org/hkijena/misa_imagej";
     }
 
     public static String getResourcePath(String internalResourcePath) {

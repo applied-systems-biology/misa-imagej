@@ -5,11 +5,11 @@ import org.hkijena.misa_imagej.json_schema.JSONSchemaEditor;
 import javax.swing.*;
 import java.awt.*;
 
-public class ObjectParametersEditor extends JPanel {
+public class RuntimeParametersEditorUI extends JPanel {
 
     private JSONSchemaEditor jsonSchemaEditor = null;
 
-    public ObjectParametersEditor() {
+    public RuntimeParametersEditorUI() {
         initialize();
     }
 
@@ -21,12 +21,7 @@ public class ObjectParametersEditor extends JPanel {
     }
 
     public void setSchema(MISAParameterSchema jsonSchema) {
-        jsonSchemaEditor.setSchema(jsonSchema.getObjectParameters());
-        jsonSchema.addPropertyChangeListener(propertyChangeEvent -> {
-            if(propertyChangeEvent.getPropertyName().equals("objectNames")) {
-                jsonSchemaEditor.refreshEditor();
-            }
-        });
+        jsonSchemaEditor.setSchema(jsonSchema.getRuntimeParameters());
     }
 
 }

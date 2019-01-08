@@ -1,5 +1,7 @@
 package org.hkijena.misa_imagej.json_schema;
 
+import org.hkijena.misa_imagej.json_schema.editors.GenericJSONSchemaObjectEditor;
+
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -24,7 +26,7 @@ public class JSONSchemaEditor extends JPanel {
         currentObject = obj;
         if(objectEditorInstance != null)
             objectEditor.remove(objectEditorInstance);
-        objectEditorInstance = new JSONSchemaObjectEditor(obj);
+        objectEditorInstance = JSONSchemaEditorRegistry.getEditorFor(obj);
         objectEditor.add(objectEditorInstance, BorderLayout.CENTER);
         objectEditor.revalidate();
     }

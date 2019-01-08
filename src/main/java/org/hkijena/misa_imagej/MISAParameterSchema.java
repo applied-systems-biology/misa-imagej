@@ -2,7 +2,6 @@ package org.hkijena.misa_imagej;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import org.hkijena.misa_imagej.data.*;
 import org.hkijena.misa_imagej.json_schema.JSONSchemaObject;
 
 import javax.swing.*;
@@ -60,14 +59,14 @@ public class MISAParameterSchema {
     }
 
     private void importFilesystem() {
-        for(JSONSchemaObject object : getImportedFilesystemSchema().flatten()) {
-            if(object.hasPropertyFromPath("data-type"))
-                object.filesystemData = new MISAImportedData(object);
-        }
-        for(JSONSchemaObject object : getExportedFilesystemSchema().flatten()) {
-            if(object.hasPropertyFromPath("data-type"))
-                object.filesystemData = new MISAExportedData(object);
-        }
+//        for(JSONSchemaObject object : getImportedFilesystemSchema().flatten()) {
+//            if(object.hasPropertyFromPath("data-type"))
+//                object.filesystemData = new MISAImportedData(object);
+//        }
+//        for(JSONSchemaObject object : getExportedFilesystemSchema().flatten()) {
+//            if(object.hasPropertyFromPath("data-type"))
+//                object.filesystemData = new MISAExportedData(object);
+//        }
 
     }
 
@@ -130,17 +129,17 @@ public class MISAParameterSchema {
      * Runs the MISADataImportSource instances
      * @param importedDirectory
      */
-    private void prepareImportedFiles(MISADialog app, Path importedDirectory, boolean forceCopy) {
-        List<JSONSchemaObject> flat = getImportedFilesystemSchema().flatten();
-        for(int i = 0; i < flat.size(); ++i) {
-            JSONSchemaObject object = flat.get(i);
-            if(object.filesystemData != null) {
-                MISAImportedData data = (MISAImportedData)object.filesystemData;
-                Path subpath = importedDirectory.resolve(data.getRelativePath());
-                app.getLogService().info("[" + (i + 1) + " / " + flat.size() + "] Importing data " + data.getRelativePath().toString() + " into " + subpath.toString());
-                data.getImportSource().runImport(subpath, forceCopy);
-            }
-        }
+    private void prepareImportedFiles(MISAModuleUI app, Path importedDirectory, boolean forceCopy) {
+//        List<JSONSchemaObject> flat = getImportedFilesystemSchema().flatten();
+//        for(int i = 0; i < flat.size(); ++i) {
+//            JSONSchemaObject object = flat.get(i);
+//            if(object.filesystemData != null) {
+//                MISAImportedData data = (MISAImportedData)object.filesystemData;
+//                Path subpath = importedDirectory.resolve(data.getRelativePath());
+//                app.getLogService().info("[" + (i + 1) + " / " + flat.size() + "] Importing data " + data.getRelativePath().toString() + " into " + subpath.toString());
+//                data.getImportSource().runImport(subpath, forceCopy);
+//            }
+//        }
     }
 
     /**
@@ -156,19 +155,19 @@ public class MISAParameterSchema {
 
         {
             boolean wroteInitialMessage = false;
-            for(JSONSchemaObject object : getImportedFilesystemSchema().flatten()) {
-                if (object.filesystemData != null) {
-                    MISAImportedData data = (MISAImportedData)object.filesystemData;
-                    if(data.getImportSource() == null) {
-                        success = false;
-                        if(!wroteInitialMessage) {
-                            message.append("You still need to setup following input data:\n");
-                            wroteInitialMessage = true;
-                        }
-                        message.append(data.getRelativePath().toString()).append("\n");
-                    }
-                }
-            }
+//            for(JSONSchemaObject object : getImportedFilesystemSchema().flatten()) {
+//                if (object.filesystemData != null) {
+//                    MISAImportedData data = (MISAImportedData)object.filesystemData;
+//                    if(data.getImportSource() == null) {
+//                        success = false;
+//                        if(!wroteInitialMessage) {
+//                            message.append("You still need to setup following input data:\n");
+//                            wroteInitialMessage = true;
+//                        }
+//                        message.append(data.getRelativePath().toString()).append("\n");
+//                    }
+//                }
+//            }
             if(wroteInitialMessage)
                 message.append("\n");
         }
@@ -219,7 +218,7 @@ public class MISAParameterSchema {
      * @param exportedDirectory The physical path of the export directory where everything will be cached
      * @param forceCopy If true, the importer will copy the files into the imported directory even if not necessary
      */
-    public void writeParameterJSON(MISADialog app, Path parameterSchema, Path importedDirectory, Path exportedDirectory, boolean forceCopy, boolean relativeDirectories) {
+    public void writeParameterJSON(MISAModuleUI app, Path parameterSchema, Path importedDirectory, Path exportedDirectory, boolean forceCopy, boolean relativeDirectories) {
 
         // Set necessary variables inside the JSON parameters
         if(!relativeDirectories) {

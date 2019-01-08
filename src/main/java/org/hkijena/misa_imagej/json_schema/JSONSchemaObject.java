@@ -2,7 +2,6 @@ package org.hkijena.misa_imagej.json_schema;
 
 import com.google.gson.annotations.SerializedName;
 import org.hkijena.misa_imagej.data.MISAData;
-import org.hkijena.misa_imagej.data.MISADataType;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.beans.PropertyChangeListener;
@@ -74,7 +73,14 @@ public class JSONSchemaObject implements Cloneable {
      * @return
      */
     public JSONSchemaObject addAdditionalProperty(String name) {
-        JSONSchemaObject obj = (JSONSchemaObject) additionalProperties.clone();
+        JSONSchemaObject obj;
+        if(additionalProperties != null) {
+            obj =  (JSONSchemaObject) additionalProperties.clone();
+        }
+        else {
+            obj = new JSONSchemaObject();
+            obj.type = "object";
+        }
         properties.put(name, obj);
         obj.id = name;
         obj.parent = this;
@@ -209,12 +215,6 @@ public class JSONSchemaObject implements Cloneable {
         ArrayList<JSONSchemaObject> result = new ArrayList<>();
         flatten_(result);
         return result;
-    }
-
-    public MISADataType getFilesystemDataType() {
-        if(filesystemData != null)
-            return filesystemData.getType();
-        return MISADataType.None;
     }
 
     public void addPropertyChangeListener( PropertyChangeListener l )

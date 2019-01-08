@@ -8,9 +8,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
 
-public class InfoPanel extends JPanel {
+public class InfoPanelUI extends JPanel {
 
-    public InfoPanel() {
+    public InfoPanelUI() {
         initialize();
     }
 

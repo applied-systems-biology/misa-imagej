@@ -1,4 +1,4 @@
-package org.hkijena.misa_imagej;
+package org.hkijena.misa_imagej.utils.ui;
 
 import org.hkijena.misa_imagej.utils.UIUtils;
 

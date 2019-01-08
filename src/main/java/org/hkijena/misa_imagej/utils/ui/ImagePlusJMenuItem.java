@@ -1,4 +1,4 @@
-package org.hkijena.misa_imagej.data;
+package org.hkijena.misa_imagej.utils.ui;
 
 import ij.ImagePlus;
 

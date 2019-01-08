@@ -16,7 +16,7 @@ import org.scijava.plugin.Plugin;
 import org.scijava.thread.ThreadService;
 import org.scijava.ui.UIService;
 
-@Plugin(type = Command.class, menuPath = "Plugins>MISA++>${project.name}")
+@Plugin(type = Command.class, menuPath = "Plugins>MISA++ Module ...")
 public class MISACommand implements Command {
 
 	@Parameter
@@ -51,8 +51,7 @@ public class MISACommand implements Command {
 	@Override
 	public void run() {
 		SwingUtilities.invokeLater(() -> {
-		    MISADialog dialog = new MISADialog(this);
-			dialog.setVisible(true);
+			MISAModuleManagerUI.getInstance(this).setVisible(true);
 		});
 	}
 
@@ -61,5 +60,33 @@ public class MISACommand implements Command {
 		final ImageJ ij = new ImageJ();
 		ij.launch(args);
 		ij.command().run(MISACommand.class, true);
+	}
+
+	public LogService getLogService() {
+		return log;
+	}
+
+	public StatusService getStatusService() {
+		return status;
+	}
+
+	public ThreadService getThreadService() {
+		return thread;
+	}
+
+	public UIService getUiService() {
+		return ui;
+	}
+
+	public DatasetIOService getDatasetIOService() {
+		return datasetIO;
+	}
+
+	public DisplayService getDisplayService() {
+		return display;
+	}
+
+	public DatasetService getDatasetService() {
+		return datasetService;
 	}
 }
