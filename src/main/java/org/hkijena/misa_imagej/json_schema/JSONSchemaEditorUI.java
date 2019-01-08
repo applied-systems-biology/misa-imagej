@@ -1,7 +1,5 @@
 package org.hkijena.misa_imagej.json_schema;
 
-import org.hkijena.misa_imagej.json_schema.editors.GenericJSONSchemaObjectEditor;
-
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -11,14 +9,14 @@ import java.awt.*;
 /**
  * Editor widget for a JSONSchema. Has a node tree on the left side.
  */
-public class JSONSchemaEditor extends JPanel {
+public class JSONSchemaEditorUI extends JPanel {
 
     private JTree jsonTree;
     private JPanel objectEditor;
-    private JSONSchemaObjectEditor objectEditorInstance = null;
+    private JSONSchemaObjectEditorUI objectEditorInstance = null;
     private JSONSchemaObject currentObject = null;
 
-    public JSONSchemaEditor() {
+    public JSONSchemaEditorUI() {
         initialize();
     }
 

@@ -1,4 +1,4 @@
-package org.hkijena.misa_imagej.filesystem;
+package org.hkijena.misa_imagej;
 
 import org.hkijena.misa_imagej.MISAModuleUI;
 import org.hkijena.misa_imagej.json_schema.JSONSchemaObject;

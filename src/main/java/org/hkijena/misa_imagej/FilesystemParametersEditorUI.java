@@ -1,8 +1,6 @@
 package org.hkijena.misa_imagej;
 
 import org.hkijena.misa_imagej.utils.UIUtils;
-import org.hkijena.misa_imagej.filesystem.ExportedFilesystemEditorUI;
-import org.hkijena.misa_imagej.filesystem.ImportedFilesystemEditorUI;
 
 import javax.swing.*;
 import java.awt.*;

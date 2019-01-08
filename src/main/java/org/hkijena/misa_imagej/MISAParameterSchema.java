@@ -2,6 +2,9 @@ package org.hkijena.misa_imagej;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import org.hkijena.misa_imagej.cache.MISACache;
+import org.hkijena.misa_imagej.cache.MISACacheRegistry;
+import org.hkijena.misa_imagej.cache.MISADataIOType;
 import org.hkijena.misa_imagej.json_schema.JSONSchemaObject;
 
 import javax.swing.*;
@@ -20,6 +23,16 @@ public class MISAParameterSchema {
     private JSONSchemaObject jsonSchemaObject;
     private List<String> objectNames = new ArrayList<>();
     private PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
+
+    /**
+     * Keeps track of the imported data
+     */
+    private List<MISACache> importedData = new ArrayList<>();
+
+    /**
+     * Keeps track of the exported data
+     */
+    private List<MISACache> exportedData = new ArrayList<>();
 
     public MISAParameterSchema(JSONSchemaObject object) {
         jsonSchemaObject = object;
@@ -58,16 +71,22 @@ public class MISAParameterSchema {
             addObject(name);
     }
 
+    /**
+     * Imports the filesystem configuration into MISACache instances
+     */
     private void importFilesystem() {
-//        for(JSONSchemaObject object : getImportedFilesystemSchema().flatten()) {
-//            if(object.hasPropertyFromPath("data-type"))
-//                object.filesystemData = new MISAImportedData(object);
-//        }
-//        for(JSONSchemaObject object : getExportedFilesystemSchema().flatten()) {
-//            if(object.hasPropertyFromPath("data-type"))
-//                object.filesystemData = new MISAExportedData(object);
-//        }
-
+        for(JSONSchemaObject object : getImportedFilesystemSchema().flatten()) {
+            if(object.hasPropertyFromPath("metadata")) {
+                object.filesystemData = MISACacheRegistry.getCacheFor(object, MISADataIOType.Imported);
+                importedData.add(object.filesystemData);
+            }
+        }
+        for(JSONSchemaObject object : getExportedFilesystemSchema().flatten()) {
+            if(object.hasPropertyFromPath("metadata")) {
+                object.filesystemData = MISACacheRegistry.getCacheFor(object, MISADataIOType.Exported);
+                exportedData.add(object.filesystemData);
+            }
+        }
     }
 
     public JSONSchemaObject getAlgorithmParameters() {
@@ -94,25 +113,16 @@ public class MISAParameterSchema {
         return jsonSchemaObject.getPropertyFromPath("filesystem", "json-data", "exported");
     }
 
-    public JSONSchemaObject getJsonSchemaObject() {
-        return jsonSchemaObject;
+    public List<MISACache> getImportedData() {
+        return Collections.unmodifiableList(importedData);
     }
 
-    private void getFilesystemLeaves(JSONSchemaObject object, List<JSONSchemaObject> output) {
-        if (object.properties.get("type").default_value.equals("file")) {
-            output.add(object);
-        } else if (object.properties.get("type").default_value.equals("folder")) {
-            if(object.properties.containsKey("children")) {
-                for (Map.Entry<String, JSONSchemaObject> kv : object.properties.get("children").properties.entrySet()) {
-                    getFilesystemLeaves(kv.getValue(), output);
-                }
-            }
-            else {
-                output.add(object);
-            }
-        } else {
-            throw new RuntimeException("Unknown type " + object.properties.get("type").default_value);
-        }
+    public List<MISACache> getExportedData() {
+        return Collections.unmodifiableList(exportedData);
+    }
+
+    public JSONSchemaObject getJsonSchemaObject() {
+        return jsonSchemaObject;
     }
 
     public void addPropertyChangeListener( PropertyChangeListener l )

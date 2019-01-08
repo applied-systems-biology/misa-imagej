@@ -1,13 +1,12 @@
-package org.hkijena.misa_imagej.data;
+package org.hkijena.misa_imagej.cache;
 
 
 import org.hkijena.misa_imagej.json_schema.JSONSchemaObject;
-import org.hkijena.misa_imagej.data.MISADataIOType;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class MISAData {
+public class MISACache {
 
     /**
      * JSON schema that points to the the filesystem entry within the parameter schema
@@ -25,10 +24,10 @@ public class MISAData {
      */
     private MISADataIOType ioType;
 
-    public MISAData(JSONSchemaObject schema, MISADataIOType ioType) {
+    public MISACache(JSONSchemaObject schema, MISADataIOType ioType) {
         this.schemaObject = schema;
         this.ioType = ioType;
-        this.relativePath = getFilesystemValuePath(schema);
+        this.relativePath = getFilesystemValuePath(schema, ioType);
     }
 
     /**
@@ -57,23 +56,35 @@ public class MISAData {
     }
 
     /**
+     * Returns the serialization ID of the pattern if available
+     * Otherwise return null
+     * @return
+     */
+    public String getPatternSerializationID() {
+        if(schemaObject.hasPropertyFromPath("metadata", "pattern")) {
+            return schemaObject.getPropertyFromPath("metadata", "pattern").serializationId;
+        }
+        return null;
+    }
+
+    /**
+     * Returns the serialization ID of the description if available
+     * Otherwise return null
+     * @return
+     */
+    public String getDescriptionSerializationID() {
+        if(schemaObject.hasPropertyFromPath("metadata", "description")) {
+            return schemaObject.getPropertyFromPath("metadata", "description").serializationId;
+        }
+        return null;
+    }
+
+    /**
      * Returns a filesystem-specific value path for a JSON Schema entry
      * @param obj
      * @return
      */
-    private static Path getFilesystemValuePath(JSONSchemaObject obj) {
-        boolean nextIsChildren = true;
-        String result = obj.id;
-        JSONSchemaObject current = obj.parent;
-
-        while(!(current.getValuePath().equals("/filesystem/json-data/imported") || current.getValuePath().equals("/filesystem/json-data/exported"))) {
-            if(!nextIsChildren) {
-                result = current.id + "/" + result;
-            }
-            nextIsChildren = !nextIsChildren;
-            current = current.parent;
-        }
-
-        return Paths.get(result);
+    private static Path getFilesystemValuePath(JSONSchemaObject obj, MISADataIOType ioType) {
+        return Paths.get(obj.getValuePath().substring("/filesystem/json-data/".length()));
     }
 }

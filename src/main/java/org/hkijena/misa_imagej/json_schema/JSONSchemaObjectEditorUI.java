@@ -5,11 +5,11 @@ import javax.swing.*;
 /**
  * Base class of all JSON schema object editors
  */
-public class JSONSchemaObjectEditor extends JPanel {
+public class JSONSchemaObjectEditorUI extends JPanel {
 
     private JSONSchemaObject jsonSchemaObject;
 
-    public JSONSchemaObjectEditor(JSONSchemaObject jsonSchemaObject) {
+    public JSONSchemaObjectEditorUI(JSONSchemaObject jsonSchemaObject) {
         this.jsonSchemaObject = jsonSchemaObject;
     }
 

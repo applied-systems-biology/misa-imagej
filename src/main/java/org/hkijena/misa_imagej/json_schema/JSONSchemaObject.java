@@ -1,7 +1,7 @@
 package org.hkijena.misa_imagej.json_schema;
 
 import com.google.gson.annotations.SerializedName;
-import org.hkijena.misa_imagej.data.MISAData;
+import org.hkijena.misa_imagej.cache.MISACache;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.beans.PropertyChangeListener;
@@ -17,7 +17,7 @@ public class JSONSchemaObject implements Cloneable {
 
     public transient JSONSchemaObject parent = null;
 
-    public transient MISAData filesystemData = null;
+    public transient MISACache filesystemData = null;
 
     private transient PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
 
@@ -49,6 +49,12 @@ public class JSONSchemaObject implements Cloneable {
 
     @SerializedName("additionalProperties")
     public JSONSchemaObject additionalProperties = null;
+
+    @SerializedName("misa:serialization-id")
+    public String serializationId = null;
+
+    @SerializedName("misa:serialization-hierarchy")
+    public List<String> serializationHierarchy = new ArrayList<>();
 
     @Override
     public Object clone() {

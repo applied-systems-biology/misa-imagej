@@ -1,7 +1,8 @@
 package org.hkijena.misa_imagej.json_schema;
 
-import org.hkijena.misa_imagej.json_schema.editors.GenericJSONSchemaObjectEditor;
+import org.hkijena.misa_imagej.json_schema.editors.GenericJSONSchemaObjectEditorUI;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -9,7 +10,8 @@ import java.util.Map;
  */
 public class JSONSchemaEditorRegistry {
 
-    private static Map<String, Class<JSONSchemaObjectEditor>> registeredEditors;
+    private static Map<String, Class<JSONSchemaObjectEditorUI>> registeredEditors = new HashMap<>();
+    private static boolean isInitialized = false;
 
     private JSONSchemaEditorRegistry() {
 
@@ -20,7 +22,7 @@ public class JSONSchemaEditorRegistry {
      * @param serializationId
      * @param editorClass
      */
-    public static void register(String serializationId, Class<JSONSchemaObjectEditor> editorClass) {
+    public static void register(String serializationId, Class<JSONSchemaObjectEditorUI> editorClass) {
         registeredEditors.put(serializationId, editorClass);
     }
 
@@ -29,10 +31,11 @@ public class JSONSchemaEditorRegistry {
      * @param schemaObject
      * @return
      */
-    public static JSONSchemaObjectEditor getEditorFor(JSONSchemaObject schemaObject) {
-        if(schemaObject.properties != null && schemaObject.properties.containsKey("misa:serialization-id")) {
-            String serializationId = schemaObject.properties.get("misa:serialization-id").default_value.toString();
-            Class<JSONSchemaObjectEditor> result = registeredEditors.getOrDefault(serializationId, null);
+    public static JSONSchemaObjectEditorUI getEditorFor(JSONSchemaObject schemaObject) {
+        if(isInitialized)
+            initialize();
+        if(schemaObject.serializationId != null) {
+            Class<JSONSchemaObjectEditorUI> result = registeredEditors.getOrDefault(schemaObject.serializationId, null);
             if(result != null) {
                 try {
                     return result.getConstructor(JSONSchemaObject.class).newInstance(schemaObject);
@@ -42,13 +45,13 @@ public class JSONSchemaEditorRegistry {
                 }
             }
         }
-        return new GenericJSONSchemaObjectEditor(schemaObject);
+        return new GenericJSONSchemaObjectEditorUI(schemaObject);
     }
 
     /**
      * Initializes default editors
      */
     public static void initialize() {
-
+        isInitialized = true;
     }
 }

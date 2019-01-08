@@ -1,4 +1,4 @@
-package org.hkijena.misa_imagej.data;
+package org.hkijena.misa_imagej.cache;
 
 public enum MISADataIOType {
     Imported,

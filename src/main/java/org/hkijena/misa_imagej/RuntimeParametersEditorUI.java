@@ -1,27 +1,27 @@
 package org.hkijena.misa_imagej;
 
-import org.hkijena.misa_imagej.json_schema.JSONSchemaEditor;
+import org.hkijena.misa_imagej.json_schema.JSONSchemaEditorUI;
 
 import javax.swing.*;
 import java.awt.*;
 
 public class RuntimeParametersEditorUI extends JPanel {
 
-    private JSONSchemaEditor jsonSchemaEditor = null;
+    private JSONSchemaEditorUI jsonSchemaEditorUI = null;
 
     public RuntimeParametersEditorUI() {
         initialize();
     }
 
     private void initialize() {
-        jsonSchemaEditor = new JSONSchemaEditor();
+        jsonSchemaEditorUI = new JSONSchemaEditorUI();
 
         setLayout(new BorderLayout());
-        add(jsonSchemaEditor, BorderLayout.CENTER);
+        add(jsonSchemaEditorUI, BorderLayout.CENTER);
     }
 
     public void setSchema(MISAParameterSchema jsonSchema) {
-        jsonSchemaEditor.setSchema(jsonSchema.getRuntimeParameters());
+        jsonSchemaEditorUI.setSchema(jsonSchema.getRuntimeParameters());
     }
 
 }

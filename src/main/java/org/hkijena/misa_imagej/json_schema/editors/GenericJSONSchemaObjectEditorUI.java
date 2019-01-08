@@ -2,7 +2,7 @@ package org.hkijena.misa_imagej.json_schema.editors;
 
 import org.hkijena.misa_imagej.json_schema.JSONSchemaEditorRegistry;
 import org.hkijena.misa_imagej.json_schema.JSONSchemaObject;
-import org.hkijena.misa_imagej.json_schema.JSONSchemaObjectEditor;
+import org.hkijena.misa_imagej.json_schema.JSONSchemaObjectEditorUI;
 import org.hkijena.misa_imagej.utils.UIUtils;
 
 import javax.swing.*;
@@ -15,9 +15,9 @@ import java.util.Comparator;
  * Editor that can edit any JSON schema
  * This is used as fallback if the parameter is not serializeable or has no editor assigned to it
  */
-public class GenericJSONSchemaObjectEditor extends JSONSchemaObjectEditor {
+public class GenericJSONSchemaObjectEditorUI extends JSONSchemaObjectEditorUI {
 
-    public GenericJSONSchemaObjectEditor(JSONSchemaObject object) {
+    public GenericJSONSchemaObjectEditorUI(JSONSchemaObject object) {
         super(object);
         initialize();
     }
@@ -119,7 +119,7 @@ public class GenericJSONSchemaObjectEditor extends JSONSchemaObjectEditor {
         }
         else if(obj.type.equals("object")) {
             if(obj.getMaxDepth() <= 1) {
-                JSONSchemaObjectEditor editor = JSONSchemaEditorRegistry.getEditorFor(obj);
+                JSONSchemaObjectEditorUI editor = JSONSchemaEditorRegistry.getEditorFor(obj);
                 add(editor, new GridBagConstraints() {
                     {
                         anchor = GridBagConstraints.PAGE_START;
