@@ -203,6 +203,7 @@ public class MISAModuleUI extends JFrame {
         runtimeParametersEditorUI = new RuntimeParametersEditorUI(this);
         sampleDataEditorUI = new SampleDataEditorUI(this);
 
+        // Tabs with settings
         JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.addTab("Data", sampleDataEditorUI);
         tabbedPane.addTab("Sample parameters", sampleParametersEditorUI);
@@ -211,22 +212,20 @@ public class MISAModuleUI extends JFrame {
         tabbedPane.addTab("Info", new InfoPanelUI());
         add(tabbedPane, BorderLayout.CENTER);
 
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.LINE_AXIS));
+        // Toolbar
+        JToolBar toolBar = new JToolBar();
 
-        buttonPanel.add(Box.createHorizontalGlue());
-
-        JButton exportButton = new JButton("Export");
+        JButton exportButton = new JButton("Export", UIUtils.getIconFromResources("export.png"));
         exportButton.setToolTipText("Instead of running the MISA++ module, export all necessary files into a folder. This folder for example can be put onto a server.");
         exportButton.addActionListener(actionEvent -> exportMISARun());
-        buttonPanel.add(exportButton);
+        toolBar.add(exportButton);
 
-        JButton runButton = new JButton("Run");
+        JButton runButton = new JButton("Run", UIUtils.getIconFromResources("run.png"));
         runButton.setToolTipText("Runs the MISA++ module.");
         runButton.addActionListener(actionEvent -> runMISA());
-        buttonPanel.add(runButton);
+        toolBar.add(runButton);
 
-        add(buttonPanel, BorderLayout.SOUTH);
+        add(toolBar, BorderLayout.NORTH);
     }
 
 

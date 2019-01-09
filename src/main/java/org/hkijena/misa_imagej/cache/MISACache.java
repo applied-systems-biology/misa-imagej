@@ -52,6 +52,14 @@ public class MISACache {
     }
 
     /**
+     * Returns the IO type of this cache
+     * @return
+     */
+    public MISADataIOType getIOType() {
+        return getFilesystemEntry().ioType;
+    }
+
+    /**
      * Returns true if this cache has a pattern or description
      * @return
      */
