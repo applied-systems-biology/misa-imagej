@@ -4,6 +4,7 @@ package org.hkijena.misa_imagej.cache;
 import org.hkijena.misa_imagej.MISAFilesystemEntry;
 import org.hkijena.misa_imagej.json_schema.JSONSchemaObject;
 
+import java.awt.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -69,5 +70,14 @@ public class MISACache {
     @Override
     public String toString() {
         return getPatternSerializationID() + "|" + getDescriptionSerializationID() + " @ " + getFilesystemEntry().toString();
+    }
+
+    /**
+     * Automatically generates a color from the name
+     * @return
+     */
+    public Color toColor() {
+        float h = Math.abs(getCacheTypeName().hashCode() % 256) / 255.0f;
+        return Color.getHSBColor(h, 0.5f, 1);
     }
 }

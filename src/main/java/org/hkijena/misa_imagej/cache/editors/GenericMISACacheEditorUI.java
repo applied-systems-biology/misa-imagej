@@ -15,6 +15,6 @@ public class GenericMISACacheEditorUI extends MISACacheEditorUI {
 
     private void initialize() {
         setLayout(new GridBagLayout());
-//        UIUtils.createDescriptionLabelUI(this, "No settings available for data of type '" + getCache().)
+        UIUtils.createDescriptionLabelUI(this, "No settings available for data of type '" + getCache().getCacheTypeName() + "'", 0, 0);
     }
 }

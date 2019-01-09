@@ -82,17 +82,29 @@ public class SampleDataEditorUI extends JPanel {
         sampleEditor.removeAll();
         sampleEditor.setLayout(new GridBagLayout());
 
-//        sampleEditor.add(new CacheEditorUI(app, parameterSchema.getImportedFilesystemSchema(), name), new GridBagConstraints() {
-//            {
-//                anchor = GridBagConstraints.PAGE_START;
-//                gridx = 0;
-//                gridy = 2;
-//                fill = GridBagConstraints.HORIZONTAL;
-//                weightx = 1;
-//                gridwidth = 2;
-//                insets = UIUtils.UI_PADDING;
-//            }
-//        });
+        sampleEditor.add(new CacheEditorUI("Input data", sample.getImportedCaches()), new GridBagConstraints() {
+            {
+                anchor = GridBagConstraints.PAGE_START;
+                gridx = 0;
+                gridy = 2;
+                fill = GridBagConstraints.HORIZONTAL;
+                weightx = 1;
+                gridwidth = 2;
+                insets = UIUtils.UI_PADDING;
+            }
+        });
+
+        sampleEditor.add(new CacheEditorUI("Output data", sample.getExportedCaches()), new GridBagConstraints() {
+            {
+                anchor = GridBagConstraints.PAGE_START;
+                gridx = 0;
+                gridy = 3;
+                fill = GridBagConstraints.HORIZONTAL;
+                weightx = 1;
+                gridwidth = 2;
+                insets = UIUtils.UI_PADDING;
+            }
+        });
 
         sampleEditor.add(new JPanel(), new GridBagConstraints() {
             {

@@ -1,24 +1,23 @@
 package org.hkijena.misa_imagej;
 
-import org.hkijena.misa_imagej.MISAModuleUI;
 import org.hkijena.misa_imagej.cache.MISACache;
 import org.hkijena.misa_imagej.cache.MISACacheRegistry;
-import org.hkijena.misa_imagej.json_schema.JSONSchemaObject;
 import org.hkijena.misa_imagej.utils.UIUtils;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.List;
 
 /**
  * Editor that allows setting up the imported filesystem
  */
 public class CacheEditorUI extends JPanel {
-    private MISAModuleUI app;
-    private JSONSchemaObject jsonSchemaObject;
+    private String title;
+    private List<MISACache> caches;
 
-    public CacheEditorUI(MISAModuleUI app, JSONSchemaObject importedFilesystem, String name) {
-        this.app = app;
-        jsonSchemaObject = importedFilesystem.properties.get("children").properties.get(name);
+    public CacheEditorUI(String title, List<MISACache> caches) {
+        this.title = title;
+        this.caches = caches;
         initialize();
     }
 
@@ -26,7 +25,7 @@ public class CacheEditorUI extends JPanel {
         UIUtils.backgroundColorJLabel(
                 UIUtils.borderedJLabel(UIUtils.createDescriptionLabelUI(this,
                         cache.getCacheTypeName(), row, 0)),
-                new Color(206, 212, 255));
+                        cache.toColor());
         UIUtils.borderedJLabel(UIUtils.createDescriptionLabelUI(this, "/" + cache.getFilesystemEntry().getInternalPath().toString(), row, 1));
         add(MISACacheRegistry.getEditorFor(cache), new GridBagConstraints() {
             {
@@ -41,16 +40,12 @@ public class CacheEditorUI extends JPanel {
     }
 
     private void initialize() {
-        setBorder(BorderFactory.createTitledBorder("Input"));
+        setBorder(BorderFactory.createTitledBorder(title));
         setLayout(new GridBagLayout());
 
         int row = 0;
-
-//        for(MISACache cache : app.getParameterSchema().getImportedData()) {
-//            addEditor(cache, row++);
-//        }
-//        for(MISACache cache : app.getParameterSchema().getExportedData()) {
-//            addEditor(cache, row++);
-//        }
+        for(MISACache cache : caches) {
+            addEditor(cache, row++);
+        }
     }
 }
