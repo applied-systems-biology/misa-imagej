@@ -1,58 +1,29 @@
 package org.hkijena.misa_imagej.cache;
 
 
+import org.hkijena.misa_imagej.MISAFilesystemEntry;
 import org.hkijena.misa_imagej.json_schema.JSONSchemaObject;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class MISACache {
-
-    /**
-     * JSON schema that points to the the filesystem entry within the parameter schema
-     */
-    private JSONSchemaObject schemaObject;
-
     /**
      * Relative path within the imported or exported filesystem
      * This does not include "imported" or "exported"
      */
-    private Path relativePath;
+    private MISAFilesystemEntry filesystemEntry;
 
-    /**
-     * Indicates if this data is imported or exported
-     */
-    private MISADataIOType ioType;
-
-    public MISACache(JSONSchemaObject schema, MISADataIOType ioType) {
-        this.schemaObject = schema;
-        this.ioType = ioType;
-        this.relativePath = getFilesystemValuePath(schema, ioType);
+    public MISACache(MISAFilesystemEntry filesystemEntry) {
+        this.filesystemEntry = filesystemEntry;
     }
 
     /**
-     * Relative path within the imported or exported filesystem
-     * This does not include "imported" or "exported"
+     * Returns the filesystem entry this cache is attached to
      * @return
      */
-    public Path getRelativePath() {
-        return relativePath;
-    }
-
-    /**
-     * Indicates if this data is imported or exported
-     * @return
-     */
-    public MISADataIOType getIoType() {
-        return ioType;
-    }
-
-    /**
-     * JSON schema that points to the the filesystem entry within the parameter schema
-     * @return
-     */
-    public JSONSchemaObject getSchemaObject() {
-        return schemaObject;
+    public MISAFilesystemEntry getFilesystemEntry() {
+        return filesystemEntry;
     }
 
     /**
@@ -61,8 +32,8 @@ public class MISACache {
      * @return
      */
     public String getPatternSerializationID() {
-        if(schemaObject.hasPropertyFromPath("metadata", "pattern")) {
-            return schemaObject.getPropertyFromPath("metadata", "pattern").serializationId;
+        if(getFilesystemEntry().metadata.hasPropertyFromPath("pattern")) {
+            return getFilesystemEntry().metadata.getPropertyFromPath("pattern").serializationId;
         }
         return null;
     }
@@ -73,18 +44,30 @@ public class MISACache {
      * @return
      */
     public String getDescriptionSerializationID() {
-        if(schemaObject.hasPropertyFromPath("metadata", "description")) {
-            return schemaObject.getPropertyFromPath("metadata", "description").serializationId;
+        if(getFilesystemEntry().metadata.hasPropertyFromPath("description")) {
+            return getFilesystemEntry().metadata.getPropertyFromPath("description").serializationId;
         }
         return null;
     }
 
     /**
-     * Returns a filesystem-specific value path for a JSON Schema entry
-     * @param obj
+     * Returns true if this cache has a pattern or description
      * @return
      */
-    private static Path getFilesystemValuePath(JSONSchemaObject obj, MISADataIOType ioType) {
-        return Paths.get(obj.getValuePath().substring("/filesystem/json-data/".length()));
+    public boolean isValid() {
+        return getPatternSerializationID() != null || getDescriptionSerializationID() != null;
+    }
+
+    /**
+     * Returns the name of this cache
+     * @return
+     */
+    public String getCacheTypeName() {
+        return getPatternSerializationID() + " -> " + getDescriptionSerializationID();
+    }
+
+    @Override
+    public String toString() {
+        return getPatternSerializationID() + "|" + getDescriptionSerializationID() + " @ " + getFilesystemEntry().toString();
     }
 }

@@ -1,7 +1,6 @@
 package org.hkijena.misa_imagej;
 
 import java.awt.*;
-import java.io.*;
 import java.nio.file.Path;
 
 import javax.swing.*;
@@ -27,11 +26,10 @@ public class MISAModuleUI extends JFrame {
 
     private AlgorithmParametersEditorUI algorithmParametersEditorUI;
     private RuntimeParametersEditorUI runtimeParametersEditorUI;
-    private ObjectParametersEditorUI objectParametersEditorUI;
-    private FilesystemParametersEditorUI filesystemParametersEditorUI;
+    private SampleParametersEditorUI sampleParametersEditorUI;
+    private SampleDataEditorUI sampleDataEditorUI;
 
     private MISAParameterSchema parameterSchema;
-
 
     /**
      * Create the dialog.
@@ -39,8 +37,9 @@ public class MISAModuleUI extends JFrame {
     public MISAModuleUI(MISACommand command, MISAModule module) {
         this.command = command;
         this.module = module;
-        initialize();
         loadSchema();
+        initialize();
+        parameterSchema.addSample("sample1");
     }
 
     /**
@@ -54,12 +53,6 @@ public class MISAModuleUI extends JFrame {
         schema.update();
         parameterSchema = new MISAParameterSchema(schema);
         setTitle("MISA++ for ImageJ - " + module.name + " (" + module.id + "-" + module.version + ")");
-
-        parameterSchema.addObject("sample1");
-        algorithmParametersEditorUI.setSchema(parameterSchema);
-        runtimeParametersEditorUI.setSchema(parameterSchema);
-        objectParametersEditorUI.setSchema(parameterSchema);
-        filesystemParametersEditorUI.setSchema(parameterSchema);
     }
 
     private void writeParameterSchema(Path parameterSchema, Path importedDirectory, Path exportedDirectory, boolean forceCopy, boolean relativeDirectories) {
@@ -205,14 +198,14 @@ public class MISAModuleUI extends JFrame {
     private void initialize() {
         setSize(800, 600);
         getContentPane().setLayout(new BorderLayout(8, 8));
-        objectParametersEditorUI = new ObjectParametersEditorUI();
-        algorithmParametersEditorUI = new AlgorithmParametersEditorUI();
-        runtimeParametersEditorUI = new RuntimeParametersEditorUI();
-        filesystemParametersEditorUI = new FilesystemParametersEditorUI(this);
+        sampleParametersEditorUI = new SampleParametersEditorUI(this);
+        algorithmParametersEditorUI = new AlgorithmParametersEditorUI(this);
+        runtimeParametersEditorUI = new RuntimeParametersEditorUI(this);
+        sampleDataEditorUI = new SampleDataEditorUI(this);
 
         JTabbedPane tabbedPane = new JTabbedPane();
-        tabbedPane.addTab("Data", filesystemParametersEditorUI);
-        tabbedPane.addTab("Sample parameters", objectParametersEditorUI);
+        tabbedPane.addTab("Data", sampleDataEditorUI);
+        tabbedPane.addTab("Sample parameters", sampleParametersEditorUI);
         tabbedPane.addTab("Algorithm parameters", algorithmParametersEditorUI);
         tabbedPane.addTab("Runtime", runtimeParametersEditorUI);
         tabbedPane.addTab("Info", new InfoPanelUI());
@@ -220,24 +213,6 @@ public class MISAModuleUI extends JFrame {
 
         JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.LINE_AXIS));
-
-        JButton addSampleButton = new JButton("Add sample ...");
-        addSampleButton.setToolTipText("Adds a new sample.");
-        addSampleButton.addActionListener(actionEvent -> addSample());
-        buttonPanel.add(addSampleButton);
-
-        JButton batchMenuButton = new JButton("Batch ...");
-        {
-            JPopupMenu popupMenu = UIUtils.addPopupMenuToComponent(batchMenuButton);
-            JMenuItem itemBatchFromStructure = new JMenuItem("Import from folder structure");
-            itemBatchFromStructure.setToolTipText("Imports objects from a folder structure that mirrors the structure as seen in the input data editor.");
-            popupMenu.add(itemBatchFromStructure);
-
-            JMenuItem itemMergeSingle = new JMenuItem("Import for data type");
-            itemMergeSingle.setToolTipText("Import matching data from a selection of files and folders");
-            popupMenu.add(itemMergeSingle);
-        }
-        buttonPanel.add(batchMenuButton);
 
         buttonPanel.add(Box.createHorizontalGlue());
 
@@ -254,11 +229,9 @@ public class MISAModuleUI extends JFrame {
         add(buttonPanel, BorderLayout.SOUTH);
     }
 
-    private void addSample() {
-        String result = JOptionPane.showInputDialog(this, "Sample name", "Add sample", JOptionPane.PLAIN_MESSAGE);
-        if(result != null && !result.isEmpty()) {
-            parameterSchema.addObject(result);
-        }
+
+    public MISAParameterSchema getParameterSchema() {
+        return parameterSchema;
     }
 
     public LogService getLogService() {

@@ -17,8 +17,6 @@ public class JSONSchemaObject implements Cloneable {
 
     public transient JSONSchemaObject parent = null;
 
-    public transient MISACache filesystemData = null;
-
     private transient PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
 
     private transient Object value = null;
@@ -66,9 +64,29 @@ public class JSONSchemaObject implements Cloneable {
         obj.enum_values = enum_values;
         obj.required_properties = required_properties;
         obj.additionalProperties = additionalProperties;
+        obj.serializationId = serializationId;
         obj.properties = new HashMap<>();
         for(Map.Entry<String, JSONSchemaObject> kv : properties.entrySet()) {
             obj.properties.put(kv.getKey(), (JSONSchemaObject) kv.getValue().clone());
+        }
+        obj.serializationHierarchy = new ArrayList<>();
+        obj.serializationHierarchy.addAll(serializationHierarchy);
+        obj.update();
+        return obj;
+    }
+
+    /**
+     * Guaranteed way of returning additional properties (because this one might be null)
+     * @return
+     */
+    public JSONSchemaObject getAdditionalPropertiesTemplate() {
+        JSONSchemaObject obj;
+        if(additionalProperties != null) {
+            obj =  (JSONSchemaObject) additionalProperties.clone();
+        }
+        else {
+            obj = new JSONSchemaObject();
+            obj.type = "object";
         }
         return obj;
     }
@@ -79,14 +97,7 @@ public class JSONSchemaObject implements Cloneable {
      * @return
      */
     public JSONSchemaObject addAdditionalProperty(String name) {
-        JSONSchemaObject obj;
-        if(additionalProperties != null) {
-            obj =  (JSONSchemaObject) additionalProperties.clone();
-        }
-        else {
-            obj = new JSONSchemaObject();
-            obj.type = "object";
-        }
+        JSONSchemaObject obj = getAdditionalPropertiesTemplate();
         properties.put(name, obj);
         obj.id = name;
         obj.parent = this;

@@ -79,4 +79,8 @@ public class UIUtils {
         return popupMenu;
     }
 
+    public static Icon getIconFromResources(String iconName) {
+        return new ImageIcon(ResourceUtils.getPluginResource("icons/" + iconName));
+    }
+
 }

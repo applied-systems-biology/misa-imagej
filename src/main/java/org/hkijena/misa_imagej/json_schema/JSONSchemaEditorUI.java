@@ -13,48 +13,88 @@ public class JSONSchemaEditorUI extends JPanel {
 
     private JTree jsonTree;
     private JPanel objectEditor;
+    private JComponent topPanel;
     private JSONSchemaObjectEditorUI objectEditorInstance = null;
     private JSONSchemaObject currentObject = null;
 
-    public JSONSchemaEditorUI() {
+    /**
+     * Creates a JSON schema editor with a panel on top of the tree
+     * @param topPanel if null, no panel will be created
+     */
+    public JSONSchemaEditorUI(JComponent topPanel) {
+        this.topPanel = topPanel;
         initialize();
+        setSchema(null);
     }
 
-    private void editJSONSchema(JSONSchemaObject obj) {
+    public JSONSchemaEditorUI() {
+        this(null);
+    }
+
+    private void setCurrentSchema(JSONSchemaObject obj) {
         currentObject = obj;
         if(objectEditorInstance != null)
             objectEditor.remove(objectEditorInstance);
-        objectEditorInstance = JSONSchemaEditorRegistry.getEditorFor(obj);
-        objectEditor.add(objectEditorInstance, BorderLayout.CENTER);
-        objectEditor.revalidate();
+        if(obj != null) {
+            objectEditorInstance = JSONSchemaEditorRegistry.getEditorFor(obj);
+            objectEditor.add(objectEditorInstance, BorderLayout.CENTER);
+            objectEditor.revalidate();
+        }
+        else {
+            objectEditorInstance = null;
+            objectEditor.revalidate();
+        }
     }
 
     private void initialize() {
         setLayout(new BorderLayout());
-        jsonTree = new JTree();
-        jsonTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+
+        JPanel treePanel = new JPanel(new BorderLayout(8, 8));
+        {
+            // If enabled, add panel
+            if(topPanel != null) {
+                treePanel.add(topPanel, BorderLayout.NORTH);
+            }
+
+            // Create tree
+            jsonTree = new JTree();
+            jsonTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+            treePanel.add(jsonTree, BorderLayout.CENTER);
+        }
+
         objectEditor = new JPanel(new BorderLayout());
-        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, jsonTree, new JScrollPane(objectEditor));
+        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, treePanel, new JScrollPane(objectEditor));
         add(splitPane, BorderLayout.CENTER);
 
         jsonTree.addTreeSelectionListener(e -> {
             if(jsonTree.getLastSelectedPathComponent() != null) {
                 DefaultMutableTreeNode nd = (DefaultMutableTreeNode)jsonTree.getLastSelectedPathComponent();
-                editJSONSchema((JSONSchemaObject)nd.getUserObject());
+                setCurrentSchema((JSONSchemaObject)nd.getUserObject());
             }
         });
 
     }
 
     public void setSchema(JSONSchemaObject jsonSchema) {
-        jsonTree.setModel(new DefaultTreeModel(jsonSchema.toTreeNode()));
-        editJSONSchema(jsonSchema);
-        jsonSchema.addPropertyChangeListener(propertyChangeEvent -> {
-            if(jsonSchema == currentObject) {
-                jsonTree.setModel(new DefaultTreeModel(jsonSchema.toTreeNode()));
-                refreshEditor();
-            }
-        });
+        if(jsonSchema != null && jsonSchema.properties != null && jsonSchema.properties.size() > 0) {
+            jsonTree.setModel(new DefaultTreeModel(jsonSchema.toTreeNode()));
+            setCurrentSchema(jsonSchema);
+            jsonSchema.addPropertyChangeListener(propertyChangeEvent -> {
+                if(jsonSchema == currentObject) {
+                    jsonTree.setModel(new DefaultTreeModel(jsonSchema.toTreeNode()));
+                    refreshEditor();
+                }
+            });
+
+            jsonTree.setEnabled(true);
+            objectEditor.setEnabled(true);
+        }
+        else {
+            jsonTree.setModel(new DefaultTreeModel(new DefaultMutableTreeNode("No properties to edit")));
+            setCurrentSchema(null);
+            jsonTree.setEnabled(false);
+            objectEditor.setEnabled(false);
+        }
     }
 
     public void refreshEditor() {

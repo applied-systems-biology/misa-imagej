@@ -1,5 +1,7 @@
 package org.hkijena.misa_imagej.cache;
 
+import org.hkijena.misa_imagej.MISAFilesystemEntry;
+import org.hkijena.misa_imagej.cache.editors.GenericMISACacheEditorUI;
 import org.hkijena.misa_imagej.json_schema.JSONSchemaObject;
 
 import java.lang.reflect.InvocationTargetException;
@@ -12,6 +14,7 @@ import java.util.Map;
 public class MISACacheRegistry {
 
     private static Map<String, Class<MISACache>> registeredCaches = new HashMap<>();
+    private static Map<Class<MISACache>, Class<MISACacheEditorUI>> registeredCacheEditors = new HashMap<>();
     private static boolean isInitialized = false;
 
     private MISACacheRegistry() {
@@ -23,28 +26,24 @@ public class MISACacheRegistry {
      * @param serializationId
      * @param cacheClass
      */
-    public static void register(String serializationId, Class<MISACache> cacheClass) {
+    public static void register(String serializationId, Class<MISACache> cacheClass, Class<MISACacheEditorUI> editorClass) {
         registeredCaches.put(serializationId, cacheClass);
+        registeredCacheEditors.put(cacheClass, editorClass);
     }
 
+
     /**
-     * Creates an editor for the provided object
-     * @param schemaObject
+     * Creates a cache for a filesystem entry
+     * @param filesystemEntry
      * @return
      */
-    public static MISACache getCacheFor(JSONSchemaObject schemaObject, MISADataIOType ioType) {
+    public static MISACache getCacheFor(MISAFilesystemEntry filesystemEntry) {
         if(!isInitialized)
             initialize();
 
-        String patternId = null;
-        String descriptionId = null;
-
-        if(schemaObject.hasPropertyFromPath("metadata", "pattern")) {
-            patternId = schemaObject.getPropertyFromPath("metadata", "pattern").serializationId;
-        }
-        if(schemaObject.hasPropertyFromPath("metadata", "description")) {
-            descriptionId = schemaObject.getPropertyFromPath("metadata", "description").serializationId;
-        }
+        MISACache tmp = new MISACache(filesystemEntry);
+        String patternId = tmp.getPatternSerializationID();
+        String descriptionId = tmp.getDescriptionSerializationID();
 
         Class<MISACache> result = null;
 
@@ -61,10 +60,31 @@ public class MISACacheRegistry {
         }
 
         try {
-            return result.getConstructor(JSONSchemaObject.class, MISADataIOType.class).newInstance(schemaObject, ioType);
+            return result.getConstructor(MISAFilesystemEntry.class).newInstance(filesystemEntry);
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Creates an UI editor for the cache
+     * @param cache
+     * @return
+     */
+    public static MISACacheEditorUI getEditorFor(MISACache cache) {
+        if(!isInitialized)
+            initialize();
+        Class<MISACacheEditorUI> result = registeredCacheEditors.getOrDefault(cache.getClass(), null);
+        if(result == null)
+            return new GenericMISACacheEditorUI(cache);
+        else {
+            try {
+                return result.getConstructor(MISACache.class).newInstance(cache);
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new RuntimeException(e);
+            }
         }
     }
 

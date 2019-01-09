@@ -7,21 +7,20 @@ import java.awt.*;
 
 public class RuntimeParametersEditorUI extends JPanel {
 
-    private JSONSchemaEditorUI jsonSchemaEditorUI = null;
+    private MISAParameterSchema parameterSchema;
 
-    public RuntimeParametersEditorUI() {
+    public RuntimeParametersEditorUI(MISAModuleUI app) {
+        this.parameterSchema = app.getParameterSchema();
         initialize();
     }
 
     private void initialize() {
-        jsonSchemaEditorUI = new JSONSchemaEditorUI();
+        JSONSchemaEditorUI jsonSchemaEditorUI = new JSONSchemaEditorUI();
 
         setLayout(new BorderLayout());
         add(jsonSchemaEditorUI, BorderLayout.CENTER);
-    }
 
-    public void setSchema(MISAParameterSchema jsonSchema) {
-        jsonSchemaEditorUI.setSchema(jsonSchema.getRuntimeParameters());
+        jsonSchemaEditorUI.setSchema(parameterSchema.getRuntimeParameters());
     }
 
 }
