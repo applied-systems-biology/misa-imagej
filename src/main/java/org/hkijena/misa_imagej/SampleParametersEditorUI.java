@@ -16,33 +16,7 @@ public class SampleParametersEditorUI extends JPanel {
     }
 
     private void initialize() {
-
-        JComboBox<MISASample> sampleList = new JComboBox<>();
-        parameterSchema.addPropertyChangeListener(propertyChangeEvent -> {
-            if(propertyChangeEvent.getPropertyName().equals("samples")) {
-                DefaultComboBoxModel<MISASample> model = new DefaultComboBoxModel<>();
-                for(MISASample sample : parameterSchema.getSamples()) {
-                    model.addElement(sample);
-                }
-                sampleList.setModel(model);
-            }
-            else if(propertyChangeEvent.getPropertyName().equals("currentSample")) {
-                if(parameterSchema.getCurrentSample() != null) {
-                    sampleList.setSelectedItem(parameterSchema.getCurrentSample());
-                    sampleList.setEnabled(true);
-                }
-                else {
-                    sampleList.setEnabled(false);
-                }
-            }
-        });
-        sampleList.addItemListener(itemEvent -> {
-            if(parameterSchema.getSamples().size() > 0 && sampleList.getSelectedItem() != null) {
-                parameterSchema.setCurrentSample(((MISASample)sampleList.getSelectedItem()).name);
-            }
-        });
-
-        jsonSchemaEditorUI = new JSONSchemaEditorUI(sampleList);
+        jsonSchemaEditorUI = new JSONSchemaEditorUI();
 
         setLayout(new BorderLayout());
         add(jsonSchemaEditorUI, BorderLayout.CENTER);

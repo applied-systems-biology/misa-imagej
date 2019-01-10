@@ -76,6 +76,9 @@ public class MISAParameterSchema {
         samples.put(name, sample);
         propertyChangeSupport.firePropertyChange("samples", null, null);
 
+        if(samples.size() == 1) {
+            setCurrentSample(name);
+        }
     }
 
     public void removeSample(String name) {

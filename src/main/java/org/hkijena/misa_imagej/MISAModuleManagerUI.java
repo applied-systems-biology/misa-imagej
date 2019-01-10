@@ -36,6 +36,19 @@ public class MISAModuleManagerUI extends JFrame {
         getContentPane().setLayout(new BorderLayout(8, 8));
         setTitle("MISA++ for ImageJ - Module manager");
 
+        // Toolbar
+        JToolBar toolBar = new JToolBar();
+
+        JButton refreshButton = new JButton("Refresh", UIUtils.getIconFromResources("refresh.png"));
+        toolBar.add(refreshButton);
+
+        toolBar.add(Box.createHorizontalGlue());
+
+        JButton launchAnalyzer = new JButton("Analyze result ...", UIUtils.getIconFromResources("open.png"));
+        toolBar.add(launchAnalyzer);
+
+        add(toolBar, BorderLayout.NORTH);
+
         // Detail panel
         JLabel descriptionTitle;
         JLabel descriptionVersionId;

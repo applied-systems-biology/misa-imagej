@@ -39,7 +39,7 @@ public class MISAModuleUI extends JFrame {
         this.module = module;
         loadSchema();
         initialize();
-        parameterSchema.addSample("sample1");
+        parameterSchema.addSample("New Sample");
     }
 
     /**
@@ -215,6 +215,10 @@ public class MISAModuleUI extends JFrame {
         // Toolbar
         JToolBar toolBar = new JToolBar();
 
+        initalizeSampleManagerUI(toolBar);
+
+        toolBar.add(Box.createHorizontalGlue());
+
         JButton exportButton = new JButton("Export", UIUtils.getIconFromResources("export.png"));
         exportButton.setToolTipText("Instead of running the MISA++ module, export all necessary files into a folder. This folder for example can be put onto a server.");
         exportButton.addActionListener(actionEvent -> exportMISARun());
@@ -228,6 +232,65 @@ public class MISAModuleUI extends JFrame {
         add(toolBar, BorderLayout.NORTH);
     }
 
+    private void initalizeSampleManagerUI(JToolBar toolBar) {
+        // Add sample button
+        JButton addSampleButton = new JButton("Add sample", UIUtils.getIconFromResources("add.png"));
+        addSampleButton.addActionListener(actionEvent -> addSample());
+        toolBar.add(addSampleButton);
+
+        // Batch-add button
+        JButton batchAddSampleButton = new JButton("Batch ...", UIUtils.getIconFromResources("batch-add.png"));
+        toolBar.add(batchAddSampleButton);
+
+        {
+            JComboBox<MISASample> sampleList = new JComboBox<>();
+            parameterSchema.addPropertyChangeListener(propertyChangeEvent -> {
+                if(propertyChangeEvent.getPropertyName().equals("samples")) {
+                    DefaultComboBoxModel<MISASample> model = new DefaultComboBoxModel<>();
+                    for(MISASample sample : parameterSchema.getSamples()) {
+                        model.addElement(sample);
+                    }
+                    sampleList.setModel(model);
+                }
+                else if(propertyChangeEvent.getPropertyName().equals("currentSample")) {
+                    if(parameterSchema.getCurrentSample() != null) {
+                        sampleList.setSelectedItem(parameterSchema.getCurrentSample());
+                        sampleList.setEnabled(true);
+                    }
+                    else {
+                        sampleList.setEnabled(false);
+                    }
+                }
+            });
+            sampleList.addItemListener(itemEvent -> {
+                if(parameterSchema.getSamples().size() > 0 && sampleList.getSelectedItem() != null) {
+                    parameterSchema.setCurrentSample(((MISASample)sampleList.getSelectedItem()).name);
+                }
+            });
+            toolBar.add(sampleList);
+        }
+
+        // Remove sample button
+        JButton removeSampleButton = new JButton(UIUtils.getIconFromResources("delete.png"));
+        removeSampleButton.setToolTipText("Remove current sample");
+        removeSampleButton.addActionListener(actionEvent -> removeSample());
+        toolBar.add(removeSampleButton);
+    }
+
+    private void addSample() {
+        String result = JOptionPane.showInputDialog(this, "Sample name", "Add sample", JOptionPane.PLAIN_MESSAGE);
+        if(result != null && !result.isEmpty()) {
+            parameterSchema.addSample(result);
+        }
+    }
+
+    private void removeSample() {
+        if(JOptionPane.showConfirmDialog(this,
+                "Do you really want to remove this sample?",
+                "Remove sample", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+            parameterSchema.removeSample(parameterSchema.getCurrentSample().name);
+        }
+    }
 
     public MISAParameterSchema getParameterSchema() {
         return parameterSchema;

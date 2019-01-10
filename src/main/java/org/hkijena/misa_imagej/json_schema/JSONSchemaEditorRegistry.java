@@ -10,7 +10,7 @@ import java.util.Map;
  */
 public class JSONSchemaEditorRegistry {
 
-    private static Map<String, Class<JSONSchemaObjectEditorUI>> registeredEditors = new HashMap<>();
+    private static Map<String, Class<? extends JSONSchemaObjectEditorUI>> registeredEditors = new HashMap<>();
     private static boolean isInitialized = false;
 
     private JSONSchemaEditorRegistry() {
@@ -35,7 +35,7 @@ public class JSONSchemaEditorRegistry {
         if(isInitialized)
             initialize();
         if(schemaObject.serializationId != null) {
-            Class<JSONSchemaObjectEditorUI> result = registeredEditors.getOrDefault(schemaObject.serializationId, null);
+            Class<? extends JSONSchemaObjectEditorUI> result = registeredEditors.getOrDefault(schemaObject.serializationId, null);
             if(result != null) {
                 try {
                     return result.getConstructor(JSONSchemaObject.class).newInstance(schemaObject);

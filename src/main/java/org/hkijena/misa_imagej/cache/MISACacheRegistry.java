@@ -1,6 +1,8 @@
 package org.hkijena.misa_imagej.cache;
 
 import org.hkijena.misa_imagej.MISAFilesystemEntry;
+import org.hkijena.misa_imagej.cache.caches.MISAFileCache;
+import org.hkijena.misa_imagej.cache.caches.MISAOMETiffCache;
 import org.hkijena.misa_imagej.cache.editors.GenericMISACacheEditorUI;
 import org.hkijena.misa_imagej.json_schema.JSONSchemaObject;
 
@@ -13,8 +15,8 @@ import java.util.Map;
  */
 public class MISACacheRegistry {
 
-    private static Map<String, Class<MISACache>> registeredCaches = new HashMap<>();
-    private static Map<Class<MISACache>, Class<MISACacheEditorUI>> registeredCacheEditors = new HashMap<>();
+    private static Map<String, Class<? extends MISACache>> registeredCaches = new HashMap<>();
+    private static Map<Class<? extends MISACache>, Class<? extends MISACacheEditorUI>> registeredCacheEditors = new HashMap<>();
     private static boolean isInitialized = false;
 
     private MISACacheRegistry() {
@@ -26,7 +28,7 @@ public class MISACacheRegistry {
      * @param serializationId
      * @param cacheClass
      */
-    public static void register(String serializationId, Class<MISACache> cacheClass, Class<MISACacheEditorUI> editorClass) {
+    public static void register(String serializationId, Class<? extends MISACache> cacheClass, Class<? extends MISACacheEditorUI> editorClass) {
         registeredCaches.put(serializationId, cacheClass);
         registeredCacheEditors.put(cacheClass, editorClass);
     }
@@ -45,7 +47,7 @@ public class MISACacheRegistry {
         String patternId = tmp.getPatternSerializationID();
         String descriptionId = tmp.getDescriptionSerializationID();
 
-        Class<MISACache> result = null;
+        Class<? extends MISACache> result = null;
 
         if(descriptionId != null) {
             // The preferred way: Decide via description id
@@ -75,7 +77,7 @@ public class MISACacheRegistry {
     public static MISACacheEditorUI getEditorFor(MISACache cache) {
         if(!isInitialized)
             initialize();
-        Class<MISACacheEditorUI> result = registeredCacheEditors.getOrDefault(cache.getClass(), null);
+        Class<? extends MISACacheEditorUI> result = registeredCacheEditors.getOrDefault(cache.getClass(), null);
         if(result == null)
             return new GenericMISACacheEditorUI(cache);
         else {
@@ -92,6 +94,10 @@ public class MISACacheRegistry {
      * Initializes default editors
      */
     public static void initialize() {
+
+        register("misa_ome:descriptions/ome-tiff", MISAOMETiffCache.class, GenericMISACacheEditorUI.class);
+        register("misa:descriptions/file", MISAFileCache.class, GenericMISACacheEditorUI.class);
+
         isInitialized = true;
     }
 

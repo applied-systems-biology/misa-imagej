@@ -1,111 +1,135 @@
 package org.hkijena.misa_imagej;
 
+import org.apache.commons.collections.ListUtils;
+import org.hkijena.misa_imagej.cache.MISACache;
 import org.hkijena.misa_imagej.utils.UIUtils;
 
 import javax.swing.*;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 public class SampleDataEditorUI extends JPanel {
 
-    private MISAModuleUI app;
-    private JList<String> sampleList;
     private JPanel sampleEditor;
+    private JTree cacheList;
     private MISAParameterSchema parameterSchema;
 
     public SampleDataEditorUI(MISAModuleUI app) {
-        this.app = app;
         this.parameterSchema = app.getParameterSchema();
         initialize();
-        updateObjectList();
     }
 
     private void initialize() {
         setLayout(new BorderLayout());
         sampleEditor = new JPanel(new BorderLayout());
 
-        JPanel sampleListPanel = new JPanel(new BorderLayout(8, 8));
-        {
-            // Management button on top
-            JPanel buttonPanel = new JPanel();
-            buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.LINE_AXIS));
+        // List of caches
+        JPanel cacheListPanel = new JPanel(new BorderLayout(8, 8));
+        cacheList = new JTree();
+        cacheListPanel.add(cacheList, BorderLayout.CENTER);
 
-            // Add sample button
-            JButton addSampleButton = new JButton(UIUtils.getIconFromResources("add.png"));
-            addSampleButton.setToolTipText("Add new sample");
-            addSampleButton.addActionListener(actionEvent -> addSample());
-            buttonPanel.add(addSampleButton);
+        cacheList.addTreeSelectionListener(treeSelectionEvent -> {
+            if(cacheList.getLastSelectedPathComponent() != null) {
+                DefaultMutableTreeNode nd = (DefaultMutableTreeNode)cacheList.getLastSelectedPathComponent();
+                setCurrentCacheList((CacheListEntry)nd.getUserObject());
+            }
+        });
 
-            // Batch-add button
-            JButton batchAddSampleButton = new JButton(UIUtils.getIconFromResources("batch-add.png"));
-            batchAddSampleButton.setToolTipText("Batch-add samples");
-            buttonPanel.add(batchAddSampleButton);
-
-            // Remove sample button
-            JButton removeSampleButton = new JButton(UIUtils.getIconFromResources("delete.png"));
-            removeSampleButton.setToolTipText("Remove current sample");
-            removeSampleButton.addActionListener(actionEvent -> removeSample());
-            buttonPanel.add(removeSampleButton);
-
-            sampleListPanel.add(buttonPanel, BorderLayout.NORTH);
-
-            // Add the sample list to the panel
-            sampleList = new JList<>(new DefaultListModel<>());
-            sampleListPanel.add(sampleList, BorderLayout.CENTER);
-        }
-
-        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, sampleListPanel, new JScrollPane(sampleEditor));
+        // Editor for the current data
+        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, cacheListPanel, new JScrollPane(sampleEditor));
         add(splitPane, BorderLayout.CENTER);
         sampleEditor.setLayout(new GridBagLayout());
 
-        // Add events
-        sampleList.addListSelectionListener(listSelectionEvent -> {
-            // Set current sample globally
-            parameterSchema.setCurrentSample(sampleList.getSelectedValue());
-        });
         parameterSchema.addPropertyChangeListener(propertyChangeEvent -> {
-            if(propertyChangeEvent.getPropertyName().equals("samples")) {
-                updateObjectList();
-            }
-            else if(propertyChangeEvent.getPropertyName().equals("currentSample")) {
-                if(parameterSchema.getCurrentSample() != null)
-                    sampleList.setSelectedValue(parameterSchema.getCurrentSample().name, true);
-                setCurrentSample(app.getParameterSchema().getCurrentSample());
+            if(propertyChangeEvent.getPropertyName().equals("currentSample")) {
+                if(parameterSchema.getCurrentSample() != null) {
+                    setCurrentSample(parameterSchema.getCurrentSample());
+                }
+                else {
+                    sampleEditor.removeAll();
+                    sampleEditor.revalidate();
+                }
             }
         });
     }
 
     private void setCurrentSample(MISASample sample) {
+        // Create tree nodes
+        DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode(new CacheListEntry("'" + sample.name + "' data",
+                ListUtils.union(sample.getImportedCaches(), sample.getExportedCaches())));
 
-        if(sample == null)
-            return;
+        // Imported data
+        DefaultMutableTreeNode importedNode = new DefaultMutableTreeNode(new CacheListEntry("Input", sample.getImportedCaches()));
+        for(MISACache cache : sample.getImportedCaches()) {
+            importedNode.add(new DefaultMutableTreeNode(new CacheListEntry(cache.getRelativePathName(), Arrays.asList(cache))));
+        }
+        rootNode.add(importedNode);
+
+        // Exported data
+        DefaultMutableTreeNode exportedNode = new DefaultMutableTreeNode(new CacheListEntry("Output", sample.getExportedCaches()));
+        for(MISACache cache : sample.getExportedCaches()) {
+            exportedNode.add(new DefaultMutableTreeNode(new CacheListEntry(cache.getRelativePathName(), Arrays.asList(cache))));
+        }
+        rootNode.add(exportedNode);
+
+
+        cacheList.setModel(new DefaultTreeModel(rootNode));
+        setCurrentCacheList((CacheListEntry)rootNode.getUserObject());
+    }
+
+    private void setCurrentCacheList(CacheListEntry entry) {
+        List<MISACache> imported = new ArrayList<>();
+        List<MISACache> exported = new ArrayList<>();
+
+        for(MISACache cache : entry.caches) {
+            switch(cache.getIOType()) {
+                case Imported:
+                    imported.add(cache);
+                    break;
+                case Exported:
+                    exported.add(cache);
+                    break;
+                default:
+                    throw new UnsupportedOperationException();
+            }
+        }
 
         sampleEditor.removeAll();
         sampleEditor.setLayout(new GridBagLayout());
 
-        sampleEditor.add(new CacheEditorUI("Input data", sample.getImportedCaches()), new GridBagConstraints() {
-            {
-                anchor = GridBagConstraints.PAGE_START;
-                gridx = 0;
-                gridy = 2;
-                fill = GridBagConstraints.HORIZONTAL;
-                weightx = 1;
-                gridwidth = 2;
-                insets = UIUtils.UI_PADDING;
-            }
-        });
+        if(!imported.isEmpty()) {
+            sampleEditor.add(new CacheEditorUI("Input data", imported), new GridBagConstraints() {
+                {
+                    anchor = GridBagConstraints.PAGE_START;
+                    gridx = 0;
+                    gridy = 2;
+                    fill = GridBagConstraints.HORIZONTAL;
+                    weightx = 1;
+                    gridwidth = 2;
+                    insets = UIUtils.UI_PADDING;
+                }
+            });
+        }
+        if(!exported.isEmpty()) {
+            sampleEditor.add(new CacheEditorUI("Output data", exported), new GridBagConstraints() {
+                {
+                    anchor = GridBagConstraints.PAGE_START;
+                    gridx = 0;
+                    gridy = 3;
+                    fill = GridBagConstraints.HORIZONTAL;
+                    weightx = 1;
+                    gridwidth = 2;
+                    insets = UIUtils.UI_PADDING;
+                }
+            });
+        }
 
-        sampleEditor.add(new CacheEditorUI("Output data", sample.getExportedCaches()), new GridBagConstraints() {
-            {
-                anchor = GridBagConstraints.PAGE_START;
-                gridx = 0;
-                gridy = 3;
-                fill = GridBagConstraints.HORIZONTAL;
-                weightx = 1;
-                gridwidth = 2;
-                insets = UIUtils.UI_PADDING;
-            }
-        });
-
+        // Vertical fill space
         sampleEditor.add(new JPanel(), new GridBagConstraints() {
             {
                 anchor = GridBagConstraints.PAGE_START;
@@ -118,35 +142,25 @@ public class SampleDataEditorUI extends JPanel {
         });
 
         sampleEditor.revalidate();
+        sampleEditor.repaint();
     }
 
-    private void addSample() {
-        String result = JOptionPane.showInputDialog(this, "Sample name", "Add sample", JOptionPane.PLAIN_MESSAGE);
-        if(result != null && !result.isEmpty()) {
-            parameterSchema.addSample(result);
-        }
-    }
+    private class CacheListEntry {
+        public List<MISACache> caches;
+        public String name;
 
-    private void removeSample() {
-        if(JOptionPane.showConfirmDialog(this,
-                "Do you really want to remove this sample?",
-                "Remove sample", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-            parameterSchema.removeSample(parameterSchema.getCurrentSample().name);
-        }
-    }
+        public CacheListEntry() {
 
-    private void updateObjectList() {
-        DefaultListModel<String> model = (DefaultListModel<String>) sampleList.getModel();
-        model.clear();
-        for(String name : parameterSchema.getSampleNames()) {
-            model.addElement(name);
         }
-        if(model.size() > 0) {
-            sampleList.setSelectedIndex(0);
+
+        public CacheListEntry(String name, List<MISACache> caches) {
+            this.caches = caches;
+            this.name = name;
         }
-        else {
-            sampleEditor.removeAll();
-            sampleEditor.revalidate();
+
+        @Override
+        public String toString() {
+            return name;
         }
     }
 }

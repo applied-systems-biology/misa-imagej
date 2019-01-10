@@ -28,6 +28,17 @@ public class MISACache {
     }
 
     /**
+     * Returns a non-empty string that describes the internal path within the filesystem
+     * @return
+     */
+    public String getRelativePathName() {
+        if(getFilesystemEntry().getInternalPath().toString().isEmpty())
+            return "<Root>";
+        else
+            return getFilesystemEntry().getInternalPath().toString();
+    }
+
+    /**
      * Returns the serialization ID of the pattern if available
      * Otherwise return null
      * @return
