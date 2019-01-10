@@ -1,8 +1,10 @@
 package org.hkijena.misa_imagej;
 
+import org.hkijena.misa_imagej.parametereditor.MISAModuleUI;
 import org.hkijena.misa_imagej.repository.MISAModule;
 import org.hkijena.misa_imagej.repository.MISAModuleRepository;
 import org.hkijena.misa_imagej.utils.UIUtils;
+import org.hkijena.misa_imagej.workbench.MISAWorkbench;
 
 import javax.swing.*;
 import java.awt.*;
@@ -45,6 +47,10 @@ public class MISAModuleManagerUI extends JFrame {
         toolBar.add(Box.createHorizontalGlue());
 
         JButton launchAnalyzer = new JButton("Analyze result ...", UIUtils.getIconFromResources("open.png"));
+        launchAnalyzer.addActionListener(actionEvent -> {
+            MISAWorkbench workbench = new MISAWorkbench();
+            workbench.setVisible(true);
+        });
         toolBar.add(launchAnalyzer);
 
         add(toolBar, BorderLayout.NORTH);

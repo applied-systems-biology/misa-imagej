@@ -55,13 +55,6 @@ public class MISACommand implements Command {
 		});
 	}
 
-	public static void main(final String... args) {
-		// Launch ImageJ as usual.
-		final ImageJ ij = new ImageJ();
-		ij.launch(args);
-		ij.command().run(MISACommand.class, true);
-	}
-
 	public LogService getLogService() {
 		return log;
 	}
@@ -89,4 +82,14 @@ public class MISACommand implements Command {
 	public DatasetService getDatasetService() {
 		return datasetService;
 	}
+
+	public static void main(final String... args) {
+//		fiji.Debug.runPlugIn(MISACommand.class.getName(), null, false);
+//		fiji.Debug.run("MISA ImageJ", "");
+		// Launch ImageJ as usual.
+		final ImageJ ij = new ImageJ();
+		ij.ui().showUI();
+		ij.command().run(MISACommand.class, true);
+	}
 }
+

@@ -3,8 +3,6 @@ package org.hkijena.misa_imagej.repository;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.hkijena.misa_imagej.MISACommand;
-import org.hkijena.misa_imagej.MISAParameterSchema;
-import org.hkijena.misa_imagej.json_schema.JSONSchemaObject;
 
 import java.io.File;
 import java.io.FileInputStream;
