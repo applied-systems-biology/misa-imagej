@@ -2,6 +2,7 @@ package org.hkijena.misa_imagej;
 
 import javax.swing.SwingUtilities;
 
+import ij.IJ;
 import io.scif.services.DatasetIOService;
 import net.imagej.DatasetService;
 import net.imagej.ImageJ;
