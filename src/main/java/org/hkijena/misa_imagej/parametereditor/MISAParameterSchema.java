@@ -1,15 +1,23 @@
 package org.hkijena.misa_imagej.parametereditor;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import org.hkijena.misa_imagej.parametereditor.cache.MISACache;
 import org.hkijena.misa_imagej.parametereditor.cache.MISADataIOType;
 import org.hkijena.misa_imagej.parametereditor.json_schema.JSONSchemaObject;
+import org.hkijena.misa_imagej.utils.FilesystemUtils;
 
+import javax.swing.*;
 import java.awt.*;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.nio.file.Path;
 import java.util.*;
 
-public class MISAParameterSchema {
+public class MISAParameterSchema implements ParameterSchemaValue {
 
     /**
      * JSON schema object for runtime parameters
@@ -84,6 +92,7 @@ public class MISAParameterSchema {
     public void removeSample(String name) {
         samples.remove(name);
         propertyChangeSupport.firePropertyChange("samples", null, null);
+        propertyChangeSupport.firePropertyChange("currentSample", null, null);
     }
 
     public MISASample getSample(String name) {
@@ -121,95 +130,6 @@ public class MISAParameterSchema {
     }
 
     /**
-     * Runs the MISADataImportSource instances
-     *
-     * @param importedDirectory
-     */
-    private void prepareImportedFiles(MISAModuleUI app, Path importedDirectory, boolean forceCopy) {
-//        List<JSONSchemaObject> flat = getImportedFilesystemSchema().flatten();
-//        for(int i = 0; i < flat.size(); ++i) {
-//            JSONSchemaObject object = flat.get(i);
-//            if(object.filesystemData != null) {
-//                MISAImportedData data = (MISAImportedData)object.filesystemData;
-//                Path subpath = importedDirectory.resolve(data.getRelativePath());
-//                app.getLogService().info("[" + (i + 1) + " / " + flat.size() + "] Importing data " + data.getRelativePath().toString() + " into " + subpath.toString());
-//                data.getImportSource().runImport(subpath, forceCopy);
-//            }
-//        }
-    }
-
-    /**
-     * Checks if a parameter JSON can be written and shows an error message if something is wrong
-     *
-     * @param parent
-     * @return
-     */
-    public boolean canWriteParameterJSON(Component parent) {
-        return true;
-
-//        // Check if all importers are set
-//        StringBuilder message = new StringBuilder();
-//        boolean success = true;
-//
-//        {
-//            boolean wroteInitialMessage = false;
-////            for(JSONSchemaObject object : getImportedFilesystemSchema().flatten()) {
-////                if (object.filesystemData != null) {
-////                    MISAImportedData data = (MISAImportedData)object.filesystemData;
-////                    if(data.getImportSource() == null) {
-////                        success = false;
-////                        if(!wroteInitialMessage) {
-////                            message.append("You still need to setup following input data:\n");
-////                            wroteInitialMessage = true;
-////                        }
-////                        message.append(data.getRelativePath().toString()).append("\n");
-////                    }
-////                }
-////            }
-//            if(wroteInitialMessage)
-//                message.append("\n");
-//        }
-//
-//        // Check if all values are set
-//        {
-//            boolean wroteInitialMessage = false;
-//            for(JSONSchemaObject object : getObjectParameters().flatten()) {
-//                if (!object.hasValue()) {
-//                    success = false;
-//                    if(!wroteInitialMessage) {
-//                        message.append("Following object parameters are not set, yet:\n");
-//                        wroteInitialMessage = true;
-//                    }
-//                    message.append(object.getValuePath()).append("\n");
-//                }
-//            }
-//            if(wroteInitialMessage)
-//                message.append("\n");
-//        }
-//        {
-//            boolean wroteInitialMessage = false;
-//            for(JSONSchemaObject object : getAlgorithmParameters().flatten()) {
-//                if (!object.hasValue()) {
-//                    success = false;
-//                    if(!wroteInitialMessage) {
-//                        message.append("Following algorithm parameters are not set, yet:\n");
-//                        wroteInitialMessage = true;
-//                    }
-//                    message.append(object.getValuePath()).append("\n");
-//                }
-//            }
-//            if(wroteInitialMessage)
-//                message.append("\n");
-//        }
-//
-//        if(!success) {
-//            JOptionPane.showMessageDialog(parent, message, "Error", JOptionPane.ERROR_MESSAGE);
-//        }
-//
-//        return success;
-    }
-
-    /**
      * Writes the final JSON parameter
      *
      * @param parameterSchema   where the parameter will be written
@@ -217,28 +137,68 @@ public class MISAParameterSchema {
      * @param exportedDirectory The physical path of the export directory where everything will be cached
      * @param forceCopy         If true, the importer will copy the files into the imported directory even if not necessary
      */
-    public void writeParameterJSON(MISAModuleUI app, Path parameterSchema, Path importedDirectory, Path exportedDirectory, boolean forceCopy, boolean relativeDirectories) {
+    public void install(MISAModuleParameterEditorUI app, Path parameterSchema, Path importedDirectory, Path exportedDirectory, boolean forceCopy, boolean relativeDirectories) {
 
-//        // Set necessary variables inside the JSON parameters
-//        if(!relativeDirectories) {
-//            getImportedFilesystemSchema().getPropertyFromPath("external-path").setValue(importedDirectory.toString());
-//            getExportedFilesystemSchema().getPropertyFromPath("external-path").setValue(exportedDirectory.toString());
-//        }
-//        else {
-//            getImportedFilesystemSchema().getPropertyFromPath("external-path").setValue(importedDirectory.getFileName().toString());
-//            getExportedFilesystemSchema().getPropertyFromPath("external-path").setValue(exportedDirectory.getFileName().toString());
-//        }
-//
-//        prepareImportedFiles(app, importedDirectory, forceCopy);
-//
-//        app.getLogService().info("Writing parameter schema into " + parameterSchema.toString());
-//        GsonBuilder builder = new GsonBuilder().setPrettyPrinting().serializeNulls();
-//        Gson gson = builder.create();
-//        try(OutputStreamWriter w = new OutputStreamWriter(new FileOutputStream(parameterSchema.toString()))) {
-//            w.write(gson.toJson(jsonSchemaObject.toValue()));
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
+        JSONSchemaObject parameters = new JSONSchemaObject();
+        parameters.type = "object";
+
+        // Save properties
+        parameters.addProperty("algorithm", algorithmParameters);
+        parameters.addProperty("runtime", runtimeParameters);
+        parameters.addProperty("objects", JSONSchemaObject.createObject());
+
+        for(MISASample sample : samples.values()) {
+            parameters.getPropertyFromPath("objects").addProperty(sample.name, sample.getParameters());
+        }
+
+        parameters.ensurePropertyFromPath("filesystem").addProperty("source", JSONSchemaObject.createString("directories"));
+        if(!relativeDirectories) {
+            parameters.ensurePropertyFromPath("filesystem").addProperty("input-directory",
+                    JSONSchemaObject.createString(importedDirectory.toString()));
+            parameters.ensurePropertyFromPath("filesystem").addProperty("output-directory",
+                    JSONSchemaObject.createString(exportedDirectory.toString()));
+        }
+        else {
+            parameters.ensurePropertyFromPath("filesystem").addProperty("input-directory",
+                    JSONSchemaObject.createString(parameterSchema.getParent().relativize(importedDirectory).toString()));
+            parameters.ensurePropertyFromPath("filesystem").addProperty("output-directory",
+                    JSONSchemaObject.createString(parameterSchema.getParent().relativize(exportedDirectory).toString()));
+        }
+
+        // Write the parameter schema
+        app.getLogService().info("Writing parameter schema into " + parameterSchema.toString());
+        GsonBuilder builder = new GsonBuilder().setPrettyPrinting().serializeNulls();
+        Gson gson = builder.create();
+        try(OutputStreamWriter w = new OutputStreamWriter(new FileOutputStream(parameterSchema.toString()))) {
+            w.write(gson.toJson(parameters.toValue()));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // Install imported data into their proper filesystem locations
+        for(MISASample sample : samples.values()) {
+            for(MISACache cache : sample.getImportedCaches()) {
+                Path cachePath = importedDirectory.resolve(sample.name).resolve(cache.getFilesystemEntry().getInternalPath());
+                cache.install(cachePath, forceCopy);
+            }
+        }
     }
 
+    /**
+     * Generates the parameter schema report
+     * @return
+     */
+    @Override
+    public ParameterSchemaValidityReport isValidParameter() {
+        ParameterSchemaValidityReport report = new ParameterSchemaValidityReport();
+
+        report.merge(algorithmParameters.isValidParameter(), "Algorithm parameters");
+        report.merge(runtimeParameters.isValidParameter(), "Runtime parameters");
+
+        for(MISASample sample : samples.values()) {
+            report.merge(sample.isValidParameter(), "Samples", sample.name);
+        }
+
+        return report;
+    }
 }

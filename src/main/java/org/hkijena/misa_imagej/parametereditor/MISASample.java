@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * Models a data sample
  */
-public class MISASample {
+public class MISASample implements ParameterSchemaValue {
     /**
      * Name of the sample
      */
@@ -68,5 +68,20 @@ public class MISASample {
     @Override
     public String toString() {
         return name;
+    }
+
+    @Override
+    public ParameterSchemaValidityReport isValidParameter() {
+        ParameterSchemaValidityReport report = new ParameterSchemaValidityReport();
+
+        report.merge(parameters.isValidParameter(), "Parameters");
+        for(MISACache cache : importedCaches) {
+            report.merge(cache.isValidParameter(), "Data", "Input");
+        }
+        for(MISACache cache : exportedCaches) {
+            report.merge(cache.isValidParameter(), "Data", "Output");
+        }
+
+        return report;
     }
 }

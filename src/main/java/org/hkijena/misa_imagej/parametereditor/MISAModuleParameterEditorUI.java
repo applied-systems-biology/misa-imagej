@@ -1,6 +1,8 @@
 package org.hkijena.misa_imagej.parametereditor;
 
 import java.awt.*;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 import javax.swing.*;
@@ -20,7 +22,7 @@ import org.scijava.log.LogService;
 import org.scijava.thread.ThreadService;
 import org.scijava.ui.UIService;
 
-public class MISAModuleUI extends JFrame {
+public class MISAModuleParameterEditorUI extends JFrame {
 
     private MISACommand command;
     private MISAModule module;
@@ -35,7 +37,7 @@ public class MISAModuleUI extends JFrame {
     /**
      * Create the dialog.
      */
-    public MISAModuleUI(MISACommand command, MISAModule module) {
+    public MISAModuleParameterEditorUI(MISACommand command, MISAModule module) {
         this.command = command;
         this.module = module;
         loadSchema();
@@ -56,10 +58,10 @@ public class MISAModuleUI extends JFrame {
         setTitle("MISA++ for ImageJ - " + module.name + " (" + module.id + "-" + module.version + ")");
     }
 
-    private void writeParameterSchema(Path parameterSchema, Path importedDirectory, Path exportedDirectory, boolean forceCopy, boolean relativeDirectories) {
+    private void install(Path parameterSchema, Path importedDirectory, Path exportedDirectory, boolean forceCopy, boolean relativeDirectories) {
         setEnabled(false);
         getUiService().getDefaultUI().getConsolePane().show();
-        this.parameterSchema.writeParameterJSON(this, parameterSchema, importedDirectory, exportedDirectory, forceCopy, relativeDirectories);
+        this.parameterSchema.install(this, parameterSchema, importedDirectory, exportedDirectory, forceCopy, relativeDirectories);
         setEnabled(true);
     }
 
@@ -69,66 +71,50 @@ public class MISAModuleUI extends JFrame {
      */
     private void exportMISARun() {
 
-//        if (!parameterSchema.canWriteParameterJSON(this))
-//            return;
-//
-//        JFileChooser chooser = new JFileChooser();
-//        chooser.setDialogTitle("Open folder");
-//        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-//        chooser.setMultiSelectionEnabled(false);
-//        chooser.setAcceptAllFileFilterUsed(false);
-//
-//        if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-//            try {
-//                Path exportRunPath = chooser.getSelectedFile().toPath();
-//
-//                if (!FilesystemUtils.directoryIsEmpty(exportRunPath)) {
-//                    JOptionPane.showMessageDialog(this,
-//                            "The directory " + exportRunPath.toString() + " must be empty!",
-//                            "Export run",
-//                            JOptionPane.ERROR_MESSAGE);
-//                    return;
-//                }
-//
-//                Path importedPath = exportRunPath.resolve("imported");
-//                Path exportedPath = exportRunPath.resolve("exported");
-//                Files.createDirectories(exportRunPath);
-//
-//                // Export all available executables
-//                for (Map.Entry<OSUtils.OperatingSystem, MISAExecutable> entry : MISAExecutable.getAvailableExecutables().entrySet()) {
-//                    entry.getValue().install(exportRunPath, true, "--parameters parameters.json");
-//                }
-//
-//                // Write the parameter schema
-//                writeParameterSchema(exportRunPath.resolve("parameters.json"),
-//                        importedPath,
-//                        exportedPath,
-//                        true,
-//                        true);
-//
-//                if (JOptionPane.showConfirmDialog(this,
-//                        "Export successful. Do you want to open the output directory?",
-//                        "Export run", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-//                    Desktop.getDesktop().open(exportRunPath.toFile());
-//                }
-//
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//        }
-    }
+        ParameterSchemaValidityReport report = parameterSchema.isValidParameter();
 
-    private void importMISAOutputData(Path exportedPath) {
-//        getLogService().info("Importing results back into ImageJ ...");
-//        for(JSONSchemaObject obj : parameterSchema.getExportedFilesystemSchema().flatten()) {
-//            if(obj.filesystemData != null) {
-//                try {
-//                    ((MISAExportedData)obj.filesystemData).applyImportImageJAction(this, exportedPath);
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        }
+        if (!report.isValid())
+            return;
+
+        JFileChooser chooser = new JFileChooser();
+        chooser.setDialogTitle("Open folder");
+        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        chooser.setMultiSelectionEnabled(false);
+        chooser.setAcceptAllFileFilterUsed(false);
+
+        if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            try {
+                Path exportRunPath = chooser.getSelectedFile().toPath();
+
+                if (!FilesystemUtils.directoryIsEmpty(exportRunPath)) {
+                    JOptionPane.showMessageDialog(this,
+                            "The directory " + exportRunPath.toString() + " must be empty!",
+                            "Export run",
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                Path importedPath = exportRunPath.resolve("imported");
+                Path exportedPath = exportRunPath.resolve("exported");
+                Files.createDirectories(exportRunPath);
+
+                // Write the parameter schema
+                install(exportRunPath.resolve("parameters.json"),
+                        importedPath,
+                        exportedPath,
+                        true,
+                        true);
+
+                if (JOptionPane.showConfirmDialog(this,
+                        "Export successful. Do you want to open the output directory?",
+                        "Export run", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+                    Desktop.getDesktop().open(exportRunPath.toFile());
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private void runMISA() {
@@ -160,7 +146,7 @@ public class MISAModuleUI extends JFrame {
 //                Path executableFile = MISAExecutable.getBestMatchingExecutable().install(dialog.getExecutablePath(), false, null);
 //
 //                // Write the parameter schema
-//                writeParameterSchema(dialog.getParameterFilePath(), dialog.getImportedPath(), dialog.getExportedPath(), false, false);
+//                install(dialog.getParameterFilePath(), dialog.getImportedPath(), dialog.getExportedPath(), false, false);
 //
 //                // Run the executable
 //                getLogService().info("Starting worker process ...");

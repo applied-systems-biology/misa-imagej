@@ -2,10 +2,13 @@ package org.hkijena.misa_imagej.parametereditor.cache;
 
 
 import org.hkijena.misa_imagej.parametereditor.MISAFilesystemEntry;
+import org.hkijena.misa_imagej.parametereditor.ParameterSchemaValidityReport;
+import org.hkijena.misa_imagej.parametereditor.ParameterSchemaValue;
 
 import java.awt.*;
+import java.nio.file.Path;
 
-public class MISACache {
+public class MISACache implements ParameterSchemaValue {
     /**
      * Relative path within the imported or exported filesystem
      * This does not include "imported" or "exported"
@@ -95,5 +98,23 @@ public class MISACache {
     public Color toColor() {
         float h = Math.abs(getCacheTypeName().hashCode() % 256) / 255.0f;
         return Color.getHSBColor(h, 0.5f, 1);
+    }
+
+    @Override
+    public ParameterSchemaValidityReport isValidParameter() {
+        if(getIOType() == MISADataIOType.Exported)
+            return new ParameterSchemaValidityReport(this, null, true, "");
+        else
+            return new ParameterSchemaValidityReport(this, null, false, "The data type '" + getCacheTypeName() + "' is not supported by MISA++ for ImageJ.");
+    }
+
+    /**
+     * Installs this cache into the install folder
+     * this is only valid for imported caches
+     * @param installFolder
+     * @param forceCopy forces copying all files into the install folder
+     */
+    public void install(Path installFolder, boolean forceCopy) {
+
     }
 }

@@ -94,6 +94,34 @@ public class OMETiffSwapper implements FileSwapper {
     }
 
     @Override
+    public void installToFilesystem(String path, boolean forceCopy) {
+        if(isInImageJ()) {
+            // Always export if this is available
+            WindowManager.setCurrentWindow(imageJImage.getWindow());
+            IJ.run("Bio-Formats Exporter", "save=" + path + " export compression=Uncompressed");
+        }
+        else if(isInFilesystem()) {
+            if(forceCopy) {
+                try {
+                    Files.copy(Paths.get(this.path), Paths.get(path), StandardCopyOption.REPLACE_EXISTING);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            else {
+                try {
+                    Files.createLink(Paths.get(path), Paths.get(this.path));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        else {
+            throw new UnsupportedOperationException("The data is neither present in ImageJ, nor located within the filesystem!");
+        }
+    }
+
+    @Override
     public String toString() {
         if(isInImageJ()) {
             return imageJImage.toString();

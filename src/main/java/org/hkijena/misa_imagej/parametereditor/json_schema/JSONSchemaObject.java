@@ -1,6 +1,8 @@
 package org.hkijena.misa_imagej.parametereditor.json_schema;
 
 import com.google.gson.annotations.SerializedName;
+import org.hkijena.misa_imagej.parametereditor.ParameterSchemaValidityReport;
+import org.hkijena.misa_imagej.parametereditor.ParameterSchemaValue;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.beans.PropertyChangeListener;
@@ -10,7 +12,7 @@ import java.util.*;
 /**
  * Deserialized JSON Schema entry that allows editing and exporting to the final JSON
  */
-public class JSONSchemaObject implements Cloneable {
+public class JSONSchemaObject implements Cloneable, ParameterSchemaValue {
 
     public transient String id;
 
@@ -53,6 +55,42 @@ public class JSONSchemaObject implements Cloneable {
     @SerializedName("misa:serialization-hierarchy")
     public List<String> serializationHierarchy = new ArrayList<>();
 
+    public JSONSchemaObject() {
+    }
+
+    public static JSONSchemaObject createObject() {
+        JSONSchemaObject result = new JSONSchemaObject();
+        result.type = "object";
+        return result;
+    }
+
+    public static JSONSchemaObject createArray() {
+        JSONSchemaObject result = new JSONSchemaObject();
+        result.type = "array";
+        return result;
+    }
+
+    public static JSONSchemaObject createNumber(double number) {
+        JSONSchemaObject result = new JSONSchemaObject();
+        result.type = "number";
+        result.value = number;
+        return result;
+    }
+
+    public static JSONSchemaObject createBoolean(boolean b) {
+        JSONSchemaObject result = new JSONSchemaObject();
+        result.type = "boolean";
+        result.value = b;
+        return result;
+    }
+
+    public static JSONSchemaObject createString(String string) {
+        JSONSchemaObject result = new JSONSchemaObject();
+        result.type = "string";
+        result.value = string;
+        return result;
+    }
+
     @Override
     public Object clone() {
         JSONSchemaObject obj = new JSONSchemaObject();
@@ -61,6 +99,7 @@ public class JSONSchemaObject implements Cloneable {
         obj.description = description;
         obj.default_value = default_value;
         obj.enum_values = enum_values;
+        obj.value = value;
         obj.required_properties = required_properties;
         obj.additionalProperties = additionalProperties;
         obj.serializationId = serializationId;
@@ -220,6 +259,24 @@ public class JSONSchemaObject implements Cloneable {
         return true;
     }
 
+    public JSONSchemaObject addProperty(String key, JSONSchemaObject property) {
+        JSONSchemaObject copy = (JSONSchemaObject)property.clone();
+        properties.put(key, copy);
+        update();
+        return copy;
+    }
+
+    public JSONSchemaObject ensurePropertyFromPath(String... path) {
+        JSONSchemaObject current = this;
+        for(String v : path) {
+            if(current.properties.containsKey(v))
+                current = current.properties.get(v);
+            else
+                current = current.addProperty(v, JSONSchemaObject.createObject());
+        }
+        return current;
+    }
+
     private void flatten_(List<JSONSchemaObject> result) {
         result.add(this);
         for(Map.Entry<String, JSONSchemaObject> kv : properties.entrySet()) {
@@ -261,5 +318,27 @@ public class JSONSchemaObject implements Cloneable {
         propertyChangeSupport.firePropertyChange("structure", null, null);
         if(parent != null)
             parent.triggerStructureChangedEvent();
+    }
+
+    @Override
+    public ParameterSchemaValidityReport isValidParameter() {
+        ParameterSchemaValidityReport report = new ParameterSchemaValidityReport();
+        if(hasValue())
+            report.report(this, null, true, "");
+        else
+            report.report(this, null, false, "Value is not set");
+
+        if(properties != null) {
+            for(JSONSchemaObject object : properties.values()) {
+                report.merge(object.isValidParameter(), object.id == null ? "" : object.id);
+            }
+        }
+        if(items != null) {
+            for(int i = 0; i < items.size(); ++i) {
+                report.merge(items.get(i).isValidParameter(), "[" + i + "]");
+            }
+        }
+
+        return report;
     }
 }

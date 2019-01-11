@@ -4,7 +4,6 @@ import org.apache.commons.collections.ListUtils;
 import org.hkijena.misa_imagej.parametereditor.cache.MISACache;
 import org.hkijena.misa_imagej.utils.UIUtils;
 import org.hkijena.misa_imagej.utils.ui.ColorIcon;
-import org.scijava.util.Colors;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -21,7 +20,7 @@ public class SampleDataEditorUI extends JPanel {
     private JTree cacheList;
     private MISAParameterSchema parameterSchema;
 
-    public SampleDataEditorUI(MISAModuleUI app) {
+    public SampleDataEditorUI(MISAModuleParameterEditorUI app) {
         this.parameterSchema = app.getParameterSchema();
         initialize();
     }

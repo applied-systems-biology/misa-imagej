@@ -70,20 +70,20 @@ public class MISAOMETiffCacheEditorUI extends MISACacheEditorUI {
         // Allow selection from filesystem
         JMenuItem selectExternal = new JMenuItem("From filesystem ...", UIUtils.getIconFromResources("import.png"));
         selectExternal.addActionListener(actionEvent -> {
-            java.awt.FileDialog dialog = new FileDialog((JFrame)SwingUtilities.getWindowAncestor(this), "Open image", FileDialog.LOAD);
-            dialog.setMultipleMode(false);
-            dialog.setFile("*.ome.tif;*.ome.tiff");
-            dialog.setAutoRequestFocus(true);
-            dialog.setVisible(true);
-            if(dialog.getFiles().length > 0) {
-                cache.setTiffSwapper(new OMETiffSwapper(null, dialog.getFiles()[0].getAbsolutePath()));
-                refreshDisplay();
-            }
-//            JFileChooser chooser = new JFileChooser();
-//            if(chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-//                cache.setTiffSwapper(new OMETiffSwapper(null, chooser.getSelectedFile().getAbsolutePath()));
+//            java.awt.FileDialog dialog = new FileDialog((JFrame)SwingUtilities.getWindowAncestor(this), "Open image", FileDialog.LOAD);
+//            dialog.setMultipleMode(false);
+//            dialog.setFile("*.ome.tif;*.ome.tiff");
+//            dialog.setAutoRequestFocus(true);
+//            dialog.setVisible(true);
+//            if(dialog.getFiles().length > 0) {
+//                cache.setTiffSwapper(new OMETiffSwapper(null, dialog.getFiles()[0].getAbsolutePath()));
 //                refreshDisplay();
 //            }
+            JFileChooser chooser = new JFileChooser();
+            if(chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+                cache.setTiffSwapper(new OMETiffSwapper(null, chooser.getSelectedFile().getAbsolutePath()));
+                refreshDisplay();
+            }
         });
         selectOptions.add(selectExternal);
 

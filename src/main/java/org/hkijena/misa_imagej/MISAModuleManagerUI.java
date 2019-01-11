@@ -1,6 +1,6 @@
 package org.hkijena.misa_imagej;
 
-import org.hkijena.misa_imagej.parametereditor.MISAModuleUI;
+import org.hkijena.misa_imagej.parametereditor.MISAModuleParameterEditorUI;
 import org.hkijena.misa_imagej.repository.MISAModule;
 import org.hkijena.misa_imagej.repository.MISAModuleRepository;
 import org.hkijena.misa_imagej.utils.UIUtils;
@@ -72,7 +72,7 @@ public class MISAModuleManagerUI extends JFrame {
 
             JButton launchButton = new JButton("Launch");
             launchButton.addActionListener(actionEvent -> {
-                MISAModuleUI launcher = new MISAModuleUI(command, misaModuleJList.getSelectedValue());
+                MISAModuleParameterEditorUI launcher = new MISAModuleParameterEditorUI(command, misaModuleJList.getSelectedValue());
                 launcher.setVisible(true);
             });
             detailPanel.add(launchButton, BorderLayout.SOUTH);

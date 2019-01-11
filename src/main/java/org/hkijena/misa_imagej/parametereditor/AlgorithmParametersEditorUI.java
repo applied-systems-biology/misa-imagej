@@ -9,7 +9,7 @@ public class AlgorithmParametersEditorUI extends JPanel {
 
     private MISAParameterSchema parameterSchema;
 
-    public AlgorithmParametersEditorUI(MISAModuleUI app) {
+    public AlgorithmParametersEditorUI(MISAModuleParameterEditorUI app) {
         this.parameterSchema = app.getParameterSchema();
         initialize();
     }

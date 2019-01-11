@@ -49,4 +49,12 @@ public interface FileSwapper {
      */
     void exportToFilesystem(String path);
 
+    /**
+     * Exports to the filesystem without changing the current path
+     * By default, less intrusive installation is preferred (e.g. creating symlinks instead of copying)
+     * @param path
+     * @param forceCopy Disables symlinking and other ways to optimize installation
+     */
+    void installToFilesystem(String path, boolean forceCopy);
+
 }
