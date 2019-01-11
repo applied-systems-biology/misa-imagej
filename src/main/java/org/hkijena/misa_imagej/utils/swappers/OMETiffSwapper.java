@@ -110,7 +110,7 @@ public class OMETiffSwapper implements FileSwapper {
             }
             else {
                 try {
-                    Files.createLink(Paths.get(path), Paths.get(this.path));
+                    Files.createSymbolicLink(Paths.get(path), Paths.get(this.path));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

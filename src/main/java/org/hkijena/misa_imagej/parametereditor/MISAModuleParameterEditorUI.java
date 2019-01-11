@@ -13,6 +13,7 @@ import io.scif.services.DatasetIOService;
 
 import net.imagej.DatasetService;
 import org.hkijena.misa_imagej.MISACommand;
+import org.hkijena.misa_imagej.repository.MISAExecutable;
 import org.hkijena.misa_imagej.repository.MISAModule;
 import org.hkijena.misa_imagej.utils.*;
 import org.hkijena.misa_imagej.parametereditor.json_schema.JSONSchemaObject;
@@ -119,67 +120,64 @@ public class MISAModuleParameterEditorUI extends JFrame {
 
     private void runMISA() {
 
-//        getUiService().getDefaultUI().getConsolePane().show();
-//
-//        if (!parameterSchema.canWriteParameterJSON(this))
-//            return;
-//
-//        MISARunDialog dialog = new MISARunDialog(this);
-//        dialog.setLocationRelativeTo(this);
-//        if (dialog.showDialog() == MISARunDialog.ACCEPT_OPTION) {
-//            try {
-//                Files.createDirectories(dialog.getImportedPath());
-//                Files.createDirectories(dialog.getExportedPath());
-//                Files.createDirectories(dialog.getParameterFilePath().getParent());
-//                Files.createDirectories(dialog.getExecutablePath().getParent());
-//
-//                if (!FilesystemUtils.directoryIsEmpty(dialog.getImportedPath())) {
-//                    JOptionPane.showMessageDialog(this, "The directory " + dialog.getImportedPath().toString() + " must be empty!", "Run", JOptionPane.ERROR_MESSAGE);
-//                    return;
-//                }
-//                if (!FilesystemUtils.directoryIsEmpty(dialog.getExportedPath())) {
-//                    JOptionPane.showMessageDialog(this, "The directory " + dialog.getExportedPath().toString() + " must be empty!", "Run", JOptionPane.ERROR_MESSAGE);
-//                    return;
-//                }
-//
-//                // Export only the matching executable
-//                Path executableFile = MISAExecutable.getBestMatchingExecutable().install(dialog.getExecutablePath(), false, null);
-//
-//                // Write the parameter schema
-//                install(dialog.getParameterFilePath(), dialog.getImportedPath(), dialog.getExportedPath(), false, false);
-//
-//                // Run the executable
-//                getLogService().info("Starting worker process ...");
-//                ProcessBuilder pb = new ProcessBuilder(executableFile.toString(), "--parameters", dialog.getParameterFilePath().toString());
-//                Process p = pb.start();
-//                new ProcessStreamToStringGobbler(p.getInputStream(), s -> getLogService().info(s)).start();
-//                new ProcessStreamToStringGobbler(p.getErrorStream(), s -> getLogService().error(s)).start();
-//
-//                CancelableProcessUI processUI = new CancelableProcessUI(p);
-//                processUI.setLocationRelativeTo(this);
-//
-//                // React to changes in status
-//                processUI.addPropertyChangeListener(propertyChangeEvent -> {
-//                    if(processUI.getStatus() == CancelableProcessUI.Status.Done ||
-//                            processUI.getStatus() == CancelableProcessUI.Status.Failed ||
-//                            processUI.getStatus() == CancelableProcessUI.Status.Canceled) {
-//                        setEnabled(true);
-//                        if(processUI.getStatus() == CancelableProcessUI.Status.Failed) {
-//                            JOptionPane.showMessageDialog(this, "There was an error during calculation. Please check the console to see the cause of this error.", "Error", JOptionPane.ERROR_MESSAGE);
-//                            return;
-//                        }
-//
-//                        importMISAOutputData(dialog.getExportedPath());
-//                    }
-//                });
-//
-//                setEnabled(false);
-//                processUI.showDialog();
-//
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//        }
+        getUiService().getDefaultUI().getConsolePane().show();
+
+        ParameterSchemaValidityReport report = parameterSchema.isValidParameter();
+
+        if (!report.isValid())
+            return;
+
+        MISARunDialog dialog = new MISARunDialog(this);
+        dialog.setLocationRelativeTo(this);
+        if (dialog.showDialog() == MISARunDialog.ACCEPT_OPTION) {
+            try {
+                Files.createDirectories(dialog.getImportedPath());
+                Files.createDirectories(dialog.getExportedPath());
+                Files.createDirectories(dialog.getParameterFilePath().getParent());
+                Files.createDirectories(dialog.getExecutablePath().getParent());
+
+                if (!FilesystemUtils.directoryIsEmpty(dialog.getImportedPath())) {
+                    JOptionPane.showMessageDialog(this, "The directory " + dialog.getImportedPath().toString() + " must be empty!", "Run", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                if (!FilesystemUtils.directoryIsEmpty(dialog.getExportedPath())) {
+                    JOptionPane.showMessageDialog(this, "The directory " + dialog.getExportedPath().toString() + " must be empty!", "Run", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                // Write the parameter schema
+                install(dialog.getParameterFilePath(), dialog.getImportedPath(), dialog.getExportedPath(), false, false);
+
+                // Run the executable
+                getLogService().info("Starting worker process ...");
+                MISAExecutable executable = module.getBestMatchingExecutable();
+                ProcessBuilder pb = new ProcessBuilder(executable.executablePath, "--parameters", dialog.getParameterFilePath().toString());
+                Process p = pb.start();
+                new ProcessStreamToStringGobbler(p.getInputStream(), s -> getLogService().info(s)).start();
+                new ProcessStreamToStringGobbler(p.getErrorStream(), s -> getLogService().error(s)).start();
+
+                CancelableProcessUI processUI = new CancelableProcessUI(p);
+                processUI.setLocationRelativeTo(this);
+
+                // React to changes in status
+                processUI.addPropertyChangeListener(propertyChangeEvent -> {
+                    if(processUI.getStatus() == CancelableProcessUI.Status.Done ||
+                            processUI.getStatus() == CancelableProcessUI.Status.Failed ||
+                            processUI.getStatus() == CancelableProcessUI.Status.Canceled) {
+                        setEnabled(true);
+                        if(processUI.getStatus() == CancelableProcessUI.Status.Failed) {
+                            JOptionPane.showMessageDialog(this, "There was an error during calculation. Please check the console to see the cause of this error.", "Error", JOptionPane.ERROR_MESSAGE);
+                        }
+                    }
+                });
+
+                setEnabled(false);
+                processUI.showDialog();
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private void initialize() {
