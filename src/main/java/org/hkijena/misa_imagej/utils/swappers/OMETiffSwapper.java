@@ -62,7 +62,7 @@ public class OMETiffSwapper implements FileSwapper {
     @Override
     public void importIntoImageJ(String id) {
         if(!isInImageJ() && isInFilesystem()) {
-            IJ.run("Bio-Formats Importer", "open=" + getPath() + " color_mode=Default rois_import=[ROI manager] view=Hyperstack stack_order=XYCZT");
+            IJ.run("Bio-Formats Importer", "open='" + getPath() + "' color_mode=Default rois_import=[ROI manager] view=Hyperstack stack_order=XYCZT");
             this.imageJImage = WindowManager.getCurrentImage();
         }
         else if(isInImageJ()) {
@@ -77,7 +77,7 @@ public class OMETiffSwapper implements FileSwapper {
     public void exportToFilesystem(String path) {
         if(isInImageJ()) {
             WindowManager.setCurrentWindow(imageJImage.getWindow());
-            IJ.run("Bio-Formats Exporter", "save=" + path + " export compression=Uncompressed");
+            IJ.run("Bio-Formats Exporter", "save='" + path + "' export compression=Uncompressed");
             this.path = path;
         }
         else if(isInFilesystem()) {
@@ -98,7 +98,7 @@ public class OMETiffSwapper implements FileSwapper {
         if(isInImageJ()) {
             // Always export if this is available
             WindowManager.setCurrentWindow(imageJImage.getWindow());
-            IJ.run("Bio-Formats Exporter", "save=" + path + " export compression=Uncompressed");
+            IJ.run("Bio-Formats Exporter", "save='" + path + "' export compression=Uncompressed");
         }
         else if(isInFilesystem()) {
             if(forceCopy) {
