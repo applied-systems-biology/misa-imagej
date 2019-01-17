@@ -68,6 +68,7 @@ public class JSONSchemaEditorUI extends JPanel {
 
         objectEditor = new JPanel(new BorderLayout());
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, treePanel, new JScrollPane(objectEditor));
+        splitPane.setResizeWeight(0);
         add(splitPane, BorderLayout.CENTER);
 
         jsonTree.addTreeSelectionListener(e -> {
