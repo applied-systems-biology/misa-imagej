@@ -5,7 +5,7 @@ import javax.swing.*;
 /**
  * Base class of all JSON schema object editors
  */
-public class JSONSchemaObjectEditorUI extends JPanel {
+public abstract class JSONSchemaObjectEditorUI extends JPanel {
 
     private JSONSchemaObject jsonSchemaObject;
 
@@ -16,4 +16,6 @@ public class JSONSchemaObjectEditorUI extends JPanel {
     public JSONSchemaObject getJsonSchemaObject() {
         return jsonSchemaObject;
     }
+
+    public abstract void populate(JSONSchemaEditorUI schemaEditorUI);
 }

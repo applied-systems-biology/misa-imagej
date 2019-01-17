@@ -17,8 +17,9 @@ public class JSONSchemaEditorUI extends JPanel {
     private JTree jsonTree;
     private JPanel objectEditor;
     private JComponent topPanel;
-    private JSONSchemaObjectEditorUI objectEditorInstance = null;
     private JSONSchemaObject currentObject = null;
+
+    private int objectEditorRows = 0;
 
     /**
      * Creates a JSON schema editor with a panel on top of the tree
@@ -36,16 +37,12 @@ public class JSONSchemaEditorUI extends JPanel {
 
     private void setCurrentSchema(JSONSchemaObject obj) {
         currentObject = obj;
-        if(objectEditorInstance != null)
-            objectEditor.remove(objectEditorInstance);
+        objectEditor.removeAll();
+        objectEditorRows = 0;
+        objectEditor.revalidate();
+
         if(obj != null) {
-            objectEditorInstance = JSONSchemaEditorRegistry.getEditorFor(obj);
-            objectEditor.add(objectEditorInstance, BorderLayout.CENTER);
-            objectEditor.revalidate();
-        }
-        else {
-            objectEditorInstance = null;
-            objectEditor.revalidate();
+            JSONSchemaEditorRegistry.getEditorFor(obj).populate(this);
         }
     }
 
@@ -66,7 +63,7 @@ public class JSONSchemaEditorUI extends JPanel {
             treePanel.add(jsonTree, BorderLayout.CENTER);
         }
 
-        objectEditor = new JPanel(new BorderLayout());
+        objectEditor = new JPanel(new GridBagLayout());
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, treePanel, new JScrollPane(objectEditor));
         splitPane.setResizeWeight(0);
         add(splitPane, BorderLayout.CENTER);
