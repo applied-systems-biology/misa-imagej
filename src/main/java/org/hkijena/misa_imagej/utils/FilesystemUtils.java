@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.Set;
 
@@ -47,5 +48,25 @@ public class FilesystemUtils {
     public static boolean directoryIsEmpty(Path dir) throws IOException {
         File[] entries = dir.toFile().listFiles();
         return entries == null || entries.length == 0;
+    }
+
+    /**
+     * Returns the configuration path for the current operating system
+     * @return
+     */
+    public static Path getSystemConfigPath() {
+        switch (OSUtils.detectOperatingSystem()) {
+            case Windows:
+                return Paths.get(System.getenv("APPDATA"));
+            case Linux:
+                if(System.getenv().containsKey("XDG_CONFIG_HOME")) {
+                    return Paths.get(System.getenv("XDG_CONFIG_HOME"));
+                }
+                else {
+                    return Paths.get(System.getProperty("user.home")).resolve(".config");
+                }
+            default:
+                throw new UnsupportedOperationException("Unsupported ");
+        }
     }
 }

@@ -3,11 +3,14 @@ package org.hkijena.misa_imagej.repository;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.hkijena.misa_imagej.MISACommand;
+import org.hkijena.misa_imagej.utils.FilesystemUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 
 /**
@@ -20,29 +23,31 @@ public class MISAModuleRepository {
     /**
      * Paths where to look for modules
      */
-    private List<String> paths = new ArrayList<>();
+    private List<Path> paths = new ArrayList<>();
     /**
      * Known modules
      */
-    private Map<String, MISAModule> modules = new HashMap<>();
+    private List<MISAModule> modules = new ArrayList<>();
 
     public MISAModuleRepository(MISACommand command) {
         this.command = command;
-        paths.add("/home/rgerst/tmp/misaxx-modules-repository/"); // TODO: Debug
+        paths.add(FilesystemUtils.getSystemConfigPath().resolve("MISA-ImageJ").resolve("misa-modules"));
     }
 
-    public Map<String, MISAModule> getModules() {
-        return Collections.unmodifiableMap(modules);
+    public List<MISAModule> getModules() {
+        return Collections.unmodifiableList(modules);
     }
 
     public void refresh() {
-        for(String path : paths) {
+        for(Path path : paths) {
             command.getLogService().info("Checking for MISA++ modules in " + path);
-            File f = new File(path);
-            File[] files = f.listFiles();
-            if(files != null) {
-                for(File entry : files) {
-                    tryLoadModule(entry.getAbsolutePath());
+            if(Files.isDirectory(path)) {
+                File f = path.toFile();
+                File[] files = f.listFiles();
+                if(files != null) {
+                    for(File entry : files) {
+                        tryLoadModule(entry.getAbsolutePath());
+                    }
                 }
             }
         }
@@ -55,14 +60,18 @@ public class MISAModuleRepository {
         try (InputStreamReader r = new InputStreamReader(new FileInputStream(path))) {
             MISAModule module = gson.fromJson(r, MISAModule.class);
             module.definitionPath = path;
-            command.getLogService().info("Loaded module information " + module.id + " version " + module.version);
+            if(module.getModuleInfo() == null) {
+                command.getLogService().info("Error: Unable load MISA++ module " + path + " as no module info could be retrieved!");
+                return;
+            }
+            command.getLogService().info("Loaded module information " + module.getModuleInfo().toString());
 
             // Try to load parameter schema
             if(module.getParameterSchema() == null) {
-                command.getLogService().warn("Could not load parameter schema for module " + module.id + " version " + module.version);
+                command.getLogService().warn("Could not load parameter schema for module " +module.getModuleInfo().toString());
             }
 
-            modules.put(module.id, module);
+            modules.add(module);
 
         } catch (IOException e) {
             e.printStackTrace();

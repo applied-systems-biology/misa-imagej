@@ -1,10 +1,17 @@
 package org.hkijena.misa_imagej.repository;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.SerializedName;
 import org.hkijena.misa_imagej.utils.OSUtils;
 import org.hkijena.misa_imagej.utils.OperatingSystem;
 import org.hkijena.misa_imagej.utils.OperatingSystemArchitecture;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,22 +21,25 @@ import java.util.Map;
  * MISA++ module located within a repository
  */
 public class MISAModule {
-    @SerializedName("id")
-    public String id;
 
-    @SerializedName("version")
-    public String version;
+    @SerializedName("executable-path")
+    public String executablePath;
 
-    @SerializedName("name")
-    public String name;
+    @SerializedName("operating-system")
+    public OperatingSystem operatingSystem;
 
-    @SerializedName("executables")
-    public List<MISAExecutable> executables = new ArrayList<>();
+    @SerializedName("architecture")
+    public OperatingSystemArchitecture operatingSystemArchitecture;
+
+    /**
+     * Contains the info about this module
+     */
+    private transient MISAModuleInfo moduleInfo;
 
     /**
      * Contains the path where this module was defined
      */
-    public transient String definitionPath;
+    transient String definitionPath;
 
     /**
      * Parameter schema queried from the executable
@@ -41,22 +51,30 @@ public class MISAModule {
     }
 
     /**
+     * Returns or queries the module info
+     * @return
+     */
+    public MISAModuleInfo getModuleInfo() {
+        if(moduleInfo == null && isCompatible()) {
+            String infoString = queryModuleInfo();
+            if(infoString != null) {
+                GsonBuilder builder = new GsonBuilder();
+                Gson gson = builder.create();
+                moduleInfo = gson.fromJson(infoString, MISAModuleInfo.class);
+            }
+        }
+        return moduleInfo;
+    }
+
+    /**
      * Finds the executable that matches best to the current operating system
      * If no matching executable is found, NULL is returned
      * @return
      */
-    public MISAExecutable getBestMatchingExecutable() {
+    public boolean isCompatible() {
         OperatingSystem os = OSUtils.detectOperatingSystem();
         OperatingSystemArchitecture arch = OSUtils.detectArchitecture();
-        for(MISAExecutable e : executables) {
-            if(e.operatingSystem == os && e.operatingSystemArchitecture == arch)
-                return e;
-        }
-        for(MISAExecutable e : executables) {
-            if(OSUtils.isCompatible(os, arch, e.operatingSystem, e.operatingSystemArchitecture))
-                return e;
-        }
-        return null;
+        return OSUtils.isCompatible(os, arch, operatingSystem, operatingSystemArchitecture);
     }
 
     /**
@@ -64,17 +82,64 @@ public class MISAModule {
      * @return The parameter schema. If no matching executable is found or the executable crashes, returns null
      */
     public String getParameterSchema() {
-        if(parameterSchema == null) {
-            MISAExecutable executable = getBestMatchingExecutable();
-            if(executable != null) {
-                parameterSchema = executable.queryParameterSchema();
-            }
+        if(parameterSchema == null && isCompatible()) {
+            parameterSchema = queryParameterSchema();
         }
         return parameterSchema;
     }
 
+    public String getDefinitionPath() {
+        return definitionPath;
+    }
+
+    /**
+     * Returns the parameter schema if possible
+     * @return The parameter Schema JSON if successful. Otherwise null.
+     */
+    private String queryParameterSchema() {
+        try {
+            Path tmppath = Files.createTempFile("MISAParameterSchema", ".json");
+//            System.out.println(executablePath + " " + tmppath.toString());
+            ProcessBuilder pb = new ProcessBuilder(executablePath, "--write-parameter-schema", tmppath.toString());
+            Process p = pb.start();
+            if(p.waitFor() == 0) {
+                return new String(Files.readAllBytes(tmppath));
+            }
+        } catch (IOException | InterruptedException e) {
+//            throw new RuntimeException(e);
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private String queryModuleInfo() {
+        try {
+            ProcessBuilder pb = new ProcessBuilder(executablePath, "--module-info");
+            Process p = pb.start();
+            if(p.waitFor() == 0) {
+                try(BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
+                    StringBuilder builder = new StringBuilder();
+                    String line = null;
+                    while ( (line = reader.readLine()) != null) {
+                        builder.append(line);
+                        builder.append(System.getProperty("line.separator"));
+                    }
+                    return builder.toString();
+                }
+            }
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     @Override
     public String toString() {
-        return name + " (" + id + "-" + version + ")";
+        if(getModuleInfo() == null)
+            return "<Unable to load>";
+        else
+            return getModuleInfo().toString();
     }
+
+
 }

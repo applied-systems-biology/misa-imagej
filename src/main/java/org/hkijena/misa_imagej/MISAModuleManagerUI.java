@@ -18,6 +18,7 @@ public class MISAModuleManagerUI extends JFrame {
     private MISAModuleRepository moduleRepository;
     private static MISAModuleManagerUI instance;
     private JList<MISAModule> misaModuleJList;
+    private JPanel detailPanel;
 
     public static MISAModuleManagerUI getInstance(MISACommand command) {
         if(instance == null)
@@ -42,6 +43,7 @@ public class MISAModuleManagerUI extends JFrame {
         JToolBar toolBar = new JToolBar();
 
         JButton refreshButton = new JButton("Refresh", UIUtils.getIconFromResources("refresh.png"));
+        refreshButton.addActionListener(actionEvent -> refreshModuleList());
         toolBar.add(refreshButton);
 
         toolBar.add(Box.createHorizontalGlue());
@@ -59,7 +61,7 @@ public class MISAModuleManagerUI extends JFrame {
         JLabel descriptionTitle;
         JLabel descriptionVersionId;
         JLabel descriptionSourceFile;
-        JPanel detailPanel = new JPanel(new BorderLayout(8, 8));
+        detailPanel = new JPanel(new BorderLayout(8, 8));
         {
             JPanel descriptionPanel = new JPanel(new GridBagLayout());
             descriptionTitle = UIUtils.createDescriptionLabelUI(descriptionPanel, "<Title>", 0, 0);
@@ -81,9 +83,11 @@ public class MISAModuleManagerUI extends JFrame {
         // List of modules
         misaModuleJList = new JList<>(new DefaultListModel<>());
         misaModuleJList.addListSelectionListener(listSelectionEvent -> {
-            descriptionTitle.setText(misaModuleJList.getSelectedValue().name);
-            descriptionVersionId.setText(misaModuleJList.getSelectedValue().id + " version " + misaModuleJList.getSelectedValue().version);
-            descriptionSourceFile.setText(misaModuleJList.getSelectedValue().definitionPath);
+            if(misaModuleJList.getSelectedValue() != null) {
+                descriptionTitle.setText(misaModuleJList.getSelectedValue().getModuleInfo().getDescription());
+                descriptionVersionId.setText(misaModuleJList.getSelectedValue().getModuleInfo().getName() + " version " + misaModuleJList.getSelectedValue().getModuleInfo().version);
+                descriptionSourceFile.setText(misaModuleJList.getSelectedValue().getDefinitionPath());
+            }
         });
 
         // Arrange in split panel
@@ -95,11 +99,15 @@ public class MISAModuleManagerUI extends JFrame {
         moduleRepository.refresh();
         DefaultListModel<MISAModule> model = (DefaultListModel<MISAModule>)misaModuleJList.getModel();
         model.clear();
-        for(MISAModule module : moduleRepository.getModules().values()) {
+        for(MISAModule module : moduleRepository.getModules()) {
             model.addElement(module);
         }
         if(moduleRepository.getModules().size() > 0) {
+            detailPanel.setVisible(true);
             misaModuleJList.setSelectedIndex(0);
+        }
+        else {
+            detailPanel.setVisible(false);
         }
     }
 

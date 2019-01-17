@@ -50,7 +50,7 @@ public class MISAParameterSchema implements ParameterSchemaValue {
     public MISAParameterSchema(JSONSchemaObject object) {
         algorithmParameters = object.properties.get("algorithm");
         runtimeParameters = object.properties.get("runtime");
-        sampleParametersTemplate = object.properties.get("objects").getAdditionalPropertiesTemplate();
+        sampleParametersTemplate = object.properties.get("samples").getAdditionalPropertiesTemplate();
         sampleImportedFilesystemTemplate = new MISAFilesystemEntry(null,
                 object.getPropertyFromPath("filesystem", "json-data", "imported", "children").getAdditionalPropertiesTemplate(),
                 "",
@@ -145,10 +145,10 @@ public class MISAParameterSchema implements ParameterSchemaValue {
         // Save properties
         parameters.addProperty("algorithm", algorithmParameters);
         parameters.addProperty("runtime", runtimeParameters);
-        parameters.addProperty("objects", JSONSchemaObject.createObject());
+        parameters.addProperty("samples", JSONSchemaObject.createObject());
 
         for(MISASample sample : samples.values()) {
-            parameters.getPropertyFromPath("objects").addProperty(sample.name, sample.getParameters());
+            parameters.getPropertyFromPath("samples").addProperty(sample.name, sample.getParameters());
         }
 
         parameters.ensurePropertyFromPath("filesystem").addProperty("source", JSONSchemaObject.createString("directories"));

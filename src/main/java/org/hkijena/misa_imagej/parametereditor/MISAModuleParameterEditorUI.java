@@ -13,7 +13,6 @@ import io.scif.services.DatasetIOService;
 
 import net.imagej.DatasetService;
 import org.hkijena.misa_imagej.MISACommand;
-import org.hkijena.misa_imagej.repository.MISAExecutable;
 import org.hkijena.misa_imagej.repository.MISAModule;
 import org.hkijena.misa_imagej.utils.*;
 import org.hkijena.misa_imagej.parametereditor.json_schema.JSONSchemaObject;
@@ -56,7 +55,7 @@ public class MISAModuleParameterEditorUI extends JFrame {
         schema.id = "parameters";
         schema.update();
         parameterSchema = new MISAParameterSchema(schema);
-        setTitle("MISA++ for ImageJ - " + module.name + " (" + module.id + "-" + module.version + ")");
+        setTitle("MISA++ for ImageJ - " + module.getModuleInfo().toString());
     }
 
     private void install(Path parameterSchema, Path importedDirectory, Path exportedDirectory, boolean forceCopy, boolean relativeDirectories) {
@@ -150,8 +149,7 @@ public class MISAModuleParameterEditorUI extends JFrame {
 
                 // Run the executable
                 getLogService().info("Starting worker process ...");
-                MISAExecutable executable = module.getBestMatchingExecutable();
-                ProcessBuilder pb = new ProcessBuilder(executable.executablePath, "--parameters", dialog.getParameterFilePath().toString());
+                ProcessBuilder pb = new ProcessBuilder(module.executablePath, "--parameters", dialog.getParameterFilePath().toString());
                 Process p = pb.start();
                 new ProcessStreamToStringGobbler(p.getInputStream(), s -> getLogService().info(s)).start();
                 new ProcessStreamToStringGobbler(p.getErrorStream(), s -> getLogService().error(s)).start();
