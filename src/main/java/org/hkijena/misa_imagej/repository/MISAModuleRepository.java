@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.hkijena.misa_imagej.MISACommand;
 import org.hkijena.misa_imagej.utils.FilesystemUtils;
+import org.hkijena.misa_imagej.utils.OSUtils;
+import org.hkijena.misa_imagej.utils.OperatingSystem;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -11,12 +13,15 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 /**
  * Manages MISA++ repositories
  */
 public class MISAModuleRepository {
+
+    public static final Path USER_MODULE_PATH = FilesystemUtils.getSystemConfigPath().resolve("MISA-ImageJ").resolve("misa-modules");
 
     private MISACommand command;
 
@@ -31,7 +36,11 @@ public class MISAModuleRepository {
 
     public MISAModuleRepository(MISACommand command) {
         this.command = command;
-        paths.add(FilesystemUtils.getSystemConfigPath().resolve("MISA-ImageJ").resolve("misa-modules"));
+        paths.add(USER_MODULE_PATH);
+        if(OSUtils.detectOperatingSystem() == OperatingSystem.Linux) {
+            paths.add(Paths.get("/usr/lib/misaxx/modules"));
+            paths.add(Paths.get("/usr/local/lib/misaxx/modules"));
+        }
     }
 
     public List<MISAModule> getModules() {
@@ -39,6 +48,7 @@ public class MISAModuleRepository {
     }
 
     public void refresh() {
+        modules.clear();
         for(Path path : paths) {
             command.getLogService().info("Checking for MISA++ modules in " + path);
             if(Files.isDirectory(path)) {
@@ -59,7 +69,7 @@ public class MISAModuleRepository {
         Gson gson = builder.create();
         try (InputStreamReader r = new InputStreamReader(new FileInputStream(path))) {
             MISAModule module = gson.fromJson(r, MISAModule.class);
-            module.definitionPath = path;
+            module.linkPath = path;
             if(module.getModuleInfo() == null) {
                 command.getLogService().info("Error: Unable load MISA++ module " + path + " as no module info could be retrieved!");
                 return;

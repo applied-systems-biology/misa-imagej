@@ -12,10 +12,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * MISA++ module located within a repository
@@ -39,7 +35,7 @@ public class MISAModule {
     /**
      * Contains the path where this module was defined
      */
-    transient String definitionPath;
+    transient String linkPath;
 
     /**
      * Parameter schema queried from the executable
@@ -88,8 +84,8 @@ public class MISAModule {
         return parameterSchema;
     }
 
-    public String getDefinitionPath() {
-        return definitionPath;
+    public String getLinkPath() {
+        return linkPath;
     }
 
     /**
@@ -141,5 +137,13 @@ public class MISAModule {
             return getModuleInfo().toString();
     }
 
+    /**
+     * Generates a filename for this module.
+     * Does not include an extension
+     * @return
+     */
+    public String getGeneratedFileName() {
+        return getModuleInfo().getName() + "-" + getModuleInfo().getVersion() + "-" + operatingSystem.toString() + "-" + operatingSystemArchitecture.toString();
+    }
 
 }

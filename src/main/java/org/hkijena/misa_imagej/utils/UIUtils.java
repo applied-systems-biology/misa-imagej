@@ -24,6 +24,18 @@ public class UIUtils {
         return description;
     }
 
+    public static void addToGridBag(JPanel panel, JButton component, int row, int column) {
+        panel.add(component, new GridBagConstraints() {
+            {
+                anchor = GridBagConstraints.WEST;
+                gridx = column;
+                gridy = row;
+                insets = UI_PADDING;
+                fill = GridBagConstraints.HORIZONTAL;
+            }
+        });
+    }
+
     public static JLabel createDescriptionLabelUI(JPanel panel, JSONSchemaObject obj, int row, int column) {
         JLabel description = createDescriptionLabelUI(panel, obj.getName(), row, column);
         description.setToolTipText(obj.description);
