@@ -87,9 +87,9 @@ public class JSONSchemaEditorUI extends JPanel {
             }
         }
 
-        if(ui.getJsonSchemaObject().parent != null && ui.getJsonSchemaObject().parent != lastObjectEditorSchemaParent) {
+        JSONSchemaObject parent = ui.getJsonSchemaObject().parent;
 
-            JSONSchemaObject parent = ui.getJsonSchemaObject().parent;
+        if(parent != null && parent != lastObjectEditorSchemaParent && parent.getDepth() >= getCurrentObject().getDepth()) {
             String parentPath = getCurrentObject().id + parent.getValuePath().substring(getCurrentObject().getValuePath().length());
 
             // Announce the object

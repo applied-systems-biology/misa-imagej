@@ -24,7 +24,7 @@ public class GenericJSONSchemaObjectEditorUI extends JSONSchemaObjectEditorUI {
         if(getJsonSchemaObject().type == JSONSchemaObjectType.jsonObject) {
             // Do not do anything. Instead create editors for the contained objects
             ArrayList<JSONSchemaObject> objects = new ArrayList<>(getJsonSchemaObject().properties.values());
-            objects.sort(Comparator.comparingInt(JSONSchemaObject::getMaxDepth));
+            objects.sort(Comparator.comparingInt(JSONSchemaObject::getMaxDepth).thenComparing(JSONSchemaObject::getName));
 
             for(JSONSchemaObject obj : objects) {
                 if(!schemaEditorUI.getObjectLimitEnabled() || obj.getMaxDepth() <= 1) {
