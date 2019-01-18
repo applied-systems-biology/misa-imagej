@@ -7,13 +7,15 @@ import org.hkijena.misa_imagej.parametereditor.cache.MISACacheRegistry;
 import org.hkijena.misa_imagej.parametereditor.cache.MISADataIOType;
 import org.hkijena.misa_imagej.utils.UIUtils;
 import org.hkijena.misa_imagej.utils.ui.ColorIcon;
+import org.jdesktop.swingx.JXTextField;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeCellRenderer;
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -25,6 +27,7 @@ public class SampleDataEditorUI extends JPanel {
     private JPanel sampleEditor;
     private JTree cacheList;
     private MISAParameterSchema parameterSchema;
+    private JXTextField objectFilter;
 
     private CacheListEntry currentCacheList;
 
@@ -38,7 +41,6 @@ public class SampleDataEditorUI extends JPanel {
 
     private void initialize() {
         setLayout(new BorderLayout());
-        sampleEditor = new JPanel(new BorderLayout());
 
         // List of caches
         JPanel cacheListPanel = new JPanel(new BorderLayout(8, 8));
@@ -53,10 +55,47 @@ public class SampleDataEditorUI extends JPanel {
             }
         });
 
+        // Create editor
+        JPanel editPanel = new JPanel(new BorderLayout());
+        {
+            // Create a toolbar with view options
+            JToolBar toolBar = new JToolBar();
+
+            toolBar.add(Box.createHorizontalGlue());
+
+            objectFilter = new JXTextField("Filter ...");
+            objectFilter.getDocument().addDocumentListener(new DocumentListener() {
+                @Override
+                public void insertUpdate(DocumentEvent documentEvent) {
+                    refreshEditor();
+                }
+
+                @Override
+                public void removeUpdate(DocumentEvent documentEvent) {
+                    refreshEditor();
+                }
+
+                @Override
+                public void changedUpdate(DocumentEvent documentEvent) {
+                    refreshEditor();
+                }
+            });
+            toolBar.add(objectFilter);
+
+            JButton clearFilterButton = new JButton(UIUtils.getIconFromResources("clear.png"));
+            clearFilterButton.addActionListener(actionEvent -> objectFilter.setText(""));
+            toolBar.add(clearFilterButton);
+
+            editPanel.add(toolBar, BorderLayout.NORTH);
+
+            // Add the scroll layout here
+            sampleEditor = new JPanel(new GridBagLayout());
+            editPanel.add(new JScrollPane(sampleEditor), BorderLayout.CENTER);
+        }
+
         // Editor for the current data
-        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, cacheListPanel, new JScrollPane(sampleEditor));
+        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, cacheListPanel, editPanel);
         add(splitPane, BorderLayout.CENTER);
-        sampleEditor.setLayout(new GridBagLayout());
 
         parameterSchema.addPropertyChangeListener(propertyChangeEvent -> {
             if(propertyChangeEvent.getPropertyName().equals("currentSample")) {
@@ -97,10 +136,10 @@ public class SampleDataEditorUI extends JPanel {
 
     private void setCurrentCacheList(CacheListEntry entry) {
         currentCacheList = entry;
-        updateEditor();
+        refreshEditor();
     }
 
-    public void updateEditor() {
+    public void refreshEditor() {
         sampleEditor.removeAll();
         sampleEditor.setLayout(new GridBagLayout());
         editorLastIOType = null;
@@ -160,6 +199,13 @@ public class SampleDataEditorUI extends JPanel {
     }
 
     public void insertCacheEditorUI(MISACacheEditorUI ui) {
+        if(objectFilter.getText() != null && !objectFilter.getText().isEmpty()) {
+            String searchText = ui.getCache().getCacheTypeName().toLowerCase() + ui.getCache().getRelativePathName().toLowerCase();
+            if(!searchText.contains(objectFilter.getText().toLowerCase())) {
+                return;
+            }
+        }
+
         JLabel description = new JLabel(ui.getCache().getCacheTypeName());
         description.setIcon(UIUtils.getIconFromColor(ui.getCache().toColor()));
         sampleEditor.add(description, new GridBagConstraints() {
