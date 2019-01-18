@@ -3,6 +3,7 @@ package org.hkijena.misa_imagej.repository;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.SerializedName;
+import org.hkijena.misa_imagej.utils.GsonUtils;
 import org.hkijena.misa_imagej.utils.OSUtils;
 import org.hkijena.misa_imagej.utils.OperatingSystem;
 import org.hkijena.misa_imagej.utils.OperatingSystemArchitecture;
@@ -54,8 +55,7 @@ public class MISAModule {
         if(moduleInfo == null && isCompatible()) {
             String infoString = queryModuleInfo();
             if(infoString != null) {
-                GsonBuilder builder = new GsonBuilder();
-                Gson gson = builder.create();
+                Gson gson = GsonUtils.getGson();
                 moduleInfo = gson.fromJson(infoString, MISAModuleInfo.class);
             }
         }

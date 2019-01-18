@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.hkijena.misa_imagej.MISACommand;
 import org.hkijena.misa_imagej.utils.FilesystemUtils;
+import org.hkijena.misa_imagej.utils.GsonUtils;
 import org.hkijena.misa_imagej.utils.OSUtils;
 import org.hkijena.misa_imagej.utils.OperatingSystem;
 
@@ -65,8 +66,7 @@ public class MISAModuleRepository {
 
     private void tryLoadModule(String path) {
         command.getLogService().info("Trying to load MISA++ module " + path);
-        GsonBuilder builder = new GsonBuilder();
-        Gson gson = builder.create();
+        Gson gson = GsonUtils.getGson();
         try (InputStreamReader r = new InputStreamReader(new FileInputStream(path))) {
             MISAModule module = gson.fromJson(r, MISAModule.class);
             module.linkPath = path;

@@ -23,7 +23,7 @@ public class JSONSchemaObject implements Cloneable, ParameterSchemaValue {
     private transient Object value = null;
 
     @SerializedName("type")
-    public String type;
+    public JSONSchemaObjectType type;
 
     @SerializedName("title")
     public String title = null;
@@ -58,35 +58,35 @@ public class JSONSchemaObject implements Cloneable, ParameterSchemaValue {
     public JSONSchemaObject() {
     }
 
+    public JSONSchemaObject(JSONSchemaObjectType type) {
+        this.type = type;
+    }
+
     public static JSONSchemaObject createObject() {
-        JSONSchemaObject result = new JSONSchemaObject();
-        result.type = "object";
+        JSONSchemaObject result = new JSONSchemaObject(JSONSchemaObjectType.jsonObject);
         return result;
     }
 
-    public static JSONSchemaObject createArray() {
-        JSONSchemaObject result = new JSONSchemaObject();
-        result.type = "array";
+    public static JSONSchemaObject createArray(List<Object> value) {
+        JSONSchemaObject result = new JSONSchemaObject(JSONSchemaObjectType.jsonArray);
+        result.value = value;
         return result;
     }
 
     public static JSONSchemaObject createNumber(double number) {
-        JSONSchemaObject result = new JSONSchemaObject();
-        result.type = "number";
+        JSONSchemaObject result = new JSONSchemaObject(JSONSchemaObjectType.jsonNumber);
         result.value = number;
         return result;
     }
 
     public static JSONSchemaObject createBoolean(boolean b) {
-        JSONSchemaObject result = new JSONSchemaObject();
-        result.type = "boolean";
+        JSONSchemaObject result = new JSONSchemaObject(JSONSchemaObjectType.jsonBoolean);
         result.value = b;
         return result;
     }
 
     public static JSONSchemaObject createString(String string) {
-        JSONSchemaObject result = new JSONSchemaObject();
-        result.type = "string";
+        JSONSchemaObject result = new JSONSchemaObject(JSONSchemaObjectType.jsonString);
         result.value = string;
         return result;
     }
@@ -123,8 +123,7 @@ public class JSONSchemaObject implements Cloneable, ParameterSchemaValue {
             obj =  (JSONSchemaObject) additionalProperties.clone();
         }
         else {
-            obj = new JSONSchemaObject();
-            obj.type = "object";
+            obj = createObject();
         }
         return obj;
     }
@@ -168,6 +167,10 @@ public class JSONSchemaObject implements Cloneable, ParameterSchemaValue {
         }
     }
 
+    /**
+     * Returns the max depth of this object and its properties
+     * @return
+     */
     public int getMaxDepth() {
         if (properties.isEmpty())
             return 0;
@@ -178,6 +181,17 @@ public class JSONSchemaObject implements Cloneable, ParameterSchemaValue {
             }
             return d;
         }
+    }
+
+    /**
+     * Returns the depth of this object
+     * @return
+     */
+    public int getDepth() {
+        if(parent == null)
+            return 0;
+        else
+            return parent.getDepth() + 1;
     }
 
     public String getName() {
@@ -204,18 +218,18 @@ public class JSONSchemaObject implements Cloneable, ParameterSchemaValue {
 
     public Object toValue() {
         switch (type) {
-            case "string":
-            case "number":
-            case "boolean":
+            case jsonString:
+            case jsonNumber:
+            case jsonBoolean:
                 return getValue();
-            case "array": {
+            case jsonArray: {
                 ArrayList<Object> result = new ArrayList<>();
                 for (JSONSchemaObject obj : items) {
                     result.add(obj.toValue());
                 }
                 return result;
             }
-            case "object": {
+            case jsonObject: {
                 HashMap<String, Object> result = new HashMap<>();
                 for (Map.Entry<String, JSONSchemaObject> kv : properties.entrySet()) {
                     result.put(kv.getKey(), kv.getValue().toValue());
@@ -311,7 +325,7 @@ public class JSONSchemaObject implements Cloneable, ParameterSchemaValue {
     }
 
     public boolean hasValue() {
-        return type.equals("object") || value != null;
+        return type == JSONSchemaObjectType.jsonObject || value != null;
     }
 
     private void triggerStructureChangedEvent() {

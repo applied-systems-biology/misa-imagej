@@ -49,8 +49,7 @@ public class MISAModuleParameterEditorUI extends JFrame {
      * Loads the module schema into the editor
      */
     private void loadSchema() {
-        GsonBuilder builder = new GsonBuilder();
-        Gson gson = builder.create();
+        Gson gson = GsonUtils.getGson();
         JSONSchemaObject schema = gson.fromJson(module.getParameterSchema(), JSONSchemaObject.class);
         schema.id = "parameters";
         schema.update();
@@ -192,7 +191,6 @@ public class MISAModuleParameterEditorUI extends JFrame {
         tabbedPane.addTab("Sample parameters", sampleParametersEditorUI);
         tabbedPane.addTab("Algorithm parameters", algorithmParametersEditorUI);
         tabbedPane.addTab("Runtime", runtimeParametersEditorUI);
-        tabbedPane.addTab("Info", new InfoPanelUI());
         add(tabbedPane, BorderLayout.CENTER);
 
         // Toolbar

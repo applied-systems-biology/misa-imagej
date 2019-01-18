@@ -5,7 +5,9 @@ import com.google.gson.GsonBuilder;
 import org.hkijena.misa_imagej.parametereditor.cache.MISACache;
 import org.hkijena.misa_imagej.parametereditor.cache.MISADataIOType;
 import org.hkijena.misa_imagej.parametereditor.json_schema.JSONSchemaObject;
+import org.hkijena.misa_imagej.parametereditor.json_schema.JSONSchemaObjectType;
 import org.hkijena.misa_imagej.utils.FilesystemUtils;
+import org.hkijena.misa_imagej.utils.GsonUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -139,13 +141,12 @@ public class MISAParameterSchema implements ParameterSchemaValue {
      */
     public void install(MISAModuleParameterEditorUI app, Path parameterSchema, Path importedDirectory, Path exportedDirectory, boolean forceCopy, boolean relativeDirectories) {
 
-        JSONSchemaObject parameters = new JSONSchemaObject();
-        parameters.type = "object";
+        JSONSchemaObject parameters = new JSONSchemaObject(JSONSchemaObjectType.jsonObject);
 
         // Save properties
         parameters.addProperty("algorithm", algorithmParameters);
         parameters.addProperty("runtime", runtimeParameters);
-        parameters.addProperty("samples", JSONSchemaObject.createObject());
+        parameters.addProperty("samples", new JSONSchemaObject(JSONSchemaObjectType.jsonObject));
 
         for(MISASample sample : samples.values()) {
             parameters.getPropertyFromPath("samples").addProperty(sample.name, sample.getParameters());
@@ -167,8 +168,7 @@ public class MISAParameterSchema implements ParameterSchemaValue {
 
         // Write the parameter schema
         app.getLogService().info("Writing parameter schema into " + parameterSchema.toString());
-        GsonBuilder builder = new GsonBuilder().setPrettyPrinting().serializeNulls();
-        Gson gson = builder.create();
+        Gson gson = GsonUtils.getGson();
         try(OutputStreamWriter w = new OutputStreamWriter(new FileOutputStream(parameterSchema.toString()))) {
             w.write(gson.toJson(parameters.toValue()));
         } catch (IOException e) {

@@ -1,8 +1,6 @@
 package org.hkijena.misa_imagej.parametereditor.json_schema.editors;
 
-import org.hkijena.misa_imagej.parametereditor.json_schema.JSONSchemaEditorRegistry;
-import org.hkijena.misa_imagej.parametereditor.json_schema.JSONSchemaObject;
-import org.hkijena.misa_imagej.parametereditor.json_schema.JSONSchemaObjectEditorUI;
+import org.hkijena.misa_imagej.parametereditor.json_schema.*;
 import org.hkijena.misa_imagej.utils.UIUtils;
 
 import javax.swing.*;
@@ -19,200 +17,98 @@ public class GenericJSONSchemaObjectEditorUI extends JSONSchemaObjectEditorUI {
 
     public GenericJSONSchemaObjectEditorUI(JSONSchemaObject object) {
         super(object);
-        initialize();
     }
 
-    private void createUI(JSONSchemaObject obj, int row) {
-        if(obj.enum_values != null) {
-            UIUtils.createDescriptionLabelUI(this, obj, row, 0);
+    @Override
+    public void populate(JSONSchemaEditorUI schemaEditorUI) {
+        if(getJsonSchemaObject().type == JSONSchemaObjectType.jsonObject) {
+            // Do not do anything. Instead create editors for the contained objects
+            ArrayList<JSONSchemaObject> objects = new ArrayList<>(getJsonSchemaObject().properties.values());
+            objects.sort(Comparator.comparingInt(JSONSchemaObject::getMaxDepth));
+
+            for(JSONSchemaObject obj : objects) {
+                if(!schemaEditorUI.getObjectLimitEnabled() || obj.getMaxDepth() <= 1) {
+                    JSONSchemaEditorRegistry.getEditorFor(obj).populate(schemaEditorUI);
+                }
+            }
+        }
+        else if(getJsonSchemaObject().enum_values != null) {
+            // Create a combo box within this panel
+            setLayout(new BorderLayout());
             JComboBox<Object> comboBox = new JComboBox<>();
-            comboBox.setToolTipText(obj.description);
+            comboBox.setToolTipText(getJsonSchemaObject().description);
             DefaultComboBoxModel<Object> model = new DefaultComboBoxModel<>();
 
-            for(Object d : obj.enum_values) {
+            for(Object d : getJsonSchemaObject().enum_values) {
                 model.addElement(d);
-                if(d.equals(obj.default_value)) {
+                if(d.equals(getJsonSchemaObject().default_value)) {
                     model.setSelectedItem(d);
                 }
             }
             comboBox.setModel(model);
-            add(comboBox, new GridBagConstraints() {
-                {
-                    anchor = GridBagConstraints.PAGE_START;
-                    gridx = 1;
-                    gridy = row;
-                    fill = GridBagConstraints.HORIZONTAL;
-                    weightx = 1;
-                    insets = UIUtils.UI_PADDING;
-                }
-            });
+            add(comboBox, BorderLayout.CENTER);
+
             comboBox.addActionListener(actionEvent -> {
-                obj.setValue(model.getSelectedItem());
+                getJsonSchemaObject().setValue(model.getSelectedItem());
             });
+
+            schemaEditorUI.insertObjectEditorUI(this, true);
         }
-        else if(obj.type.equals("string")) {
-            UIUtils.createDescriptionLabelUI(this, obj, row, 0);
-            JTextField edit = new JTextField(obj.default_value != null ? (String)obj.default_value : "");
-            edit.setToolTipText(obj.description);
-            add(edit, new GridBagConstraints() {
-                {
-                    anchor = GridBagConstraints.PAGE_START;
-                    gridx = 1;
-                    gridy = row;
-                    fill = GridBagConstraints.HORIZONTAL;
-                    weightx = 1;
-                    insets = UIUtils.UI_PADDING;
-                }
-            });
-            if(obj.default_value != null) {
-                edit.setText((String)obj.default_value);
+        else if(getJsonSchemaObject().type == JSONSchemaObjectType.jsonString) {
+            // Create a string editor
+            setLayout(new BorderLayout());
+            JTextField edit = new JTextField(getJsonSchemaObject().default_value != null ? (String)getJsonSchemaObject().default_value : "");
+            edit.setToolTipText(getJsonSchemaObject().description);
+            if(getJsonSchemaObject().default_value != null) {
+                edit.setText((String)getJsonSchemaObject().default_value);
             }
+            add(edit, BorderLayout.CENTER);
+
             edit.addActionListener(actionEvent -> {
-                obj.setValue(edit.getText());
+                getJsonSchemaObject().setValue(edit.getText());
             });
+            schemaEditorUI.insertObjectEditorUI(this, true);
         }
-        else if(obj.type.equals("number")) {
-            UIUtils.createDescriptionLabelUI(this, obj, row, 0);
+        else if(getJsonSchemaObject().type == JSONSchemaObjectType.jsonNumber) {
+            // Create a spinner where the user can edit the value
+            setLayout(new BorderLayout());
             JSpinner edit = new JSpinner();
             Dimension dim = edit.getPreferredSize();
             edit.setModel(new SpinnerNumberModel(0.0, -Double.MAX_VALUE, Double.MAX_VALUE, 1));
             edit.setPreferredSize(dim);
-            edit.setToolTipText(obj.description);
-            add(edit, new GridBagConstraints() {
-                {
-                    anchor = GridBagConstraints.PAGE_START;
-                    gridx = 1;
-                    gridy = row;
-                    fill = GridBagConstraints.HORIZONTAL;
-                    weightx = 1;
-                    insets = UIUtils.UI_PADDING;
-                }
-            });
-            if(obj.default_value != null) {
-                edit.setValue(obj.default_value);
+            edit.setToolTipText(getJsonSchemaObject().description);
+
+            if(getJsonSchemaObject().default_value != null) {
+                edit.setValue(getJsonSchemaObject().default_value);
             }
+            add(edit, BorderLayout.CENTER);
+
             edit.addChangeListener(changeEvent -> {
-                obj.setValue(edit.getValue());
+                getJsonSchemaObject().setValue(edit.getValue());
             });
+            schemaEditorUI.insertObjectEditorUI(this, true);
         }
-        else if(obj.type.equals("boolean")) {
+        else if(getJsonSchemaObject().type == JSONSchemaObjectType.jsonBoolean) {
+            setLayout(new BorderLayout());
+            // Create a checkbox
             JCheckBox checkBox = new JCheckBox();
-            checkBox.setToolTipText(obj.description);
-            checkBox.setText(obj.getName());
-            add(checkBox, new GridBagConstraints() {
-                {
-                    anchor = GridBagConstraints.PAGE_START;
-                    gridx = 1;
-                    gridy = row;
-                    fill = GridBagConstraints.HORIZONTAL;
-                    weightx = 1;
-                    gridwidth = 2;
-                    insets = UIUtils.UI_PADDING;
-                }
-            });
-            if(obj.default_value != null) {
-                checkBox.setSelected((boolean)obj.default_value);
+            checkBox.setToolTipText(getJsonSchemaObject().description);
+            checkBox.setText(getJsonSchemaObject().getName());
+
+            if(getJsonSchemaObject().default_value != null) {
+                checkBox.setSelected((boolean)getJsonSchemaObject().default_value);
             }
+            add(checkBox, BorderLayout.CENTER);
             checkBox.addActionListener(actionEvent -> {
-                obj.setValue(checkBox.isSelected());
+                getJsonSchemaObject().setValue(checkBox.isSelected());
             });
-        }
-        else if(obj.type.equals("object")) {
-            if(obj.getMaxDepth() <= 1) {
-                JSONSchemaObjectEditorUI editor = JSONSchemaEditorRegistry.getEditorFor(obj);
-                add(editor, new GridBagConstraints() {
-                    {
-                        anchor = GridBagConstraints.PAGE_START;
-                        gridx = 0;
-                        gridy = row;
-                        fill = GridBagConstraints.HORIZONTAL;
-                        weightx = 1;
-                        gridwidth = 3;
-                        insets = UIUtils.UI_PADDING;
-                    }
-                });
-            }
-            else {
-                JPanel panel = new JPanel(new BorderLayout());
-                panel.setBorder(BorderFactory.createTitledBorder(obj.getName()));
-                panel.add(new JLabel("Select " + obj.getName() + " in the tree on the left side to show its parameters"), BorderLayout.CENTER);
-                add(panel, new GridBagConstraints() {
-                    {
-                        anchor = GridBagConstraints.PAGE_START;
-                        gridx = 0;
-                        gridy = row;
-                        fill = GridBagConstraints.HORIZONTAL;
-                        weightx = 1;
-                        gridwidth = 3;
-                        insets = UIUtils.UI_PADDING;
-                    }
-                });
-            }
-        }
 
-        // Add indicator for null values (that we don't want)
-        if(!obj.type.equals("object")) {
-
-            JLabel missingValue = new JLabel();
-            add(missingValue, new GridBagConstraints() {
-                {
-                    anchor = GridBagConstraints.PAGE_START;
-                    gridx = 2;
-                    gridy = row;
-                    insets = UIUtils.UI_PADDING;
-                }
-            });
-            missingValue.setForeground(Color.RED);
-            if(!obj.hasValue()) {
-                missingValue.setText("Please provide value");
-            }
-            obj.addPropertyChangeListener(propertyChangeEvent -> {
-                if(!obj.hasValue()) {
-                    missingValue.setText("Please provide value");
-                }
-                else {
-                    missingValue.setText("");
-                }
-            });
-        }
-    }
-
-    private void initialize() {
-
-        setLayout(new GridBagLayout());
-        int row = 0;
-
-        // Optional description of the current object
-        if(getJsonSchemaObject().description != null && !getJsonSchemaObject().description.isEmpty()) {
-            add(new JLabel(getJsonSchemaObject().description), new GridBagConstraints() {
-                {
-                    gridx = 0;
-                    gridy = 0;
-                    gridwidth = 2;
-                    anchor = GridBagConstraints.PAGE_START;
-                    fill = GridBagConstraints.HORIZONTAL;
-                    weightx = 1;
-                }
-            });
-            ++row;
-        }
-
-        if(getJsonSchemaObject().type.equals("object")) {
-            setBorder(BorderFactory.createTitledBorder(getJsonSchemaObject().getName()));
-
-            ArrayList<JSONSchemaObject> objects = new ArrayList<>(getJsonSchemaObject().properties.values());
-            Collections.sort(objects, Comparator.comparingInt(JSONSchemaObject::getMaxDepth));
-
-            for(JSONSchemaObject obj : objects) {
-                createUI(obj, row++);
-            }
+            schemaEditorUI.insertObjectEditorUI(this, false);
         }
         else {
-            createUI(getJsonSchemaObject(), row++);
+            throw new UnsupportedOperationException("Unknown schema object type " + getJsonSchemaObject().type);
         }
 
-
-        UIUtils.addFillerGridBagComponent(this, row);
     }
 
 }

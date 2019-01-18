@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonWriter;
 import org.hkijena.misa_imagej.MISACommand;
 import org.hkijena.misa_imagej.parametereditor.MISAModuleParameterEditorUI;
+import org.hkijena.misa_imagej.utils.GsonUtils;
 import org.hkijena.misa_imagej.utils.OSUtils;
 import org.hkijena.misa_imagej.utils.UIUtils;
 import org.hkijena.misa_imagej.workbench.MISAWorkbench;
@@ -67,8 +68,7 @@ public class MISAModuleManagerUI extends JFrame {
                 module.operatingSystem = OSUtils.detectOperatingSystem();
                 module.operatingSystemArchitecture = OSUtils.detectArchitecture();
                 if(module.getModuleInfo() != null) {
-                    GsonBuilder builder = new GsonBuilder();
-                    Gson gson = builder.create();
+                    Gson gson = GsonUtils.getGson();
                     try(JsonWriter writer = new JsonWriter(new FileWriter(MISAModuleRepository.USER_MODULE_PATH.resolve(module.getGeneratedFileName() + ".json").toString()))) {
                         gson.toJson(module, MISAModule.class, writer);
                     } catch (IOException e) {
