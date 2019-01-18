@@ -2,6 +2,9 @@ package org.hkijena.misa_imagej.parametereditor;
 
 import org.apache.commons.collections.ListUtils;
 import org.hkijena.misa_imagej.parametereditor.cache.MISACache;
+import org.hkijena.misa_imagej.parametereditor.cache.MISACacheEditorUI;
+import org.hkijena.misa_imagej.parametereditor.cache.MISACacheRegistry;
+import org.hkijena.misa_imagej.parametereditor.cache.MISADataIOType;
 import org.hkijena.misa_imagej.utils.UIUtils;
 import org.hkijena.misa_imagej.utils.ui.ColorIcon;
 
@@ -12,13 +15,21 @@ import javax.swing.tree.TreeCellRenderer;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
+
+import static org.hkijena.misa_imagej.utils.UIUtils.UI_PADDING;
 
 public class SampleDataEditorUI extends JPanel {
 
     private JPanel sampleEditor;
     private JTree cacheList;
     private MISAParameterSchema parameterSchema;
+
+    private CacheListEntry currentCacheList;
+
+    private int cacheEditorRows = 0;
+    private MISADataIOType editorLastIOType;
 
     public SampleDataEditorUI(MISAModuleParameterEditorUI app) {
         this.parameterSchema = app.getParameterSchema();
@@ -85,66 +96,108 @@ public class SampleDataEditorUI extends JPanel {
     }
 
     private void setCurrentCacheList(CacheListEntry entry) {
-        List<MISACache> imported = new ArrayList<>();
-        List<MISACache> exported = new ArrayList<>();
+        currentCacheList = entry;
+        updateEditor();
+    }
 
-        for(MISACache cache : entry.caches) {
-            switch(cache.getIOType()) {
-                case Imported:
-                    imported.add(cache);
-                    break;
-                case Exported:
-                    exported.add(cache);
-                    break;
-                default:
-                    throw new UnsupportedOperationException();
-            }
-        }
-
+    public void updateEditor() {
         sampleEditor.removeAll();
         sampleEditor.setLayout(new GridBagLayout());
+        editorLastIOType = null;
+        cacheEditorRows = 0;
 
-        if(!imported.isEmpty()) {
-            sampleEditor.add(new CacheEditorUI("Input data", imported), new GridBagConstraints() {
-                {
-                    anchor = GridBagConstraints.PAGE_START;
-                    gridx = 0;
-                    gridy = 2;
-                    fill = GridBagConstraints.HORIZONTAL;
-                    weightx = 1;
-                    gridwidth = 2;
-                    insets = UIUtils.UI_PADDING;
-                }
-            });
-        }
-        if(!exported.isEmpty()) {
-            sampleEditor.add(new CacheEditorUI("Output data", exported), new GridBagConstraints() {
-                {
-                    anchor = GridBagConstraints.PAGE_START;
-                    gridx = 0;
-                    gridy = 3;
-                    fill = GridBagConstraints.HORIZONTAL;
-                    weightx = 1;
-                    gridwidth = 2;
-                    insets = UIUtils.UI_PADDING;
-                }
-            });
-        }
+        if(currentCacheList != null) {
+            for(MISACache cache : currentCacheList.caches) {
+                if(cache.getIOType() != editorLastIOType) {
+                    final boolean first = editorLastIOType == null;
+                    JLabel description;
 
-        // Vertical fill space
-        sampleEditor.add(new JPanel(), new GridBagConstraints() {
-            {
-                anchor = GridBagConstraints.PAGE_START;
-                gridx = 0;
-                gridy = 4;
-                fill = GridBagConstraints.HORIZONTAL | GridBagConstraints.VERTICAL;
-                weightx = 1;
-                weighty = 1;
+                    switch(cache.getIOType()) {
+                        case Imported:
+                            description = new JLabel("Input data");
+                            break;
+                        case Exported:
+                            description = new JLabel("Output data");
+                            break;
+                        default:
+                            throw new UnsupportedOperationException("Unsupported data!");
+                    }
+                    description.setIcon(UIUtils.getIconFromResources("cache.png"));
+                    description.setFont(description.getFont().deriveFont(14.0f));
+                    sampleEditor.add(description, new GridBagConstraints() {
+                        {
+                            anchor = GridBagConstraints.WEST;
+                            gridx = 0;
+                            gridy = cacheEditorRows++;
+                            gridwidth = 2;
+                            weightx = 0;
+                            insets = new Insets(first ? 8 : 24,4,8,4);
+                        }
+                    });
+                    editorLastIOType = cache.getIOType();
+                }
+                MISACacheRegistry.getEditorFor(cache).populate(this);
             }
-        });
+
+            sampleEditor.add(new JPanel(), new GridBagConstraints() {
+                {
+                    anchor = GridBagConstraints.PAGE_START;
+                    gridx = 2;
+                    gridy = cacheEditorRows++;
+                    fill = GridBagConstraints.HORIZONTAL | GridBagConstraints.VERTICAL;
+                    weightx = 0;
+                    weighty = 1;
+                }
+            });
+        }
 
         sampleEditor.revalidate();
         sampleEditor.repaint();
+    }
+
+    public CacheListEntry getCurrentCacheList() {
+        return currentCacheList;
+    }
+
+    public void insertCacheEditorUI(MISACacheEditorUI ui) {
+        JLabel description = new JLabel(ui.getCache().getCacheTypeName());
+        description.setIcon(UIUtils.getIconFromColor(ui.getCache().toColor()));
+        sampleEditor.add(description, new GridBagConstraints() {
+            {
+                anchor = GridBagConstraints.WEST;
+                gridx = 0;
+                gridy = cacheEditorRows;
+                weightx = 0;
+                insets = UI_PADDING;
+            }
+        });
+
+        JTextField internalPath = new JTextField(ui.getCache().getRelativePathName());
+        internalPath.setEditable(false);
+        internalPath.setBorder(null);
+        sampleEditor.add(internalPath, new GridBagConstraints() {
+            {
+                anchor = GridBagConstraints.WEST;
+                gridx = 1;
+                gridy = cacheEditorRows;
+                weightx = 0;
+                insets = UI_PADDING;
+                fill = GridBagConstraints.HORIZONTAL;
+            }
+        });
+
+        sampleEditor.add(ui, new GridBagConstraints() {
+            {
+                anchor = GridBagConstraints.WEST;
+                gridx = 2;
+                gridy = cacheEditorRows;
+                insets = UI_PADDING;
+                weightx = 1;
+                fill = GridBagConstraints.HORIZONTAL;
+            }
+        });
+
+        ++cacheEditorRows;
     }
 
     private class CacheListEntry {
@@ -157,6 +210,9 @@ public class SampleDataEditorUI extends JPanel {
         public CacheListEntry(String name, List<MISACache> caches) {
             this.caches = caches;
             this.name = name;
+
+            // Sort, so imported items are on top
+            this.caches.sort(Comparator.comparing(MISACache::getIOType).thenComparing(MISACache::getRelativePath).thenComparing(MISACache::getCacheTypeName));
         }
 
         @Override

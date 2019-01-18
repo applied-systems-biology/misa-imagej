@@ -39,6 +39,14 @@ public class MISACache implements ParameterSchemaValue {
     }
 
     /**
+     * Returns a string that describes the internal path within the filesystem
+     * @return
+     */
+    public String getRelativePath() {
+        return getFilesystemEntry().getInternalPath().toString();
+    }
+
+    /**
      * Returns the serialization ID of the pattern if available
      * Otherwise return null
      * @return
