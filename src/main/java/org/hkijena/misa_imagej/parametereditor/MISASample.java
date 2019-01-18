@@ -1,6 +1,6 @@
 package org.hkijena.misa_imagej.parametereditor;
 
-import org.hkijena.misa_imagej.parametereditor.cache.MISACache;
+import org.hkijena.misa_imagej.api.cache.MISACache;
 import org.hkijena.misa_imagej.parametereditor.json_schema.JSONSchemaObject;
 
 import java.util.ArrayList;

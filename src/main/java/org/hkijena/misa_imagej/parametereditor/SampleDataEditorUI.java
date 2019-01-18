@@ -1,10 +1,10 @@
 package org.hkijena.misa_imagej.parametereditor;
 
 import org.apache.commons.collections.ListUtils;
-import org.hkijena.misa_imagej.parametereditor.cache.MISACache;
+import org.hkijena.misa_imagej.api.cache.MISACache;
 import org.hkijena.misa_imagej.parametereditor.cache.MISACacheEditorUI;
-import org.hkijena.misa_imagej.parametereditor.cache.MISACacheRegistry;
-import org.hkijena.misa_imagej.parametereditor.cache.MISADataIOType;
+import org.hkijena.misa_imagej.parametereditor.cache.MISACacheUIRegistry;
+import org.hkijena.misa_imagej.api.cache.MISACacheIOType;
 import org.hkijena.misa_imagej.utils.UIUtils;
 import org.hkijena.misa_imagej.utils.ui.ColorIcon;
 import org.jdesktop.swingx.JXTextField;
@@ -32,7 +32,7 @@ public class SampleDataEditorUI extends JPanel {
     private CacheListEntry currentCacheList;
 
     private int cacheEditorRows = 0;
-    private MISADataIOType editorLastIOType;
+    private MISACacheIOType editorLastIOType;
 
     public SampleDataEditorUI(MISAModuleParameterEditorUI app) {
         this.parameterSchema = app.getParameterSchema();
@@ -175,7 +175,7 @@ public class SampleDataEditorUI extends JPanel {
                     });
                     editorLastIOType = cache.getIOType();
                 }
-                MISACacheRegistry.getEditorFor(cache).populate(this);
+                MISACacheUIRegistry.getEditorFor(cache).populate(this);
             }
 
             sampleEditor.add(new JPanel(), new GridBagConstraints() {

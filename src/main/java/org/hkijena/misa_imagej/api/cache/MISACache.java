@@ -1,4 +1,4 @@
-package org.hkijena.misa_imagej.parametereditor.cache;
+package org.hkijena.misa_imagej.api.cache;
 
 
 import org.hkijena.misa_imagej.parametereditor.MISAFilesystemEntry;
@@ -74,7 +74,7 @@ public class MISACache implements ParameterSchemaValue {
      * Returns the IO type of this cache
      * @return
      */
-    public MISADataIOType getIOType() {
+    public MISACacheIOType getIOType() {
         return getFilesystemEntry().ioType;
     }
 
@@ -110,7 +110,7 @@ public class MISACache implements ParameterSchemaValue {
 
     @Override
     public ParameterSchemaValidityReport isValidParameter() {
-        if(getIOType() == MISADataIOType.Exported)
+        if(getIOType() == MISACacheIOType.Exported)
             return new ParameterSchemaValidityReport(this, null, true, "");
         else
             return new ParameterSchemaValidityReport(this, null, false, "The data type '" + getCacheTypeName() + "' is not supported by MISA++ for ImageJ.");

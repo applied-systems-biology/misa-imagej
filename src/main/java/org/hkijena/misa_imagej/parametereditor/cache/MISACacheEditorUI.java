@@ -1,5 +1,7 @@
 package org.hkijena.misa_imagej.parametereditor.cache;
 
+import org.hkijena.misa_imagej.api.cache.MISACache;
+import org.hkijena.misa_imagej.api.cache.MISACacheIOType;
 import org.hkijena.misa_imagej.parametereditor.SampleDataEditorUI;
 
 import javax.swing.*;
@@ -16,7 +18,7 @@ public abstract class MISACacheEditorUI extends JPanel {
     }
 
     public void populate(SampleDataEditorUI ui) {
-        if(getCache().getIOType() == MISADataIOType.Imported) {
+        if(getCache().getIOType() == MISACacheIOType.Imported) {
             initializeImporterUI();
         }
         ui.insertCacheEditorUI(this);

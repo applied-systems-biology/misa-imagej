@@ -1,8 +1,9 @@
 package org.hkijena.misa_imagej.parametereditor;
 
-import org.hkijena.misa_imagej.parametereditor.cache.MISACache;
-import org.hkijena.misa_imagej.parametereditor.cache.MISACacheRegistry;
-import org.hkijena.misa_imagej.parametereditor.cache.MISADataIOType;
+import org.hkijena.misa_imagej.api.cache.MISACache;
+import org.hkijena.misa_imagej.api.cache.MISACacheRegistry;
+import org.hkijena.misa_imagej.parametereditor.cache.MISACacheUIRegistry;
+import org.hkijena.misa_imagej.api.cache.MISACacheIOType;
 import org.hkijena.misa_imagej.parametereditor.json_schema.JSONSchemaObject;
 
 import java.nio.file.Path;
@@ -20,13 +21,13 @@ public class MISAFilesystemEntry implements Cloneable {
     public MISAFilesystemEntry parent;
     public String externalPath = "";
     public JSONSchemaObject metadata;
-    public MISADataIOType ioType;
+    public MISACacheIOType ioType;
 
     public MISAFilesystemEntry() {
 
     }
 
-    public MISAFilesystemEntry(MISAFilesystemEntry parent, JSONSchemaObject sourceObject, String name , MISADataIOType ioType) {
+    public MISAFilesystemEntry(MISAFilesystemEntry parent, JSONSchemaObject sourceObject, String name , MISACacheIOType ioType) {
         this.parent = parent;
         this.name = name;
         this.ioType = ioType;

@@ -1,16 +1,12 @@
 package org.hkijena.misa_imagej.parametereditor;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import org.hkijena.misa_imagej.parametereditor.cache.MISACache;
-import org.hkijena.misa_imagej.parametereditor.cache.MISADataIOType;
+import org.hkijena.misa_imagej.api.cache.MISACache;
+import org.hkijena.misa_imagej.api.cache.MISACacheIOType;
 import org.hkijena.misa_imagej.parametereditor.json_schema.JSONSchemaObject;
 import org.hkijena.misa_imagej.parametereditor.json_schema.JSONSchemaObjectType;
-import org.hkijena.misa_imagej.utils.FilesystemUtils;
 import org.hkijena.misa_imagej.utils.GsonUtils;
 
-import javax.swing.*;
-import java.awt.*;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.FileOutputStream;
@@ -56,11 +52,11 @@ public class MISAParameterSchema implements ParameterSchemaValue {
         sampleImportedFilesystemTemplate = new MISAFilesystemEntry(null,
                 object.getPropertyFromPath("filesystem", "json-data", "imported", "children").getAdditionalPropertiesTemplate(),
                 "",
-                MISADataIOType.Imported);
+                MISACacheIOType.Imported);
         sampleExportedFilesystemTemplate = new MISAFilesystemEntry(null,
                 object.getPropertyFromPath("filesystem", "json-data", "exported", "children").getAdditionalPropertiesTemplate(),
                 "",
-                MISADataIOType.Exported);
+                MISACacheIOType.Exported);
     }
 
     public Collection<String> getSampleNames() {

@@ -1,9 +1,9 @@
-package org.hkijena.misa_imagej.parametereditor.cache.caches;
+package org.hkijena.misa_imagej.api.cache.caches;
 
 import org.hkijena.misa_imagej.parametereditor.MISAFilesystemEntry;
 import org.hkijena.misa_imagej.parametereditor.ParameterSchemaValidityReport;
-import org.hkijena.misa_imagej.parametereditor.cache.MISACache;
-import org.hkijena.misa_imagej.parametereditor.cache.MISADataIOType;
+import org.hkijena.misa_imagej.api.cache.MISACache;
+import org.hkijena.misa_imagej.api.cache.MISACacheIOType;
 import org.hkijena.misa_imagej.utils.swappers.OMETiffSwapper;
 
 import java.io.IOException;
@@ -34,7 +34,7 @@ public class MISAOMETiffCache extends MISACache {
 
     @Override
     public ParameterSchemaValidityReport isValidParameter() {
-        if(getIOType() == MISADataIOType.Imported) {
+        if(getIOType() == MISACacheIOType.Imported) {
             if(tiffSwapper == null)
                 return new ParameterSchemaValidityReport(this, null, false, "No data set. Please add data.");
             else if(!tiffSwapper.isValid())
