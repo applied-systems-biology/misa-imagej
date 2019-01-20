@@ -40,6 +40,8 @@ public class MISAModuleRepository {
         paths.add(USER_MODULE_PATH);
         if(OSUtils.detectOperatingSystem() == OperatingSystem.Linux) {
             paths.add(Paths.get("/usr/lib/misaxx/modules"));
+            paths.add(Paths.get("/usr/local/lib32/misaxx/modules"));
+            paths.add(Paths.get("/usr/local/lib64/misaxx/modules"));
             paths.add(Paths.get("/usr/local/lib/misaxx/modules"));
         }
     }
