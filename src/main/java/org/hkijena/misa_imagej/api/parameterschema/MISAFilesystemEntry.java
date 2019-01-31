@@ -1,10 +1,8 @@
-package org.hkijena.misa_imagej.parametereditor;
+package org.hkijena.misa_imagej.api.parameterschema;
 
 import org.hkijena.misa_imagej.api.cache.MISACache;
 import org.hkijena.misa_imagej.api.cache.MISACacheRegistry;
-import org.hkijena.misa_imagej.parametereditor.cache.MISACacheUIRegistry;
 import org.hkijena.misa_imagej.api.cache.MISACacheIOType;
-import org.hkijena.misa_imagej.parametereditor.json_schema.JSONSchemaObject;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -51,7 +49,7 @@ public class MISAFilesystemEntry implements Cloneable {
      * @return
      */
     @Override
-    protected Object clone() {
+    public Object clone() {
         MISAFilesystemEntry entry = new MISAFilesystemEntry();
         entry.name = name;
         entry.externalPath = externalPath;

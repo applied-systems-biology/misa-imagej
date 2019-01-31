@@ -1,12 +1,12 @@
 package org.hkijena.misa_imagej.parametereditor.json_schema.editors;
 
+import org.hkijena.misa_imagej.api.parameterschema.JSONSchemaObject;
+import org.hkijena.misa_imagej.api.parameterschema.JSONSchemaObjectType;
 import org.hkijena.misa_imagej.parametereditor.json_schema.*;
-import org.hkijena.misa_imagej.utils.UIUtils;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 
 /**

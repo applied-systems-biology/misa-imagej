@@ -1,6 +1,6 @@
 package org.hkijena.misa_imagej.api.cache.caches;
 
-import org.hkijena.misa_imagej.parametereditor.MISAFilesystemEntry;
+import org.hkijena.misa_imagej.api.parameterschema.MISAFilesystemEntry;
 import org.hkijena.misa_imagej.api.cache.MISACache;
 
 import java.util.ArrayList;

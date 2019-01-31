@@ -1,9 +1,9 @@
 package org.hkijena.misa_imagej.api.cache;
 
 
-import org.hkijena.misa_imagej.parametereditor.MISAFilesystemEntry;
-import org.hkijena.misa_imagej.parametereditor.ParameterSchemaValidityReport;
-import org.hkijena.misa_imagej.parametereditor.ParameterSchemaValue;
+import org.hkijena.misa_imagej.api.parameterschema.MISAFilesystemEntry;
+import org.hkijena.misa_imagej.api.parameterschema.ParameterSchemaValidityReport;
+import org.hkijena.misa_imagej.api.parameterschema.ParameterSchemaValue;
 
 import java.awt.*;
 import java.nio.file.Path;

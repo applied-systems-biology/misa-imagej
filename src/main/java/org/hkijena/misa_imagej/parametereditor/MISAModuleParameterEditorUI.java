@@ -8,14 +8,17 @@ import java.nio.file.Path;
 import javax.swing.*;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import io.scif.services.DatasetIOService;
 
 import net.imagej.DatasetService;
 import org.hkijena.misa_imagej.MISACommand;
+import org.hkijena.misa_imagej.api.parameterschema.MISAParameterSchema;
+import org.hkijena.misa_imagej.api.parameterschema.MISASample;
+import org.hkijena.misa_imagej.api.parameterschema.ParameterSchemaValidityReport;
 import org.hkijena.misa_imagej.repository.MISAModule;
 import org.hkijena.misa_imagej.utils.*;
-import org.hkijena.misa_imagej.parametereditor.json_schema.JSONSchemaObject;
+import org.hkijena.misa_imagej.api.parameterschema.JSONSchemaObject;
+import org.jdesktop.swingx.JXStatusBar;
 import org.scijava.app.StatusService;
 import org.scijava.display.DisplayService;
 import org.scijava.log.LogService;
@@ -31,6 +34,8 @@ public class MISAModuleParameterEditorUI extends JFrame {
     private RuntimeParametersEditorUI runtimeParametersEditorUI;
     private SampleParametersEditorUI sampleParametersEditorUI;
     private SampleDataEditorUI sampleDataEditorUI;
+
+    private JLabel errorLabel;
 
     private MISAParameterSchema parameterSchema;
 
@@ -64,16 +69,48 @@ public class MISAModuleParameterEditorUI extends JFrame {
         setEnabled(true);
     }
 
+    private boolean parametersAreValid() {
+        ParameterSchemaValidityReport report = parameterSchema.isValidParameter();
+
+        if (!report.isValid()) {
+            StringBuilder message = new StringBuilder();
+            if(!report.getInvalidEntries().isEmpty()) {
+                ParameterSchemaValidityReport.Entry e = report.getInvalidEntries().values().stream().findFirst().get();
+                if(!e.getCategories().isEmpty()) {
+                    message.append(e.getCategories().stream().findFirst().get());
+                    if(e.getCategories().size() > 1)
+                        message.append("...");
+                    message.append(": ");
+                }
+                message.append(e.getMessage());
+
+                if(report.getInvalidEntries().size() > 1) {
+                    message.append(" (");
+                    message.append(report.getEntries().size() - 1);
+                    message.append(" more)");
+                }
+            }
+            else {
+                message.append("Parameters are invalid!");
+            }
+            errorLabel.setText(message.toString());
+            errorLabel.setIcon(UIUtils.getIconFromResources("error.png"));
+            return false;
+        }
+        else {
+            errorLabel.setText("Parameters are valid");
+            errorLabel.setIcon(null);
+            return true;
+        }
+    }
 
     /**
      * Exports the current settings into a user-selected folder
      */
     private void exportMISARun() {
 
-        ParameterSchemaValidityReport report = parameterSchema.isValidParameter();
-
-        if (!report.isValid())
-            return;
+       if(!parametersAreValid())
+           return;
 
         JFileChooser chooser = new JFileChooser();
         chooser.setDialogTitle("Open folder");
@@ -118,16 +155,14 @@ public class MISAModuleParameterEditorUI extends JFrame {
 
     private void runMISA() {
 
-        getUiService().getDefaultUI().getConsolePane().show();
-
-        ParameterSchemaValidityReport report = parameterSchema.isValidParameter();
-
-        if (!report.isValid())
+        if(!parametersAreValid())
             return;
 
-        MISARunDialog dialog = new MISARunDialog(this);
+        getUiService().getDefaultUI().getConsolePane().show();
+
+        MISARunDialogUI dialog = new MISARunDialogUI(this);
         dialog.setLocationRelativeTo(this);
-        if (dialog.showDialog() == MISARunDialog.ACCEPT_OPTION) {
+        if (dialog.showDialog() == MISARunDialogUI.ACCEPT_OPTION) {
             try {
                 Files.createDirectories(dialog.getImportedPath());
                 Files.createDirectories(dialog.getExportedPath());
@@ -211,6 +246,12 @@ public class MISAModuleParameterEditorUI extends JFrame {
         toolBar.add(runButton);
 
         add(toolBar, BorderLayout.NORTH);
+
+        // Status bar
+        JXStatusBar statusBar = new JXStatusBar();
+        errorLabel = new JLabel("Ready");
+        statusBar.add(errorLabel);
+        add(statusBar, BorderLayout.SOUTH);
     }
 
     private void initalizeSampleManagerUI(JToolBar toolBar) {

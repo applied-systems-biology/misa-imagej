@@ -1,4 +1,4 @@
-package org.hkijena.misa_imagej.parametereditor;
+package org.hkijena.misa_imagej.api.parameterschema;
 
 public interface ParameterSchemaValue {
 

@@ -1,4 +1,4 @@
-package org.hkijena.misa_imagej.parametereditor.json_schema;
+package org.hkijena.misa_imagej.api.parameterschema;
 
 import com.google.gson.*;
 

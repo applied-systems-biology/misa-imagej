@@ -2,7 +2,7 @@ package org.hkijena.misa_imagej.api.cache;
 
 import org.hkijena.misa_imagej.api.cache.caches.MISAFileCache;
 import org.hkijena.misa_imagej.api.cache.caches.MISAOMETiffCache;
-import org.hkijena.misa_imagej.parametereditor.MISAFilesystemEntry;
+import org.hkijena.misa_imagej.api.parameterschema.MISAFilesystemEntry;
 
 import java.util.HashMap;
 import java.util.Map;

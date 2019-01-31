@@ -1,5 +1,7 @@
 package org.hkijena.misa_imagej.parametereditor.json_schema;
 
+import org.hkijena.misa_imagej.api.parameterschema.JSONSchemaObject;
+
 import javax.swing.*;
 
 /**
