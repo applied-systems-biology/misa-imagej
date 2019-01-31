@@ -1,6 +1,9 @@
 package org.hkijena.misa_imagej.api.parameterschema;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import org.hkijena.misa_imagej.api.cache.MISACache;
 import org.hkijena.misa_imagej.api.cache.MISACacheIOType;
 import org.hkijena.misa_imagej.utils.GsonUtils;
@@ -198,5 +201,22 @@ public class MISAParameterSchema implements ParameterSchemaValue {
         }
 
         return report;
+    }
+
+    /**
+     * Load parameters from the provided JSON string
+     * @param jsonString
+     */
+    public void loadParameters(String jsonString) {
+        Gson gson = GsonUtils.getGson();
+        JsonObject root = gson.fromJson(jsonString, JsonObject.class);
+
+        // Add missing samples
+        if(root.has("samples")) {
+            for(Map.Entry<String, JsonElement> kv : root.getAsJsonObject("samples").entrySet()) {
+
+            }
+        }
+
     }
 }
