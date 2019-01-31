@@ -1,5 +1,6 @@
 package org.hkijena.misa_imagej.api.parameterschema;
 
+import com.google.gson.JsonElement;
 import com.google.gson.annotations.SerializedName;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -352,5 +353,27 @@ public class JSONSchemaObject implements Cloneable, ParameterSchemaValue {
         }
 
         return report;
+    }
+
+    public void setValueFromJson(JsonElement json) {
+        switch(type) {
+            case jsonBoolean:
+                value = json.getAsBoolean();
+                break;
+            case jsonNumber:
+                value = json.getAsDouble();
+                break;
+            case jsonString:
+                value = json.getAsString();
+                break;
+            case jsonArray:
+                value = json.getAsJsonArray();
+                break;
+            case jsonObject:
+                for(Map.Entry<String, JsonElement> kv : json.getAsJsonObject().entrySet()) {
+                    ensurePropertyFromPath(kv.getKey()).setValueFromJson(kv.getValue());
+                }
+                break;
+        }
     }
 }

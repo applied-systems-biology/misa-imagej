@@ -211,11 +211,22 @@ public class MISAParameterSchema implements ParameterSchemaValue {
         Gson gson = GsonUtils.getGson();
         JsonObject root = gson.fromJson(jsonString, JsonObject.class);
 
-        // Add missing samples
+        // Add missing samples & merge their parameters
         if(root.has("samples")) {
             for(Map.Entry<String, JsonElement> kv : root.getAsJsonObject("samples").entrySet()) {
-
+                if(!samples.containsKey(kv.getKey())) {
+                    addSample(kv.getKey());
+                }
+                samples.get(kv.getKey()).getParameters().setValueFromJson(kv.getValue());
             }
+        }
+
+        // Merge parameters
+        if(root.has("algorithm")) {
+            algorithmParameters.setValueFromJson(root.get("algorithm"));
+        }
+        if(root.has("runtime")) {
+            runtimeParameters.setValueFromJson(root.get("runtime"));
         }
 
     }
