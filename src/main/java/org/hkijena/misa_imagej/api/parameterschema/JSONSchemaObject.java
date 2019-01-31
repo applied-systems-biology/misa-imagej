@@ -358,16 +358,16 @@ public class JSONSchemaObject implements Cloneable, ParameterSchemaValue {
     public void setValueFromJson(JsonElement json) {
         switch(type) {
             case jsonBoolean:
-                value = json.getAsBoolean();
+                setValue(json.getAsBoolean());
                 break;
             case jsonNumber:
-                value = json.getAsDouble();
+                setValue(json.getAsDouble());
                 break;
             case jsonString:
-                value = json.getAsString();
+                setValue(json.getAsString());
                 break;
             case jsonArray:
-                value = json.getAsJsonArray();
+                setValue(json.getAsJsonArray());
                 break;
             case jsonObject:
                 for(Map.Entry<String, JsonElement> kv : json.getAsJsonObject().entrySet()) {
