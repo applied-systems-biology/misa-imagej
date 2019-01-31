@@ -1,6 +1,9 @@
-package org.hkijena.misa_imagej.repository;
+package org.hkijena.misa_imagej.api.repository;
 
 import com.google.gson.annotations.SerializedName;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MISAModuleInfo {
     @SerializedName("name")
@@ -11,6 +14,9 @@ public class MISAModuleInfo {
 
     @SerializedName("description")
     public String description;
+
+    @SerializedName("dependencies")
+    public List<MISAModuleInfo> dependencies = new ArrayList<>();
 
     @Override
     public String toString() {

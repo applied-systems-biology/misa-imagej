@@ -1,9 +1,10 @@
 package org.hkijena.misa_imagej.repository;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonWriter;
 import org.hkijena.misa_imagej.MISACommand;
+import org.hkijena.misa_imagej.api.repository.MISAModule;
+import org.hkijena.misa_imagej.api.repository.MISAModuleRepository;
 import org.hkijena.misa_imagej.parametereditor.MISAModuleParameterEditorUI;
 import org.hkijena.misa_imagej.utils.GsonUtils;
 import org.hkijena.misa_imagej.utils.OSUtils;
