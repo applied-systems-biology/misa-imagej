@@ -1,7 +1,7 @@
-package org.hkijena.misa_imagej.parametereditor.cache.editors;
+package org.hkijena.misa_imagej.ui.parametereditor.cache.editors;
 
 import org.hkijena.misa_imagej.api.cache.MISACache;
-import org.hkijena.misa_imagej.parametereditor.cache.MISACacheEditorUI;
+import org.hkijena.misa_imagej.ui.parametereditor.cache.MISACacheEditorUI;
 import org.hkijena.misa_imagej.utils.UIUtils;
 
 import java.awt.*;

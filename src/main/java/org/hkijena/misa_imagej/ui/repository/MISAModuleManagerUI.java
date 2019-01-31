@@ -1,15 +1,15 @@
-package org.hkijena.misa_imagej.repository;
+package org.hkijena.misa_imagej.ui.repository;
 
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonWriter;
 import org.hkijena.misa_imagej.MISACommand;
 import org.hkijena.misa_imagej.api.repository.MISAModule;
 import org.hkijena.misa_imagej.api.repository.MISAModuleRepository;
-import org.hkijena.misa_imagej.parametereditor.MISAModuleParameterEditorUI;
+import org.hkijena.misa_imagej.ui.parametereditor.MISAModuleParameterEditorUI;
 import org.hkijena.misa_imagej.utils.GsonUtils;
 import org.hkijena.misa_imagej.utils.OSUtils;
 import org.hkijena.misa_imagej.utils.UIUtils;
-import org.hkijena.misa_imagej.workbench.MISAWorkbench;
+import org.hkijena.misa_imagej.ui.workbench.MISAWorkbench;
 
 import javax.swing.*;
 import java.awt.*;

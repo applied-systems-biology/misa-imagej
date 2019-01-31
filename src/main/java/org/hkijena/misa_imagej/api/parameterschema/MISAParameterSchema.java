@@ -3,7 +3,6 @@ package org.hkijena.misa_imagej.api.parameterschema;
 import com.google.gson.Gson;
 import org.hkijena.misa_imagej.api.cache.MISACache;
 import org.hkijena.misa_imagej.api.cache.MISACacheIOType;
-import org.hkijena.misa_imagej.parametereditor.*;
 import org.hkijena.misa_imagej.utils.GsonUtils;
 
 import java.beans.PropertyChangeListener;
@@ -12,7 +11,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MISAParameterSchema implements ParameterSchemaValue {
 
@@ -136,7 +138,7 @@ public class MISAParameterSchema implements ParameterSchemaValue {
      * @param exportedDirectory The physical path of the export directory where everything will be cached
      * @param forceCopy         If true, the importer will copy the files into the imported directory even if not necessary
      */
-    public void install(MISAModuleParameterEditorUI app, Path parameterSchema, Path importedDirectory, Path exportedDirectory, boolean forceCopy, boolean relativeDirectories) {
+    public void install(Path parameterSchema, Path importedDirectory, Path exportedDirectory, boolean forceCopy, boolean relativeDirectories) {
 
         JSONSchemaObject parameters = new JSONSchemaObject(JSONSchemaObjectType.jsonObject);
 
@@ -164,7 +166,6 @@ public class MISAParameterSchema implements ParameterSchemaValue {
         }
 
         // Write the parameter schema
-        app.getLogService().info("Writing parameter schema into " + parameterSchema.toString());
         Gson gson = GsonUtils.getGson();
         try(OutputStreamWriter w = new OutputStreamWriter(new FileOutputStream(parameterSchema.toString()))) {
             w.write(gson.toJson(parameters.toValue()));

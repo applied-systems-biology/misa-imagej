@@ -1,4 +1,4 @@
-package org.hkijena.misa_imagej.parametereditor;
+package org.hkijena.misa_imagej.ui.parametereditor;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;

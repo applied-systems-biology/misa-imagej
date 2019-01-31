@@ -1,4 +1,4 @@
-package org.hkijena.misa_imagej.parametereditor;
+package org.hkijena.misa_imagej.ui.parametereditor;
 
 import org.hkijena.misa_imagej.utils.ui.FileSelection;
 import org.hkijena.misa_imagej.utils.UIUtils;

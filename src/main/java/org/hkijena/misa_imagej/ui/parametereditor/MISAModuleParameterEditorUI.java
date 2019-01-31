@@ -1,4 +1,4 @@
-package org.hkijena.misa_imagej.parametereditor;
+package org.hkijena.misa_imagej.ui.parametereditor;
 
 import java.awt.*;
 import java.io.IOException;
@@ -65,7 +65,7 @@ public class MISAModuleParameterEditorUI extends JFrame {
     private void install(Path parameterSchema, Path importedDirectory, Path exportedDirectory, boolean forceCopy, boolean relativeDirectories) {
         setEnabled(false);
         getUiService().getDefaultUI().getConsolePane().show();
-        this.parameterSchema.install(this, parameterSchema, importedDirectory, exportedDirectory, forceCopy, relativeDirectories);
+        this.parameterSchema.install(parameterSchema, importedDirectory, exportedDirectory, forceCopy, relativeDirectories);
         setEnabled(true);
     }
 

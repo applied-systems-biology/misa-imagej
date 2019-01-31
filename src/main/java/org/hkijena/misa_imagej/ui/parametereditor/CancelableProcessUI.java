@@ -1,4 +1,4 @@
-package org.hkijena.misa_imagej.parametereditor;
+package org.hkijena.misa_imagej.ui.parametereditor;
 
 import javax.swing.*;
 import java.awt.*;

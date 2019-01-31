@@ -1,4 +1,4 @@
-package org.hkijena.misa_imagej.workbench;
+package org.hkijena.misa_imagej.ui.workbench;
 
 import javax.swing.*;
 import java.awt.*;

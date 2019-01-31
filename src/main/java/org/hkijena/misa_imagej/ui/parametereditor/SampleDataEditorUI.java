@@ -1,11 +1,11 @@
-package org.hkijena.misa_imagej.parametereditor;
+package org.hkijena.misa_imagej.ui.parametereditor;
 
 import org.apache.commons.collections.ListUtils;
 import org.hkijena.misa_imagej.api.cache.MISACache;
 import org.hkijena.misa_imagej.api.parameterschema.MISAParameterSchema;
 import org.hkijena.misa_imagej.api.parameterschema.MISASample;
-import org.hkijena.misa_imagej.parametereditor.cache.MISACacheEditorUI;
-import org.hkijena.misa_imagej.parametereditor.cache.MISACacheUIRegistry;
+import org.hkijena.misa_imagej.ui.parametereditor.cache.MISACacheEditorUI;
+import org.hkijena.misa_imagej.ui.parametereditor.cache.MISACacheUIRegistry;
 import org.hkijena.misa_imagej.api.cache.MISACacheIOType;
 import org.hkijena.misa_imagej.utils.UIUtils;
 import org.hkijena.misa_imagej.utils.ui.ColorIcon;

@@ -25,7 +25,7 @@ public class MISAOutput {
 
     private void loadParameterSchema() throws IOException {
         Gson gson = GsonUtils.getGson();
-        JSONSchemaObject schema = gson.fromJson(new String(Files.readAllBytes(rootPath.resolve("parameter-schema.json"))), JSONSchemaObject.class);
+        JSONSchemaObject schema = gson.fromJson(new String(Files.readAllBytes(getRootPath().resolve("parameter-schema.json"))), JSONSchemaObject.class);
         schema.id = "parameters";
         schema.update();
         parameterSchema = new MISAParameterSchema(schema);
@@ -33,7 +33,10 @@ public class MISAOutput {
 
     private void loadModuleInfo() throws IOException {
         Gson gson = GsonUtils.getGson();
-        moduleInfo = gson.fromJson(new String(Files.readAllBytes(rootPath.resolve("misa-module-info.json"))), MISAModuleInfo.class);
+        moduleInfo = gson.fromJson(new String(Files.readAllBytes(getRootPath().resolve("misa-module-info.json"))), MISAModuleInfo.class);
+    }
+
+    private void loadCaches() throws IOException {
     }
 
     public static void main(String[] args) throws IOException {
@@ -41,4 +44,15 @@ public class MISAOutput {
         System.out.println("test");
     }
 
+    public Path getRootPath() {
+        return rootPath;
+    }
+
+    public MISAParameterSchema getParameterSchema() {
+        return parameterSchema;
+    }
+
+    public MISAModuleInfo getModuleInfo() {
+        return moduleInfo;
+    }
 }

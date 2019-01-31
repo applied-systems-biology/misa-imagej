@@ -1,8 +1,8 @@
-package org.hkijena.misa_imagej.parametereditor.cache;
+package org.hkijena.misa_imagej.ui.parametereditor.cache;
 
 import org.hkijena.misa_imagej.api.cache.MISACache;
 import org.hkijena.misa_imagej.api.cache.MISACacheIOType;
-import org.hkijena.misa_imagej.parametereditor.SampleDataEditorUI;
+import org.hkijena.misa_imagej.ui.parametereditor.SampleDataEditorUI;
 
 import javax.swing.*;
 

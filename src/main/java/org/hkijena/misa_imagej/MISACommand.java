@@ -6,7 +6,7 @@ import io.scif.services.DatasetIOService;
 import net.imagej.DatasetService;
 import net.imagej.ImageJ;
 import net.imagej.ops.OpService;
-import org.hkijena.misa_imagej.repository.MISAModuleManagerUI;
+import org.hkijena.misa_imagej.ui.repository.MISAModuleManagerUI;
 import org.scijava.app.StatusService;
 import org.scijava.command.Command;
 import org.scijava.command.CommandService;
