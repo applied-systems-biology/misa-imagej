@@ -101,39 +101,39 @@ public class SampleDataEditorUI extends JPanel {
 
         parameterSchema.addPropertyChangeListener(propertyChangeEvent -> {
             if(propertyChangeEvent.getPropertyName().equals("currentSample")) {
-                if(parameterSchema.getCurrentSample() != null) {
-                    setCurrentSample(parameterSchema.getCurrentSample());
-                }
-                else {
-                    sampleEditor.removeAll();
-                    sampleEditor.revalidate();
-                }
+                setCurrentSample(parameterSchema.getCurrentSample());
             }
         });
     }
 
     private void setCurrentSample(MISASample sample) {
-        // Create tree nodes
-        DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode(new CacheListEntry("'" + sample.name + "' data",
-                ListUtils.union(sample.getImportedCaches(), sample.getExportedCaches())));
+        if(sample != null) {
+            // Create tree nodes
+            DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode(new CacheListEntry("'" + sample.name + "' data",
+                    ListUtils.union(sample.getImportedCaches(), sample.getExportedCaches())));
 
-        // Imported data
-        DefaultMutableTreeNode importedNode = new DefaultMutableTreeNode(new CacheListEntry("Input", sample.getImportedCaches()));
-        for(MISACache cache : sample.getImportedCaches()) {
-            importedNode.add(new DefaultMutableTreeNode(new CacheListEntry(cache.getRelativePathName(), Arrays.asList(cache))));
+            // Imported data
+            DefaultMutableTreeNode importedNode = new DefaultMutableTreeNode(new CacheListEntry("Input", sample.getImportedCaches()));
+            for(MISACache cache : sample.getImportedCaches()) {
+                importedNode.add(new DefaultMutableTreeNode(new CacheListEntry(cache.getRelativePathName(), Arrays.asList(cache))));
+            }
+            rootNode.add(importedNode);
+
+            // Exported data
+            DefaultMutableTreeNode exportedNode = new DefaultMutableTreeNode(new CacheListEntry("Output", sample.getExportedCaches()));
+            for(MISACache cache : sample.getExportedCaches()) {
+                exportedNode.add(new DefaultMutableTreeNode(new CacheListEntry(cache.getRelativePathName(), Arrays.asList(cache))));
+            }
+            rootNode.add(exportedNode);
+
+
+            cacheList.setModel(new DefaultTreeModel(rootNode));
+            setCurrentCacheList((CacheListEntry)rootNode.getUserObject());
         }
-        rootNode.add(importedNode);
-
-        // Exported data
-        DefaultMutableTreeNode exportedNode = new DefaultMutableTreeNode(new CacheListEntry("Output", sample.getExportedCaches()));
-        for(MISACache cache : sample.getExportedCaches()) {
-            exportedNode.add(new DefaultMutableTreeNode(new CacheListEntry(cache.getRelativePathName(), Arrays.asList(cache))));
+        else {
+            cacheList.setModel(new DefaultTreeModel(new DefaultMutableTreeNode("No properties to edit")));
+            setCurrentCacheList(null);
         }
-        rootNode.add(exportedNode);
-
-
-        cacheList.setModel(new DefaultTreeModel(rootNode));
-        setCurrentCacheList((CacheListEntry)rootNode.getUserObject());
     }
 
     private void setCurrentCacheList(CacheListEntry entry) {

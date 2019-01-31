@@ -87,6 +87,8 @@ public class MISAParameterSchema implements ParameterSchemaValue {
     }
 
     public void removeSample(String name) {
+        if(currentSample != null && currentSample.name.equals(name))
+            currentSample = null;
         samples.remove(name);
         propertyChangeSupport.firePropertyChange("samples", null, null);
         propertyChangeSupport.firePropertyChange("currentSample", null, null);
