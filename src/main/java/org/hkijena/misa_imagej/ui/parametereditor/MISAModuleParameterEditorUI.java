@@ -15,7 +15,7 @@ import net.imagej.DatasetService;
 import org.hkijena.misa_imagej.MISACommand;
 import org.hkijena.misa_imagej.api.parameterschema.MISAParameterSchema;
 import org.hkijena.misa_imagej.api.parameterschema.MISASample;
-import org.hkijena.misa_imagej.api.parameterschema.ParameterSchemaValidityReport;
+import org.hkijena.misa_imagej.api.parameterschema.MISAParameterValidity;
 import org.hkijena.misa_imagej.api.repository.MISAModule;
 import org.hkijena.misa_imagej.utils.*;
 import org.hkijena.misa_imagej.api.parameterschema.JSONSchemaObject;
@@ -73,12 +73,12 @@ public class MISAModuleParameterEditorUI extends JFrame {
     }
 
     private boolean parametersAreValid() {
-        ParameterSchemaValidityReport report = parameterSchema.isValidParameter();
+        MISAParameterValidity report = parameterSchema.isValidParameter();
 
         if (!report.isValid()) {
             StringBuilder message = new StringBuilder();
             if(!report.getInvalidEntries().isEmpty()) {
-                ParameterSchemaValidityReport.Entry e = report.getInvalidEntries().values().stream().findFirst().get();
+                MISAParameterValidity.Entry e = report.getInvalidEntries().values().stream().findFirst().get();
                 if(!e.getCategories().isEmpty()) {
                     message.append(e.getCategories().stream().findFirst().get());
                     if(e.getCategories().size() > 1)

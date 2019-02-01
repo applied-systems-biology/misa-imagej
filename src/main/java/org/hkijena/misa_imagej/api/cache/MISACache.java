@@ -2,13 +2,13 @@ package org.hkijena.misa_imagej.api.cache;
 
 
 import org.hkijena.misa_imagej.api.parameterschema.MISAFilesystemEntry;
-import org.hkijena.misa_imagej.api.parameterschema.ParameterSchemaValidityReport;
-import org.hkijena.misa_imagej.api.parameterschema.ParameterSchemaValue;
+import org.hkijena.misa_imagej.api.parameterschema.MISAParameterValidity;
+import org.hkijena.misa_imagej.api.parameterschema.MISAParameter;
 
 import java.awt.*;
 import java.nio.file.Path;
 
-public class MISACache implements ParameterSchemaValue {
+public class MISACache implements MISAParameter {
     /**
      * Relative path within the imported or exported filesystem
      * This does not include "imported" or "exported"
@@ -109,11 +109,11 @@ public class MISACache implements ParameterSchemaValue {
     }
 
     @Override
-    public ParameterSchemaValidityReport isValidParameter() {
+    public MISAParameterValidity isValidParameter() {
         if(getIOType() == MISACacheIOType.Exported)
-            return new ParameterSchemaValidityReport(this, null, true, "");
+            return new MISAParameterValidity(this, null, true, "");
         else
-            return new ParameterSchemaValidityReport(this, null, false, "The data type '" + getCacheTypeName() + "' is not supported by MISA++ for ImageJ.");
+            return new MISAParameterValidity(this, null, false, "The data type '" + getCacheTypeName() + "' is not supported by MISA++ for ImageJ.");
     }
 
     /**
