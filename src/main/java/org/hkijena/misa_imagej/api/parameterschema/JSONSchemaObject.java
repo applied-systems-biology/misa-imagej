@@ -356,6 +356,8 @@ public class JSONSchemaObject implements Cloneable, ParameterSchemaValue {
     }
 
     public void setValueFromJson(JsonElement json) {
+        if(json.isJsonNull())
+            return;
         switch(type) {
             case jsonBoolean:
                 setValue(json.getAsBoolean());

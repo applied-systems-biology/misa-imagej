@@ -204,13 +204,10 @@ public class MISAParameterSchema implements ParameterSchemaValue {
     }
 
     /**
-     * Load parameters from the provided JSON string
-     * @param jsonString
+     * Load parameters from the provided JSON
+     * @param root
      */
-    public void loadParameters(String jsonString) {
-        Gson gson = GsonUtils.getGson();
-        JsonObject root = gson.fromJson(jsonString, JsonObject.class);
-
+    public void loadParameters(JsonObject root) {
         // Add missing samples & merge their parameters
         if(root.has("samples")) {
             for(Map.Entry<String, JsonElement> kv : root.getAsJsonObject("samples").entrySet()) {
