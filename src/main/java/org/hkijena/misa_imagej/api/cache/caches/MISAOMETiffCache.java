@@ -1,7 +1,7 @@
 package org.hkijena.misa_imagej.api.cache.caches;
 
 import org.hkijena.misa_imagej.api.parameterschema.MISAFilesystemEntry;
-import org.hkijena.misa_imagej.api.parameterschema.ParameterSchemaValidityReport;
+import org.hkijena.misa_imagej.api.parameterschema.MISAParameterValidity;
 import org.hkijena.misa_imagej.api.cache.MISACache;
 import org.hkijena.misa_imagej.api.cache.MISACacheIOType;
 import org.hkijena.misa_imagej.utils.swappers.OMETiffSwapper;
@@ -33,16 +33,16 @@ public class MISAOMETiffCache extends MISACache {
     }
 
     @Override
-    public ParameterSchemaValidityReport isValidParameter() {
+    public MISAParameterValidity isValidParameter() {
         if(getIOType() == MISACacheIOType.Imported) {
             if(tiffSwapper == null)
-                return new ParameterSchemaValidityReport(this,
+                return new MISAParameterValidity(this,
                         "Data " + getCacheTypeName() + " " + getRelativePathName(), false, "No data set. Please add data.");
             else if(!tiffSwapper.isValid())
-                return new ParameterSchemaValidityReport(this,
+                return new MISAParameterValidity(this,
                         "Data " + getCacheTypeName() + " " + getRelativePathName(), false, "Data is not present anymore. Did you close the image or remove the file?");
             else
-                return new ParameterSchemaValidityReport(this,
+                return new MISAParameterValidity(this,
                         "Data " + getCacheTypeName() + " " + getRelativePathName(), true, "");
         }
         return super.isValidParameter();

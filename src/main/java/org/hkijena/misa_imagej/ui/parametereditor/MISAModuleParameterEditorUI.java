@@ -1,6 +1,7 @@
 package org.hkijena.misa_imagej.ui.parametereditor;
 
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -14,7 +15,7 @@ import net.imagej.DatasetService;
 import org.hkijena.misa_imagej.MISACommand;
 import org.hkijena.misa_imagej.api.parameterschema.MISAParameterSchema;
 import org.hkijena.misa_imagej.api.parameterschema.MISASample;
-import org.hkijena.misa_imagej.api.parameterschema.ParameterSchemaValidityReport;
+import org.hkijena.misa_imagej.api.parameterschema.MISAParameterValidity;
 import org.hkijena.misa_imagej.api.repository.MISAModule;
 import org.hkijena.misa_imagej.utils.*;
 import org.hkijena.misa_imagej.api.parameterschema.JSONSchemaObject;
@@ -38,6 +39,8 @@ public class MISAModuleParameterEditorUI extends JFrame {
     private JLabel errorLabel;
 
     private MISAParameterSchema parameterSchema;
+
+    private Action addSampleAction;
 
     /**
      * Create the dialog.
@@ -70,12 +73,12 @@ public class MISAModuleParameterEditorUI extends JFrame {
     }
 
     private boolean parametersAreValid() {
-        ParameterSchemaValidityReport report = parameterSchema.isValidParameter();
+        MISAParameterValidity report = parameterSchema.isValidParameter();
 
         if (!report.isValid()) {
             StringBuilder message = new StringBuilder();
             if(!report.getInvalidEntries().isEmpty()) {
-                ParameterSchemaValidityReport.Entry e = report.getInvalidEntries().values().stream().findFirst().get();
+                MISAParameterValidity.Entry e = report.getInvalidEntries().values().stream().findFirst().get();
                 if(!e.getCategories().isEmpty()) {
                     message.append(e.getCategories().stream().findFirst().get());
                     if(e.getCategories().size() > 1)
@@ -212,6 +215,15 @@ public class MISAModuleParameterEditorUI extends JFrame {
         }
     }
 
+    private void initializeActions() {
+        addSampleAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+
+            }
+        };
+    }
+
     private void initialize() {
         setSize(800, 600);
         getContentPane().setLayout(new BorderLayout(8, 8));
@@ -219,6 +231,9 @@ public class MISAModuleParameterEditorUI extends JFrame {
         algorithmParametersEditorUI = new AlgorithmParametersEditorUI(this);
         runtimeParametersEditorUI = new RuntimeParametersEditorUI(this);
         sampleDataEditorUI = new SampleDataEditorUI(this);
+
+        // Menu bar
+        initializeMenuBar();
 
         // Tabs with settings
         JTabbedPane tabbedPane = new JTabbedPane();
@@ -254,15 +269,18 @@ public class MISAModuleParameterEditorUI extends JFrame {
         add(statusBar, BorderLayout.SOUTH);
     }
 
+    private void initializeMenuBar() {
+        JMenuBar menuBar = new JMenuBar();
+        JMenu samplesMenu = new JMenu("Samples");
+        menuBar.add(samplesMenu);
+        setJMenuBar(menuBar);
+    }
+
     private void initalizeSampleManagerUI(JToolBar toolBar) {
         // Add sample button
         JButton addSampleButton = new JButton("Add sample", UIUtils.getIconFromResources("add.png"));
         addSampleButton.addActionListener(actionEvent -> addSample());
         toolBar.add(addSampleButton);
-
-        // Batch-add button
-        JButton batchAddSampleButton = new JButton("Batch ...", UIUtils.getIconFromResources("batch-add.png"));
-        toolBar.add(batchAddSampleButton);
 
         {
             JComboBox<MISASample> sampleList = new JComboBox<>();

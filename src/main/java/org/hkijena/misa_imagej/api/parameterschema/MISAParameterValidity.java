@@ -2,7 +2,7 @@ package org.hkijena.misa_imagej.api.parameterschema;
 
 import java.util.*;
 
-public class ParameterSchemaValidityReport {
+public class MISAParameterValidity {
 
     public static class Entry {
         private Object object;
@@ -50,11 +50,11 @@ public class ParameterSchemaValidityReport {
 
     private Map<Object, Entry> entries = new HashMap<>();
 
-    public ParameterSchemaValidityReport() {
+    public MISAParameterValidity() {
 
     }
 
-    public ParameterSchemaValidityReport(Object target, String category, boolean valid, String message) {
+    public MISAParameterValidity(Object target, String category, boolean valid, String message) {
         this.report(target, category, valid, message);
     }
 
@@ -85,7 +85,7 @@ public class ParameterSchemaValidityReport {
      * @param subreport
      * @param category
      */
-    public void merge(ParameterSchemaValidityReport subreport, String... category) {
+    public void merge(MISAParameterValidity subreport, String... category) {
         for(Object key : subreport.entries.keySet()) {
             if(entries.containsKey(key)) {
                 Entry src = subreport.entries.get(key);

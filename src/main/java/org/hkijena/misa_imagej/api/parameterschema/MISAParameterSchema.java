@@ -1,7 +1,6 @@
 package org.hkijena.misa_imagej.api.parameterschema;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.hkijena.misa_imagej.api.cache.MISACache;
@@ -19,7 +18,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MISAParameterSchema implements ParameterSchemaValue {
+public class MISAParameterSchema implements MISAParameter {
 
     /**
      * JSON schema object for runtime parameters
@@ -190,8 +189,8 @@ public class MISAParameterSchema implements ParameterSchemaValue {
      * @return
      */
     @Override
-    public ParameterSchemaValidityReport isValidParameter() {
-        ParameterSchemaValidityReport report = new ParameterSchemaValidityReport();
+    public MISAParameterValidity isValidParameter() {
+        MISAParameterValidity report = new MISAParameterValidity();
 
         report.merge(algorithmParameters.isValidParameter(), "Algorithm parameters");
         report.merge(runtimeParameters.isValidParameter(), "Runtime parameters");
@@ -204,13 +203,10 @@ public class MISAParameterSchema implements ParameterSchemaValue {
     }
 
     /**
-     * Load parameters from the provided JSON string
-     * @param jsonString
+     * Load parameters from the provided JSON
+     * @param root
      */
-    public void loadParameters(String jsonString) {
-        Gson gson = GsonUtils.getGson();
-        JsonObject root = gson.fromJson(jsonString, JsonObject.class);
-
+    public void loadParameters(JsonObject root) {
         // Add missing samples & merge their parameters
         if(root.has("samples")) {
             for(Map.Entry<String, JsonElement> kv : root.getAsJsonObject("samples").entrySet()) {

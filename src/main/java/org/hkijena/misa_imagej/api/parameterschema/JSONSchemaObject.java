@@ -11,7 +11,7 @@ import java.util.*;
 /**
  * Deserialized JSON Schema entry that allows editing and exporting to the final JSON
  */
-public class JSONSchemaObject implements Cloneable, ParameterSchemaValue {
+public class JSONSchemaObject implements Cloneable, MISAParameter {
 
     public transient String id;
 
@@ -334,8 +334,8 @@ public class JSONSchemaObject implements Cloneable, ParameterSchemaValue {
     }
 
     @Override
-    public ParameterSchemaValidityReport isValidParameter() {
-        ParameterSchemaValidityReport report = new ParameterSchemaValidityReport();
+    public MISAParameterValidity isValidParameter() {
+        MISAParameterValidity report = new MISAParameterValidity();
         if(hasValue())
             report.report(this, null, true, "");
         else
@@ -356,6 +356,8 @@ public class JSONSchemaObject implements Cloneable, ParameterSchemaValue {
     }
 
     public void setValueFromJson(JsonElement json) {
+        if(json.isJsonNull())
+            return;
         switch(type) {
             case jsonBoolean:
                 setValue(json.getAsBoolean());

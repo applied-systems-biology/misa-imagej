@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * Models a data sample
  */
-public class MISASample implements ParameterSchemaValue {
+public class MISASample implements MISAParameter {
     /**
      * Name of the sample
      */
@@ -70,8 +70,8 @@ public class MISASample implements ParameterSchemaValue {
     }
 
     @Override
-    public ParameterSchemaValidityReport isValidParameter() {
-        ParameterSchemaValidityReport report = new ParameterSchemaValidityReport();
+    public MISAParameterValidity isValidParameter() {
+        MISAParameterValidity report = new MISAParameterValidity();
 
         report.merge(parameters.isValidParameter(), "Parameters");
         for(MISACache cache : importedCaches) {
