@@ -8,7 +8,10 @@ import org.hkijena.misa_imagej.utils.UIUtils;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.DateAxis;
+import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.util.StringUtils;
+import org.jfree.data.category.DefaultIntervalCategoryDataset;
 import org.jfree.data.category.IntervalCategoryDataset;
 import org.jfree.data.gantt.Task;
 import org.jfree.data.gantt.TaskSeries;
@@ -19,6 +22,7 @@ import java.awt.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.*;
 import java.util.List;
@@ -85,8 +89,11 @@ public class MISARuntimeLogUI extends JFrame {
                 else if (name.contains("__OBJECT__"))
                     name = "Parameter schema";
                 else if (CharMatcher.is('/').countIn(name) >= 2) {
-                    name = name.substring(name.indexOf('/'));
                     name = name.substring(name.indexOf('/') + 1);
+                    name = name.substring(name.indexOf('/') + 1);
+                }
+                else {
+                    name = "Module dispatcher";
                 }
                 if (!entriesByName.containsKey(name))
                     entriesByName.put(name, new ArrayList<>());
@@ -109,9 +116,19 @@ public class MISARuntimeLogUI extends JFrame {
         }
 
         // Create chart
-        JFreeChart chart = ChartFactory.createGanttChart("MISA++ runtime", "Thread", "ms", dataset);
+        JFreeChart chart = ChartFactory.createGanttChart("MISA++ runtime",
+                "Thread",
+                "Time (ms)",
+                dataset,
+                true,
+                false,
+                false);
+        CategoryPlot plot = chart.getCategoryPlot();
+        DateAxis axis = (DateAxis)plot.getRangeAxis();
+        axis.setDateFormatOverride(new SimpleDateFormat("SSS"));
         chartPanel = new ChartPanel(chart);
         add(chartPanel, BorderLayout.CENTER);
+        revalidate();
         repaint();
     }
 }
