@@ -5,10 +5,12 @@ import com.google.gson.Gson;
 import org.hkijena.misa_imagej.api.perfanalysis.MISARuntimeLog;
 import org.hkijena.misa_imagej.utils.GsonUtils;
 import org.hkijena.misa_imagej.utils.UIUtils;
+import org.jdesktop.swingx.JXStatusBar;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.DateAxis;
+import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.util.StringUtils;
 import org.jfree.data.category.DefaultIntervalCategoryDataset;
@@ -16,6 +18,7 @@ import org.jfree.data.category.IntervalCategoryDataset;
 import org.jfree.data.gantt.Task;
 import org.jfree.data.gantt.TaskSeries;
 import org.jfree.data.gantt.TaskSeriesCollection;
+import org.jfree.data.time.SimpleTimePeriod;
 
 import javax.swing.*;
 import java.awt.*;
@@ -31,6 +34,7 @@ public class MISARuntimeLogUI extends JFrame {
 
     private MISARuntimeLog runtimeLog;
     private ChartPanel chartPanel;
+    private JLabel statusLabel;
 
     public MISARuntimeLogUI() {
         initialize();
@@ -56,12 +60,19 @@ public class MISARuntimeLogUI extends JFrame {
 
         add(toolBar, BorderLayout.NORTH);
 
+        JXStatusBar statusBar = new JXStatusBar();
+        statusLabel = new JLabel("Ready");
+        statusBar.add(statusLabel);
+        add(statusBar, BorderLayout.SOUTH);
+
     }
 
     public void open(Path path) {
+        statusLabel.setText("Ready");
         Gson gson = GsonUtils.getGson();
         try {
             runtimeLog = gson.fromJson(new String(Files.readAllBytes(path)), MISARuntimeLog.class);
+            statusLabel.setText(path.toString());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -104,16 +115,59 @@ public class MISARuntimeLogUI extends JFrame {
 
         // Create the dataset
         TaskSeriesCollection dataset = new TaskSeriesCollection();
-        for (Map.Entry<String, List<MISARuntimeLog.Entry>> kv : entriesByName.entrySet()) {
-            TaskSeries series = new TaskSeries(kv.getKey());
-            for (MISARuntimeLog.Entry entry : kv.getValue()) {
-                Task task = new Task(entryThreads.get(entry),
-                        Date.from(Instant.ofEpochMilli((long) entry.startTime)),
-                        Date.from(Instant.ofEpochMilli((long) entry.endTime)));
-                series.add(task);
+
+        // We need to have a map of entry name -> thread -> thread-representative task due to how this plot works
+        Map<String, Map<String, Task>> taskTargets = new HashMap<>();
+        for(String name : entriesByName.keySet()) {
+            taskTargets.put(name, new HashMap<>());
+            TaskSeries series = new TaskSeries(name);
+
+            long minRuntime = Long.MAX_VALUE;
+            long maxRuntime = 0;
+
+            for(MISARuntimeLog.Entry entry : entriesByName.get(name)) {
+                minRuntime = Math.min(minRuntime, (long)entry.startTime);
+                maxRuntime = Math.max(maxRuntime, (long)entry.endTime);
             }
+
+            for(String thread : runtimeLog.entries.keySet()) {
+                Task taskRepresentative = new Task(thread, new SimpleTimePeriod(minRuntime, maxRuntime));
+                taskTargets.get(name).put(thread, taskRepresentative);
+                series.add(taskRepresentative);
+            }
+
             dataset.add(series);
         }
+
+        // Now go through all entries
+        for(Map.Entry<String, List<MISARuntimeLog.Entry>> kv : entriesByName.entrySet()) {
+            for(MISARuntimeLog.Entry entry : kv.getValue()) {
+                String name = kv.getKey();
+                String thread = entryThreads.get(entry);
+                Task target = taskTargets.get(name).get(thread);
+                target.addSubtask(new Task(entry.name + entry.startTime + "_" + entry.endTime, new SimpleTimePeriod((long)entry.startTime, (long)entry.endTime)));
+            }
+        }
+
+//        {
+//            TaskSeries s1 = new TaskSeries("A");
+//            TaskSeries s2 = new TaskSeries("B");
+//
+//            Task s1t0 = new Task("thread0", new SimpleTimePeriod(0, 4000));
+//            Task s1t1 = new Task("thread1", new SimpleTimePeriod(0, 4000));
+//            Task s2t0 = new Task("thread0", new SimpleTimePeriod(0, 4000));
+//
+//            s1.add(s1t0);
+//            s1.add(s1t1);
+//            s2.add(s2t0);
+//
+//            s1t0.addSubtask(new Task("thread0", new SimpleTimePeriod(0, 1000)));
+//            s1t0.addSubtask(new Task("thread0", new SimpleTimePeriod(1500, 3000)));
+//            s1t1.addSubtask(new Task("thread1", new SimpleTimePeriod(1000, 4000)));
+//            s2t0.addSubtask(new Task("thread1", new SimpleTimePeriod(100, 900)));
+//            dataset.add(s1);
+//            dataset.add(s2);
+//        }
 
         // Create chart
         JFreeChart chart = ChartFactory.createGanttChart("MISA++ runtime",
@@ -124,9 +178,10 @@ public class MISARuntimeLogUI extends JFrame {
                 false,
                 false);
         CategoryPlot plot = chart.getCategoryPlot();
-        DateAxis axis = (DateAxis)plot.getRangeAxis();
-        axis.setDateFormatOverride(new SimpleDateFormat("SSS"));
+        plot.setRangeAxis(new NumberAxis("Time (ms)"));
         chartPanel = new ChartPanel(chart);
+        chartPanel.setMaximumDrawWidth(Integer.MAX_VALUE);
+        chartPanel.setMaximumDrawHeight(Integer.MAX_VALUE);
         add(chartPanel, BorderLayout.CENTER);
         revalidate();
         repaint();
