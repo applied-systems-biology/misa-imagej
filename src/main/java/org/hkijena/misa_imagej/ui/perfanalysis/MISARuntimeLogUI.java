@@ -15,7 +15,9 @@ import org.jfree.chart.axis.SymbolAxis;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.StandardXYBarPainter;
 import org.jfree.chart.renderer.xy.XYBarRenderer;
+import org.jfree.chart.ui.RectangleEdge;
 import org.jfree.chart.util.StringUtils;
 import org.jfree.data.category.DefaultIntervalCategoryDataset;
 import org.jfree.data.category.IntervalCategoryDataset;
@@ -28,6 +30,7 @@ import org.jfree.data.xy.XYIntervalSeriesCollection;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.geom.RectangularShape;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -48,6 +51,7 @@ public class MISARuntimeLogUI extends JFrame {
 
     private void initialize() {
         setSize(800, 600);
+        setIconImage(UIUtils.getIconFromResources("misaxx.png").getImage());
         getContentPane().setLayout(new BorderLayout(8, 8));
         setTitle("MISA++ for ImageJ - Analyze runtime log");
 
@@ -127,27 +131,28 @@ public class MISARuntimeLogUI extends JFrame {
             XYIntervalSeries series = new XYIntervalSeries(kv.getKey());
             for(MISARuntimeLog.Entry entry : kv.getValue()) {
                 int threadId = threadList.indexOf(entryThreads.get(entry));
-                series.add(threadId, threadId - 0.3, threadId + 0.3, entry.startTime, entry.startTime + 0.1, entry.endTime - 0.1);
+                series.add(threadId, threadId - 0.3, threadId + 0.3, entry.startTime / 1000.0, entry.startTime / 1000.0, entry.endTime / 1000.0);
             }
 
             dataset.addSeries(series);
         }
 
-//        for(int k = 0; k < totalCourseCount; k++){
-//            //get a random room
-//            int currentRoom = r.nextInt(runtimeLog.entries.size());
-//            //get a random course
-//            int currentCourse = r.nextInt(courseTypes);
-//            //get a random course duration (1-3 h)
-//            int time = r.nextInt(3) + 1;
-//            //Encode the room as x value. The width of the bar is only 0.6 to leave a small gap. The course starts 0.1 h/6 min after the end of the preceding course.
-//            series[currentCourse].add(currentRoom, currentRoom - 0.3, currentRoom + 0.3, startTimes[currentRoom], startTimes[currentRoom] +0.1, startTimes[currentRoom] + time - 0.1);
-//            //Increase start time for the current room
-//            startTimes[currentRoom] += time;
-//        }
         XYBarRenderer renderer = new XYBarRenderer();
+        renderer.setBarPainter(new StandardXYBarPainter() {
+            @Override
+            public void paintBarShadow(Graphics2D g2, XYBarRenderer renderer, int row, int column, RectangularShape bar, RectangleEdge base, boolean pegShadow) {
+            }
+
+            @Override
+            public void paintBar(Graphics2D g2, XYBarRenderer renderer, int row, int column, RectangularShape bar, RectangleEdge base) {
+                super.paintBar(g2, renderer, row, column, bar, base);
+                g2.setColor(Color.DARK_GRAY);
+                g2.setStroke(new BasicStroke(1));
+                g2.draw(bar);
+            }
+        });
         renderer.setUseYInterval(true);
-        XYPlot plot = new XYPlot(dataset, new SymbolAxis("Threads", threadList.toArray(new String[0])), new NumberAxis(), renderer);
+        XYPlot plot = new XYPlot(dataset, new SymbolAxis("Threads", threadList.toArray(new String[0])), new NumberAxis("Time (s)"), renderer);
         plot.setOrientation(PlotOrientation.HORIZONTAL);
         JFreeChart chart = new JFreeChart(plot);
 

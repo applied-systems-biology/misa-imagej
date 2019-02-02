@@ -92,11 +92,11 @@ public class UIUtils {
         return popupMenu;
     }
 
-    public static Icon getIconFromResources(String iconName) {
+    public static ImageIcon getIconFromResources(String iconName) {
         return new ImageIcon(ResourceUtils.getPluginResource("icons/" + iconName));
     }
 
-    public static Icon getIconFromColor(Color color) {
+    public static ColorIcon getIconFromColor(Color color) {
         return new ColorIcon(16, 16, color);
     }
 
