@@ -2,10 +2,12 @@ package org.hkijena.misa_imagej.ui.repository;
 
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonWriter;
+import org.checkerframework.checker.guieffect.qual.UI;
 import org.hkijena.misa_imagej.MISACommand;
 import org.hkijena.misa_imagej.api.repository.MISAModule;
 import org.hkijena.misa_imagej.api.repository.MISAModuleRepository;
 import org.hkijena.misa_imagej.ui.parametereditor.MISAModuleParameterEditorUI;
+import org.hkijena.misa_imagej.ui.perfanalysis.MISARuntimeLogUI;
 import org.hkijena.misa_imagej.utils.GsonUtils;
 import org.hkijena.misa_imagej.utils.OSUtils;
 import org.hkijena.misa_imagej.utils.UIUtils;
@@ -22,21 +24,21 @@ import java.nio.file.Paths;
 /**
  * User interface that allows the user to manage and select MISA++ modules
  */
-public class MISAModuleManagerUI extends JFrame {
+public class MISAModuleRepositoryUI extends JFrame {
 
     private MISACommand command;
     private MISAModuleRepository moduleRepository;
-    private static MISAModuleManagerUI instance;
+    private static MISAModuleRepositoryUI instance;
     private JList<MISAModule> misaModuleJList;
     private JPanel detailPanel;
 
-    public static MISAModuleManagerUI getInstance(MISACommand command) {
+    public static MISAModuleRepositoryUI getInstance(MISACommand command) {
         if(instance == null)
-            instance = new MISAModuleManagerUI(command);
+            instance = new MISAModuleRepositoryUI(command);
         return instance;
     }
 
-    private MISAModuleManagerUI(MISACommand command) {
+    private MISAModuleRepositoryUI(MISACommand command) {
         instance = this;
         moduleRepository = new MISAModuleRepository(command);
         this.command = command;
@@ -85,6 +87,13 @@ public class MISAModuleManagerUI extends JFrame {
         toolBar.add(addButton);
 
         toolBar.add(Box.createHorizontalGlue());
+
+        JButton launchRuntimeLogUI = new JButton("Analyze runtime log ...", UIUtils.getIconFromResources("open.png"));
+        launchRuntimeLogUI.addActionListener(actionEvent -> {
+            MISARuntimeLogUI runtimeLogUI = new MISARuntimeLogUI();
+            runtimeLogUI.setVisible(true);
+        });
+        toolBar.add(launchRuntimeLogUI);
 
         JButton launchAnalyzer = new JButton("Analyze result ...", UIUtils.getIconFromResources("open.png"));
         launchAnalyzer.addActionListener(actionEvent -> {

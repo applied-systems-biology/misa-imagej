@@ -6,7 +6,7 @@ import io.scif.services.DatasetIOService;
 import net.imagej.DatasetService;
 import net.imagej.ImageJ;
 import net.imagej.ops.OpService;
-import org.hkijena.misa_imagej.ui.repository.MISAModuleManagerUI;
+import org.hkijena.misa_imagej.ui.repository.MISAModuleRepositoryUI;
 import org.scijava.app.StatusService;
 import org.scijava.command.Command;
 import org.scijava.command.CommandService;
@@ -52,7 +52,7 @@ public class MISACommand implements Command {
 	@Override
 	public void run() {
 		SwingUtilities.invokeLater(() -> {
-			MISAModuleManagerUI.getInstance(this).setVisible(true);
+			MISAModuleRepositoryUI.getInstance(this).setVisible(true);
 		});
 	}
 
