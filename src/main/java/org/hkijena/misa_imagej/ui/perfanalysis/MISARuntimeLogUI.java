@@ -6,25 +6,15 @@ import org.hkijena.misa_imagej.api.perfanalysis.MISARuntimeLog;
 import org.hkijena.misa_imagej.utils.GsonUtils;
 import org.hkijena.misa_imagej.utils.UIUtils;
 import org.jdesktop.swingx.JXStatusBar;
-import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.axis.SymbolAxis;
-import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.StandardXYBarPainter;
 import org.jfree.chart.renderer.xy.XYBarRenderer;
 import org.jfree.chart.ui.RectangleEdge;
-import org.jfree.chart.util.StringUtils;
-import org.jfree.data.category.DefaultIntervalCategoryDataset;
-import org.jfree.data.category.IntervalCategoryDataset;
-import org.jfree.data.gantt.Task;
-import org.jfree.data.gantt.TaskSeries;
-import org.jfree.data.gantt.TaskSeriesCollection;
-import org.jfree.data.time.SimpleTimePeriod;
 import org.jfree.data.xy.XYIntervalSeries;
 import org.jfree.data.xy.XYIntervalSeriesCollection;
 
@@ -34,16 +24,18 @@ import java.awt.geom.RectangularShape;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MISARuntimeLogUI extends JFrame {
 
     private MISARuntimeLog runtimeLog;
     private ChartPanel chartPanel;
     private JLabel statusLabel;
+
+    private JToggleButton withBorderToggle;
 
     public MISARuntimeLogUI() {
         initialize();
@@ -67,6 +59,11 @@ public class MISARuntimeLogUI extends JFrame {
             }
         });
         toolBar.add(openButton);
+        toolBar.add(Box.createHorizontalGlue());
+        withBorderToggle = new JToggleButton("With border", UIUtils.getIconFromResources("border.png"));
+        withBorderToggle.addActionListener(actionEvent -> { revalidate(); repaint(); });
+        withBorderToggle.setSelected(true);
+        toolBar.add(withBorderToggle);
 
         add(toolBar, BorderLayout.NORTH);
 
@@ -146,9 +143,11 @@ public class MISARuntimeLogUI extends JFrame {
             @Override
             public void paintBar(Graphics2D g2, XYBarRenderer renderer, int row, int column, RectangularShape bar, RectangleEdge base) {
                 super.paintBar(g2, renderer, row, column, bar, base);
-                g2.setColor(Color.DARK_GRAY);
-                g2.setStroke(new BasicStroke(1));
-                g2.draw(bar);
+                if(withBorderToggle.isSelected()) {
+                    g2.setColor(Color.DARK_GRAY);
+                    g2.setStroke(new BasicStroke(1));
+                    g2.draw(bar);
+                }
             }
         });
         renderer.setUseYInterval(true);

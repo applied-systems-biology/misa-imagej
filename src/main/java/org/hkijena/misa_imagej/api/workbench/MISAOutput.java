@@ -2,6 +2,7 @@ package org.hkijena.misa_imagej.api.workbench;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import org.hkijena.misa_imagej.api.cache.MISACache;
 import org.hkijena.misa_imagej.api.parameterschema.JSONSchemaObject;
 import org.hkijena.misa_imagej.api.parameterschema.MISAParameterSchema;
 import org.hkijena.misa_imagej.api.parameterschema.MISASample;
@@ -47,6 +48,16 @@ public class MISAOutput {
 
     private void loadCaches() throws IOException {
         for(MISASample sample : parameterSchema.getSamples()) {
+            Path cachePath = rootPath.resolve(sample.name);
+            Path importedCacheAttachmentsPath = rootPath.resolve("attachments").resolve("imported").resolve(sample.name);
+            Path exportedCacheAttachmentsPath = rootPath.resolve("attachments").resolve("exported").resolve(sample.name);
+
+            for(MISACache cache : sample.getImportedCaches()) {
+                Path attachments = importedCacheAttachmentsPath;
+                if(cache.getRelativePath() != null && !cache.getRelativePath().isEmpty()) {
+                    attachments = attachments.resolve(cache.getRelativePath());
+                }
+            }
         }
     }
 
