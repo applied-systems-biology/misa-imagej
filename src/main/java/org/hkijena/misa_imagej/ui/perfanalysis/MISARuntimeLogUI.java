@@ -32,10 +32,10 @@ import java.util.Map;
 public class MISARuntimeLogUI extends JFrame {
 
     private MISARuntimeLog runtimeLog;
-    private ChartPanel chartPanel;
+    private ChartPanel ganttChartPanel;
     private JLabel statusLabel;
 
-    private JToggleButton withBorderToggle;
+    private JToggleButton ganttWithBorderToggle;
 
     public MISARuntimeLogUI() {
         initialize();
@@ -59,19 +59,29 @@ public class MISARuntimeLogUI extends JFrame {
             }
         });
         toolBar.add(openButton);
-        toolBar.add(Box.createHorizontalGlue());
-        withBorderToggle = new JToggleButton("With border", UIUtils.getIconFromResources("border.png"));
-        withBorderToggle.addActionListener(actionEvent -> { revalidate(); repaint(); });
-        withBorderToggle.setSelected(true);
-        toolBar.add(withBorderToggle);
-
         add(toolBar, BorderLayout.NORTH);
+
+        JTabbedPane tabbedPane = new JTabbedPane();
+        tabbedPane.addTab("Timeline", initializeGantt());
+        add(tabbedPane, BorderLayout.CENTER);
 
         JXStatusBar statusBar = new JXStatusBar();
         statusLabel = new JLabel("Ready");
         statusBar.add(statusLabel);
         add(statusBar, BorderLayout.SOUTH);
 
+    }
+
+    private JPanel initializeGantt() {
+        JPanel result = new JPanel(new BorderLayout());
+
+        JToolBar toolBar = new JToolBar();
+        ganttWithBorderToggle = new JToggleButton("With border", UIUtils.getIconFromResources("border.png"));
+        ganttWithBorderToggle.addActionListener(actionEvent -> { ganttChartPanel.repaint(); });
+        ganttWithBorderToggle.setSelected(true);
+        toolBar.add(ganttWithBorderToggle);
+        result.add(toolBar, BorderLayout.NORTH);
+        return result;
     }
 
     public void open(Path path) {
@@ -83,12 +93,12 @@ public class MISARuntimeLogUI extends JFrame {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        rebuildChart();
+        rebuildGanttChart();
     }
 
-    public void rebuildChart() {
-        if (chartPanel != null) {
-            this.remove(chartPanel);
+    public void rebuildGanttChart() {
+        if (ganttChartPanel != null) {
+            this.remove(ganttChartPanel);
         }
         if (runtimeLog == null)
             return;
@@ -143,7 +153,7 @@ public class MISARuntimeLogUI extends JFrame {
             @Override
             public void paintBar(Graphics2D g2, XYBarRenderer renderer, int row, int column, RectangularShape bar, RectangleEdge base) {
                 super.paintBar(g2, renderer, row, column, bar, base);
-                if(withBorderToggle.isSelected()) {
+                if(ganttWithBorderToggle.isSelected()) {
                     g2.setColor(Color.DARK_GRAY);
                     g2.setStroke(new BasicStroke(1));
                     g2.draw(bar);
@@ -156,10 +166,10 @@ public class MISARuntimeLogUI extends JFrame {
         JFreeChart chart = new JFreeChart(plot);
 
         // Setup panel
-        chartPanel = new ChartPanel(chart);
-        chartPanel.setMaximumDrawWidth(Integer.MAX_VALUE);
-        chartPanel.setMaximumDrawHeight(Integer.MAX_VALUE);
-        add(chartPanel, BorderLayout.CENTER);
+        ganttChartPanel = new ChartPanel(chart);
+        ganttChartPanel.setMaximumDrawWidth(Integer.MAX_VALUE);
+        ganttChartPanel.setMaximumDrawHeight(Integer.MAX_VALUE);
+        add(ganttChartPanel, BorderLayout.CENTER);
         revalidate();
         repaint();
     }
