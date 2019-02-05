@@ -23,4 +23,44 @@ public class MISARuntimeLog extends MISASerializable {
         @SerializedName("start-time")
         public double startTime;
     }
+
+    /**
+     * Returns the total runtime
+     * @return
+     */
+    public double getTotalRuntime() {
+        double result = 0;
+        for(List<Entry> list : entries.values()) {
+            for(Entry entry : list) {
+                result = Math.max(entry.endTime, result);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Estimates the runtime if no parallelization would be used
+     * @return
+     */
+    public double getUnparallelizedRuntime() {
+        if(entries.size() <= 1)
+            return getTotalRuntime();
+        double result = 0;
+        for(List<Entry> list : entries.values()) {
+            for(Entry entry : list) {
+                result += entry.endTime - entry.startTime;
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Returns the speedup by parallelization
+     * @return
+     */
+    public double getParallelizationSpeedup() {
+        return getUnparallelizedRuntime() / getTotalRuntime();
+    }
+
+
 }

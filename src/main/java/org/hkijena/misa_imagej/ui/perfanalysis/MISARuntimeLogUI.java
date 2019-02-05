@@ -19,6 +19,8 @@ import org.jfree.data.xy.XYIntervalSeries;
 import org.jfree.data.xy.XYIntervalSeriesCollection;
 
 import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.geom.RectangularShape;
 import java.io.IOException;
@@ -33,6 +35,8 @@ public class MISARuntimeLogUI extends JFrame {
 
     private MISARuntimeLog runtimeLog;
     private ChartPanel ganttChartPanel;
+    private JTable summaryTable;
+
     private JLabel statusLabel;
     private JButton openButton;
 
@@ -64,6 +68,7 @@ public class MISARuntimeLogUI extends JFrame {
 
         JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.addTab("Timeline", initializeGantt());
+        tabbedPane.addTab("Summary", initializeSummaryPanel());
         add(tabbedPane, BorderLayout.CENTER);
 
         JXStatusBar statusBar = new JXStatusBar();
@@ -95,9 +100,21 @@ public class MISARuntimeLogUI extends JFrame {
         return result;
     }
 
+    private JPanel initializeSummaryPanel() {
+        JPanel result = new JPanel(new BorderLayout());
+        summaryTable = new JTable() {
+            @Override
+            public boolean isCellEditable(int i, int i1) {
+                return false;
+            }
+        };
+        result.add(summaryTable, BorderLayout.CENTER);
+        return result;
+    }
+
     public void open(MISARuntimeLog log) {
         this.runtimeLog = log;
-        rebuildGanttChart();
+        rebuildCharts();
     }
 
     public void open(Path path) {
@@ -111,10 +128,27 @@ public class MISARuntimeLogUI extends JFrame {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        rebuildGanttChart();
+        rebuildCharts();
     }
 
-    public void rebuildGanttChart() {
+    public void rebuildCharts() {
+        rebuildGanttChart();
+        rebuildSummary();
+    }
+
+    private void rebuildSummary() {
+        DefaultTableModel model = new DefaultTableModel();
+        if(runtimeLog != null) {
+            model.addColumn("");
+            model.addColumn("Value");
+            model.addRow(new Object[] { "Total runtime (s)", runtimeLog.getTotalRuntime() / 1000.0 });
+            model.addRow(new Object[] { "Estimated single-threaded runtime (s)", runtimeLog.getUnparallelizedRuntime() / 1000.0 });
+            model.addRow(new Object[] { "Multithreading speedup", runtimeLog.getParallelizationSpeedup() });
+        }
+        summaryTable.setModel(model);
+    }
+
+    private void rebuildGanttChart() {
         if (ganttChartPanel != null) {
             this.remove(ganttChartPanel);
         }
