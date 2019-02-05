@@ -2,7 +2,7 @@ package org.hkijena.misa_imagej.ui.perfanalysis;
 
 import com.google.common.base.CharMatcher;
 import com.google.gson.Gson;
-import org.hkijena.misa_imagej.api.perfanalysis.MISARuntimeLog;
+import org.hkijena.misa_imagej.api.MISARuntimeLog;
 import org.hkijena.misa_imagej.utils.GsonUtils;
 import org.hkijena.misa_imagej.utils.UIUtils;
 import org.jdesktop.swingx.JXStatusBar;
@@ -86,6 +86,11 @@ public class MISARuntimeLogUI extends JFrame {
         result.add(ganttChartPanel, BorderLayout.CENTER);
 
         return result;
+    }
+
+    public void open(MISARuntimeLog log) {
+        this.runtimeLog = log;
+        rebuildGanttChart();
     }
 
     public void open(Path path) {

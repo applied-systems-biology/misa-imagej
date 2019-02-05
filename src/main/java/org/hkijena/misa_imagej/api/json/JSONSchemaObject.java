@@ -1,7 +1,9 @@
-package org.hkijena.misa_imagej.api.parameterschema;
+package org.hkijena.misa_imagej.api.json;
 
 import com.google.gson.JsonElement;
 import com.google.gson.annotations.SerializedName;
+import org.hkijena.misa_imagej.api.MISAParameter;
+import org.hkijena.misa_imagej.api.MISAParameterValidity;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.beans.PropertyChangeListener;

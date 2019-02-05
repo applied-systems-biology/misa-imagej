@@ -1,4 +1,4 @@
-package org.hkijena.misa_imagej.api.parameterschema;
+package org.hkijena.misa_imagej.api;
 
 import java.util.*;
 

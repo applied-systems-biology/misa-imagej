@@ -1,10 +1,10 @@
-package org.hkijena.misa_imagej.api.parameterschema;
+package org.hkijena.misa_imagej.api;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import org.hkijena.misa_imagej.api.cache.MISACache;
-import org.hkijena.misa_imagej.api.cache.MISACacheIOType;
+import org.hkijena.misa_imagej.api.json.JSONSchemaObject;
+import org.hkijena.misa_imagej.api.json.JSONSchemaObjectType;
 import org.hkijena.misa_imagej.utils.GsonUtils;
 
 import java.beans.PropertyChangeListener;

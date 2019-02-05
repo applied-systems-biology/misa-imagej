@@ -1,4 +1,4 @@
-package org.hkijena.misa_imagej.api.cache;
+package org.hkijena.misa_imagej.api;
 
 public enum MISACacheIOType {
     Imported,

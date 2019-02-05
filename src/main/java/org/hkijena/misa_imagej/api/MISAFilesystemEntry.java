@@ -1,8 +1,6 @@
-package org.hkijena.misa_imagej.api.parameterschema;
+package org.hkijena.misa_imagej.api;
 
-import org.hkijena.misa_imagej.api.cache.MISACache;
-import org.hkijena.misa_imagej.api.cache.MISACacheRegistry;
-import org.hkijena.misa_imagej.api.cache.MISACacheIOType;
+import org.hkijena.misa_imagej.api.json.JSONSchemaObject;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;

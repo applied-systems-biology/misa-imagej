@@ -13,12 +13,12 @@ import io.scif.services.DatasetIOService;
 
 import net.imagej.DatasetService;
 import org.hkijena.misa_imagej.MISACommand;
-import org.hkijena.misa_imagej.api.parameterschema.MISAParameterSchema;
-import org.hkijena.misa_imagej.api.parameterschema.MISASample;
-import org.hkijena.misa_imagej.api.parameterschema.MISAParameterValidity;
+import org.hkijena.misa_imagej.api.MISAParameterSchema;
+import org.hkijena.misa_imagej.api.MISASample;
+import org.hkijena.misa_imagej.api.MISAParameterValidity;
 import org.hkijena.misa_imagej.api.repository.MISAModule;
 import org.hkijena.misa_imagej.utils.*;
-import org.hkijena.misa_imagej.api.parameterschema.JSONSchemaObject;
+import org.hkijena.misa_imagej.api.json.JSONSchemaObject;
 import org.jdesktop.swingx.JXStatusBar;
 import org.scijava.app.StatusService;
 import org.scijava.display.DisplayService;

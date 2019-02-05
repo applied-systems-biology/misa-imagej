@@ -1,6 +1,6 @@
-package org.hkijena.misa_imagej.api.parameterschema;
+package org.hkijena.misa_imagej.api;
 
-import org.hkijena.misa_imagej.api.cache.MISACache;
+import org.hkijena.misa_imagej.api.json.JSONSchemaObject;
 
 import java.util.ArrayList;
 import java.util.List;

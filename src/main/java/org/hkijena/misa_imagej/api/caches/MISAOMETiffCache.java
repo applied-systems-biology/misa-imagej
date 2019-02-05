@@ -1,9 +1,9 @@
-package org.hkijena.misa_imagej.api.cache.caches;
+package org.hkijena.misa_imagej.api.caches;
 
-import org.hkijena.misa_imagej.api.parameterschema.MISAFilesystemEntry;
-import org.hkijena.misa_imagej.api.parameterschema.MISAParameterValidity;
-import org.hkijena.misa_imagej.api.cache.MISACache;
-import org.hkijena.misa_imagej.api.cache.MISACacheIOType;
+import org.hkijena.misa_imagej.api.MISAFilesystemEntry;
+import org.hkijena.misa_imagej.api.MISAParameterValidity;
+import org.hkijena.misa_imagej.api.MISACache;
+import org.hkijena.misa_imagej.api.MISACacheIOType;
 import org.hkijena.misa_imagej.utils.swappers.OMETiffSwapper;
 
 import java.io.IOException;

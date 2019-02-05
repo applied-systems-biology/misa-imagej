@@ -1,12 +1,10 @@
-package org.hkijena.misa_imagej.api.cache;
+package org.hkijena.misa_imagej.api;
 
-
-import org.hkijena.misa_imagej.api.parameterschema.MISAFilesystemEntry;
-import org.hkijena.misa_imagej.api.parameterschema.MISAParameterValidity;
-import org.hkijena.misa_imagej.api.parameterschema.MISAParameter;
 
 import java.awt.*;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MISACache implements MISAParameter {
     /**
@@ -14,6 +12,11 @@ public class MISACache implements MISAParameter {
      * This does not include "imported" or "exported"
      */
     private MISAFilesystemEntry filesystemEntry;
+
+    /**
+     * List of attachments
+     */
+    private Map<MISAAttachmentLocation, MISASerializable> attachments = new HashMap<>();
 
     public MISACache(MISAFilesystemEntry filesystemEntry) {
         this.filesystemEntry = filesystemEntry;
@@ -124,5 +127,9 @@ public class MISACache implements MISAParameter {
      */
     public void install(Path installFolder, boolean forceCopy) {
 
+    }
+
+    public Map<MISAAttachmentLocation, MISASerializable> getAttachments() {
+        return attachments;
     }
 }

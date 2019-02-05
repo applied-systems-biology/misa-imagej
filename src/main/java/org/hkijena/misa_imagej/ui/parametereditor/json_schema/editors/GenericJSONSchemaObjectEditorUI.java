@@ -1,7 +1,7 @@
 package org.hkijena.misa_imagej.ui.parametereditor.json_schema.editors;
 
-import org.hkijena.misa_imagej.api.parameterschema.JSONSchemaObject;
-import org.hkijena.misa_imagej.api.parameterschema.JSONSchemaObjectType;
+import org.hkijena.misa_imagej.api.json.JSONSchemaObject;
+import org.hkijena.misa_imagej.api.json.JSONSchemaObjectType;
 import org.hkijena.misa_imagej.ui.parametereditor.json_schema.*;
 
 import javax.swing.*;

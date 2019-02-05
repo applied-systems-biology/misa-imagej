@@ -1,4 +1,4 @@
-package org.hkijena.misa_imagej.api.perfanalysis;
+package org.hkijena.misa_imagej.api;
 
 import com.google.gson.annotations.SerializedName;
 import org.hkijena.misa_imagej.api.MISASerializable;

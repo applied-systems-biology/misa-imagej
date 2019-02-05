@@ -1,6 +1,6 @@
 package org.hkijena.misa_imagej.ui.parametereditor.json_schema;
 
-import org.hkijena.misa_imagej.api.parameterschema.JSONSchemaObject;
+import org.hkijena.misa_imagej.api.json.JSONSchemaObject;
 import org.hkijena.misa_imagej.ui.parametereditor.json_schema.editors.GenericJSONSchemaObjectEditorUI;
 
 import java.util.HashMap;

@@ -1,10 +1,15 @@
 package org.hkijena.misa_imagej.api;
 
+import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import org.hkijena.misa_imagej.api.attachments.MISALocatable;
+import org.hkijena.misa_imagej.api.attachments.MISALocation;
+import org.hkijena.misa_imagej.api.attachments.ome.MISAOMEPlanesLocation;
 import org.hkijena.misa_imagej.utils.GsonUtils;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class MISASerializableRegistry {
@@ -37,11 +42,22 @@ public class MISASerializableRegistry {
                 String id = element.getAsJsonObject().get("misa:serialization-id").getAsString();
                 if(registeredCaches.containsKey(id)) {
                     Gson gson = GsonUtils.getGson();
-                    return gson.fromJson(element, registeredCaches.get(id));
+                    MISASerializable result = gson.fromJson(element, registeredCaches.get(id));
+                    result.rawData = element.getAsJsonObject();
+                    return result;
                 }
                 else {
                     Gson gson = GsonUtils.getGson();
-                    return gson.fromJson(element, MISASerializable.class);
+                    // Deserialize to the best matching class
+                    List<String> hierarchy = gson.fromJson(element.getAsJsonObject().get("misa:serialization-hierarchy"), List.class);
+                    for(String hid : Lists.reverse(hierarchy)) {
+                        if(registeredCaches.containsKey(hid)) {
+                            return gson.fromJson(element, registeredCaches.get(hid));
+                        }
+                    }
+                    MISASerializable result = gson.fromJson(element, MISASerializable.class);
+                    result.rawData = element.getAsJsonObject();
+                    return result;
                 }
             }
             return null;
@@ -52,6 +68,9 @@ public class MISASerializableRegistry {
     }
 
     public static void initialize() {
+        register("misa:attachments/location", MISALocation.class);
+        register("misa:attachments/locatable", MISALocatable.class);
+        register("misa_ome:attachments/planes-location", MISAOMEPlanesLocation.class);
         isInitialized = true;
     }
 }

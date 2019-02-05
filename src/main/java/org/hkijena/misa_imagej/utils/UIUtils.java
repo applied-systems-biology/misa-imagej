@@ -1,6 +1,6 @@
 package org.hkijena.misa_imagej.utils;
 
-import org.hkijena.misa_imagej.api.parameterschema.JSONSchemaObject;
+import org.hkijena.misa_imagej.api.json.JSONSchemaObject;
 import org.hkijena.misa_imagej.utils.ui.ColorIcon;
 
 import javax.swing.*;
