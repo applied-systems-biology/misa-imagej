@@ -17,6 +17,7 @@ import org.hkijena.misa_imagej.api.MISAParameterSchema;
 import org.hkijena.misa_imagej.api.MISASample;
 import org.hkijena.misa_imagej.api.MISAParameterValidity;
 import org.hkijena.misa_imagej.api.repository.MISAModule;
+import org.hkijena.misa_imagej.ui.workbench.MISAWorkbench;
 import org.hkijena.misa_imagej.utils.*;
 import org.hkijena.misa_imagej.api.json.JSONSchemaObject;
 import org.jdesktop.swingx.JXStatusBar;
@@ -39,8 +40,6 @@ public class MISAModuleParameterEditorUI extends JFrame {
     private JLabel errorLabel;
 
     private MISAParameterSchema parameterSchema;
-
-    private Action addSampleAction;
 
     /**
      * Create the dialog.
@@ -170,7 +169,6 @@ public class MISAModuleParameterEditorUI extends JFrame {
                 Files.createDirectories(dialog.getImportedPath());
                 Files.createDirectories(dialog.getExportedPath());
                 Files.createDirectories(dialog.getParameterFilePath().getParent());
-                Files.createDirectories(dialog.getExecutablePath().getParent());
 
                 if (!FilesystemUtils.directoryIsEmpty(dialog.getImportedPath())) {
                     JOptionPane.showMessageDialog(this, "The directory " + dialog.getImportedPath().toString() + " must be empty!", "Run", JOptionPane.ERROR_MESSAGE);
@@ -196,8 +194,16 @@ public class MISAModuleParameterEditorUI extends JFrame {
 
                 // React to changes in status
                 processUI.addPropertyChangeListener(propertyChangeEvent -> {
-                    if(processUI.getStatus() == CancelableProcessUI.Status.Done ||
-                            processUI.getStatus() == CancelableProcessUI.Status.Failed ||
+                    if(processUI.getStatus() == CancelableProcessUI.Status.Done) {
+                        setEnabled(true);
+                        if(JOptionPane.showConfirmDialog(this, "The calculated finished. Do you want to analyze the results?",
+                                "Calulcation finished", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION) {
+                            MISAWorkbench ui = new MISAWorkbench();
+                            ui.setVisible(true);
+                            ui.open(dialog.getExportedPath());
+                        }
+                    }
+                    else if(processUI.getStatus() == CancelableProcessUI.Status.Failed ||
                             processUI.getStatus() == CancelableProcessUI.Status.Canceled) {
                         setEnabled(true);
                         if(processUI.getStatus() == CancelableProcessUI.Status.Failed) {
@@ -215,18 +221,10 @@ public class MISAModuleParameterEditorUI extends JFrame {
         }
     }
 
-    private void initializeActions() {
-        addSampleAction = new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent actionEvent) {
-
-            }
-        };
-    }
-
     private void initialize() {
         setSize(800, 600);
         getContentPane().setLayout(new BorderLayout(8, 8));
+        setIconImage(UIUtils.getIconFromResources("misaxx.png").getImage());
         sampleParametersEditorUI = new SampleParametersEditorUI(this);
         algorithmParametersEditorUI = new AlgorithmParametersEditorUI(this);
         runtimeParametersEditorUI = new RuntimeParametersEditorUI(this);

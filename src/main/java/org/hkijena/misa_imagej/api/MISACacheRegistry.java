@@ -1,5 +1,6 @@
 package org.hkijena.misa_imagej.api;
 
+import org.hkijena.misa_imagej.api.caches.MISAExportedAttachmentsCache;
 import org.hkijena.misa_imagej.api.caches.MISAFileCache;
 import org.hkijena.misa_imagej.api.caches.MISAOMETiffCache;
 
@@ -65,6 +66,7 @@ public class MISACacheRegistry {
 
         register("misa_ome:descriptions/ome-tiff", MISAOMETiffCache.class);
         register("misa:descriptions/file", MISAFileCache.class);
+        register("misa:descriptions/exported-attachments", MISAExportedAttachmentsCache.class);
 
         isInitialized = true;
     }

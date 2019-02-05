@@ -12,7 +12,6 @@ import org.hkijena.misa_imagej.api.MISASample;
 import org.hkijena.misa_imagej.api.MISARuntimeLog;
 import org.hkijena.misa_imagej.api.repository.MISAModuleInfo;
 import org.hkijena.misa_imagej.utils.GsonUtils;
-import org.jfree.data.json.impl.JSONObject;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -146,5 +145,9 @@ public class MISAOutput {
 
     public MISAModuleInfo getModuleInfo() {
         return moduleInfo;
+    }
+
+    public MISARuntimeLog getRuntimeLog() {
+        return runtimeLog;
     }
 }

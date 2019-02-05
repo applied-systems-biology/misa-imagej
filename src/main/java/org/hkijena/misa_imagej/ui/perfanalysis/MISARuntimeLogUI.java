@@ -34,6 +34,7 @@ public class MISARuntimeLogUI extends JFrame {
     private MISARuntimeLog runtimeLog;
     private ChartPanel ganttChartPanel;
     private JLabel statusLabel;
+    private JButton openButton;
 
     private JToggleButton ganttWithBorderToggle;
 
@@ -45,11 +46,11 @@ public class MISARuntimeLogUI extends JFrame {
         setSize(800, 600);
         setIconImage(UIUtils.getIconFromResources("misaxx.png").getImage());
         getContentPane().setLayout(new BorderLayout(8, 8));
-        setTitle("MISA++ for ImageJ - Analyze runtime log");
+        setTitle("MISA++ runtime analysis");
 
         JToolBar toolBar = new JToolBar();
 
-        JButton openButton = new JButton("Open ...", UIUtils.getIconFromResources("open.png"));
+        openButton = new JButton("Open ...", UIUtils.getIconFromResources("open.png"));
         openButton.addActionListener(actionEvent -> {
             JFileChooser chooser = new JFileChooser();
             chooser.setDialogTitle("Open runtime log");
@@ -77,7 +78,13 @@ public class MISARuntimeLogUI extends JFrame {
 
         JToolBar toolBar = new JToolBar();
         ganttWithBorderToggle = new JToggleButton("With border", UIUtils.getIconFromResources("border.png"));
-        ganttWithBorderToggle.addActionListener(actionEvent -> { ganttChartPanel.repaint(); });
+        ganttWithBorderToggle.addActionListener(actionEvent -> {
+            JFreeChart chart = ganttChartPanel.getChart();
+            ganttChartPanel.setChart(null);
+            ganttChartPanel.revalidate(); ganttChartPanel.repaint();
+            ganttChartPanel.setChart(chart);
+            ganttChartPanel.revalidate(); ganttChartPanel.repaint();
+        });
         ganttWithBorderToggle.setSelected(true);
         toolBar.add(ganttWithBorderToggle);
         result.add(toolBar, BorderLayout.NORTH);
@@ -95,10 +102,12 @@ public class MISARuntimeLogUI extends JFrame {
 
     public void open(Path path) {
         statusLabel.setText("Ready");
+        setTitle("MISA++ runtime analysis");
         Gson gson = GsonUtils.getGson();
         try {
             runtimeLog = gson.fromJson(new String(Files.readAllBytes(path)), MISARuntimeLog.class);
             statusLabel.setText(path.toString());
+            setTitle(path.toString() + " - MISA++ runtime analysis");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -129,6 +138,9 @@ public class MISARuntimeLogUI extends JFrame {
                 else if (CharMatcher.is('/').countIn(name) >= 2) {
                     name = name.substring(name.indexOf('/') + 1);
                     name = name.substring(name.indexOf('/') + 1);
+                }
+                else if(name.equals("Undefined workload")) {
+                    // Do nothing
                 }
                 else {
                     name = "Module dispatcher";
@@ -180,5 +192,12 @@ public class MISARuntimeLogUI extends JFrame {
         ganttChartPanel.setMaximumDrawHeight(Integer.MAX_VALUE);
         revalidate();
         repaint();
+    }
+
+    public void setHideOpenButton(boolean hide) {
+        if(hide)
+            openButton.setVisible(false);
+        else
+            openButton.setVisible(true);
     }
 }

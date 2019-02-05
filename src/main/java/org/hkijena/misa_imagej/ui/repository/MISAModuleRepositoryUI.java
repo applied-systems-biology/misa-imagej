@@ -50,6 +50,7 @@ public class MISAModuleRepositoryUI extends JFrame {
         setSize(800, 600);
         getContentPane().setLayout(new BorderLayout(8, 8));
         setTitle("MISA++ for ImageJ - Module manager");
+        setIconImage(UIUtils.getIconFromResources("misaxx.png").getImage());
 
         // Toolbar
         JToolBar toolBar = new JToolBar();
@@ -88,19 +89,20 @@ public class MISAModuleRepositoryUI extends JFrame {
 
         toolBar.add(Box.createHorizontalGlue());
 
-        JButton launchRuntimeLogUI = new JButton("Analyze runtime log ...", UIUtils.getIconFromResources("open.png"));
-        launchRuntimeLogUI.addActionListener(actionEvent -> {
-            MISARuntimeLogUI runtimeLogUI = new MISARuntimeLogUI();
-            runtimeLogUI.setVisible(true);
-        });
-        toolBar.add(launchRuntimeLogUI);
-
-        JButton launchAnalyzer = new JButton("Analyze result ...", UIUtils.getIconFromResources("open.png"));
+        JButton launchAnalyzer = new JButton("Analyze result ...", UIUtils.getIconFromResources("graph.png"));
         launchAnalyzer.addActionListener(actionEvent -> {
             MISAWorkbench workbench = new MISAWorkbench();
             workbench.setVisible(true);
         });
         toolBar.add(launchAnalyzer);
+
+        JButton launchRuntimeLogUI = new JButton(UIUtils.getIconFromResources("clock.png"));
+        launchRuntimeLogUI.setToolTipText("Analyze runtime log");
+        launchRuntimeLogUI.addActionListener(actionEvent -> {
+            MISARuntimeLogUI runtimeLogUI = new MISARuntimeLogUI();
+            runtimeLogUI.setVisible(true);
+        });
+        toolBar.add(launchRuntimeLogUI);
 
         add(toolBar, BorderLayout.NORTH);
 

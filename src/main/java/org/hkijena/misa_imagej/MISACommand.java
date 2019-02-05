@@ -17,7 +17,7 @@ import org.scijava.plugin.Plugin;
 import org.scijava.thread.ThreadService;
 import org.scijava.ui.UIService;
 
-@Plugin(type = Command.class, menuPath = "Plugins>MISA++ Module ...")
+@Plugin(type = Command.class, menuPath = "Plugins>MISA++ for ImageJ ...")
 public class MISACommand implements Command {
 
 	@Parameter

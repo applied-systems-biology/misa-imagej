@@ -17,7 +17,6 @@ public class MISARunDialogUI extends JDialog {
     private FileSelection parameterFilePath;
     private FileSelection importedPath;
     private FileSelection exportedPath;
-    private FileSelection executableFilePath;
     private boolean dialogOK = false;
 
     public MISARunDialogUI(Frame parent) {
@@ -30,7 +29,6 @@ public class MISARunDialogUI extends JDialog {
         try {
             Path tmppath = Files.createTempDirectory("ImageJMISA");
             parameterFilePath.setPath(tmppath.resolve("parameters.json"));
-            executableFilePath.setPath(tmppath);
             importedPath.setPath(tmppath.resolve("imported"));
             exportedPath.setPath(tmppath.resolve("exported"));
         } catch (IOException e) {
@@ -39,6 +37,7 @@ public class MISARunDialogUI extends JDialog {
     }
 
     private void initialize() {
+        setIconImage(UIUtils.getIconFromResources("misaxx.png").getImage());
         setSize(500, 400);
         getContentPane().setLayout(new BorderLayout(8, 8));
 
@@ -49,11 +48,6 @@ public class MISARunDialogUI extends JDialog {
         parameterFilePath.getFileChooser().setDialogTitle("Select parameter file path");
         parameterFilePath.getFileChooser().setMultiSelectionEnabled(false);
         parameterFilePath.getFileChooser().setFileSelectionMode(JFileChooser.FILES_ONLY);
-
-        executableFilePath = new FileSelection();
-        executableFilePath.getFileChooser().setDialogTitle("Select executable install path");
-        executableFilePath.getFileChooser().setMultiSelectionEnabled(false);
-        executableFilePath.getFileChooser().setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 
         importedPath = new FileSelection();
         importedPath.getFileChooser().setDialogTitle("Select temporary path for imported data");
@@ -89,18 +83,6 @@ public class MISARunDialogUI extends JDialog {
                 anchor = GridBagConstraints.PAGE_START;
                 gridx = 1;
                 gridy = 1;
-                fill = GridBagConstraints.HORIZONTAL;
-                weightx = 1;
-                insets = UIUtils.UI_PADDING;
-            }
-        });
-
-        UIUtils.createDescriptionLabelUI(formPanel, "Executable", 2, 0);
-        formPanel.add(executableFilePath, new GridBagConstraints() {
-            {
-                anchor = GridBagConstraints.PAGE_START;
-                gridx = 1;
-                gridy = 2;
                 fill = GridBagConstraints.HORIZONTAL;
                 weightx = 1;
                 insets = UIUtils.UI_PADDING;
@@ -175,6 +157,4 @@ public class MISARunDialogUI extends JDialog {
     public Path getExportedPath() {
         return exportedPath.getPath();
     }
-
-    public Path getExecutablePath() { return executableFilePath.getPath(); }
 }

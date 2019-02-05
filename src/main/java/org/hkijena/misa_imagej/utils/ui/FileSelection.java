@@ -32,7 +32,7 @@ public class FileSelection extends JPanel {
             }
         });
 
-        JButton selectButton = new JButton("Select ...");
+        JButton selectButton = new JButton(UIUtils.getIconFromResources("open.png"));
         add(selectButton, new GridBagConstraints() {
             {
                 anchor = GridBagConstraints.PAGE_START;
