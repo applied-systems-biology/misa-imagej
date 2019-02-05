@@ -81,6 +81,10 @@ public class MISARuntimeLogUI extends JFrame {
         ganttWithBorderToggle.setSelected(true);
         toolBar.add(ganttWithBorderToggle);
         result.add(toolBar, BorderLayout.NORTH);
+
+        ganttChartPanel = new ChartPanel(null);
+        result.add(ganttChartPanel, BorderLayout.CENTER);
+
         return result;
     }
 
@@ -166,10 +170,9 @@ public class MISARuntimeLogUI extends JFrame {
         JFreeChart chart = new JFreeChart(plot);
 
         // Setup panel
-        ganttChartPanel = new ChartPanel(chart);
+        ganttChartPanel.setChart(chart);
         ganttChartPanel.setMaximumDrawWidth(Integer.MAX_VALUE);
         ganttChartPanel.setMaximumDrawHeight(Integer.MAX_VALUE);
-        add(ganttChartPanel, BorderLayout.CENTER);
         revalidate();
         repaint();
     }
