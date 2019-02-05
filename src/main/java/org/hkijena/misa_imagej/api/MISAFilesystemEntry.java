@@ -1,5 +1,6 @@
 package org.hkijena.misa_imagej.api;
 
+import com.google.gson.JsonObject;
 import org.hkijena.misa_imagej.api.json.JSONSchemaObject;
 
 import java.nio.file.Path;
@@ -84,9 +85,37 @@ public class MISAFilesystemEntry implements Cloneable {
 
     public Path getInternalPath() {
         if(parent != null)
-            return Paths.get(parent.getInternalPath().toString(), name);
+            return parent.getInternalPath().resolve(name);
         else
             return Paths.get(name);
+    }
+
+    public Path getExternalPath() {
+        if(externalPath != null && !externalPath.isEmpty()) {
+            return Paths.get(externalPath);
+        }
+        else if(parent != null) {
+            return parent.getExternalPath().resolve(name);
+        }
+        else {
+            return null;
+        }
+    }
+
+    /**
+     * Sets the external path from a parameter JSON object that corresponds to this entry.
+     * Will recursively descend
+     * @param json
+     */
+    public void setExternalPathFromJson(JsonObject json) {
+        if(json.has("external-path")) {
+            externalPath = json.get("external-path").getAsString();
+        }
+        for(Map.Entry<String, MISAFilesystemEntry> kv : children.entrySet()) {
+            if(json.has("children") && json.getAsJsonObject("children").has(kv.getKey())) {
+                kv.getValue().setExternalPathFromJson(json.getAsJsonObject("children").getAsJsonObject(kv.getKey()));
+            }
+        }
     }
 
     @Override

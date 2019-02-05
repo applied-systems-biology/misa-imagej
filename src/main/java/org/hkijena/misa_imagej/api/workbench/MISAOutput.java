@@ -12,6 +12,7 @@ import org.hkijena.misa_imagej.api.MISASample;
 import org.hkijena.misa_imagej.api.MISARuntimeLog;
 import org.hkijena.misa_imagej.api.repository.MISAModuleInfo;
 import org.hkijena.misa_imagej.utils.GsonUtils;
+import org.jfree.data.json.impl.JSONObject;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -33,6 +34,7 @@ public class MISAOutput {
         loadModuleInfo();
         loadParameters();
         loadRuntimeLog();
+        loadFilesystem();
         loadCaches();
     }
 
@@ -61,15 +63,37 @@ public class MISAOutput {
         }
     }
 
+    private void loadFilesystem() throws IOException {
+        Gson gson = GsonUtils.getGson();
+        JsonObject parameters = gson.fromJson(new String(Files.readAllBytes(getRootPath().resolve("parameters.json"))), JsonObject.class);
+        if(parameters.getAsJsonObject("filesystem").get("source").getAsString().equals("directories")) {
+            Path inputDirectory = Paths.get(parameters.getAsJsonObject("filesystem").get("input-directory").getAsString());
+            for(MISASample sample : parameterSchema.getSamples()) {
+                sample.getImportedFilesystem().externalPath = inputDirectory.resolve(sample.name).toString();
+                sample.getExportedFilesystem().externalPath = rootPath.resolve(sample.name).toString(); // Can load it from the root path
+            }
+        }
+        else if(parameters.getAsJsonObject("filesystem").get("source").getAsString().equals("json")) {
+            for(MISASample sample : parameterSchema.getSamples()) {
+                sample.getExportedFilesystem().externalPath = rootPath.resolve(sample.name).toString(); // Can load it from the root path
+
+                // Assign all other paths from JSON data
+                sample.getImportedFilesystem().setExternalPathFromJson(parameters.getAsJsonObject("filesystem").getAsJsonObject("json-data").
+                        getAsJsonObject("imported").getAsJsonObject(sample.name));
+                sample.getImportedFilesystem().setExternalPathFromJson(parameters.getAsJsonObject("filesystem").getAsJsonObject("json-data").
+                        getAsJsonObject("exported").getAsJsonObject(sample.name));
+            }
+        }
+
+    }
+
     private void loadCaches() throws IOException {
         for(MISASample sample : parameterSchema.getSamples()) {
-            Path cacheRootPath = rootPath.resolve(sample.name);
             Path importedCacheRootAttachmentsPath = rootPath.resolve("attachments").resolve("imported").resolve(sample.name);
             Path exportedCacheRootAttachmentsPath = rootPath.resolve("attachments").resolve("exported").resolve(sample.name);
 
             for(MISACache cache : sample.getImportedCaches()) {
                 if(cache.getRelativePath() != null) {
-                    Path cachePath = cacheRootPath.resolve(cache.getRelativePath());
                     Path cacheAttachmentsPath = importedCacheRootAttachmentsPath.resolve(cache.getRelativePath());
 
                     if(cacheAttachmentsPath.toFile().isDirectory()) {
@@ -80,7 +104,6 @@ public class MISAOutput {
 
             for(MISACache cache : sample.getExportedCaches()) {
                 if(cache.getRelativePath() != null) {
-                    Path cachePath = cacheRootPath.resolve(cache.getRelativePath());
                     Path cacheAttachmentsPath = exportedCacheRootAttachmentsPath.resolve(cache.getRelativePath());
 
                     if(cacheAttachmentsPath.toFile().isDirectory()) {

@@ -18,6 +18,7 @@ public class MISACache implements MISAParameter {
      */
     private Map<MISAAttachmentLocation, MISASerializable> attachments = new HashMap<>();
 
+
     public MISACache(MISAFilesystemEntry filesystemEntry) {
         this.filesystemEntry = filesystemEntry;
     }
