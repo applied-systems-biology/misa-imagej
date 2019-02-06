@@ -2,8 +2,10 @@ package org.hkijena.misa_imagej.ui.parametereditor.datasources;
 
 import org.hkijena.misa_imagej.api.MISACache;
 import org.hkijena.misa_imagej.api.MISADataSource;
+import org.hkijena.misa_imagej.api.datasources.MISAFolderLinkDataSource;
 import org.hkijena.misa_imagej.api.datasources.MISAOMETiffDataSource;
 import org.hkijena.misa_imagej.ui.parametereditor.datasources.editors.GenericMISADataSourceUI;
+import org.hkijena.misa_imagej.ui.parametereditor.datasources.editors.MISAFolderLinkDataSourceUI;
 import org.hkijena.misa_imagej.ui.parametereditor.datasources.editors.MISAOMETiffDataSourceUI;
 
 import java.util.HashMap;
@@ -57,6 +59,7 @@ public class MISADataSourceUIRegistry {
     public static void initialize() {
 
         register(MISAOMETiffDataSource.class, MISAOMETiffDataSourceUI.class);
+        register(MISAFolderLinkDataSource.class, MISAFolderLinkDataSourceUI.class);
 
         isInitialized = true;
     }

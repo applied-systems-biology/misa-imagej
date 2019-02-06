@@ -59,7 +59,10 @@ public class MISACacheUI extends JPanel {
     private void updateEditorUI() {
         if(editor != null)
             remove(editor);
-        add(MISADataSourceUIRegistry.getEditorFor(cache.getDataSource()), BorderLayout.CENTER);
+        editor = MISADataSourceUIRegistry.getEditorFor(cache.getDataSource());
+        add(editor, BorderLayout.CENTER);
+        revalidate();
+        repaint();
     }
 
     public MISACache getCache() {
