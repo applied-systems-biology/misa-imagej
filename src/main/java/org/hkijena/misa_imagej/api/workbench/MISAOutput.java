@@ -3,21 +3,21 @@ package org.hkijena.misa_imagej.api.workbench;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import org.hkijena.misa_imagej.api.MISASerializableRegistry;
-import org.hkijena.misa_imagej.api.MISAAttachmentLocation;
-import org.hkijena.misa_imagej.api.MISACache;
+import org.hkijena.misa_imagej.api.*;
 import org.hkijena.misa_imagej.api.json.JSONSchemaObject;
-import org.hkijena.misa_imagej.api.MISAParameterSchema;
-import org.hkijena.misa_imagej.api.MISASample;
-import org.hkijena.misa_imagej.api.MISARuntimeLog;
 import org.hkijena.misa_imagej.api.repository.MISAModuleInfo;
+import org.hkijena.misa_imagej.api.workbench.keys.MISADataKey;
+import org.hkijena.misa_imagej.api.workbench.keys.MISARunDataKey;
 import org.hkijena.misa_imagej.utils.GsonUtils;
 
+import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class MISAOutput {
@@ -125,14 +125,21 @@ public class MISAOutput {
                 MISAAttachmentLocation attachmentLocation = new MISAAttachmentLocation();
                 attachmentLocation.subCachePath = subCachePath;
                 attachmentLocation.attachmentIndex = kv.getKey();
-                cache.getAttachments().put(attachmentLocation, MISASerializableRegistry.deserialize(kv.getValue()));
+                cache.getAttachments().put(attachmentLocation, new MISAAttachment(attachmentLocation, MISASerializableRegistry.deserialize(kv.getValue()), cache));
             }
         }
     }
 
     public static void main(String[] args) throws IOException {
-        MISAOutput output = new MISAOutput(Paths.get("/home/rgerst/tmp/ome_glomeruli/output/"));
-        System.out.println("test");
+//        MISAOutput output = new MISAOutput(Paths.get("/home/rgerst/tmp/ome_glomeruli/output/"));
+//        MISAOutput output = new MISAOutput(Paths.get("/home/rgerst/tmp/glomeruli_full_quantified/"));
+//        Set<MISADataKey> keys = new HashSet<>();
+//        (new MISARunDataKey(output)).traverse(keys);
+//        System.out.println("test");
+        Gson gson = GsonUtils.getGson();
+        try(FileReader reader = new FileReader("/home/rgerst/tmp/glomeruli_full_quantified/attachments/exported/d7 NTN 1a zoom063 z5 647_09-40-46/quantified/quantified.json.json")) {
+            MISASerializableRegistry.deserialize(gson.fromJson(reader, JsonElement.class));
+        }
     }
 
     public Path getRootPath() {

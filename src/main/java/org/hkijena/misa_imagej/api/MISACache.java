@@ -7,6 +7,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MISACache implements MISAParameter {
+
+    private MISASample sample;
+
     /**
      * Relative path within the imported or exported filesystem
      * This does not include "imported" or "exported"
@@ -16,10 +19,11 @@ public class MISACache implements MISAParameter {
     /**
      * List of attachments
      */
-    private Map<MISAAttachmentLocation, MISASerializable> attachments = new HashMap<>();
+    private Map<MISAAttachmentLocation, MISAAttachment> attachments = new HashMap<>();
 
 
-    public MISACache(MISAFilesystemEntry filesystemEntry) {
+    public MISACache(MISASample sample, MISAFilesystemEntry filesystemEntry) {
+        this.sample = sample;
         this.filesystemEntry = filesystemEntry;
     }
 
@@ -130,7 +134,11 @@ public class MISACache implements MISAParameter {
 
     }
 
-    public Map<MISAAttachmentLocation, MISASerializable> getAttachments() {
+    public Map<MISAAttachmentLocation, MISAAttachment> getAttachments() {
         return attachments;
+    }
+
+    public MISASample getSample() {
+        return sample;
     }
 }

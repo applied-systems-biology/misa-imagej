@@ -9,6 +9,9 @@ import java.util.List;
  * Models a data sample
  */
 public class MISASample implements MISAParameter {
+
+    private MISAParameterSchema parameterSchema;
+
     /**
      * Name of the sample
      */
@@ -27,15 +30,16 @@ public class MISASample implements MISAParameter {
 
     private List<MISACache> exportedCaches = new ArrayList<>();
 
-    public MISASample(String name, JSONSchemaObject parameters, MISAFilesystemEntry importedFilesystem, MISAFilesystemEntry exportedFilesystem) {
+    public MISASample(MISAParameterSchema parameterSchema, String name, JSONSchemaObject parameters, MISAFilesystemEntry importedFilesystem, MISAFilesystemEntry exportedFilesystem) {
+        this.parameterSchema = parameterSchema;
         this.name = name;
         this.parameters = parameters;
         this.importedFilesystem = importedFilesystem;
         this.exportedFilesystem = exportedFilesystem;
 
         // Look for caches
-        importedFilesystem.findCaches(getImportedCaches());
-        exportedFilesystem.findCaches(getExportedCaches());
+        importedFilesystem.findCaches(this, getImportedCaches());
+        exportedFilesystem.findCaches(this, getExportedCaches());
     }
 
     public JSONSchemaObject getParameters() {
@@ -82,5 +86,9 @@ public class MISASample implements MISAParameter {
         }
 
         return report;
+    }
+
+    public MISAParameterSchema getParameterSchema() {
+        return parameterSchema;
     }
 }

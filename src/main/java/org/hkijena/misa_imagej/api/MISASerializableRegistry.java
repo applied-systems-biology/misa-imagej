@@ -48,14 +48,18 @@ public class MISASerializableRegistry {
                 }
                 else {
                     Gson gson = GsonUtils.getGson();
+                    MISASerializable result = null;
                     // Deserialize to the best matching class
                     List<String> hierarchy = gson.fromJson(element.getAsJsonObject().get("misa:serialization-hierarchy"), List.class);
                     for(String hid : Lists.reverse(hierarchy)) {
                         if(registeredCaches.containsKey(hid)) {
-                            return gson.fromJson(element, registeredCaches.get(hid));
+                            result = gson.fromJson(element, registeredCaches.get(hid));
+                            break;
                         }
                     }
-                    MISASerializable result = gson.fromJson(element, MISASerializable.class);
+                    if(result == null) {
+                        result = gson.fromJson(element, MISASerializable.class);
+                    }
                     result.rawData = element.getAsJsonObject();
                     return result;
                 }

@@ -64,7 +64,7 @@ public class MISAFilesystemEntry implements Cloneable {
         return entry;
     }
 
-    public void findCaches(List<MISACache> result) {
+    public void findCaches(MISASample sample, List<MISACache> result) {
         Path relativePath = null;
         switch(ioType) {
             case Imported:
@@ -75,11 +75,11 @@ public class MISAFilesystemEntry implements Cloneable {
                 throw new UnsupportedOperationException();
         }
 
-        MISACache cache = MISACacheRegistry.getCacheFor(this);
+        MISACache cache = MISACacheRegistry.getCacheFor(sample,this);
         if(cache.isValid())
             result.add(cache);
         for(MISAFilesystemEntry entry : children.values()) {
-            entry.findCaches(result);
+            entry.findCaches(sample, result);
         }
     }
 

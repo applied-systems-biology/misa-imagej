@@ -78,7 +78,7 @@ public class MISAParameterSchema implements MISAParameter {
             }
             name = name + " (" + counter + ")";
         }
-        MISASample sample = new MISASample(name,
+        MISASample sample = new MISASample(this, name,
                 (JSONSchemaObject) sampleParametersTemplate.clone(),
                 (MISAFilesystemEntry) sampleImportedFilesystemTemplate.clone(),
                 (MISAFilesystemEntry) sampleExportedFilesystemTemplate.clone());

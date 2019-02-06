@@ -29,11 +29,11 @@ public class MISACacheRegistry {
      * @param filesystemEntry
      * @return
      */
-    public static MISACache getCacheFor(MISAFilesystemEntry filesystemEntry) {
+    public static MISACache getCacheFor(MISASample sample, MISAFilesystemEntry filesystemEntry) {
         if(!isInitialized)
             initialize();
 
-        MISACache tmp = new MISACache(filesystemEntry);
+        MISACache tmp = new MISACache(sample, filesystemEntry);
         String patternId = tmp.getPatternSerializationID();
         String descriptionId = tmp.getDescriptionSerializationID();
 
@@ -52,7 +52,7 @@ public class MISACacheRegistry {
         }
 
         try {
-            return result.getConstructor(MISAFilesystemEntry.class).newInstance(filesystemEntry);
+            return result.getConstructor(MISASample.class, MISAFilesystemEntry.class).newInstance(sample, filesystemEntry);
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException(e);

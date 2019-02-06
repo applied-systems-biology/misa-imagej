@@ -1,9 +1,6 @@
 package org.hkijena.misa_imagej.api.caches;
 
-import org.hkijena.misa_imagej.api.MISAFilesystemEntry;
-import org.hkijena.misa_imagej.api.MISAParameterValidity;
-import org.hkijena.misa_imagej.api.MISACache;
-import org.hkijena.misa_imagej.api.MISACacheIOType;
+import org.hkijena.misa_imagej.api.*;
 import org.hkijena.misa_imagej.utils.swappers.OMETiffSwapper;
 
 import java.io.IOException;
@@ -15,8 +12,8 @@ public class MISAOMETiffCache extends MISACache {
 
     private OMETiffSwapper tiffSwapper;
 
-    public MISAOMETiffCache(MISAFilesystemEntry filesystemEntry) {
-        super(filesystemEntry);
+    public MISAOMETiffCache (MISASample sample, MISAFilesystemEntry filesystemEntry) {
+        super(sample, filesystemEntry);
     }
 
     @Override
