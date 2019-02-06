@@ -12,13 +12,13 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.nio.file.Path;
 
-public class MISAWorkbench extends JFrame{
+public class MISAWorkbenchUI extends JFrame{
 
     private JLabel statusLabel;
     private JButton showRuntimeLogButton;
     private MISAOutput misaOutput;
 
-    public MISAWorkbench() {
+    public MISAWorkbenchUI() {
         initialize();
     }
 
@@ -58,10 +58,10 @@ public class MISAWorkbench extends JFrame{
     }
 
     private void showRuntimeLog() {
-        if(misaOutput != null && misaOutput.getRuntimeLog() != null) {
+        if(misaOutput != null && misaOutput.getRuntimeLogPath().toFile().isFile()) {
             MISARuntimeLogUI ui = new MISARuntimeLogUI();
             ui.setHideOpenButton(true);
-            ui.open(misaOutput.getRuntimeLog());
+            ui.open(misaOutput.getRuntimeLogPath());
             ui.setTitle(misaOutput.getRootPath().toString() + " - MISA++ runtime analysis");
             ui.setVisible(true);
         }
@@ -91,6 +91,6 @@ public class MISAWorkbench extends JFrame{
     }
 
     private void updateUI() {
-        showRuntimeLogButton.setEnabled(misaOutput != null && misaOutput.getRuntimeLog() != null);
+        showRuntimeLogButton.setEnabled(misaOutput != null && misaOutput.getRuntimeLogPath().toFile().isFile());
     }
 }

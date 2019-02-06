@@ -6,18 +6,13 @@ import com.google.gson.JsonObject;
 import org.hkijena.misa_imagej.api.*;
 import org.hkijena.misa_imagej.api.json.JSONSchemaObject;
 import org.hkijena.misa_imagej.api.repository.MISAModuleInfo;
-import org.hkijena.misa_imagej.api.workbench.keys.MISADataKey;
-import org.hkijena.misa_imagej.api.workbench.keys.MISARunDataKey;
 import org.hkijena.misa_imagej.utils.GsonUtils;
 
-import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class MISAOutput {
@@ -25,16 +20,18 @@ public class MISAOutput {
     private Path rootPath;
     private MISAParameterSchema parameterSchema;
     private MISAModuleInfo moduleInfo;
-    private MISARuntimeLog runtimeLog;
+    private Path runtimeLogPath;
+    private MISAAttachmentIndex attachmentIndex;
 
     public MISAOutput(Path rootPath) throws IOException {
         this.rootPath = rootPath;
+        this.runtimeLogPath = rootPath.resolve("runtime-log.json");
         loadParameterSchema();
         loadModuleInfo();
         loadParameters();
-        loadRuntimeLog();
         loadFilesystem();
         loadCaches();
+        this.attachmentIndex = new MISAAttachmentIndex(this);
     }
 
     private void loadParameterSchema() throws IOException {
@@ -53,13 +50,6 @@ public class MISAOutput {
     private void loadParameters() throws  IOException {
         Gson gson = GsonUtils.getGson();
         parameterSchema.loadParameters(gson.fromJson(new String(Files.readAllBytes(getRootPath().resolve("parameters.json"))), JsonObject.class));
-    }
-
-    private void loadRuntimeLog() throws  IOException {
-        if(getRootPath().resolve("runtime-log.json").toFile().isFile()) {
-            Gson gson = GsonUtils.getGson();
-            runtimeLog = gson.fromJson(new String(Files.readAllBytes(getRootPath().resolve("runtime-log.json"))), MISARuntimeLog.class);
-        }
     }
 
     private void loadFilesystem() throws IOException {
@@ -125,21 +115,13 @@ public class MISAOutput {
                 MISAAttachmentLocation attachmentLocation = new MISAAttachmentLocation();
                 attachmentLocation.subCachePath = subCachePath;
                 attachmentLocation.attachmentIndex = kv.getKey();
-                cache.getAttachments().put(attachmentLocation, new MISAAttachment(attachmentLocation, MISASerializableRegistry.deserialize(kv.getValue()), cache));
+                cache.getAttachments().put(attachmentLocation, new MISAAttachment(attachmentLocation, path, cache));
             }
         }
     }
 
     public static void main(String[] args) throws IOException {
-//        MISAOutput output = new MISAOutput(Paths.get("/home/rgerst/tmp/ome_glomeruli/output/"));
-//        MISAOutput output = new MISAOutput(Paths.get("/home/rgerst/tmp/glomeruli_full_quantified/"));
-//        Set<MISADataKey> keys = new HashSet<>();
-//        (new MISARunDataKey(output)).traverse(keys);
-//        System.out.println("test");
-        Gson gson = GsonUtils.getGson();
-        try(FileReader reader = new FileReader("/home/rgerst/tmp/glomeruli_full_quantified/attachments/exported/d7 NTN 1a zoom063 z5 647_09-40-46/quantified/quantified.json.json")) {
-            MISASerializableRegistry.deserialize(gson.fromJson(reader, JsonElement.class));
-        }
+        MISAOutput output = new MISAOutput(Paths.get("/home/rgerst/tmp/glomeruli_full_quantified/"));
     }
 
     public Path getRootPath() {
@@ -154,7 +136,11 @@ public class MISAOutput {
         return moduleInfo;
     }
 
-    public MISARuntimeLog getRuntimeLog() {
-        return runtimeLog;
+    public Path getRuntimeLogPath() {
+        return runtimeLogPath;
+    }
+
+    public MISAAttachmentIndex getAttachmentIndex() {
+        return attachmentIndex;
     }
 }

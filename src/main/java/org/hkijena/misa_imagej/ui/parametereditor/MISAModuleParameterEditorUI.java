@@ -1,7 +1,6 @@
 package org.hkijena.misa_imagej.ui.parametereditor;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -17,7 +16,7 @@ import org.hkijena.misa_imagej.api.MISAParameterSchema;
 import org.hkijena.misa_imagej.api.MISASample;
 import org.hkijena.misa_imagej.api.MISAParameterValidity;
 import org.hkijena.misa_imagej.api.repository.MISAModule;
-import org.hkijena.misa_imagej.ui.workbench.MISAWorkbench;
+import org.hkijena.misa_imagej.ui.workbench.MISAWorkbenchUI;
 import org.hkijena.misa_imagej.utils.*;
 import org.hkijena.misa_imagej.api.json.JSONSchemaObject;
 import org.jdesktop.swingx.JXStatusBar;
@@ -198,7 +197,7 @@ public class MISAModuleParameterEditorUI extends JFrame {
                         setEnabled(true);
                         if(JOptionPane.showConfirmDialog(this, "The calculated finished. Do you want to analyze the results?",
                                 "Calulcation finished", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION) {
-                            MISAWorkbench ui = new MISAWorkbench();
+                            MISAWorkbenchUI ui = new MISAWorkbenchUI();
                             ui.setVisible(true);
                             ui.open(dialog.getExportedPath());
                         }

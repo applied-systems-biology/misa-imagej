@@ -2,16 +2,16 @@ package org.hkijena.misa_imagej.ui.repository;
 
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonWriter;
-import org.checkerframework.checker.guieffect.qual.UI;
 import org.hkijena.misa_imagej.MISACommand;
 import org.hkijena.misa_imagej.api.repository.MISAModule;
 import org.hkijena.misa_imagej.api.repository.MISAModuleRepository;
 import org.hkijena.misa_imagej.ui.parametereditor.MISAModuleParameterEditorUI;
 import org.hkijena.misa_imagej.ui.perfanalysis.MISARuntimeLogUI;
+import org.hkijena.misa_imagej.ui.pipeliner.MISAPipelinerUI;
 import org.hkijena.misa_imagej.utils.GsonUtils;
 import org.hkijena.misa_imagej.utils.OSUtils;
 import org.hkijena.misa_imagej.utils.UIUtils;
-import org.hkijena.misa_imagej.ui.workbench.MISAWorkbench;
+import org.hkijena.misa_imagej.ui.workbench.MISAWorkbenchUI;
 
 import javax.swing.*;
 import java.awt.*;
@@ -89,9 +89,16 @@ public class MISAModuleRepositoryUI extends JFrame {
 
         toolBar.add(Box.createHorizontalGlue());
 
+        JButton launcherPipeliner = new JButton("Connect modules together ...", UIUtils.getIconFromResources("connect.png"));
+        launcherPipeliner.addActionListener(actionEvent -> {
+            MISAPipelinerUI pipelinerUI = new MISAPipelinerUI();
+            pipelinerUI.setVisible(true);
+        });
+        toolBar.add(launcherPipeliner);
+
         JButton launchAnalyzer = new JButton("Analyze result ...", UIUtils.getIconFromResources("graph.png"));
         launchAnalyzer.addActionListener(actionEvent -> {
-            MISAWorkbench workbench = new MISAWorkbench();
+            MISAWorkbenchUI workbench = new MISAWorkbenchUI();
             workbench.setVisible(true);
         });
         toolBar.add(launchAnalyzer);
