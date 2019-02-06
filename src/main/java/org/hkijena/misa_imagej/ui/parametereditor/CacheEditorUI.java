@@ -1,7 +1,7 @@
 package org.hkijena.misa_imagej.ui.parametereditor;
 
 import org.hkijena.misa_imagej.api.MISACache;
-import org.hkijena.misa_imagej.ui.parametereditor.cache.MISACacheUIRegistry;
+import org.hkijena.misa_imagej.ui.parametereditor.cache.MISADataSourceUIRegistry;
 import org.hkijena.misa_imagej.utils.UIUtils;
 
 import javax.swing.*;
@@ -27,7 +27,7 @@ public class CacheEditorUI extends JPanel {
                         cache.getCacheTypeName(), row, 0)),
                         cache.toColor());
         UIUtils.borderedJLabel(UIUtils.createDescriptionLabelUI(this, "/" + cache.getFilesystemEntry().getInternalPath().toString(), row, 1));
-        add(MISACacheUIRegistry.getEditorFor(cache), new GridBagConstraints() {
+        add(MISADataSourceUIRegistry.getEditorFor(cache), new GridBagConstraints() {
             {
                 gridx = 2;
                 gridy = row;

@@ -3,7 +3,7 @@ package org.hkijena.misa_imagej.ui.parametereditor.cache.editors;
 import ij.ImagePlus;
 import ij.WindowManager;
 import org.hkijena.misa_imagej.api.MISACache;
-import org.hkijena.misa_imagej.ui.parametereditor.cache.MISACacheEditorUI;
+import org.hkijena.misa_imagej.ui.parametereditor.cache.MISADataSourceUI;
 import org.hkijena.misa_imagej.api.caches.MISAOMETiffCache;
 import org.hkijena.misa_imagej.utils.UIUtils;
 import org.hkijena.misa_imagej.utils.swappers.OMETiffSwapper;
@@ -14,13 +14,13 @@ import javax.swing.*;
 /**
  * Editor for OME Tiff caches
  */
-public class MISAOMETiffCacheEditorUI extends MISACacheEditorUI {
+public class MISAOMETiffDataSourceUI extends MISADataSourceUI {
 
     private MISAOMETiffCache cache;
     private JTextField display;
     private JButton optionButton;
 
-    public MISAOMETiffCacheEditorUI(MISACache cache) {
+    public MISAOMETiffDataSourceUI(MISACache cache) {
         super(cache);
         this.cache = (MISAOMETiffCache)cache;
         refreshDisplay();

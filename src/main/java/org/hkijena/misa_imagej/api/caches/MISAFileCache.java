@@ -9,10 +9,7 @@ import java.util.List;
 
 public class MISAFileCache extends MISACache {
 
-    /**
-     * Allowed extensions according to the pattern
-     */
-    public List<String> extensions = new ArrayList<>();
+    private List<String> extensions = new ArrayList<>();
 
     public MISAFileCache(MISASample sample, MISAFilesystemEntry filesystemEntry) {
         super(sample, filesystemEntry);
@@ -28,9 +25,16 @@ public class MISAFileCache extends MISACache {
 
     @Override
     public String getCacheTypeName() {
-        if(extensions.isEmpty())
+        if(getExtensions().isEmpty())
             return "File";
         else
-            return String.join(", ", extensions) + " File";
+            return String.join(", ", getExtensions()) + " File";
+    }
+
+    /**
+     * Allowed extensions according to the pattern
+     */
+    public List<String> getExtensions() {
+        return extensions;
     }
 }

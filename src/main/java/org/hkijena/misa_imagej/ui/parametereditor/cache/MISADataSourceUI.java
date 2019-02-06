@@ -2,18 +2,19 @@ package org.hkijena.misa_imagej.ui.parametereditor.cache;
 
 import org.hkijena.misa_imagej.api.MISACache;
 import org.hkijena.misa_imagej.api.MISACacheIOType;
+import org.hkijena.misa_imagej.api.MISADataSource;
 import org.hkijena.misa_imagej.ui.parametereditor.SampleDataEditorUI;
 
 import javax.swing.*;
 
-public abstract class MISACacheEditorUI extends JPanel {
-    private MISACache cache;
+public abstract class MISADataSourceUI extends JPanel {
+    private MISADataSource cache;
 
-    public MISACacheEditorUI(MISACache cache) {
+    public MISADataSourceUI(MISADataSource cache) {
         this.cache = cache;
     }
 
-    public MISACache getCache() {
+    public MISADataSource getCache() {
         return cache;
     }
 

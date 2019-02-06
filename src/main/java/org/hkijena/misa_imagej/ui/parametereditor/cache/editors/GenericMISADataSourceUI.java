@@ -1,14 +1,14 @@
 package org.hkijena.misa_imagej.ui.parametereditor.cache.editors;
 
 import org.hkijena.misa_imagej.api.MISACache;
-import org.hkijena.misa_imagej.ui.parametereditor.cache.MISACacheEditorUI;
+import org.hkijena.misa_imagej.ui.parametereditor.cache.MISADataSourceUI;
 import org.hkijena.misa_imagej.utils.UIUtils;
 
 import java.awt.*;
 
-public class GenericMISACacheEditorUI extends MISACacheEditorUI {
+public class GenericMISADataSourceUI extends MISADataSourceUI {
 
-    public GenericMISACacheEditorUI(MISACache cache) {
+    public GenericMISADataSourceUI(MISACache cache) {
         super(cache);
     }
 

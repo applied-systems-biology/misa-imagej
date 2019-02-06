@@ -3,8 +3,10 @@ package org.hkijena.misa_imagej.api;
 
 import java.awt.*;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 
 public class MISACache implements MISAParameter {
 
@@ -15,6 +17,11 @@ public class MISACache implements MISAParameter {
      * This does not include "imported" or "exported"
      */
     private MISAFilesystemEntry filesystemEntry;
+
+    /**
+     * A data source is responsible for providing the data of the cache
+     */
+    private MISADataSource dataSource;
 
     /**
      * List of attachments
@@ -120,8 +127,12 @@ public class MISACache implements MISAParameter {
     public MISAParameterValidity isValidParameter() {
         if(getIOType() == MISACacheIOType.Exported)
             return new MISAParameterValidity(this, null, true, "");
-        else
-            return new MISAParameterValidity(this, null, false, "The data type '" + getCacheTypeName() + "' is not supported by MISA++ for ImageJ.");
+        else if(dataSource == null) {
+            return new MISAParameterValidity(this, "Data " + getCacheTypeName() + " " + getRelativePathName(), false, "No data source was set!");
+        }
+        else {
+            return dataSource.isValidParameter();
+        }
     }
 
     /**
@@ -131,13 +142,31 @@ public class MISACache implements MISAParameter {
      * @param forceCopy forces copying all files into the install folder
      */
     public void install(Path installFolder, boolean forceCopy) {
-
+        dataSource.install(installFolder, forceCopy);
     }
 
+    /**
+     * Gets the map of attachments.
+     * This is only used when output is analyzed
+     * @return
+     */
     public Map<MISAAttachmentLocation, MISAAttachment> getAttachments() {
         return attachments;
     }
 
+    /**
+     * Returns a list of additional data sources that are recommended by this cache
+     * Should return new instances
+     * @return
+     */
+    public List<MISADataSource> getAdditionalDataSources() {
+        return new ArrayList<>();
+    }
+
+    /**
+     * Returns the sample that this cache belongs to
+     * @return
+     */
     public MISASample getSample() {
         return sample;
     }
