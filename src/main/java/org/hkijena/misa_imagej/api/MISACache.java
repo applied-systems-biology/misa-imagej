@@ -1,11 +1,13 @@
 package org.hkijena.misa_imagej.api;
 
 
+import org.hkijena.misa_imagej.api.datasources.MISAFolderLinkDataSource;
+
 import java.awt.*;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.List;
 
 public class MISACache implements MISAParameter {
@@ -18,10 +20,11 @@ public class MISACache implements MISAParameter {
      */
     private MISAFilesystemEntry filesystemEntry;
 
-    /**
-     * A data source is responsible for providing the data of the cache
-     */
     private MISADataSource dataSource;
+
+    protected List<MISADataSource> availableDatasources = new ArrayList<>();
+
+    private PropertyChangeSupport propertyChangeSupport;
 
     /**
      * List of attachments
@@ -30,8 +33,12 @@ public class MISACache implements MISAParameter {
 
 
     public MISACache(MISASample sample, MISAFilesystemEntry filesystemEntry) {
+        this.propertyChangeSupport = new PropertyChangeSupport(this);
         this.sample = sample;
         this.filesystemEntry = filesystemEntry;
+
+        // Default data sources that are always available
+        this.availableDatasources.add(new MISAFolderLinkDataSource());
     }
 
     /**
@@ -127,11 +134,11 @@ public class MISACache implements MISAParameter {
     public MISAParameterValidity isValidParameter() {
         if(getIOType() == MISACacheIOType.Exported)
             return new MISAParameterValidity(this, null, true, "");
-        else if(dataSource == null) {
+        else if(getDataSource() == null) {
             return new MISAParameterValidity(this, "Data " + getCacheTypeName() + " " + getRelativePathName(), false, "No data source was set!");
         }
         else {
-            return dataSource.isValidParameter();
+            return getDataSource().isValidParameter();
         }
     }
 
@@ -142,7 +149,7 @@ public class MISACache implements MISAParameter {
      * @param forceCopy forces copying all files into the install folder
      */
     public void install(Path installFolder, boolean forceCopy) {
-        dataSource.install(installFolder, forceCopy);
+        getDataSource().install(installFolder, forceCopy);
     }
 
     /**
@@ -156,11 +163,18 @@ public class MISACache implements MISAParameter {
 
     /**
      * Returns a list of additional data sources that are recommended by this cache
-     * Should return new instances
      * @return
      */
-    public List<MISADataSource> getAdditionalDataSources() {
-        return new ArrayList<>();
+    public List<MISADataSource> getAvailableDataSources() {
+        return Collections.unmodifiableList(availableDatasources);
+    }
+
+    /**
+     * Returns a preferred data source or null
+     * @return
+     */
+    public MISADataSource getPreferredDataSource() {
+        return null;
     }
 
     /**
@@ -169,5 +183,25 @@ public class MISACache implements MISAParameter {
      */
     public MISASample getSample() {
         return sample;
+    }
+
+    public void setDataSource(MISADataSource dataSource) {
+        this.dataSource = dataSource;
+        propertyChangeSupport.firePropertyChange("dataSource", null, null);
+    }
+
+    /**
+     * A data source is responsible for providing the data of the cache
+     */
+    public MISADataSource getDataSource() {
+        return dataSource;
+    }
+
+    public void addPropertyChangeListener(PropertyChangeListener listener) {
+        propertyChangeSupport.addPropertyChangeListener(listener);
+    }
+
+    public void removePropertyChangeListener(PropertyChangeListener listener) {
+        propertyChangeSupport.removePropertyChangeListener(listener);
     }
 }

@@ -4,8 +4,8 @@ import org.apache.commons.collections.ListUtils;
 import org.hkijena.misa_imagej.api.MISACache;
 import org.hkijena.misa_imagej.api.MISAParameterSchema;
 import org.hkijena.misa_imagej.api.MISASample;
-import org.hkijena.misa_imagej.ui.parametereditor.cache.MISADataSourceUI;
-import org.hkijena.misa_imagej.ui.parametereditor.cache.MISADataSourceUIRegistry;
+import org.hkijena.misa_imagej.ui.parametereditor.datasources.MISADataSourceUI;
+import org.hkijena.misa_imagej.ui.parametereditor.datasources.MISADataSourceUIRegistry;
 import org.hkijena.misa_imagej.api.MISACacheIOType;
 import org.hkijena.misa_imagej.utils.UIUtils;
 import org.hkijena.misa_imagej.utils.ui.ColorIcon;
@@ -177,7 +177,8 @@ public class SampleDataEditorUI extends JPanel {
                     });
                     editorLastIOType = cache.getIOType();
                 }
-                MISADataSourceUIRegistry.getEditorFor(cache).populate(this);
+
+                insertCacheEditorUI(new MISACacheUI(cache));
             }
 
             sampleEditor.add(new JPanel(), new GridBagConstraints() {
@@ -200,7 +201,7 @@ public class SampleDataEditorUI extends JPanel {
         return currentCacheList;
     }
 
-    public void insertCacheEditorUI(MISADataSourceUI ui) {
+    private void insertCacheEditorUI(MISACacheUI ui) {
         if(objectFilter.getText() != null && !objectFilter.getText().isEmpty()) {
             String searchText = ui.getCache().getCacheTypeName().toLowerCase() + ui.getCache().getRelativePathName().toLowerCase();
             if(!searchText.contains(objectFilter.getText().toLowerCase())) {

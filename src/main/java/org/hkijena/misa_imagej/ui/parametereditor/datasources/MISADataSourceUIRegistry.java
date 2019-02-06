@@ -1,12 +1,10 @@
-package org.hkijena.misa_imagej.ui.parametereditor.cache;
+package org.hkijena.misa_imagej.ui.parametereditor.datasources;
 
 import org.hkijena.misa_imagej.api.MISACache;
 import org.hkijena.misa_imagej.api.MISADataSource;
-import org.hkijena.misa_imagej.api.caches.MISAFileCache;
-import org.hkijena.misa_imagej.api.caches.MISAOMETiffCache;
 import org.hkijena.misa_imagej.api.datasources.MISAOMETiffDataSource;
-import org.hkijena.misa_imagej.ui.parametereditor.cache.editors.GenericMISADataSourceUI;
-import org.hkijena.misa_imagej.ui.parametereditor.cache.editors.MISAOMETiffDataSourceUI;
+import org.hkijena.misa_imagej.ui.parametereditor.datasources.editors.GenericMISADataSourceUI;
+import org.hkijena.misa_imagej.ui.parametereditor.datasources.editors.MISAOMETiffDataSourceUI;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -45,7 +43,7 @@ public class MISADataSourceUIRegistry {
             return new GenericMISADataSourceUI(source);
         else {
             try {
-                return result.getConstructor(MISACache.class).newInstance(source);
+                return result.getConstructor(MISADataSource.class).newInstance(source);
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new RuntimeException(e);

@@ -11,15 +11,14 @@ public class MISAFolderLinkDataSource implements MISADataSource {
 
     private Path sourceFolder;
 
-    public MISAFolderLinkDataSource(Path sourceFolder) {
-        this.sourceFolder = sourceFolder;
+    public MISAFolderLinkDataSource() {
     }
 
     @Override
     public void install(Path installFolder, boolean forceCopy) {
         try {
             Files.deleteIfExists(installFolder);
-            Files.createSymbolicLink(installFolder, sourceFolder);
+            Files.createSymbolicLink(installFolder, getSourceFolder());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -42,5 +41,9 @@ public class MISAFolderLinkDataSource implements MISADataSource {
 
     public Path getSourceFolder() {
         return sourceFolder;
+    }
+
+    public void setSourceFolder(Path sourceFolder) {
+        this.sourceFolder = sourceFolder;
     }
 }

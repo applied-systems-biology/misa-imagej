@@ -1,9 +1,11 @@
-package org.hkijena.misa_imagej.ui.parametereditor.cache.editors;
+package org.hkijena.misa_imagej.ui.parametereditor.datasources.editors;
 
 import ij.ImagePlus;
 import ij.WindowManager;
 import org.hkijena.misa_imagej.api.MISACache;
-import org.hkijena.misa_imagej.ui.parametereditor.cache.MISADataSourceUI;
+import org.hkijena.misa_imagej.api.MISADataSource;
+import org.hkijena.misa_imagej.api.datasources.MISAOMETiffDataSource;
+import org.hkijena.misa_imagej.ui.parametereditor.datasources.MISADataSourceUI;
 import org.hkijena.misa_imagej.api.caches.MISAOMETiffCache;
 import org.hkijena.misa_imagej.utils.UIUtils;
 import org.hkijena.misa_imagej.utils.swappers.OMETiffSwapper;
@@ -16,18 +18,18 @@ import javax.swing.*;
  */
 public class MISAOMETiffDataSourceUI extends MISADataSourceUI {
 
-    private MISAOMETiffCache cache;
+    private MISAOMETiffDataSource dataSource;
     private JTextField display;
     private JButton optionButton;
 
-    public MISAOMETiffDataSourceUI(MISACache cache) {
-        super(cache);
-        this.cache = (MISAOMETiffCache)cache;
+    public MISAOMETiffDataSourceUI(MISADataSource dataSource) {
+        super(dataSource);
+        this.dataSource = (MISAOMETiffDataSource)dataSource;
         refreshDisplay();
     }
 
     @Override
-    protected void initializeImporterUI() {
+    protected void initialize() {
         setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
 
         display = new JTextField();
@@ -56,7 +58,7 @@ public class MISAOMETiffDataSourceUI extends MISADataSourceUI {
             final ImagePlus image = WindowManager.getImage(WindowManager.getNthImageID(i));
             ImagePlusJMenuItem item = new ImagePlusJMenuItem(image);
             item.addActionListener(actionEvent -> {
-                cache.setTiffSwapper(new OMETiffSwapper(image, null));
+                dataSource.setTiffSwapper(new OMETiffSwapper(image, null));
                 refreshDisplay();
             });
             selectOptions.add(item);
@@ -80,7 +82,7 @@ public class MISAOMETiffDataSourceUI extends MISADataSourceUI {
 //            }
             JFileChooser chooser = new JFileChooser();
             if(chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-                cache.setTiffSwapper(new OMETiffSwapper(null, chooser.getSelectedFile().getAbsolutePath()));
+                dataSource.setTiffSwapper(new OMETiffSwapper(null, chooser.getSelectedFile().getAbsolutePath()));
                 refreshDisplay();
             }
         });
@@ -95,29 +97,29 @@ public class MISAOMETiffDataSourceUI extends MISADataSourceUI {
     private void createEditPopup(JButton selectButton) {
         JPopupMenu selectOptions = UIUtils.addPopupMenuToComponent(selectButton);
 
-        if(cache == null || display == null)
+        if(dataSource == null || display == null)
             return;
-        if(cache.getTiffSwapper() != null) {
+        if(dataSource.getTiffSwapper() != null) {
             JMenuItem clearItem = new JMenuItem("Clear data", UIUtils.getIconFromResources("delete.png"));
             clearItem.addActionListener(actionEvent -> {
-                cache.setTiffSwapper(null);
+                dataSource.setTiffSwapper(null);
                 refreshDisplay();
             });
             selectOptions.add(clearItem);
 
-            if(!cache.getTiffSwapper().isInImageJ() && cache.getTiffSwapper().isInFilesystem()) {
+            if(!dataSource.getTiffSwapper().isInImageJ() && dataSource.getTiffSwapper().isInFilesystem()) {
                 JMenuItem importItem = new JMenuItem("Import into ImageJ", UIUtils.getIconFromResources("import.png"));
                 importItem.addActionListener(actionEvent -> {
-                    cache.getTiffSwapper().importIntoImageJ(null); // BioFormats decides by itself
+                    dataSource.getTiffSwapper().importIntoImageJ(null); // BioFormats decides by itself
                     refreshDisplay();
                 });
                 selectOptions.add(importItem);
             }
 
-            if(cache.getTiffSwapper().isInImageJ()) {
+            if(dataSource.getTiffSwapper().isInImageJ()) {
                 JMenuItem selectItem = new JMenuItem("Select in ImageJ", UIUtils.getIconFromResources("target.png"));
                 selectItem.addActionListener(actionEvent -> {
-                    cache.getTiffSwapper().editInImageJ();
+                    dataSource.getTiffSwapper().editInImageJ();
                 });
                 selectOptions.add(selectItem);
             }
@@ -125,10 +127,10 @@ public class MISAOMETiffDataSourceUI extends MISADataSourceUI {
     }
 
     private void refreshDisplay() {
-        if(cache == null || display == null)
+        if(dataSource == null || display == null)
             return;
-        if(cache.getTiffSwapper() != null)
-            display.setText(cache.getTiffSwapper().toString());
+        if(dataSource.getTiffSwapper() != null)
+            display.setText(dataSource.getTiffSwapper().toString());
         else
             display.setText("<No data set>");
         createEditPopup(optionButton);
