@@ -3,6 +3,8 @@ package org.hkijena.misa_imagej.api.pipelining;
 import com.google.gson.annotations.SerializedName;
 import org.hkijena.misa_imagej.api.MISAModuleInstance;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -10,29 +12,32 @@ import java.util.List;
 public class MISAPipelineNode {
 
     @SerializedName("name")
-    public String name;
+    private String name;
 
     @SerializedName("description")
-    public String description;
+    private String description;
 
     @SerializedName("module-name")
-    public String moduleName;
+    private String moduleName;
 
     @SerializedName("x")
-    public int x;
+    private int x;
 
     @SerializedName("y")
-    public int y;
+    private int y;
+
+    private PropertyChangeSupport propertyChangeSupport;
 
     public transient MISAPipeline pipeline;
 
     public transient MISAModuleInstance moduleInstance;
 
     public MISAPipelineNode() {
-
+        this.propertyChangeSupport = new PropertyChangeSupport(this);
     }
 
     public MISAPipelineNode(MISAPipeline pipeline) {
+        this.propertyChangeSupport = new PropertyChangeSupport(this);
         this.pipeline = pipeline;
     }
 
@@ -50,4 +55,56 @@ public class MISAPipelineNode {
         return result;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+        propertyChangeSupport.firePropertyChange("name", null, null);
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+        propertyChangeSupport.firePropertyChange("description", null, null);
+    }
+
+    public String getModuleName() {
+        return moduleName;
+    }
+
+    public void setModuleName(String moduleName) {
+        this.moduleName = moduleName;
+        propertyChangeSupport.firePropertyChange("moduleName", null, null);
+    }
+
+    public int getX() {
+        return x;
+    }
+
+    public void setX(int x) {
+        this.x = x;
+        propertyChangeSupport.firePropertyChange("x", null, null);
+    }
+
+    public int getY() {
+        return y;
+    }
+
+    public void setY(int y) {
+        this.y = y;
+        propertyChangeSupport.firePropertyChange("y", null, null);
+    }
+
+    public void addPropertyChangeListener(PropertyChangeListener listener) {
+        propertyChangeSupport.addPropertyChangeListener(listener);
+    }
+
+    public void removePropertyChangeListener(PropertyChangeListener listener) {
+        propertyChangeSupport.removePropertyChangeListener(listener);
+    }
 }

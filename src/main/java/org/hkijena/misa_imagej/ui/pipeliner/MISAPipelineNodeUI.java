@@ -35,7 +35,7 @@ public class MISAPipelineNodeUI extends JPanel implements ComponentListener {
         padding.setBorder(BorderFactory.createEmptyBorder(16,8,8,8));
 
         // Create name editor
-        JTextField nameEditor = new JTextField(node.name) {
+        JTextField nameEditor = new JTextField(node.getName()) {
             @Override
             public void setBorder(Border border) {
                 // No border
@@ -46,18 +46,18 @@ public class MISAPipelineNodeUI extends JPanel implements ComponentListener {
         nameEditor.getDocument().addDocumentListener(new DocumentChangeListener() {
             @Override
             public void changed(DocumentEvent documentEvent) {
-                node.name = nameEditor.getText();
+                node.setName(nameEditor.getText());
             }
         });
         padding.add(nameEditor, BorderLayout.NORTH);
 
         // Create description editor
-        JTextArea descriptionEditor = new JTextArea(node.description);
+        JTextArea descriptionEditor = new JTextArea(node.getDescription());
         descriptionEditor.setBackground(getBackground());
         descriptionEditor.getDocument().addDocumentListener(new DocumentChangeListener() {
             @Override
             public void changed(DocumentEvent documentEvent) {
-                node.description = descriptionEditor.getText();
+                node.setDescription(descriptionEditor.getText());
             }
         });
         padding.add(descriptionEditor, BorderLayout.CENTER);
@@ -86,11 +86,16 @@ public class MISAPipelineNodeUI extends JPanel implements ComponentListener {
 
     private void initializeConnectMenu(JPopupMenu menu) {
         for(MISAPipelineNode available : node.getAvailableInNodes()) {
-            JMenuItem menuItem = new JMenuItem("From " + available.name,
+            JMenuItem menuItem = new JMenuItem("From " + available.getName(),
                     new MonochromeColorIcon(UIUtils.getIconFromResources("module-template.png"),
                             available.moduleInstance.getModuleInfo().toColor()));
             menuItem.addActionListener(actionEvent -> {
                 node.pipeline.addEdge(available, node);
+            });
+            available.addPropertyChangeListener(propertyChangeEvent -> {
+                if(propertyChangeEvent.getPropertyName().equals("name")) {
+                    menuItem.setText("From " + available.getName());
+                }
             });
             menu.add(menuItem);
         }
@@ -98,7 +103,7 @@ public class MISAPipelineNodeUI extends JPanel implements ComponentListener {
 
     private void editParameters() {
         MISAModuleInstanceUI editor = new MISAModuleInstanceUI(node.moduleInstance, true);
-        editor.setTitle("MISA++ pipeline tool - Parameters for " + node.name);
+        editor.setTitle("MISA++ pipeline tool - Parameters for " + node.getName());
         editor.setVisible(true);
 
         // Java separates between JFrame and JDialog
@@ -167,8 +172,8 @@ public class MISAPipelineNodeUI extends JPanel implements ComponentListener {
 
     @Override
     public void componentMoved(ComponentEvent componentEvent) {
-        node.x = getX();
-        node.y = getY();
+        node.setX(getX());
+        node.setY(getY());
     }
 
     @Override

@@ -30,8 +30,8 @@ public class MISAPipeline implements MISAValidatable {
     public MISAPipelineNode addNode(MISAModule module) {
         MISAPipelineNode node = new MISAPipelineNode(this);
         node.moduleInstance = module.instantiate();
-        node.moduleName = module.getModuleInfo().getName();
-        node.name = module.getModuleInfo().getDescription();
+        node.setModuleName(module.getModuleInfo().getName());
+        node.setName(module.getModuleInfo().getDescription());
         nodes.put(generateNodeName(module), node);
         propertyChangeSupport.firePropertyChange("addNode", null, node);
         return node;
