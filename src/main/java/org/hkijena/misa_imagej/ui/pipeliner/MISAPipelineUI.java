@@ -8,41 +8,58 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.awt.geom.QuadCurve2D;
+import java.beans.PropertyChangeListener;
 
 public class MISAPipelineUI extends JPanel implements MouseMotionListener, MouseListener {
 
     private MISAPipeline pipeline;
-    private JLabel debug = new JLabel("Ready");
 
     private MISAPipelineNodeUI currentlyDragged;
     private Point currentlyDraggedOffset = new Point();
 
+    private PropertyChangeListener pipelineListener;
+
     public MISAPipelineUI() {
         super(null);
         initialize();
-
-        add(debug);
-        debug.setBounds(0,0,200,50);
-
-        MISAPipelineNodeUI ui1 = addNodeUI(null);
-        MISAPipelineNodeUI ui2 = addNodeUI(null);
-        ui1.setLocation(100,100);
-        ui2.setLocation(300,200);
+        refresh();
     }
 
     public MISAPipeline getPipeline() {
         return pipeline;
     }
 
-    public void setPipeline(MISAPipeline pipeline) {
-        this.pipeline = pipeline;
-    }
-
     private void initialize() {
         setBackground(Color.WHITE);
         addMouseListener(this);
         addMouseMotionListener(this);
+
+        // Update the UI when something changes
+        pipelineListener = (propertyChangeEvent -> {
+            if(propertyChangeEvent.getPropertyName().equals("addInstance")) {
+                refresh();
+            }
+        });
+    }
+
+    public void refresh() {
+        removeAll();
+        if(pipeline != null) {
+            for(MISAPipelineNode node : pipeline.getNodes()) {
+                addNodeUI(node);
+            }
+        }
+        if(getParent() != null)
+            getParent().revalidate();
+        repaint();
+    }
+
+    public void setPipeline(MISAPipeline pipeline) {
+        if(this.pipeline != null)
+            this.pipeline.removePropertyChangeListener(pipelineListener);
+        this.pipeline = pipeline;
+        this.pipeline.addPropertyChangeListener(pipelineListener);
+        refresh();
     }
 
     @Override
@@ -62,11 +79,7 @@ public class MISAPipelineUI extends JPanel implements MouseMotionListener, Mouse
     private MISAPipelineNodeUI addNodeUI(MISAPipelineNode node) {
         MISAPipelineNodeUI ui = new MISAPipelineNodeUI(node);
         add(ui);
-        ui.setBounds(0, 0, 200,150);
-
-        if(getParent() != null)
-            getParent().revalidate();
-
+        ui.setBounds(node.x, node.y, 200,150);
         return ui;
     }
 
@@ -133,4 +146,5 @@ public class MISAPipelineUI extends JPanel implements MouseMotionListener, Mouse
         }
         return new Dimension(width, height);
     }
+
 }

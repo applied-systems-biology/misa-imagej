@@ -10,9 +10,7 @@ import org.hkijena.misa_imagej.ui.repository.MISAModuleListCellRenderer;
 import org.hkijena.misa_imagej.utils.UIUtils;
 
 import javax.swing.*;
-import javax.swing.tree.DefaultMutableTreeNode;
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -99,6 +97,7 @@ public class MISAPipelinerUI extends JFrame {
         JToolBar toolboxToolbar = new JToolBar();
 
         JButton instantiateButton = new JButton("Add to pipeline", UIUtils.getIconFromResources("add.png"));
+        instantiateButton.addActionListener(actionEvent -> addInstance());
         toolboxToolbar.add(instantiateButton);
 
         toolboxPanel.add(toolboxToolbar, BorderLayout.SOUTH);
@@ -130,6 +129,12 @@ public class MISAPipelinerUI extends JFrame {
 
         // Update the editor UI
         pipelineEditor.setPipeline(pipeline);
+    }
+
+    private void addInstance() {
+        if(moduleList.getSelectedValue() != null) {
+            pipeline.addInstance(moduleList.getSelectedValue());
+        }
     }
 
     private void updateCacheTree() {
