@@ -5,15 +5,25 @@ import org.hkijena.misa_imagej.api.pipelining.MISAPipelineNode;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.awt.geom.QuadCurve2D;
 
-public class MISAPipelineUI extends JPanel {
+public class MISAPipelineUI extends JPanel implements MouseMotionListener, MouseListener {
 
     private MISAPipeline pipeline;
+    private JLabel debug = new JLabel("Ready");
+
+    private MISAPipelineNodeUI currentlyDragged;
+    private Point currentlyDraggedOffset = new Point();
 
     public MISAPipelineUI() {
         super(null);
         initialize();
+
+        add(debug);
+        debug.setBounds(0,0,200,50);
 
         MISAPipelineNodeUI ui1 = addNodeUI(null);
         MISAPipelineNodeUI ui2 = addNodeUI(null);
@@ -31,6 +41,8 @@ public class MISAPipelineUI extends JPanel {
 
     private void initialize() {
         setBackground(Color.WHITE);
+        addMouseListener(this);
+        addMouseMotionListener(this);
     }
 
     @Override
@@ -51,6 +63,74 @@ public class MISAPipelineUI extends JPanel {
         MISAPipelineNodeUI ui = new MISAPipelineNodeUI(node);
         add(ui);
         ui.setBounds(0, 0, 200,150);
+
+        if(getParent() != null)
+            getParent().revalidate();
+
         return ui;
+    }
+
+    @Override
+    public void mouseDragged(MouseEvent mouseEvent) {
+        if(currentlyDragged != null) {
+            currentlyDragged.setLocation(currentlyDraggedOffset.x + mouseEvent.getX(),
+                    currentlyDraggedOffset.y + mouseEvent.getY());
+            if(getParent() != null)
+                getParent().revalidate();
+        }
+    }
+
+    @Override
+    public void mouseMoved(MouseEvent mouseEvent) {
+
+    }
+
+    @Override
+    public void mouseClicked(MouseEvent mouseEvent) {
+
+    }
+
+    @Override
+    public void mousePressed(MouseEvent mouseEvent) {
+        if(mouseEvent.getButton() == MouseEvent.BUTTON1) {
+            for(int i = 0; i < getComponentCount(); ++i) {
+                Component component = getComponent(i);
+                if(component.getBounds().contains(mouseEvent.getX(), mouseEvent.getY())) {
+                    if(component instanceof MISAPipelineNodeUI) {
+                        currentlyDragged = (MISAPipelineNodeUI)component;
+                        currentlyDraggedOffset.x = component.getX() - mouseEvent.getX();
+                        currentlyDraggedOffset.y = component.getY() - mouseEvent.getY();
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent mouseEvent) {
+        currentlyDragged = null;
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent mouseEvent) {
+
+    }
+
+    @Override
+    public void mouseExited(MouseEvent mouseEvent) {
+
+    }
+
+    @Override
+    public Dimension getPreferredSize() {
+        int width = 0;
+        int height = 0;
+        for(int i = 0; i < getComponentCount(); ++i) {
+            Component component = getComponent(i);
+            width = Math.max(width, component.getX() + component.getWidth());
+            height = Math.max(height, component.getY() + component.getHeight());
+        }
+        return new Dimension(width, height);
     }
 }

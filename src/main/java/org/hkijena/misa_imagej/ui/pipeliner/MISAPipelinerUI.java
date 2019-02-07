@@ -62,7 +62,12 @@ public class MISAPipelinerUI extends JFrame {
 
         JPanel toolboxPanel = createToolbox();
         pipelineEditor = new MISAPipelineUI();
-        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, new JScrollPane(pipelineEditor), toolboxPanel);
+        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, new JScrollPane(pipelineEditor) {
+            {
+                setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+                setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+            }
+        }, toolboxPanel);
         splitPane.setResizeWeight(1);
         add(splitPane, BorderLayout.CENTER);
     }
