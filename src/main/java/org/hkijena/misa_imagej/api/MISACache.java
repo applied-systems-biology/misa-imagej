@@ -22,7 +22,7 @@ public class MISACache implements MISAParameter {
 
     private MISADataSource dataSource;
 
-    protected List<MISADataSource> availableDatasources = new ArrayList<>();
+    private List<MISADataSource> availableDatasources = new ArrayList<>();
 
     private PropertyChangeSupport propertyChangeSupport;
 
@@ -166,7 +166,7 @@ public class MISACache implements MISAParameter {
      * @return
      */
     public List<MISADataSource> getAvailableDataSources() {
-        return Collections.unmodifiableList(availableDatasources);
+        return availableDatasources;
     }
 
     /**
