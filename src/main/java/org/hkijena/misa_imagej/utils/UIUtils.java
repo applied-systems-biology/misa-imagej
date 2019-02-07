@@ -4,6 +4,10 @@ import org.hkijena.misa_imagej.api.json.JSONSchemaObject;
 import org.hkijena.misa_imagej.utils.ui.ColorIcon;
 
 import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -98,6 +102,14 @@ public class UIUtils {
 
     public static ColorIcon getIconFromColor(Color color) {
         return new ColorIcon(16, 16, color);
+    }
+
+    public static void makeFlat(AbstractButton component) {
+        component.setBackground(Color.WHITE);
+        component.setOpaque(false);
+        Border margin = new EmptyBorder(5, 15, 5, 15);
+        Border compound = new CompoundBorder( BorderFactory.createEtchedBorder(), margin);
+        component.setBorder(compound);
     }
 
 }

@@ -5,6 +5,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.hkijena.misa_imagej.api.json.JSONSchemaObject;
 import org.hkijena.misa_imagej.api.json.JSONSchemaObjectType;
+import org.hkijena.misa_imagej.api.repository.MISAModule;
+import org.hkijena.misa_imagej.api.repository.MISAModuleInfo;
 import org.hkijena.misa_imagej.utils.GsonUtils;
 
 import java.beans.PropertyChangeListener;
@@ -47,6 +49,10 @@ public class MISAModuleInstance implements MISAParameter {
     private PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
 
     private MISASample currentSample = null;
+
+    private MISAModuleInfo moduleInfo;
+
+    private MISAModule module;
 
     public MISAModuleInstance(JSONSchemaObject object) {
         algorithmParameters = object.properties.get("algorithm");
@@ -225,5 +231,21 @@ public class MISAModuleInstance implements MISAParameter {
             runtimeParameters.setValueFromJson(root.get("runtime"));
         }
 
+    }
+
+    public MISAModuleInfo getModuleInfo() {
+        return moduleInfo;
+    }
+
+    public void setModuleInfo(MISAModuleInfo moduleInfo) {
+        this.moduleInfo = moduleInfo;
+    }
+
+    public MISAModule getModule() {
+        return module;
+    }
+
+    public void setModule(MISAModule module) {
+        this.module = module;
     }
 }

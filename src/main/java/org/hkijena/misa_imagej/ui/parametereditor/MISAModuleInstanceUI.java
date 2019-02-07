@@ -1,65 +1,50 @@
 package org.hkijena.misa_imagej.ui.parametereditor;
 
+import org.hkijena.misa_imagej.MISACommand;
+import org.hkijena.misa_imagej.api.MISAModuleInstance;
+import org.hkijena.misa_imagej.api.MISAParameterValidity;
+import org.hkijena.misa_imagej.api.MISASample;
+import org.hkijena.misa_imagej.ui.repository.MISAModuleRepositoryUI;
+import org.hkijena.misa_imagej.ui.workbench.MISAWorkbenchUI;
+import org.hkijena.misa_imagej.utils.FilesystemUtils;
+import org.hkijena.misa_imagej.utils.ProcessStreamToStringGobbler;
+import org.hkijena.misa_imagej.utils.UIUtils;
+import org.jdesktop.swingx.JXStatusBar;
+
+import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import javax.swing.*;
-
-import com.google.gson.Gson;
-import io.scif.services.DatasetIOService;
-
-import net.imagej.DatasetService;
-import org.hkijena.misa_imagej.MISACommand;
-import org.hkijena.misa_imagej.api.MISAModuleInstance;
-import org.hkijena.misa_imagej.api.MISASample;
-import org.hkijena.misa_imagej.api.MISAParameterValidity;
-import org.hkijena.misa_imagej.api.repository.MISAModule;
-import org.hkijena.misa_imagej.ui.workbench.MISAWorkbenchUI;
-import org.hkijena.misa_imagej.utils.*;
-import org.hkijena.misa_imagej.api.json.JSONSchemaObject;
-import org.jdesktop.swingx.JXStatusBar;
-import org.scijava.app.StatusService;
-import org.scijava.display.DisplayService;
-import org.scijava.log.LogService;
-import org.scijava.thread.ThreadService;
-import org.scijava.ui.UIService;
-
-public class MISAModuleParameterEditorUI extends JFrame {
-
-    private MISACommand command;
-    private MISAModule module;
-
-    private AlgorithmParametersEditorUI algorithmParametersEditorUI;
-    private RuntimeParametersEditorUI runtimeParametersEditorUI;
-    private SampleParametersEditorUI sampleParametersEditorUI;
-    private SampleDataEditorUI sampleDataEditorUI;
+public class MISAModuleInstanceUI extends JFrame {
 
     private JLabel errorLabel;
 
-    private MISAModuleInstance parameterSchema;
+    private MISAModuleInstance moduleInstance;
 
     /**
      * Create the dialog.
      */
-    public MISAModuleParameterEditorUI(MISACommand command, MISAModule module) {
-        this.command = command;
-        this.module = module;
-        this.parameterSchema = module.instantiate();
-        initialize();
-        parameterSchema.addSample("New Sample");
+    public MISAModuleInstanceUI(MISAModuleInstance moduleInstance, boolean editOnlyMode) {
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        this.moduleInstance = moduleInstance;
+        initialize(editOnlyMode);
+
+        // Create a new sample if necessary
+        if(moduleInstance.getSamples().size() == 0)
+            this.moduleInstance.addSample("New Sample");
     }
 
     private void install(Path parameterSchema, Path importedDirectory, Path exportedDirectory, boolean forceCopy, boolean relativeDirectories) {
         setEnabled(false);
-        getUiService().getDefaultUI().getConsolePane().show();
-        this.parameterSchema.install(parameterSchema, importedDirectory, exportedDirectory, forceCopy, relativeDirectories);
+        MISAModuleRepositoryUI.getInstance().getCommand().getUiService().getDefaultUI().getConsolePane().show();
+        this.moduleInstance.install(parameterSchema, importedDirectory, exportedDirectory, forceCopy, relativeDirectories);
         setEnabled(true);
     }
 
     private boolean parametersAreValid() {
-        MISAParameterValidity report = parameterSchema.isValidParameter();
+        MISAParameterValidity report = moduleInstance.isValidParameter();
 
         if (!report.isValid()) {
             StringBuilder message = new StringBuilder();
@@ -147,7 +132,7 @@ public class MISAModuleParameterEditorUI extends JFrame {
         if(!parametersAreValid())
             return;
 
-        getUiService().getDefaultUI().getConsolePane().show();
+        MISAModuleRepositoryUI.getInstance().getCommand().getUiService().getDefaultUI().getConsolePane().show();
 
         MISARunDialogUI dialog = new MISARunDialogUI(this);
         dialog.setLocationRelativeTo(this);
@@ -170,11 +155,11 @@ public class MISAModuleParameterEditorUI extends JFrame {
                 install(dialog.getParameterFilePath(), dialog.getImportedPath(), dialog.getExportedPath(), false, false);
 
                 // Run the executable
-                getLogService().info("Starting worker process ...");
-                ProcessBuilder pb = new ProcessBuilder(module.executablePath, "--parameters", dialog.getParameterFilePath().toString());
+                MISAModuleRepositoryUI.getInstance().getCommand().getLogService().info("Starting worker process ...");
+                ProcessBuilder pb = new ProcessBuilder(getModuleInstance().getModule().executablePath, "--parameters", dialog.getParameterFilePath().toString());
                 Process p = pb.start();
-                new ProcessStreamToStringGobbler(p.getInputStream(), s -> getLogService().info(s)).start();
-                new ProcessStreamToStringGobbler(p.getErrorStream(), s -> getLogService().error(s)).start();
+                new ProcessStreamToStringGobbler(p.getInputStream(), s -> MISAModuleRepositoryUI.getInstance().getCommand().getLogService().info(s)).start();
+                new ProcessStreamToStringGobbler(p.getErrorStream(), s -> MISAModuleRepositoryUI.getInstance().getCommand().getLogService().error(s)).start();
 
                 CancelableProcessUI processUI = new CancelableProcessUI(p);
                 processUI.setLocationRelativeTo(this);
@@ -208,15 +193,15 @@ public class MISAModuleParameterEditorUI extends JFrame {
         }
     }
 
-    private void initialize() {
+    private void initialize(boolean editOnlyMode) {
         setSize(800, 600);
         getContentPane().setLayout(new BorderLayout(8, 8));
-        setTitle("MISA++ for ImageJ - " + module.getModuleInfo().toString());
+        setTitle("MISA++ for ImageJ - " + getModuleInstance().getModuleInfo().toString());
         setIconImage(UIUtils.getIconFromResources("misaxx.png").getImage());
-        sampleParametersEditorUI = new SampleParametersEditorUI(this);
-        algorithmParametersEditorUI = new AlgorithmParametersEditorUI(this);
-        runtimeParametersEditorUI = new RuntimeParametersEditorUI(this);
-        sampleDataEditorUI = new SampleDataEditorUI(this);
+        SampleParametersEditorUI sampleParametersEditorUI = new SampleParametersEditorUI(this);
+        AlgorithmParametersEditorUI algorithmParametersEditorUI = new AlgorithmParametersEditorUI(this);
+        RuntimeParametersEditorUI runtimeParametersEditorUI = new RuntimeParametersEditorUI(this);
+        SampleDataEditorUI sampleDataEditorUI = new SampleDataEditorUI(this);
 
         // Menu bar
         initializeMenuBar();
@@ -236,15 +221,21 @@ public class MISAModuleParameterEditorUI extends JFrame {
 
         toolBar.add(Box.createHorizontalGlue());
 
-        JButton exportButton = new JButton("Export", UIUtils.getIconFromResources("export.png"));
-        exportButton.setToolTipText("Instead of running the MISA++ module, export all necessary files into a folder. This folder for example can be put onto a server.");
-        exportButton.addActionListener(actionEvent -> exportMISARun());
-        toolBar.add(exportButton);
+        JButton validateButton = new JButton("Check parameters", UIUtils.getIconFromResources("checkmark.png"));
+        validateButton.addActionListener(actionEvent -> parametersAreValid());
+        toolBar.add(validateButton);
 
-        JButton runButton = new JButton("Run", UIUtils.getIconFromResources("run.png"));
-        runButton.setToolTipText("Runs the MISA++ module.");
-        runButton.addActionListener(actionEvent -> runMISA());
-        toolBar.add(runButton);
+        if(!editOnlyMode) {
+            JButton exportButton = new JButton("Export", UIUtils.getIconFromResources("export.png"));
+            exportButton.setToolTipText("Instead of running the MISA++ module, export all necessary files into a folder. This folder for example can be put onto a server.");
+            exportButton.addActionListener(actionEvent -> exportMISARun());
+            toolBar.add(exportButton);
+
+            JButton runButton = new JButton("Run", UIUtils.getIconFromResources("run.png"));
+            runButton.setToolTipText("Runs the MISA++ module.");
+            runButton.addActionListener(actionEvent -> runMISA());
+            toolBar.add(runButton);
+        }
 
         add(toolBar, BorderLayout.NORTH);
 
@@ -256,10 +247,10 @@ public class MISAModuleParameterEditorUI extends JFrame {
     }
 
     private void initializeMenuBar() {
-        JMenuBar menuBar = new JMenuBar();
-        JMenu samplesMenu = new JMenu("Samples");
-        menuBar.add(samplesMenu);
-        setJMenuBar(menuBar);
+//        JMenuBar menuBar = new JMenuBar();
+//        JMenu samplesMenu = new JMenu("Samples");
+//        menuBar.add(samplesMenu);
+//        setJMenuBar(menuBar);
     }
 
     private void initalizeSampleManagerUI(JToolBar toolBar) {
@@ -270,17 +261,17 @@ public class MISAModuleParameterEditorUI extends JFrame {
 
         {
             JComboBox<MISASample> sampleList = new JComboBox<>();
-            parameterSchema.addPropertyChangeListener(propertyChangeEvent -> {
+            moduleInstance.addPropertyChangeListener(propertyChangeEvent -> {
                 if(propertyChangeEvent.getPropertyName().equals("samples")) {
                     DefaultComboBoxModel<MISASample> model = new DefaultComboBoxModel<>();
-                    for(MISASample sample : parameterSchema.getSamples()) {
+                    for(MISASample sample : moduleInstance.getSamples()) {
                         model.addElement(sample);
                     }
                     sampleList.setModel(model);
                 }
                 else if(propertyChangeEvent.getPropertyName().equals("currentSample")) {
-                    if(parameterSchema.getCurrentSample() != null) {
-                        sampleList.setSelectedItem(parameterSchema.getCurrentSample());
+                    if(moduleInstance.getCurrentSample() != null) {
+                        sampleList.setSelectedItem(moduleInstance.getCurrentSample());
                         sampleList.setEnabled(true);
                     }
                     else {
@@ -289,8 +280,8 @@ public class MISAModuleParameterEditorUI extends JFrame {
                 }
             });
             sampleList.addItemListener(itemEvent -> {
-                if(parameterSchema.getSamples().size() > 0 && sampleList.getSelectedItem() != null) {
-                    parameterSchema.setCurrentSample(((MISASample)sampleList.getSelectedItem()).name);
+                if(moduleInstance.getSamples().size() > 0 && sampleList.getSelectedItem() != null) {
+                    moduleInstance.setCurrentSample(((MISASample)sampleList.getSelectedItem()).name);
                 }
             });
             toolBar.add(sampleList);
@@ -306,7 +297,7 @@ public class MISAModuleParameterEditorUI extends JFrame {
     private void addSample() {
         String result = JOptionPane.showInputDialog(this, "Sample name", "Add sample", JOptionPane.PLAIN_MESSAGE);
         if(result != null && !result.isEmpty()) {
-            parameterSchema.addSample(result);
+            moduleInstance.addSample(result);
         }
     }
 
@@ -314,39 +305,12 @@ public class MISAModuleParameterEditorUI extends JFrame {
         if(JOptionPane.showConfirmDialog(this,
                 "Do you really want to remove this sample?",
                 "Remove sample", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-            parameterSchema.removeSample(parameterSchema.getCurrentSample().name);
+            moduleInstance.removeSample(moduleInstance.getCurrentSample().name);
         }
     }
 
-    public MISAModuleInstance getParameterSchema() {
-        return parameterSchema;
+    public MISAModuleInstance getModuleInstance() {
+        return moduleInstance;
     }
 
-    public LogService getLogService() {
-        return command.getLogService();
-    }
-
-    public StatusService getStatusService() {
-        return command.getStatusService();
-    }
-
-    public ThreadService getThreadService() {
-        return command.getThreadService();
-    }
-
-    public UIService getUiService() {
-        return command.getUiService();
-    }
-
-    public DatasetIOService getDatasetIOService() {
-        return command.getDatasetIOService();
-    }
-
-    public DisplayService getDisplayService() {
-        return command.getDisplayService();
-    }
-
-    public DatasetService getDatasetService() {
-        return command.getDatasetService();
-    }
 }

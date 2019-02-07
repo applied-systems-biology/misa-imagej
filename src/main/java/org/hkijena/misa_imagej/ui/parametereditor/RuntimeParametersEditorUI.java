@@ -10,8 +10,8 @@ public class RuntimeParametersEditorUI extends JPanel {
 
     private MISAModuleInstance parameterSchema;
 
-    public RuntimeParametersEditorUI(MISAModuleParameterEditorUI app) {
-        this.parameterSchema = app.getParameterSchema();
+    public RuntimeParametersEditorUI(MISAModuleInstanceUI app) {
+        this.parameterSchema = app.getModuleInstance();
         initialize();
     }
 

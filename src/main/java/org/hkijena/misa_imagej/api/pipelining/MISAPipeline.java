@@ -22,6 +22,9 @@ public class MISAPipeline {
 
     public MISAPipelineNode addInstance(MISAModule module) {
         MISAPipelineNode node = new MISAPipelineNode();
+        node.moduleInstance = module.instantiate();
+        node.moduleName = module.getModuleInfo().getName();
+        node.name = module.getModuleInfo().getDescription();
         nodes.add(node);
         propertyChangeSupport.firePropertyChange("addInstance", null, node);
         return node;

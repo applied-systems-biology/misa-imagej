@@ -5,7 +5,7 @@ import com.google.gson.stream.JsonWriter;
 import org.hkijena.misa_imagej.MISACommand;
 import org.hkijena.misa_imagej.api.repository.MISAModule;
 import org.hkijena.misa_imagej.api.repository.MISAModuleRepository;
-import org.hkijena.misa_imagej.ui.parametereditor.MISAModuleParameterEditorUI;
+import org.hkijena.misa_imagej.ui.parametereditor.MISAModuleInstanceUI;
 import org.hkijena.misa_imagej.ui.perfanalysis.MISARuntimeLogUI;
 import org.hkijena.misa_imagej.ui.pipeliner.MISAPipelinerUI;
 import org.hkijena.misa_imagej.utils.GsonUtils;
@@ -35,6 +35,10 @@ public class MISAModuleRepositoryUI extends JFrame {
     public static MISAModuleRepositoryUI getInstance(MISACommand command) {
         if(instance == null)
             instance = new MISAModuleRepositoryUI(command);
+        return instance;
+    }
+
+    public static MISAModuleRepositoryUI getInstance() {
         return instance;
     }
 
@@ -145,7 +149,7 @@ public class MISAModuleRepositoryUI extends JFrame {
 
             JButton launchButton = new JButton("Launch", UIUtils.getIconFromResources("run.png"));
             launchButton.addActionListener(actionEvent -> {
-                MISAModuleParameterEditorUI launcher = new MISAModuleParameterEditorUI(command, misaModuleJList.getSelectedValue());
+                MISAModuleInstanceUI launcher = new MISAModuleInstanceUI(misaModuleJList.getSelectedValue().instantiate(), false);
                 launcher.setVisible(true);
             });
             UIUtils.addToGridBag(detailPanel, launchButton, 5, 0);
@@ -193,4 +197,7 @@ public class MISAModuleRepositoryUI extends JFrame {
         }
     }
 
+    public MISACommand getCommand() {
+        return command;
+    }
 }

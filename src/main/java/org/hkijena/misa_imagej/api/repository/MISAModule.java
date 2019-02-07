@@ -156,7 +156,10 @@ public class MISAModule {
         JSONSchemaObject schema = gson.fromJson(getParameterSchema(), JSONSchemaObject.class);
         schema.id = "parameters";
         schema.update();
-        return new MISAModuleInstance(schema);
+        MISAModuleInstance instance = new MISAModuleInstance(schema);
+        instance.setModuleInfo(getModuleInfo());
+        instance.setModule(this);
+        return instance;
     }
 
 }

@@ -11,8 +11,8 @@ public class SampleParametersEditorUI extends JPanel {
     private MISAModuleInstance parameterSchema;
     private JSONSchemaEditorUI jsonSchemaEditorUI = null;
 
-    public SampleParametersEditorUI(MISAModuleParameterEditorUI app) {
-        this.parameterSchema = app.getParameterSchema();
+    public SampleParametersEditorUI(MISAModuleInstanceUI app) {
+        this.parameterSchema = app.getModuleInstance();
         initialize();
     }
 

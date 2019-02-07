@@ -1,6 +1,5 @@
 package org.hkijena.misa_imagej.ui.parametereditor;
 
-import org.apache.commons.collections.ListUtils;
 import org.hkijena.misa_imagej.api.MISACache;
 import org.hkijena.misa_imagej.api.MISAModuleInstance;
 import org.hkijena.misa_imagej.api.MISASample;
@@ -11,10 +10,7 @@ import org.jdesktop.swingx.JXTextField;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
-import java.util.Arrays;
 
 import static org.hkijena.misa_imagej.utils.UIUtils.UI_PADDING;
 
@@ -28,8 +24,8 @@ public class SampleDataEditorUI extends JPanel {
     private int cacheEditorRows = 0;
     private MISACacheIOType editorLastIOType;
 
-    public SampleDataEditorUI(MISAModuleParameterEditorUI app) {
-        this.parameterSchema = app.getParameterSchema();
+    public SampleDataEditorUI(MISAModuleInstanceUI app) {
+        this.parameterSchema = app.getModuleInstance();
         initialize();
     }
 
