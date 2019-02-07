@@ -91,7 +91,7 @@ public class MISAModuleRepositoryUI extends JFrame {
 
         JButton launcherPipeliner = new JButton("Connect modules together ...", UIUtils.getIconFromResources("connect.png"));
         launcherPipeliner.addActionListener(actionEvent -> {
-            MISAPipelinerUI pipelinerUI = new MISAPipelinerUI();
+            MISAPipelinerUI pipelinerUI = new MISAPipelinerUI(moduleRepository);
             pipelinerUI.setVisible(true);
         });
         toolBar.add(launcherPipeliner);
@@ -153,6 +153,7 @@ public class MISAModuleRepositoryUI extends JFrame {
 
         // List of modules
         misaModuleJList = new JList<>(new DefaultListModel<>());
+        misaModuleJList.setCellRenderer(new MISAModuleListCellRenderer());
         misaModuleJList.addListSelectionListener(listSelectionEvent -> {
             MISAModule selectedModule = misaModuleJList.getSelectedValue();
             if(selectedModule != null && selectedModule.getModuleInfo() != null) {

@@ -2,6 +2,7 @@ package org.hkijena.misa_imagej.api.repository;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,5 +42,14 @@ public class MISAModuleInfo {
             return name;
         else
             return description;
+    }
+
+    /**
+     * Automatically generates a color from the name
+     * @return
+     */
+    public Color toColor() {
+        float h = Math.abs(getName().hashCode() % 256) / 255.0f;
+        return Color.getHSBColor(h, 0.8f, 0.8f);
     }
 }

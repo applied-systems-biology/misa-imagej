@@ -12,7 +12,7 @@ import io.scif.services.DatasetIOService;
 
 import net.imagej.DatasetService;
 import org.hkijena.misa_imagej.MISACommand;
-import org.hkijena.misa_imagej.api.MISAParameterSchema;
+import org.hkijena.misa_imagej.api.MISAModuleInstance;
 import org.hkijena.misa_imagej.api.MISASample;
 import org.hkijena.misa_imagej.api.MISAParameterValidity;
 import org.hkijena.misa_imagej.api.repository.MISAModule;
@@ -38,7 +38,7 @@ public class MISAModuleParameterEditorUI extends JFrame {
 
     private JLabel errorLabel;
 
-    private MISAParameterSchema parameterSchema;
+    private MISAModuleInstance parameterSchema;
 
     /**
      * Create the dialog.
@@ -46,21 +46,9 @@ public class MISAModuleParameterEditorUI extends JFrame {
     public MISAModuleParameterEditorUI(MISACommand command, MISAModule module) {
         this.command = command;
         this.module = module;
-        loadSchema();
+        this.parameterSchema = module.instantiate();
         initialize();
         parameterSchema.addSample("New Sample");
-    }
-
-    /**
-     * Loads the module schema into the editor
-     */
-    private void loadSchema() {
-        Gson gson = GsonUtils.getGson();
-        JSONSchemaObject schema = gson.fromJson(module.getParameterSchema(), JSONSchemaObject.class);
-        schema.id = "parameters";
-        schema.update();
-        parameterSchema = new MISAParameterSchema(schema);
-        setTitle("MISA++ for ImageJ - " + module.getModuleInfo().toString());
     }
 
     private void install(Path parameterSchema, Path importedDirectory, Path exportedDirectory, boolean forceCopy, boolean relativeDirectories) {
@@ -223,6 +211,7 @@ public class MISAModuleParameterEditorUI extends JFrame {
     private void initialize() {
         setSize(800, 600);
         getContentPane().setLayout(new BorderLayout(8, 8));
+        setTitle("MISA++ for ImageJ - " + module.getModuleInfo().toString());
         setIconImage(UIUtils.getIconFromResources("misaxx.png").getImage());
         sampleParametersEditorUI = new SampleParametersEditorUI(this);
         algorithmParametersEditorUI = new AlgorithmParametersEditorUI(this);
@@ -329,7 +318,7 @@ public class MISAModuleParameterEditorUI extends JFrame {
         }
     }
 
-    public MISAParameterSchema getParameterSchema() {
+    public MISAModuleInstance getParameterSchema() {
         return parameterSchema;
     }
 

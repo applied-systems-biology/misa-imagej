@@ -18,7 +18,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MISAParameterSchema implements MISAParameter {
+public class MISAModuleInstance implements MISAParameter {
 
     /**
      * JSON schema object for runtime parameters
@@ -48,7 +48,7 @@ public class MISAParameterSchema implements MISAParameter {
 
     private MISASample currentSample = null;
 
-    public MISAParameterSchema(JSONSchemaObject object) {
+    public MISAModuleInstance(JSONSchemaObject object) {
         algorithmParameters = object.properties.get("algorithm");
         runtimeParameters = object.properties.get("runtime");
         sampleParametersTemplate = object.properties.get("samples").getAdditionalPropertiesTemplate();

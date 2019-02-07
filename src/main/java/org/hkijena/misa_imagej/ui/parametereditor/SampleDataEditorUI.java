@@ -2,13 +2,10 @@ package org.hkijena.misa_imagej.ui.parametereditor;
 
 import org.apache.commons.collections.ListUtils;
 import org.hkijena.misa_imagej.api.MISACache;
-import org.hkijena.misa_imagej.api.MISAParameterSchema;
+import org.hkijena.misa_imagej.api.MISAModuleInstance;
 import org.hkijena.misa_imagej.api.MISASample;
-import org.hkijena.misa_imagej.ui.parametereditor.datasources.MISADataSourceUI;
-import org.hkijena.misa_imagej.ui.parametereditor.datasources.MISADataSourceUIRegistry;
 import org.hkijena.misa_imagej.api.MISACacheIOType;
 import org.hkijena.misa_imagej.utils.UIUtils;
-import org.hkijena.misa_imagej.utils.ui.ColorIcon;
 import org.jdesktop.swingx.JXTextField;
 
 import javax.swing.*;
@@ -16,22 +13,17 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreeCellRenderer;
 import java.awt.*;
 import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
 
 import static org.hkijena.misa_imagej.utils.UIUtils.UI_PADDING;
 
 public class SampleDataEditorUI extends JPanel {
 
     private JPanel sampleEditor;
-    private JTree cacheList;
-    private MISAParameterSchema parameterSchema;
+    private CacheListTree cacheList;
+    private MISAModuleInstance parameterSchema;
     private JXTextField objectFilter;
-
-    private CacheListEntry currentCacheList;
 
     private int cacheEditorRows = 0;
     private MISACacheIOType editorLastIOType;
@@ -46,14 +38,12 @@ public class SampleDataEditorUI extends JPanel {
 
         // List of caches
         JPanel cacheListPanel = new JPanel(new BorderLayout(8, 8));
-        cacheList = new JTree();
-        cacheList.setCellRenderer(new CacheListEntryTreeCellRenderer());
+        cacheList = new CacheListTree();
         cacheListPanel.add(cacheList, BorderLayout.CENTER);
 
-        cacheList.addTreeSelectionListener(treeSelectionEvent -> {
-            if(cacheList.getLastSelectedPathComponent() != null) {
-                DefaultMutableTreeNode nd = (DefaultMutableTreeNode)cacheList.getLastSelectedPathComponent();
-                setCurrentCacheList((CacheListEntry)nd.getUserObject());
+        cacheList.addPropertyChangeListener(propertyChangeEvent -> {
+            if(propertyChangeEvent.getPropertyName().equals("currentCacheList")) {
+                refreshEditor();
             }
         });
 
@@ -107,38 +97,7 @@ public class SampleDataEditorUI extends JPanel {
     }
 
     private void setCurrentSample(MISASample sample) {
-        if(sample != null) {
-            // Create tree nodes
-            DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode(new CacheListEntry("'" + sample.name + "' data",
-                    ListUtils.union(sample.getImportedCaches(), sample.getExportedCaches())));
-
-            // Imported data
-            DefaultMutableTreeNode importedNode = new DefaultMutableTreeNode(new CacheListEntry("Input", sample.getImportedCaches()));
-            for(MISACache cache : sample.getImportedCaches()) {
-                importedNode.add(new DefaultMutableTreeNode(new CacheListEntry(cache.getRelativePathName(), Arrays.asList(cache))));
-            }
-            rootNode.add(importedNode);
-
-            // Exported data
-            DefaultMutableTreeNode exportedNode = new DefaultMutableTreeNode(new CacheListEntry("Output", sample.getExportedCaches()));
-            for(MISACache cache : sample.getExportedCaches()) {
-                exportedNode.add(new DefaultMutableTreeNode(new CacheListEntry(cache.getRelativePathName(), Arrays.asList(cache))));
-            }
-            rootNode.add(exportedNode);
-
-
-            cacheList.setModel(new DefaultTreeModel(rootNode));
-            setCurrentCacheList((CacheListEntry)rootNode.getUserObject());
-        }
-        else {
-            cacheList.setModel(new DefaultTreeModel(new DefaultMutableTreeNode("No properties to edit")));
-            setCurrentCacheList(null);
-        }
-    }
-
-    private void setCurrentCacheList(CacheListEntry entry) {
-        currentCacheList = entry;
-        refreshEditor();
+       cacheList.setSample(sample);
     }
 
     public void refreshEditor() {
@@ -147,8 +106,8 @@ public class SampleDataEditorUI extends JPanel {
         editorLastIOType = null;
         cacheEditorRows = 0;
 
-        if(currentCacheList != null) {
-            for(MISACache cache : currentCacheList.caches) {
+        if(cacheList.getCurrentCacheList() != null) {
+            for(MISACache cache : cacheList.getCurrentCacheList().caches) {
                 if(cache.getIOType() != editorLastIOType) {
                     final boolean first = editorLastIOType == null;
                     JLabel description;
@@ -195,10 +154,6 @@ public class SampleDataEditorUI extends JPanel {
 
         sampleEditor.revalidate();
         sampleEditor.repaint();
-    }
-
-    public CacheListEntry getCurrentCacheList() {
-        return currentCacheList;
     }
 
     private void insertCacheEditorUI(MISACacheUI ui) {
@@ -249,70 +204,4 @@ public class SampleDataEditorUI extends JPanel {
         ++cacheEditorRows;
     }
 
-    private class CacheListEntry {
-        public List<MISACache> caches;
-        public String name;
-
-        public CacheListEntry() {
-        }
-
-        public CacheListEntry(String name, List<MISACache> caches) {
-            this.caches = caches;
-            this.name = name;
-
-            // Sort, so imported items are on top
-            this.caches.sort(Comparator.comparing(MISACache::getIOType).thenComparing(MISACache::getRelativePath).thenComparing(MISACache::getCacheTypeName));
-        }
-
-        @Override
-        public String toString() {
-            return name;
-        }
-    }
-
-    private class CacheListEntryTreeCellRenderer extends JLabel implements TreeCellRenderer {
-
-        private ColorIcon icon;
-
-        public CacheListEntryTreeCellRenderer() {
-            setOpaque(true);
-            setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
-            icon = new ColorIcon(16, 16, Color.BLACK);
-        }
-
-        @Override
-        public Component getTreeCellRendererComponent(JTree jTree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) {
-
-            if(jTree.getFont() != null) {
-                setFont(jTree.getFont());
-            }
-
-            Object o = ((DefaultMutableTreeNode)value).getUserObject();
-            if(o instanceof CacheListEntry) {
-                setText(o.toString());
-                CacheListEntry entry = (CacheListEntry)o;
-                if(entry.caches.size() == 1) {
-                    icon.setColor(entry.caches.get(0).toColor());
-                    setIcon(icon);
-                }
-                else {
-                    setIcon(null);
-                }
-            }
-            else {
-                setText(o.toString());
-                setIcon(null);
-            }
-
-            // Update status
-            if(selected) {
-                setBackground(new Color(184, 207, 229));
-            }
-            else {
-                setBackground(new Color(255,255,255));
-            }
-
-            return this;
-        }
-    }
 }

@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 public class MISAOutput {
 
     private Path rootPath;
-    private MISAParameterSchema parameterSchema;
+    private MISAModuleInstance parameterSchema;
     private MISAModuleInfo moduleInfo;
     private Path runtimeLogPath;
     private MISAAttachmentIndex attachmentIndex;
@@ -39,7 +39,7 @@ public class MISAOutput {
         JSONSchemaObject schema = gson.fromJson(new String(Files.readAllBytes(getRootPath().resolve("parameter-schema.json"))), JSONSchemaObject.class);
         schema.id = "parameters";
         schema.update();
-        parameterSchema = new MISAParameterSchema(schema);
+        parameterSchema = new MISAModuleInstance(schema);
     }
 
     private void loadModuleInfo() throws IOException {
@@ -128,7 +128,7 @@ public class MISAOutput {
         return rootPath;
     }
 
-    public MISAParameterSchema getParameterSchema() {
+    public MISAModuleInstance getParameterSchema() {
         return parameterSchema;
     }
 

@@ -2,6 +2,8 @@ package org.hkijena.misa_imagej.api.repository;
 
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
+import org.hkijena.misa_imagej.api.MISAModuleInstance;
+import org.hkijena.misa_imagej.api.json.JSONSchemaObject;
 import org.hkijena.misa_imagej.utils.GsonUtils;
 import org.hkijena.misa_imagej.utils.OSUtils;
 import org.hkijena.misa_imagej.utils.OperatingSystem;
@@ -143,6 +145,18 @@ public class MISAModule {
      */
     public String getGeneratedFileName() {
         return getModuleInfo().getName() + "-" + getModuleInfo().getVersion() + "-" + operatingSystem.toString() + "-" + operatingSystemArchitecture.toString();
+    }
+
+    /**
+     * Creates a new module instance
+     * @return
+     */
+    public MISAModuleInstance instantiate() {
+        Gson gson = GsonUtils.getGson();
+        JSONSchemaObject schema = gson.fromJson(getParameterSchema(), JSONSchemaObject.class);
+        schema.id = "parameters";
+        schema.update();
+        return new MISAModuleInstance(schema);
     }
 
 }

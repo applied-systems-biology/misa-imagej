@@ -10,7 +10,7 @@ import java.util.List;
  */
 public class MISASample implements MISAParameter {
 
-    private MISAParameterSchema parameterSchema;
+    private MISAModuleInstance parameterSchema;
 
     /**
      * Name of the sample
@@ -30,7 +30,7 @@ public class MISASample implements MISAParameter {
 
     private List<MISACache> exportedCaches = new ArrayList<>();
 
-    public MISASample(MISAParameterSchema parameterSchema, String name, JSONSchemaObject parameters, MISAFilesystemEntry importedFilesystem, MISAFilesystemEntry exportedFilesystem) {
+    public MISASample(MISAModuleInstance parameterSchema, String name, JSONSchemaObject parameters, MISAFilesystemEntry importedFilesystem, MISAFilesystemEntry exportedFilesystem) {
         this.parameterSchema = parameterSchema;
         this.name = name;
         this.parameters = parameters;
@@ -88,7 +88,7 @@ public class MISASample implements MISAParameter {
         return report;
     }
 
-    public MISAParameterSchema getParameterSchema() {
+    public MISAModuleInstance getParameterSchema() {
         return parameterSchema;
     }
 }
