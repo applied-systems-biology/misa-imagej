@@ -4,6 +4,7 @@ import org.hkijena.misa_imagej.api.pipelining.MISAPipeline;
 import org.hkijena.misa_imagej.api.pipelining.MISAPipelineNode;
 import org.hkijena.misa_imagej.utils.GraphicsUtils;
 import org.hkijena.misa_imagej.utils.MathUtils;
+import org.hkijena.misa_imagej.utils.UIUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -13,9 +14,11 @@ import java.awt.event.MouseMotionListener;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
 import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.List;
 
 public class MISAPipelineUI extends JPanel implements MouseMotionListener, MouseListener {
 
@@ -27,16 +30,7 @@ public class MISAPipelineUI extends JPanel implements MouseMotionListener, Mouse
     private PropertyChangeListener pipelineListener;
 
     private Map<MISAPipelineNode, MISAPipelineNodeUI> nodeUIMap = new HashMap<>();
-
-    private static final Polygon arrowHead = new Polygon() {
-        {
-            addPoint( 0,1);
-            addPoint( -5, -10);
-            addPoint( 5,-10);
-        }
-    };
-
-    private AffineTransform arrowHeadTransform = new AffineTransform();
+    private List<RemoveEdgeButton> removeEdgeButtonList = new ArrayList<>();
 
     public MISAPipelineUI() {
         super(null);
@@ -56,7 +50,8 @@ public class MISAPipelineUI extends JPanel implements MouseMotionListener, Mouse
         // Update the UI when something changes
         pipelineListener = (propertyChangeEvent -> {
             if(propertyChangeEvent.getPropertyName().equals("addNode") ||
-                    propertyChangeEvent.getPropertyName().equals("addEdge")) {
+                    propertyChangeEvent.getPropertyName().equals("addEdge") ||
+                    propertyChangeEvent.getPropertyName().equals("removeEdge")) {
                 refresh();
             }
         });
@@ -64,15 +59,25 @@ public class MISAPipelineUI extends JPanel implements MouseMotionListener, Mouse
 
     public void refresh() {
         nodeUIMap.clear();
+        removeEdgeButtonList.clear();
         removeAll();
         if(pipeline != null) {
             for(MISAPipelineNode node : pipeline.getNodes()) {
                 addNodeUI(node);
+
+                // Add edges
+                if(pipeline.getEdges().containsKey(node)) {
+                    for(MISAPipelineNode target : pipeline.getEdges().get(node)) {
+                        addEdgeUI(node, target);
+                    }
+                }
+
             }
         }
         if(getParent() != null)
             getParent().revalidate();
         repaint();
+        updateEdgeUI();
     }
 
     public void setPipeline(MISAPipeline pipeline) {
@@ -81,6 +86,27 @@ public class MISAPipelineUI extends JPanel implements MouseMotionListener, Mouse
         this.pipeline = pipeline;
         this.pipeline.addPropertyChangeListener(pipelineListener);
         refresh();
+    }
+
+    private void updateEdgeUI() {
+        for(RemoveEdgeButton button : removeEdgeButtonList) {
+            if(currentlyDragged != null) {
+                button.setVisible(false);
+            }
+            else {
+                button.setVisible(true);
+                MISAPipelineNodeUI sourceUI = nodeUIMap.get(button.source);
+                MISAPipelineNodeUI targetUI = nodeUIMap.get(button.target);
+
+                int x1 = sourceUI.getX() + sourceUI.getWidth() / 2;
+                int y1 = sourceUI.getY() + sourceUI.getHeight() / 2;
+                int x2 = targetUI.getX() + targetUI.getWidth() / 2;
+                int y2 = targetUI.getY() + targetUI.getHeight() / 2;
+                int xc = x1 + (x2 - x1) / 2;
+                int yc = y1 + (y2 - y1) / 2;
+                button.setLocation(xc - button.getWidth() / 2, yc - button.getHeight() / 2);
+            }
+        }
     }
 
     @Override
@@ -93,15 +119,6 @@ public class MISAPipelineUI extends JPanel implements MouseMotionListener, Mouse
                 RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         g.setRenderingHints(rh);
 
-//        // Draw a nice grid
-//        graphics.setColor(new Color(184, 207, 229));
-//        for(int y = 0; y < getHeight(); y += 20) {
-//            graphics.drawLine(0, y, getWidth() - 1, y);
-//        }
-//        for(int x = 0; x < getWidth(); x += 20) {
-//            graphics.drawLine(x, 0, x, getHeight() - 1);
-//        }
-
         // Draw the edges
         graphics.setColor(Color.BLACK);
         g.setStroke(new BasicStroke(2));
@@ -113,26 +130,8 @@ public class MISAPipelineUI extends JPanel implements MouseMotionListener, Mouse
                         targetUI.getX() + targetUI.getWidth() / 2.0, targetUI.getY() + targetUI.getHeight() / 2.0),
                         new Rectangle(targetUI.getX(), targetUI.getY(), targetUI.getWidth(), targetUI.getHeight()));
                 if(targetPoint != null) {
-//                    Line2D finalLine = new Line2D.Double(sourceUI.getX() + sourceUI.getWidth() / 2.0,
-//                            sourceUI.getY() + sourceUI.getHeight() / 2.0,
-//                            targetPoint.x,
-//                            targetPoint.y);
                     GraphicsUtils.drawArrowLine(g, sourceUI.getX() + sourceUI.getWidth() / 2,
                             sourceUI.getY() + sourceUI.getHeight() / 2, targetPoint.x, targetPoint.y, 8, 5);
-//                    g.draw(finalLine);
-//
-//                    // Draw arrowhead
-//                    arrowHeadTransform.setToIdentity();
-//                    double angle = Math.atan2(finalLine.getY2()-finalLine.getY1(), finalLine.getX2()-finalLine.getX1());
-//                    arrowHeadTransform.translate(finalLine.getX2(), finalLine.getY2());
-//                    arrowHeadTransform.rotate((angle-Math.PI/2d));
-//
-//                    AffineTransform backup = g.getTransform();
-//                    g.setTransform(arrowHeadTransform);
-//                    backup.transform();
-//                    g.fill(arrowHead);
-//                    g.setTransform(backup);
-
                 }
             }
         }
@@ -146,12 +145,20 @@ public class MISAPipelineUI extends JPanel implements MouseMotionListener, Mouse
         return ui;
     }
 
+    private void addEdgeUI(MISAPipelineNode source, MISAPipelineNode target) {
+        RemoveEdgeButton button = new RemoveEdgeButton(source, target);
+        add(button);
+        button.setBounds(0,0,21,21);
+        removeEdgeButtonList.add(button);
+    }
+
     @Override
     public void mouseDragged(MouseEvent mouseEvent) {
         if(currentlyDragged != null) {
             currentlyDragged.setLocation(currentlyDraggedOffset.x + mouseEvent.getX(),
                     currentlyDraggedOffset.y + mouseEvent.getY());
             repaint();
+            updateEdgeUI();
             if(getParent() != null)
                 getParent().revalidate();
         }
@@ -187,6 +194,7 @@ public class MISAPipelineUI extends JPanel implements MouseMotionListener, Mouse
     @Override
     public void mouseReleased(MouseEvent mouseEvent) {
         currentlyDragged = null;
+        updateEdgeUI();
     }
 
     @Override
@@ -211,6 +219,18 @@ public class MISAPipelineUI extends JPanel implements MouseMotionListener, Mouse
         return new Dimension(width, height);
     }
 
+    private static class RemoveEdgeButton extends JButton {
 
+        private MISAPipelineNode source;
+        private MISAPipelineNode target;
+
+        public RemoveEdgeButton(MISAPipelineNode source, MISAPipelineNode target) {
+            super(UIUtils.getIconFromResources("remove.png"));
+            this.source = source;
+            this.target = target;
+            addActionListener(actionEvent -> source.pipeline.removeEdge(source, target));
+        }
+
+    }
 
 }

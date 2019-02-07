@@ -61,8 +61,24 @@ public class MISAPipeline implements MISAValidatable {
             edges.get(source).add(target);
         else
             edges.put(source, new HashSet<>(Arrays.asList(target)));
+        // TODO: Update module instances accordingly
         propertyChangeSupport.firePropertyChange("addEdge", null, null);
         return true;
+    }
+
+    /**
+     * Removes an edge between two nodes
+     * @param source
+     * @param target
+     * @return
+     */
+    public boolean removeEdge(MISAPipelineNode source, MISAPipelineNode target) {
+        if(!edges.containsKey(source))
+            return false;
+        // TODO: Update module instances accordingly
+        boolean result = edges.get(source).remove(target);
+        propertyChangeSupport.firePropertyChange("removeEdge", null, null);
+        return result;
     }
 
     private String generateNodeName(MISAModule module) {
