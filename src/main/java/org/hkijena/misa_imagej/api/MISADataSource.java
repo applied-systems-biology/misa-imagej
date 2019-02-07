@@ -5,7 +5,7 @@ import java.nio.file.Path;
 /**
  * Interface for any type of data that is an input of a cache
  */
-public interface MISADataSource extends MISAParameter {
+public interface MISADataSource extends MISAValidatable {
     /**
      *  Installs this cache into the install folder
      * @param installFolder

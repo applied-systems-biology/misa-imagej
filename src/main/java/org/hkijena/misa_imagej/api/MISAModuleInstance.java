@@ -20,7 +20,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MISAModuleInstance implements MISAParameter {
+public class MISAModuleInstance implements MISAValidatable {
 
     /**
      * JSON schema object for runtime parameters

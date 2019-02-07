@@ -133,7 +133,7 @@ public class MISAPipelinerUI extends JFrame {
 
     private void addInstance() {
         if(moduleList.getSelectedValue() != null) {
-            pipeline.addInstance(moduleList.getSelectedValue());
+            pipeline.addNode(moduleList.getSelectedValue());
         }
     }
 

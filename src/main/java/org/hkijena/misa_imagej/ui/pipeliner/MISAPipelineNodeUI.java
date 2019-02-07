@@ -4,6 +4,7 @@ import org.hkijena.misa_imagej.api.pipelining.MISAPipelineNode;
 import org.hkijena.misa_imagej.ui.parametereditor.MISAModuleInstanceUI;
 import org.hkijena.misa_imagej.utils.UIUtils;
 import org.hkijena.misa_imagej.utils.ui.DocumentChangeListener;
+import org.hkijena.misa_imagej.utils.ui.MonochromeColorIcon;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -68,7 +69,7 @@ public class MISAPipelineNodeUI extends JPanel implements ComponentListener {
         buttonPanel.add(Box.createHorizontalGlue());
 
         JButton connectButton = new JButton(UIUtils.getIconFromResources("connect.png"));
-        connectButton.setToolTipText("Connect to another node");
+        connectButton.setToolTipText("Connect from another node");
         initializeConnectMenu(UIUtils.addPopupMenuToComponent(connectButton));
         UIUtils.makeFlat(connectButton);
         buttonPanel.add(connectButton);
@@ -84,7 +85,15 @@ public class MISAPipelineNodeUI extends JPanel implements ComponentListener {
     }
 
     private void initializeConnectMenu(JPopupMenu menu) {
-
+        for(MISAPipelineNode available : node.getAvailableInNodes()) {
+            JMenuItem menuItem = new JMenuItem("From " + available.name,
+                    new MonochromeColorIcon(UIUtils.getIconFromResources("module-template.png"),
+                            available.moduleInstance.getModuleInfo().toColor()));
+            menuItem.addActionListener(actionEvent -> {
+                node.pipeline.addEdge(available, node);
+            });
+            menu.add(menuItem);
+        }
     }
 
     private void editParameters() {

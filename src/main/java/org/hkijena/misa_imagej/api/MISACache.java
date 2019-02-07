@@ -10,7 +10,7 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.List;
 
-public class MISACache implements MISAParameter {
+public class MISACache implements MISAValidatable {
 
     private MISASample sample;
 

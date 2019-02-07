@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * Models a data sample
  */
-public class MISASample implements MISAParameter {
+public class MISASample implements MISAValidatable {
 
     private MISAModuleInstance parameterSchema;
 

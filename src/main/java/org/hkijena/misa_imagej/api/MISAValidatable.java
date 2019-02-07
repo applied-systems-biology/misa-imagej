@@ -1,6 +1,6 @@
 package org.hkijena.misa_imagej.api;
 
-public interface MISAParameter {
+public interface MISAValidatable {
 
     /**
      * Generates a parameter schema validity report

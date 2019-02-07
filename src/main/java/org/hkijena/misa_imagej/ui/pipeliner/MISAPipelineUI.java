@@ -9,6 +9,9 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.beans.PropertyChangeListener;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 public class MISAPipelineUI extends JPanel implements MouseMotionListener, MouseListener {
 
@@ -18,6 +21,8 @@ public class MISAPipelineUI extends JPanel implements MouseMotionListener, Mouse
     private Point currentlyDraggedOffset = new Point();
 
     private PropertyChangeListener pipelineListener;
+
+    private Map<MISAPipelineNode, MISAPipelineNodeUI> nodeUIMap = new HashMap<>();
 
     public MISAPipelineUI() {
         super(null);
@@ -36,13 +41,15 @@ public class MISAPipelineUI extends JPanel implements MouseMotionListener, Mouse
 
         // Update the UI when something changes
         pipelineListener = (propertyChangeEvent -> {
-            if(propertyChangeEvent.getPropertyName().equals("addInstance")) {
+            if(propertyChangeEvent.getPropertyName().equals("addNode") ||
+                    propertyChangeEvent.getPropertyName().equals("addEdge")) {
                 refresh();
             }
         });
     }
 
     public void refresh() {
+        nodeUIMap.clear();
         removeAll();
         if(pipeline != null) {
             for(MISAPipelineNode node : pipeline.getNodes()) {
@@ -74,12 +81,23 @@ public class MISAPipelineUI extends JPanel implements MouseMotionListener, Mouse
 //        for(int x = 0; x < getWidth(); x += 20) {
 //            graphics.drawLine(x, 0, x, getHeight() - 1);
 //        }
+
+        // Draw the edges
+        graphics.setColor(Color.BLACK);
+        for(Map.Entry<MISAPipelineNode, Set<MISAPipelineNode>> kv : pipeline.getEdges().entrySet()) {
+            for(MISAPipelineNode target : kv.getValue()) {
+                MISAPipelineNodeUI sourceUI = nodeUIMap.get(kv.getKey());
+                MISAPipelineNodeUI targetUI = nodeUIMap.get(target);
+                graphics.drawLine(sourceUI.getX(), sourceUI.getY(), targetUI.getX(), targetUI.getY());
+            }
+        }
     }
 
     private MISAPipelineNodeUI addNodeUI(MISAPipelineNode node) {
         MISAPipelineNodeUI ui = new MISAPipelineNodeUI(node);
         add(ui);
         ui.setBounds(node.x, node.y, 200,150);
+        nodeUIMap.put(node, ui);
         return ui;
     }
 
@@ -88,6 +106,7 @@ public class MISAPipelineUI extends JPanel implements MouseMotionListener, Mouse
         if(currentlyDragged != null) {
             currentlyDragged.setLocation(currentlyDraggedOffset.x + mouseEvent.getX(),
                     currentlyDraggedOffset.y + mouseEvent.getY());
+            repaint();
             if(getParent() != null)
                 getParent().revalidate();
         }

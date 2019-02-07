@@ -2,7 +2,7 @@ package org.hkijena.misa_imagej.api.json;
 
 import com.google.gson.JsonElement;
 import com.google.gson.annotations.SerializedName;
-import org.hkijena.misa_imagej.api.MISAParameter;
+import org.hkijena.misa_imagej.api.MISAValidatable;
 import org.hkijena.misa_imagej.api.MISAParameterValidity;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -13,7 +13,7 @@ import java.util.*;
 /**
  * Deserialized JSON Schema entry that allows editing and exporting to the final JSON
  */
-public class JSONSchemaObject implements Cloneable, MISAParameter {
+public class JSONSchemaObject implements Cloneable, MISAValidatable {
 
     public transient String id;
 

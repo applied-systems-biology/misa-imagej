@@ -1,18 +1,20 @@
 package org.hkijena.misa_imagej.api.pipelining;
 
 import com.google.gson.annotations.SerializedName;
+import org.hkijena.misa_imagej.api.MISAParameterValidity;
+import org.hkijena.misa_imagej.api.MISAValidatable;
 import org.hkijena.misa_imagej.api.repository.MISAModule;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
-public class MISAPipeline {
+public class MISAPipeline implements MISAValidatable {
 
     @SerializedName("nodes")
-    private List<MISAPipelineNode> nodes = new ArrayList<>();
+    private Map<String, MISAPipelineNode> nodes = new HashMap<>();
+
+    private transient Map<MISAPipelineNode, Set<MISAPipelineNode>> edges = new HashMap<>();
 
     private transient PropertyChangeSupport propertyChangeSupport;
 
@@ -20,14 +22,56 @@ public class MISAPipeline {
         propertyChangeSupport = new PropertyChangeSupport(this);
     }
 
-    public MISAPipelineNode addInstance(MISAModule module) {
-        MISAPipelineNode node = new MISAPipelineNode();
+    /**
+     * Adds a new node into the pipeline
+     * @param module
+     * @return
+     */
+    public MISAPipelineNode addNode(MISAModule module) {
+        MISAPipelineNode node = new MISAPipelineNode(this);
         node.moduleInstance = module.instantiate();
         node.moduleName = module.getModuleInfo().getName();
         node.name = module.getModuleInfo().getDescription();
-        nodes.add(node);
-        propertyChangeSupport.firePropertyChange("addInstance", null, node);
+        nodes.put(generateNodeName(module), node);
+        propertyChangeSupport.firePropertyChange("addNode", null, node);
         return node;
+    }
+
+    public boolean canAddEdge(MISAPipelineNode source, MISAPipelineNode target) {
+        if(source == target)
+            return false;
+        if(edges.containsKey(target)) {
+            return !edges.get(target).contains(source);
+        }
+        return true;
+    }
+
+    /**
+     * Adds an edge between two nodes, allowing access to data sources
+     *
+     * @param source
+     * @param target
+     * @return If the edge was added
+     */
+    public boolean addEdge(MISAPipelineNode source, MISAPipelineNode target) {
+        if(!canAddEdge(source, target))
+            return false;
+
+        if(edges.containsKey(source))
+            edges.get(source).add(target);
+        else
+            edges.put(source, new HashSet<>(Arrays.asList(target)));
+        propertyChangeSupport.firePropertyChange("addEdge", null, null);
+        return true;
+    }
+
+    private String generateNodeName(MISAModule module) {
+        String prefix = module.getModuleInfo().getName();
+        int counter = 1;
+        while(nodes.containsKey(prefix + "-" + counter)) {
+            ++counter;
+        }
+        return prefix + "-" + counter;
     }
 
     public void addPropertyChangeListener(PropertyChangeListener listener) {
@@ -38,7 +82,21 @@ public class MISAPipeline {
         propertyChangeSupport.removePropertyChangeListener(listener);
     }
 
-    public List<MISAPipelineNode> getNodes() {
-        return Collections.unmodifiableList(nodes);
+    public Collection<MISAPipelineNode> getNodes() {
+        return Collections.unmodifiableCollection(nodes.values());
+    }
+
+    @Override
+    public MISAParameterValidity isValidParameter() {
+        return null;
+    }
+
+    /**
+     * Returns the edges between nodes
+     * The map key is the source and the list of nodes are the targets
+     * @return
+     */
+    public Map<MISAPipelineNode, Set<MISAPipelineNode>> getEdges() {
+        return Collections.unmodifiableMap(edges);
     }
 }
