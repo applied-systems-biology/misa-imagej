@@ -248,10 +248,19 @@ public class MISAPipeline implements MISAValidatable {
             }
 
             List<JsonObject> edges = new ArrayList<>();
+
             // The output edge list directly contains cache -> cache edges
             for(Map.Entry<MISAPipelineNode, Set<MISAPipelineNode>> kv : pipeline.edges.entrySet()) {
                 MISAPipelineNode source = kv.getKey();
                 for(MISAPipelineNode target : kv.getValue()) {
+
+                    // Also track the module-edges
+                    {
+                        JsonObject edge = new JsonObject();
+                        edge.addProperty("source-node", nodes.inverse().get(source));
+                        edge.addProperty("target-node", nodes.inverse().get(target));
+                        edges.add(edge);
+                    }
 
                     for(MISASample sample : target.moduleInstance.getSamples()) {
                         for(MISACache cache : sample.getImportedCaches()) {
@@ -273,7 +282,7 @@ public class MISAPipeline implements MISAValidatable {
             }
 
             JsonObject result = new JsonObject();
-            result.add("nodes", jsonSerializationContext.serialize(nodes));
+            result.add("nodes", jsonSerializationContext.serialize(new HashMap<>(nodes)));
             result.add("edges", jsonSerializationContext.serialize(edges));
 
             return  result;

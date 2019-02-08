@@ -26,7 +26,7 @@ public class MISAPipelineNode {
     @SerializedName("y")
     private int y;
 
-    private PropertyChangeSupport propertyChangeSupport;
+    private transient PropertyChangeSupport propertyChangeSupport;
 
     public transient MISAPipeline pipeline;
 
