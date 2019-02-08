@@ -1,5 +1,7 @@
 package org.hkijena.misa_imagej.ui.pipeliner;
 
+import com.google.common.base.Charsets;
+import com.google.gson.Gson;
 import org.hkijena.misa_imagej.api.MISACache;
 import org.hkijena.misa_imagej.api.MISAModuleInstance;
 import org.hkijena.misa_imagej.api.pipelining.MISAPipeline;
@@ -7,12 +9,17 @@ import org.hkijena.misa_imagej.api.repository.MISAModule;
 import org.hkijena.misa_imagej.api.repository.MISAModuleRepository;
 import org.hkijena.misa_imagej.ui.parametereditor.MISACacheTreeUI;
 import org.hkijena.misa_imagej.ui.repository.MISAModuleListCellRenderer;
+import org.hkijena.misa_imagej.utils.GsonUtils;
 import org.hkijena.misa_imagej.utils.UIUtils;
+import org.jdesktop.swingx.JXTaskPane;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -59,15 +66,16 @@ public class MISAPipelinerUI extends JFrame {
         toolBar.add(refreshButton);
 
         add(toolBar, BorderLayout.NORTH);
+        JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+        tabbedPane.addTab("Available modules", createToolbox());
 
-        JPanel toolboxPanel = createToolbox();
         pipelineEditor = new MISAPipelineUI();
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, new JScrollPane(pipelineEditor) {
             {
                 setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
                 setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
             }
-        }, toolboxPanel);
+        }, tabbedPane);
         splitPane.setResizeWeight(1);
         add(splitPane, BorderLayout.CENTER);
     }
@@ -133,7 +141,18 @@ public class MISAPipelinerUI extends JFrame {
     }
 
     private void save() {
-
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        if(fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+            try {
+                Gson gson = GsonUtils.getGson();
+                String json = gson.toJson(pipeline);
+                Files.write(fileChooser.getSelectedFile().toPath(), json.getBytes(Charsets.UTF_8));
+            }
+            catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     private void refresh() {

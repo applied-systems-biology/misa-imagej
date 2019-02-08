@@ -27,9 +27,9 @@ public class MISACache implements MISAValidatable {
     private PropertyChangeSupport propertyChangeSupport;
 
     /**
-     * List of attachments
+     * List of attachments TODO
      */
-    private Map<MISAAttachmentLocation, MISAAttachment> attachments = new HashMap<>();
+//    private Map<MISAAttachmentLocation, MISAAttachment> attachments = new HashMap<>();
 
 
     public MISACache(MISASample sample, MISAFilesystemEntry filesystemEntry) {
@@ -152,15 +152,6 @@ public class MISACache implements MISAValidatable {
         if(getIOType() == MISACacheIOType.Imported) {
             getDataSource().install(installFolder, forceCopy);
         }
-    }
-
-    /**
-     * Gets the map of attachments.
-     * This is only used when output is analyzed
-     * @return
-     */
-    public Map<MISAAttachmentLocation, MISAAttachment> getAttachments() {
-        return attachments;
     }
 
     /**

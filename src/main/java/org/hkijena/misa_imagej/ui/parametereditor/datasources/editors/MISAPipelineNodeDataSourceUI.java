@@ -6,7 +6,6 @@ import org.hkijena.misa_imagej.api.datasources.MISAPipelineNodeDataSource;
 import org.hkijena.misa_imagej.ui.parametereditor.datasources.MISADataSourceUI;
 import org.hkijena.misa_imagej.utils.UIUtils;
 import org.hkijena.misa_imagej.utils.ui.ColorIcon;
-import org.hkijena.misa_imagej.utils.ui.MonochromeColorIcon;
 
 import javax.swing.*;
 import java.awt.*;
@@ -35,6 +34,8 @@ public class MISAPipelineNodeDataSourceUI extends MISADataSourceUI {
             {
                 gridx = 0;
                 gridy = 0;
+                fill = GridBagConstraints.HORIZONTAL;
+                weightx = 1;
             }
         });
 
@@ -65,6 +66,12 @@ public class MISAPipelineNodeDataSourceUI extends MISADataSourceUI {
 
         if(model.getSelectedItem() != null) {
             getNativeDataSource().setSourceCache((MISACache) model.getSelectedItem());
+        }
+        else {
+            // Select the first one that is available
+            if(model.getSize() != 0) {
+                getNativeDataSource().setSourceCache(model.getElementAt(0));
+            }
         }
     }
 

@@ -1,19 +1,23 @@
 package org.hkijena.misa_imagej.api.pipelining;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Maps;
+import com.google.gson.*;
 import com.google.gson.annotations.SerializedName;
 import org.hkijena.misa_imagej.api.*;
 import org.hkijena.misa_imagej.api.datasources.MISAPipelineNodeDataSource;
 import org.hkijena.misa_imagej.api.repository.MISAModule;
+import org.jfree.data.json.impl.JSONObject;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.lang.reflect.Type;
 import java.util.*;
 
 public class MISAPipeline implements MISAValidatable {
 
-    @SerializedName("nodes")
-    private Map<String, MISAPipelineNode> nodes = new HashMap<>();
+    private transient Set<MISAPipelineNode> nodes = new HashSet<>();
 
     private transient Map<MISAPipelineNode, Set<MISAPipelineNode>> edges = new HashMap<>();
 
@@ -29,13 +33,11 @@ public class MISAPipeline implements MISAValidatable {
      * @return
      */
     public MISAPipelineNode addNode(MISAModule module) {
-        String id = generateNodeName(module);
         MISAPipelineNode node = new MISAPipelineNode(this);
-        node.id = id;
         node.moduleInstance = module.instantiate();
         node.setModuleName(module.getModuleInfo().getName());
         node.setName(module.getModuleInfo().getDescription());
-        nodes.put(id, node);
+        nodes.add(node);
         propertyChangeSupport.firePropertyChange("addNode", null, node);
         node.moduleInstance.addPropertyChangeListener(propertyChangeEvent -> {
             if(propertyChangeEvent.getPropertyName().equals("samples")) {
@@ -53,7 +55,7 @@ public class MISAPipeline implements MISAValidatable {
      */
     public void removeNode(MISAPipelineNode node) {
         isolateNode(node);
-        nodes.remove(node.id);
+        nodes.remove(node);
         propertyChangeSupport.firePropertyChange("removeNode", null, node);
     }
 
@@ -131,15 +133,6 @@ public class MISAPipeline implements MISAValidatable {
         return result;
     }
 
-    private String generateNodeName(MISAModule module) {
-        String prefix = module.getModuleInfo().getName();
-        int counter = 1;
-        while(nodes.containsKey(prefix + "-" + counter)) {
-            ++counter;
-        }
-        return prefix + "-" + counter;
-    }
-
     public void addPropertyChangeListener(PropertyChangeListener listener) {
         propertyChangeSupport.addPropertyChangeListener(listener);
     }
@@ -149,7 +142,7 @@ public class MISAPipeline implements MISAValidatable {
     }
 
     public Collection<MISAPipelineNode> getNodes() {
-        return Collections.unmodifiableCollection(nodes.values());
+        return Collections.unmodifiableCollection(nodes);
     }
 
     @Override
@@ -184,12 +177,12 @@ public class MISAPipeline implements MISAValidatable {
      */
     private void synchronizeSamples() {
         Set<String> sampleNames = new HashSet<>();
-        for(MISAPipelineNode node : nodes.values()) {
+        for(MISAPipelineNode node : nodes) {
             for(MISASample sample : node.moduleInstance.getSamples()) {
                 sampleNames.add(sample.name);
             }
         }
-        for(MISAPipelineNode node : nodes.values()) {
+        for(MISAPipelineNode node : nodes) {
             for(String sample : sampleNames) {
                 if(!node.moduleInstance.getSampleNames().contains(sample)) {
                     node.moduleInstance.addSample(sample);
@@ -221,7 +214,7 @@ public class MISAPipeline implements MISAValidatable {
             }
         }
         List<MISADataSource> toRemove = new ArrayList<>();
-        for(MISAPipelineNode target : nodes.values()) {
+        for(MISAPipelineNode target : nodes) {
             for(MISASample sample : target.moduleInstance.getSamples()) {
                 for (MISACache cache : sample.getImportedCaches()) {
                     toRemove.clear();
@@ -237,6 +230,62 @@ public class MISAPipeline implements MISAValidatable {
                     }
                 }
             }
+        }
+    }
+
+    public static class JSONAdapter implements JsonDeserializer<MISAPipeline>, JsonSerializer<MISAPipeline> {
+
+        @Override
+        public MISAPipeline deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
+            return null;
+        }
+
+        @Override
+        public JsonElement serialize(MISAPipeline pipeline, Type type, JsonSerializationContext jsonSerializationContext) {
+            BiMap<String, MISAPipelineNode> nodes = HashBiMap.create();
+            for(MISAPipelineNode node : pipeline.nodes) {
+                nodes.put(generateNodeName(nodes, node.moduleInstance.getModule()), node);
+            }
+
+            List<JsonObject> edges = new ArrayList<>();
+            // The output edge list directly contains cache -> cache edges
+            for(Map.Entry<MISAPipelineNode, Set<MISAPipelineNode>> kv : pipeline.edges.entrySet()) {
+                MISAPipelineNode source = kv.getKey();
+                for(MISAPipelineNode target : kv.getValue()) {
+
+                    for(MISASample sample : target.moduleInstance.getSamples()) {
+                        for(MISACache cache : sample.getImportedCaches()) {
+                            if(cache.getDataSource() instanceof MISAPipelineNodeDataSource) {
+                                MISAPipelineNodeDataSource dataSource = (MISAPipelineNodeDataSource)cache.getDataSource();
+                                if(dataSource.getSourceNode() == source) {
+                                    JsonObject edge = new JsonObject();
+                                    edge.addProperty("source-node", nodes.inverse().get(source));
+                                    edge.addProperty("target-node", nodes.inverse().get(target));
+                                    edge.addProperty("source-cache", dataSource.getSourceCache().getRelativePath());
+                                    edge.addProperty("sample", sample.name);
+                                    edges.add(edge);
+                                }
+                            }
+                        }
+                    }
+
+                }
+            }
+
+            JsonObject result = new JsonObject();
+            result.add("nodes", jsonSerializationContext.serialize(nodes));
+            result.add("edges", jsonSerializationContext.serialize(edges));
+
+            return  result;
+        }
+
+        private static String generateNodeName(Map<String, MISAPipelineNode> nodes, MISAModule module) {
+            String prefix = module.getModuleInfo().getName();
+            int counter = 1;
+            while(nodes.containsKey(prefix + "-" + counter)) {
+                ++counter;
+            }
+            return prefix + "-" + counter;
         }
     }
 }

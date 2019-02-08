@@ -21,7 +21,6 @@ public class MISAOutput {
     private MISAModuleInstance moduleInstance;
     private MISAModuleInfo moduleInfo;
     private Path runtimeLogPath;
-    private MISAAttachmentIndex attachmentIndex;
 
     public MISAOutput(Path rootPath) throws IOException {
         this.rootPath = rootPath;
@@ -31,7 +30,6 @@ public class MISAOutput {
         loadParameters();
         loadFilesystem();
         loadCaches();
-        this.attachmentIndex = new MISAAttachmentIndex(this);
     }
 
     private void loadParameterSchema() throws IOException {
@@ -77,48 +75,48 @@ public class MISAOutput {
     }
 
     private void loadCaches() throws IOException {
-        for(MISASample sample : moduleInstance.getSamples()) {
-            Path importedCacheRootAttachmentsPath = rootPath.resolve("attachments").resolve("imported").resolve(sample.name);
-            Path exportedCacheRootAttachmentsPath = rootPath.resolve("attachments").resolve("exported").resolve(sample.name);
-
-            for(MISACache cache : sample.getImportedCaches()) {
-                if(cache.getRelativePath() != null) {
-                    Path cacheAttachmentsPath = importedCacheRootAttachmentsPath.resolve(cache.getRelativePath());
-
-                    if(cacheAttachmentsPath.toFile().isDirectory()) {
-                        loadCacheAttachments(cacheAttachmentsPath, cache);
-                    }
-                }
-            }
-
-            for(MISACache cache : sample.getExportedCaches()) {
-                if(cache.getRelativePath() != null) {
-                    Path cacheAttachmentsPath = exportedCacheRootAttachmentsPath.resolve(cache.getRelativePath());
-
-                    if(cacheAttachmentsPath.toFile().isDirectory()) {
-                        loadCacheAttachments(cacheAttachmentsPath, cache);
-                    }
-                }
-            }
-        }
+//        for(MISASample sample : moduleInstance.getSamples()) {
+//            Path importedCacheRootAttachmentsPath = rootPath.resolve("attachments").resolve("imported").resolve(sample.name);
+//            Path exportedCacheRootAttachmentsPath = rootPath.resolve("attachments").resolve("exported").resolve(sample.name);
+//
+//            for(MISACache cache : sample.getImportedCaches()) {
+//                if(cache.getRelativePath() != null) {
+//                    Path cacheAttachmentsPath = importedCacheRootAttachmentsPath.resolve(cache.getRelativePath());
+//
+//                    if(cacheAttachmentsPath.toFile().isDirectory()) {
+//                        loadCacheAttachments(cacheAttachmentsPath, cache);
+//                    }
+//                }
+//            }
+//
+//            for(MISACache cache : sample.getExportedCaches()) {
+//                if(cache.getRelativePath() != null) {
+//                    Path cacheAttachmentsPath = exportedCacheRootAttachmentsPath.resolve(cache.getRelativePath());
+//
+//                    if(cacheAttachmentsPath.toFile().isDirectory()) {
+//                        loadCacheAttachments(cacheAttachmentsPath, cache);
+//                    }
+//                }
+//            }
+//        }
     }
 
-    private void loadCacheAttachments(Path cacheAttachmentsPath, MISACache cache) throws IOException {
-        final Gson gson = GsonUtils.getGson();
-        for(Path path : Files.find(cacheAttachmentsPath, Integer.MAX_VALUE, (path, basicFileAttributes) ->
-                basicFileAttributes.isRegularFile() && path.getFileName().toString().endsWith(".json")).collect(Collectors.toList())) {
-
-            Path subCachePath = cacheAttachmentsPath.relativize(path);
-
-            for(Map.Entry<String, JsonElement> kv : gson.fromJson(new String(Files.readAllBytes(path)),
-                    JsonObject.class).getAsJsonObject().entrySet()) {
-                MISAAttachmentLocation attachmentLocation = new MISAAttachmentLocation();
-                attachmentLocation.subCachePath = subCachePath;
-                attachmentLocation.attachmentIndex = kv.getKey();
-                cache.getAttachments().put(attachmentLocation, new MISAAttachment(attachmentLocation, path, cache));
-            }
-        }
-    }
+//    private void loadCacheAttachments(Path cacheAttachmentsPath, MISACache cache) throws IOException {
+//        final Gson gson = GsonUtils.getGson();
+//        for(Path path : Files.find(cacheAttachmentsPath, Integer.MAX_VALUE, (path, basicFileAttributes) ->
+//                basicFileAttributes.isRegularFile() && path.getFileName().toString().endsWith(".json")).collect(Collectors.toList())) {
+//
+//            Path subCachePath = cacheAttachmentsPath.relativize(path);
+//
+//            for(Map.Entry<String, JsonElement> kv : gson.fromJson(new String(Files.readAllBytes(path)),
+//                    JsonObject.class).getAsJsonObject().entrySet()) {
+//                MISAAttachmentLocation attachmentLocation = new MISAAttachmentLocation();
+//                attachmentLocation.subCachePath = subCachePath;
+//                attachmentLocation.attachmentIndex = kv.getKey();
+//                cache.getAttachments().put(attachmentLocation, new MISAAttachment(attachmentLocation, path, cache));
+//            }
+//        }
+//    }
 
     public static void main(String[] args) throws IOException {
         MISAOutput output = new MISAOutput(Paths.get("/home/rgerst/tmp/glomeruli_full_quantified/"));
@@ -138,9 +136,5 @@ public class MISAOutput {
 
     public Path getRuntimeLogPath() {
         return runtimeLogPath;
-    }
-
-    public MISAAttachmentIndex getAttachmentIndex() {
-        return attachmentIndex;
     }
 }
