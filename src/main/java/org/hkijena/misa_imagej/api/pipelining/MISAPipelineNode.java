@@ -61,6 +61,7 @@ public class MISAPipelineNode {
 
     public void setName(String name) {
         this.name = name;
+        this.moduleInstance.setName(name);
         propertyChangeSupport.firePropertyChange("name", null, null);
     }
 

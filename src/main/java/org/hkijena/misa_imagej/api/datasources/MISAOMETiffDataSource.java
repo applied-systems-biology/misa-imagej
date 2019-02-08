@@ -1,9 +1,8 @@
 package org.hkijena.misa_imagej.api.datasources;
 
 import org.hkijena.misa_imagej.api.MISACache;
-import org.hkijena.misa_imagej.api.MISACacheIOType;
 import org.hkijena.misa_imagej.api.MISADataSource;
-import org.hkijena.misa_imagej.api.MISAParameterValidity;
+import org.hkijena.misa_imagej.api.MISAValidityReport;
 import org.hkijena.misa_imagej.utils.swappers.OMETiffSwapper;
 
 import java.io.IOException;
@@ -57,20 +56,21 @@ public class MISAOMETiffDataSource implements MISADataSource {
         return true;
     }
 
+    @Override
     public MISACache getCache() {
         return cache;
     }
 
     @Override
-    public MISAParameterValidity isValidParameter() {
+    public MISAValidityReport getValidityReport() {
         if(tiffSwapper == null)
-            return new MISAParameterValidity(this,
+            return new MISAValidityReport(this,
                     "Data " + cache.getCacheTypeName() + " " + cache.getRelativePathName(), false, "No data set. Please add data.");
         else if(!tiffSwapper.isValid())
-            return new MISAParameterValidity(this,
+            return new MISAValidityReport(this,
                     "Data " + cache.getCacheTypeName() + " " + cache.getRelativePathName(), false, "Data is not present anymore. Did you close the image or remove the file?");
         else
-            return new MISAParameterValidity(this,
+            return new MISAValidityReport(this,
                     "Data " + cache.getCacheTypeName() + " " + cache.getRelativePathName(), true, "");
     }
 }

@@ -38,7 +38,7 @@ public class MISACache implements MISAValidatable {
         this.filesystemEntry = filesystemEntry;
 
         // Default data sources that are always available
-        this.availableDatasources.add(new MISAFolderLinkDataSource());
+        this.availableDatasources.add(new MISAFolderLinkDataSource(this));
     }
 
     /**
@@ -131,14 +131,14 @@ public class MISACache implements MISAValidatable {
     }
 
     @Override
-    public MISAParameterValidity isValidParameter() {
+    public MISAValidityReport getValidityReport() {
         if(getIOType() == MISACacheIOType.Exported)
-            return new MISAParameterValidity(this, null, true, "");
+            return new MISAValidityReport(this, null, true, "");
         else if(getDataSource() == null) {
-            return new MISAParameterValidity(this, "Data " + getCacheTypeName() + " " + getRelativePathName(), false, "No data source was set!");
+            return new MISAValidityReport(this, "Data " + getCacheTypeName() + " " + getRelativePathName(), false, "No data source was set!");
         }
         else {
-            return getDataSource().isValidParameter();
+            return getDataSource().getValidityReport();
         }
     }
 
@@ -149,7 +149,9 @@ public class MISACache implements MISAValidatable {
      * @param forceCopy forces copying all files into the install folder
      */
     public void install(Path installFolder, boolean forceCopy) {
-        getDataSource().install(installFolder, forceCopy);
+        if(getIOType() == MISACacheIOType.Imported) {
+            getDataSource().install(installFolder, forceCopy);
+        }
     }
 
     /**
@@ -162,11 +164,35 @@ public class MISACache implements MISAValidatable {
     }
 
     /**
-     * Returns a list of additional data sources that are recommended by this cache
+     * Returns a list of additional data sources that are available for this cache
      * @return
      */
     public List<MISADataSource> getAvailableDataSources() {
-        return availableDatasources;
+        return Collections.unmodifiableList(availableDatasources);
+    }
+
+    /**
+     * Adds a new data source to the list of available ones
+     * @param source
+     */
+    public void addAvailableDataSource(MISADataSource source) {
+        availableDatasources.add(source);
+    }
+
+    /**
+     * Removes a data source from the list of available sources
+     * @param source
+     */
+    public void removeAvailableDataSource(MISADataSource source) {
+        availableDatasources.remove(source);
+        if(source == dataSource) {
+            if(getPreferredDataSource() != null)
+                setDataSource(getPreferredDataSource());
+            else if(availableDatasources.size() > 0)
+                setDataSource(availableDatasources.get(0));
+            else
+                setDataSource(null);
+        }
     }
 
     /**

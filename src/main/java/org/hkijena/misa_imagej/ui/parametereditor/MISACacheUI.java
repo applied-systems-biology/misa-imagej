@@ -53,6 +53,7 @@ public class MISACacheUI extends JPanel {
             }
 
             add(selectDataSourceButton, BorderLayout.EAST);
+            updateEditorUI();
         }
     }
 

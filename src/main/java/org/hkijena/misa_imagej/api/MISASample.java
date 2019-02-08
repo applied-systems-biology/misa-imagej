@@ -10,7 +10,7 @@ import java.util.List;
  */
 public class MISASample implements MISAValidatable {
 
-    private MISAModuleInstance parameterSchema;
+    private MISAModuleInstance moduleInstance;
 
     /**
      * Name of the sample
@@ -30,8 +30,8 @@ public class MISASample implements MISAValidatable {
 
     private List<MISACache> exportedCaches = new ArrayList<>();
 
-    public MISASample(MISAModuleInstance parameterSchema, String name, JSONSchemaObject parameters, MISAFilesystemEntry importedFilesystem, MISAFilesystemEntry exportedFilesystem) {
-        this.parameterSchema = parameterSchema;
+    public MISASample(MISAModuleInstance moduleInstance, String name, JSONSchemaObject parameters, MISAFilesystemEntry importedFilesystem, MISAFilesystemEntry exportedFilesystem) {
+        this.moduleInstance = moduleInstance;
         this.name = name;
         this.parameters = parameters;
         this.importedFilesystem = importedFilesystem;
@@ -74,21 +74,21 @@ public class MISASample implements MISAValidatable {
     }
 
     @Override
-    public MISAParameterValidity isValidParameter() {
-        MISAParameterValidity report = new MISAParameterValidity();
+    public MISAValidityReport getValidityReport() {
+        MISAValidityReport report = new MISAValidityReport();
 
-        report.merge(parameters.isValidParameter(), "Parameters");
+        report.merge(parameters.getValidityReport(), "Parameters");
         for(MISACache cache : importedCaches) {
-            report.merge(cache.isValidParameter(), "Data", "Input");
+            report.merge(cache.getValidityReport(), "Data", "Input");
         }
         for(MISACache cache : exportedCaches) {
-            report.merge(cache.isValidParameter(), "Data", "Output");
+            report.merge(cache.getValidityReport(), "Data", "Output");
         }
 
         return report;
     }
 
-    public MISAModuleInstance getParameterSchema() {
-        return parameterSchema;
+    public MISAModuleInstance getModuleInstance() {
+        return moduleInstance;
     }
 }

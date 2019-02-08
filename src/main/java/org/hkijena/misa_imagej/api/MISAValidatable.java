@@ -6,6 +6,6 @@ public interface MISAValidatable {
      * Generates a parameter schema validity report
      * @return
      */
-    MISAParameterValidity isValidParameter();
+    MISAValidityReport getValidityReport();
 
 }

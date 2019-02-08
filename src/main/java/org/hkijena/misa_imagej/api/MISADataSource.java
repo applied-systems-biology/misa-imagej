@@ -24,4 +24,10 @@ public interface MISADataSource extends MISAValidatable {
      * @return
      */
     boolean isEditable();
+
+    /**
+     * Returns the cache that this data source is assigned to
+     * @return
+     */
+    MISACache getCache();
 }

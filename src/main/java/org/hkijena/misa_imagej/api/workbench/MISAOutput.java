@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 public class MISAOutput {
 
     private Path rootPath;
-    private MISAModuleInstance parameterSchema;
+    private MISAModuleInstance moduleInstance;
     private MISAModuleInfo moduleInfo;
     private Path runtimeLogPath;
     private MISAAttachmentIndex attachmentIndex;
@@ -39,7 +39,7 @@ public class MISAOutput {
         JSONSchemaObject schema = gson.fromJson(new String(Files.readAllBytes(getRootPath().resolve("parameter-schema.json"))), JSONSchemaObject.class);
         schema.id = "parameters";
         schema.update();
-        parameterSchema = new MISAModuleInstance(schema);
+        moduleInstance = new MISAModuleInstance(schema);
     }
 
     private void loadModuleInfo() throws IOException {
@@ -49,7 +49,7 @@ public class MISAOutput {
 
     private void loadParameters() throws  IOException {
         Gson gson = GsonUtils.getGson();
-        parameterSchema.loadParameters(gson.fromJson(new String(Files.readAllBytes(getRootPath().resolve("parameters.json"))), JsonObject.class));
+        moduleInstance.loadParameters(gson.fromJson(new String(Files.readAllBytes(getRootPath().resolve("parameters.json"))), JsonObject.class));
     }
 
     private void loadFilesystem() throws IOException {
@@ -57,13 +57,13 @@ public class MISAOutput {
         JsonObject parameters = gson.fromJson(new String(Files.readAllBytes(getRootPath().resolve("parameters.json"))), JsonObject.class);
         if(parameters.getAsJsonObject("filesystem").get("source").getAsString().equals("directories")) {
             Path inputDirectory = Paths.get(parameters.getAsJsonObject("filesystem").get("input-directory").getAsString());
-            for(MISASample sample : parameterSchema.getSamples()) {
+            for(MISASample sample : moduleInstance.getSamples()) {
                 sample.getImportedFilesystem().externalPath = inputDirectory.resolve(sample.name).toString();
                 sample.getExportedFilesystem().externalPath = rootPath.resolve(sample.name).toString(); // Can load it from the root path
             }
         }
         else if(parameters.getAsJsonObject("filesystem").get("source").getAsString().equals("json")) {
-            for(MISASample sample : parameterSchema.getSamples()) {
+            for(MISASample sample : moduleInstance.getSamples()) {
                 sample.getExportedFilesystem().externalPath = rootPath.resolve(sample.name).toString(); // Can load it from the root path
 
                 // Assign all other paths from JSON data
@@ -77,7 +77,7 @@ public class MISAOutput {
     }
 
     private void loadCaches() throws IOException {
-        for(MISASample sample : parameterSchema.getSamples()) {
+        for(MISASample sample : moduleInstance.getSamples()) {
             Path importedCacheRootAttachmentsPath = rootPath.resolve("attachments").resolve("imported").resolve(sample.name);
             Path exportedCacheRootAttachmentsPath = rootPath.resolve("attachments").resolve("exported").resolve(sample.name);
 
@@ -128,8 +128,8 @@ public class MISAOutput {
         return rootPath;
     }
 
-    public MISAModuleInstance getParameterSchema() {
-        return parameterSchema;
+    public MISAModuleInstance getModuleInstance() {
+        return moduleInstance;
     }
 
     public MISAModuleInfo getModuleInfo() {

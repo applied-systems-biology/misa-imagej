@@ -5,12 +5,14 @@ import org.hkijena.misa_imagej.api.MISAModuleInstance;
 import org.hkijena.misa_imagej.api.pipelining.MISAPipeline;
 import org.hkijena.misa_imagej.api.repository.MISAModule;
 import org.hkijena.misa_imagej.api.repository.MISAModuleRepository;
-import org.hkijena.misa_imagej.ui.parametereditor.CacheListTree;
+import org.hkijena.misa_imagej.ui.parametereditor.MISACacheTreeUI;
 import org.hkijena.misa_imagej.ui.repository.MISAModuleListCellRenderer;
 import org.hkijena.misa_imagej.utils.UIUtils;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,7 +21,7 @@ public class MISAPipelinerUI extends JFrame {
     private MISAPipeline pipeline = new MISAPipeline();
     private MISAModuleRepository repository;
     private JList<MISAModule> moduleList;
-    private CacheListTree cacheTree;
+    private MISACacheTreeUI cacheTree;
     private MISAPipelineUI pipelineEditor;
 
     /**
@@ -75,12 +77,32 @@ public class MISAPipelinerUI extends JFrame {
         moduleList = new JList<>();
         moduleList.setCellRenderer(new MISAModuleListCellRenderer());
         moduleList.addListSelectionListener(listSelectionEvent -> updateCacheTree());
+        moduleList.addMouseListener(new MouseListener() {
+            @Override
+            public void mouseClicked(MouseEvent mouseEvent) {
+                if(mouseEvent.getClickCount() == 2) {
+                    addInstance();
+                }
+            }
 
-        cacheTree = new CacheListTree() {
+            @Override
+            public void mousePressed(MouseEvent mouseEvent) {}
+
+            @Override
+            public void mouseReleased(MouseEvent mouseEvent) {}
+
+            @Override
+            public void mouseEntered(MouseEvent mouseEvent) {}
+
+            @Override
+            public void mouseExited(MouseEvent mouseEvent) {}
+        });
+
+        cacheTree = new MISACacheTreeUI() {
             @Override
             protected Entry createRootEntry() {
                 Entry result = super.createRootEntry();
-                result.name = "Input and output";
+                result.name = "Input and output preview";
                 return result;
             }
 

@@ -1,8 +1,8 @@
 package org.hkijena.misa_imagej.api.pipelining;
 
 import com.google.gson.annotations.SerializedName;
-import org.hkijena.misa_imagej.api.MISAParameterValidity;
-import org.hkijena.misa_imagej.api.MISAValidatable;
+import org.hkijena.misa_imagej.api.*;
+import org.hkijena.misa_imagej.api.datasources.MISAPipelineNodeDataSource;
 import org.hkijena.misa_imagej.api.repository.MISAModule;
 
 import java.beans.PropertyChangeListener;
@@ -34,11 +34,20 @@ public class MISAPipeline implements MISAValidatable {
         node.setName(module.getModuleInfo().getDescription());
         nodes.put(generateNodeName(module), node);
         propertyChangeSupport.firePropertyChange("addNode", null, node);
+        node.moduleInstance.addPropertyChangeListener(propertyChangeEvent -> {
+            if(propertyChangeEvent.getPropertyName().equals("samples")) {
+                synchronizeSamples();
+                updateCacheDataSources();
+            }
+        });
+        synchronizeSamples();
         return node;
     }
 
     public boolean canAddEdge(MISAPipelineNode source, MISAPipelineNode target) {
         if(source == target)
+            return false;
+        if(edges.containsKey(source) && edges.get(source).contains(target))
             return false;
         if(edges.containsKey(target)) {
             return !edges.get(target).contains(source);
@@ -61,7 +70,8 @@ public class MISAPipeline implements MISAValidatable {
             edges.get(source).add(target);
         else
             edges.put(source, new HashSet<>(Arrays.asList(target)));
-        // TODO: Update module instances accordingly
+
+        updateCacheDataSources();
         propertyChangeSupport.firePropertyChange("addEdge", null, null);
         return true;
     }
@@ -75,8 +85,8 @@ public class MISAPipeline implements MISAValidatable {
     public boolean removeEdge(MISAPipelineNode source, MISAPipelineNode target) {
         if(!edges.containsKey(source))
             return false;
-        // TODO: Update module instances accordingly
         boolean result = edges.get(source).remove(target);
+        updateCacheDataSources();
         propertyChangeSupport.firePropertyChange("removeEdge", null, null);
         return result;
     }
@@ -103,7 +113,7 @@ public class MISAPipeline implements MISAValidatable {
     }
 
     @Override
-    public MISAParameterValidity isValidParameter() {
+    public MISAValidityReport getValidityReport() {
         return null;
     }
 
@@ -114,5 +124,79 @@ public class MISAPipeline implements MISAValidatable {
      */
     public Map<MISAPipelineNode, Set<MISAPipelineNode>> getEdges() {
         return Collections.unmodifiableMap(edges);
+    }
+
+    /**
+     * Returns true if there is an edge
+     * @param source
+     * @param target
+     * @return
+     */
+    public boolean hasEdge(MISAPipelineNode source, MISAPipelineNode target) {
+        if(edges.containsKey(source)) {
+            return edges.get(source).contains(target);
+        }
+        return false;
+    }
+
+    /**
+     * Synchronizes samples across all modules
+     */
+    private void synchronizeSamples() {
+        Set<String> sampleNames = new HashSet<>();
+        for(MISAPipelineNode node : nodes.values()) {
+            for(MISASample sample : node.moduleInstance.getSamples()) {
+                sampleNames.add(sample.name);
+            }
+        }
+        for(MISAPipelineNode node : nodes.values()) {
+            for(String sample : sampleNames) {
+                if(!node.moduleInstance.getSampleNames().contains(sample)) {
+                    node.moduleInstance.addSample(sample);
+                }
+            }
+        }
+    }
+
+    /**
+     * Updates the data sources of the caches
+     */
+    private void updateCacheDataSources() {
+        for(Map.Entry<MISAPipelineNode, Set<MISAPipelineNode>> kv : edges.entrySet()) {
+            MISAPipelineNode source = kv.getKey();
+            for(MISAPipelineNode target : kv.getValue()) {
+                for(MISASample sample : target.moduleInstance.getSamples()) {
+                    for(MISACache cache : sample.getImportedCaches()) {
+                        // Add any missing data source to the cache
+                        if(cache.getAvailableDataSources().stream().noneMatch(misaDataSource -> {
+                            if(misaDataSource instanceof MISAPipelineNodeDataSource) {
+                                return ((MISAPipelineNodeDataSource)misaDataSource).getSourceNode() == source;
+                            }
+                            return false;
+                        })) {
+                            cache.addAvailableDataSource(new MISAPipelineNodeDataSource(cache, source));
+                        }
+                    }
+                }
+            }
+        }
+        List<MISADataSource> toRemove = new ArrayList<>();
+        for(MISAPipelineNode target : nodes.values()) {
+            for(MISASample sample : target.moduleInstance.getSamples()) {
+                for (MISACache cache : sample.getImportedCaches()) {
+                    toRemove.clear();
+                    for(MISADataSource dataSource : cache.getAvailableDataSources()) {
+                        if(dataSource instanceof MISAPipelineNodeDataSource) {
+                            MISAPipelineNodeDataSource d = (MISAPipelineNodeDataSource)dataSource;
+                            if(!hasEdge(d.getSourceNode(), target))
+                                toRemove.add(dataSource);
+                        }
+                    }
+                    for(MISADataSource dataSource : toRemove) {
+                        cache.removeAvailableDataSource(dataSource);
+                    }
+                }
+            }
+        }
     }
 }

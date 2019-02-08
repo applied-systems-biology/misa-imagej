@@ -3,33 +3,33 @@ package org.hkijena.misa_imagej.api.datasources;
 import org.hkijena.misa_imagej.api.MISACache;
 import org.hkijena.misa_imagej.api.MISADataSource;
 import org.hkijena.misa_imagej.api.MISAValidityReport;
+import org.hkijena.misa_imagej.api.pipelining.MISAPipelineNode;
 
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class MISAFolderLinkDataSource implements MISADataSource {
+/**
+ * Data source that is used by the pipelining tool
+ */
+public class MISAPipelineNodeDataSource implements MISADataSource {
 
-    private Path sourceFolder;
+    private MISAPipelineNode sourceNode;
+    private MISACache sourceCache;
     private MISACache cache;
 
-    public MISAFolderLinkDataSource(MISACache cache) {
+    public MISAPipelineNodeDataSource(MISACache cache, MISAPipelineNode sourceNode) {
         this.cache = cache;
+        this.sourceNode = sourceNode;
     }
+
 
     @Override
     public void install(Path installFolder, boolean forceCopy) {
-        try {
-            Files.deleteIfExists(installFolder);
-            Files.createSymbolicLink(installFolder, getSourceFolder());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+
     }
 
     @Override
     public String getName() {
-        return "Folder link";
+        return "Pipeline: " + getSourceNode().getName();
     }
 
     @Override
@@ -47,11 +47,15 @@ public class MISAFolderLinkDataSource implements MISADataSource {
         return new MISAValidityReport();
     }
 
-    public Path getSourceFolder() {
-        return sourceFolder;
+    public MISAPipelineNode getSourceNode() {
+        return sourceNode;
     }
 
-    public void setSourceFolder(Path sourceFolder) {
-        this.sourceFolder = sourceFolder;
+    public MISACache getSourceCache() {
+        return sourceCache;
+    }
+
+    public void setSourceCache(MISACache sourceCache) {
+        this.sourceCache = sourceCache;
     }
 }

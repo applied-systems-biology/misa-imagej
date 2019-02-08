@@ -13,7 +13,7 @@ public class MISAOMETiffCache extends MISACache {
     public MISAOMETiffCache (MISASample sample, MISAFilesystemEntry filesystemEntry) {
         super(sample, filesystemEntry);
         nativeDataSource = new MISAOMETiffDataSource(this);
-        getAvailableDataSources().add(nativeDataSource);
+        addAvailableDataSource(nativeDataSource);
     }
 
     @Override

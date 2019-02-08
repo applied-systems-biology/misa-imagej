@@ -54,6 +54,8 @@ public class MISAModuleInstance implements MISAValidatable {
 
     private MISAModule module;
 
+    private String name = "module";
+
     public MISAModuleInstance(JSONSchemaObject object) {
         algorithmParameters = object.properties.get("algorithm");
         runtimeParameters = object.properties.get("runtime");
@@ -195,14 +197,14 @@ public class MISAModuleInstance implements MISAValidatable {
      * @return
      */
     @Override
-    public MISAParameterValidity isValidParameter() {
-        MISAParameterValidity report = new MISAParameterValidity();
+    public MISAValidityReport getValidityReport() {
+        MISAValidityReport report = new MISAValidityReport();
 
-        report.merge(algorithmParameters.isValidParameter(), "Algorithm parameters");
-        report.merge(runtimeParameters.isValidParameter(), "Runtime parameters");
+        report.merge(algorithmParameters.getValidityReport(), "Algorithm parameters");
+        report.merge(runtimeParameters.getValidityReport(), "Runtime parameters");
 
         for(MISASample sample : samples.values()) {
-            report.merge(sample.isValidParameter(), "Samples", sample.name);
+            report.merge(sample.getValidityReport(), "Samples", sample.name);
         }
 
         return report;
@@ -247,5 +249,13 @@ public class MISAModuleInstance implements MISAValidatable {
 
     public void setModule(MISAModule module) {
         this.module = module;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

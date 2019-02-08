@@ -4,9 +4,11 @@ import org.hkijena.misa_imagej.api.MISACache;
 import org.hkijena.misa_imagej.api.MISADataSource;
 import org.hkijena.misa_imagej.api.datasources.MISAFolderLinkDataSource;
 import org.hkijena.misa_imagej.api.datasources.MISAOMETiffDataSource;
+import org.hkijena.misa_imagej.api.datasources.MISAPipelineNodeDataSource;
 import org.hkijena.misa_imagej.ui.parametereditor.datasources.editors.GenericMISADataSourceUI;
 import org.hkijena.misa_imagej.ui.parametereditor.datasources.editors.MISAFolderLinkDataSourceUI;
 import org.hkijena.misa_imagej.ui.parametereditor.datasources.editors.MISAOMETiffDataSourceUI;
+import org.hkijena.misa_imagej.ui.parametereditor.datasources.editors.MISAPipelineNodeDataSourceUI;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -60,6 +62,7 @@ public class MISADataSourceUIRegistry {
 
         register(MISAOMETiffDataSource.class, MISAOMETiffDataSourceUI.class);
         register(MISAFolderLinkDataSource.class, MISAFolderLinkDataSourceUI.class);
+        register(MISAPipelineNodeDataSource.class, MISAPipelineNodeDataSourceUI.class);
 
         isInitialized = true;
     }

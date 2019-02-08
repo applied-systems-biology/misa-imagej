@@ -17,7 +17,7 @@ import static org.hkijena.misa_imagej.utils.UIUtils.UI_PADDING;
 public class SampleDataEditorUI extends JPanel {
 
     private JPanel sampleEditor;
-    private CacheListTree cacheList;
+    private MISACacheTreeUI cacheList;
     private MISAModuleInstance parameterSchema;
     private JXTextField objectFilter;
 
@@ -27,6 +27,7 @@ public class SampleDataEditorUI extends JPanel {
     public SampleDataEditorUI(MISAModuleInstanceUI app) {
         this.parameterSchema = app.getModuleInstance();
         initialize();
+        refreshEditor();
     }
 
     private void initialize() {
@@ -34,7 +35,7 @@ public class SampleDataEditorUI extends JPanel {
 
         // List of caches
         JPanel cacheListPanel = new JPanel(new BorderLayout(8, 8));
-        cacheList = new CacheListTree();
+        cacheList = new MISACacheTreeUI();
         cacheListPanel.add(cacheList, BorderLayout.CENTER);
 
         cacheList.addPropertyChangeListener(propertyChangeEvent -> {
@@ -90,6 +91,7 @@ public class SampleDataEditorUI extends JPanel {
                 setCurrentSample(parameterSchema.getCurrentSample());
             }
         });
+        setCurrentSample(parameterSchema.getCurrentSample());
     }
 
     private void setCurrentSample(MISASample sample) {

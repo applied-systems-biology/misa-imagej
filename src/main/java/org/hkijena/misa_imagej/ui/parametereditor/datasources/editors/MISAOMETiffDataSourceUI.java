@@ -18,13 +18,11 @@ import javax.swing.*;
  */
 public class MISAOMETiffDataSourceUI extends MISADataSourceUI {
 
-    private MISAOMETiffDataSource dataSource;
     private JTextField display;
     private JButton optionButton;
 
     public MISAOMETiffDataSourceUI(MISADataSource dataSource) {
         super(dataSource);
-        this.dataSource = (MISAOMETiffDataSource)dataSource;
         refreshDisplay();
     }
 
@@ -58,7 +56,7 @@ public class MISAOMETiffDataSourceUI extends MISADataSourceUI {
             final ImagePlus image = WindowManager.getImage(WindowManager.getNthImageID(i));
             ImagePlusJMenuItem item = new ImagePlusJMenuItem(image);
             item.addActionListener(actionEvent -> {
-                dataSource.setTiffSwapper(new OMETiffSwapper(image, null));
+                getNativeDataSource().setTiffSwapper(new OMETiffSwapper(image, null));
                 refreshDisplay();
             });
             selectOptions.add(item);
@@ -82,7 +80,7 @@ public class MISAOMETiffDataSourceUI extends MISADataSourceUI {
 //            }
             JFileChooser chooser = new JFileChooser();
             if(chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-                dataSource.setTiffSwapper(new OMETiffSwapper(null, chooser.getSelectedFile().getAbsolutePath()));
+                getNativeDataSource().setTiffSwapper(new OMETiffSwapper(null, chooser.getSelectedFile().getAbsolutePath()));
                 refreshDisplay();
             }
         });
@@ -97,29 +95,29 @@ public class MISAOMETiffDataSourceUI extends MISADataSourceUI {
     private void createEditPopup(JButton selectButton) {
         JPopupMenu selectOptions = UIUtils.addPopupMenuToComponent(selectButton);
 
-        if(dataSource == null || display == null)
+        if(getNativeDataSource() == null || display == null)
             return;
-        if(dataSource.getTiffSwapper() != null) {
+        if(getNativeDataSource().getTiffSwapper() != null) {
             JMenuItem clearItem = new JMenuItem("Clear data", UIUtils.getIconFromResources("delete.png"));
             clearItem.addActionListener(actionEvent -> {
-                dataSource.setTiffSwapper(null);
+                getNativeDataSource().setTiffSwapper(null);
                 refreshDisplay();
             });
             selectOptions.add(clearItem);
 
-            if(!dataSource.getTiffSwapper().isInImageJ() && dataSource.getTiffSwapper().isInFilesystem()) {
+            if(!getNativeDataSource().getTiffSwapper().isInImageJ() && getNativeDataSource().getTiffSwapper().isInFilesystem()) {
                 JMenuItem importItem = new JMenuItem("Import into ImageJ", UIUtils.getIconFromResources("import.png"));
                 importItem.addActionListener(actionEvent -> {
-                    dataSource.getTiffSwapper().importIntoImageJ(null); // BioFormats decides by itself
+                    getNativeDataSource().getTiffSwapper().importIntoImageJ(null); // BioFormats decides by itself
                     refreshDisplay();
                 });
                 selectOptions.add(importItem);
             }
 
-            if(dataSource.getTiffSwapper().isInImageJ()) {
+            if(getNativeDataSource().getTiffSwapper().isInImageJ()) {
                 JMenuItem selectItem = new JMenuItem("Select in ImageJ", UIUtils.getIconFromResources("target.png"));
                 selectItem.addActionListener(actionEvent -> {
-                    dataSource.getTiffSwapper().editInImageJ();
+                    getNativeDataSource().getTiffSwapper().editInImageJ();
                 });
                 selectOptions.add(selectItem);
             }
@@ -127,12 +125,16 @@ public class MISAOMETiffDataSourceUI extends MISADataSourceUI {
     }
 
     private void refreshDisplay() {
-        if(dataSource == null || display == null)
+        if(getNativeDataSource() == null || display == null)
             return;
-        if(dataSource.getTiffSwapper() != null)
-            display.setText(dataSource.getTiffSwapper().toString());
+        if(getNativeDataSource().getTiffSwapper() != null)
+            display.setText(getNativeDataSource().getTiffSwapper().toString());
         else
             display.setText("<No data set>");
         createEditPopup(optionButton);
+    }
+
+    private MISAOMETiffDataSource getNativeDataSource() {
+        return (MISAOMETiffDataSource)getDataSource();
     }
 }

@@ -78,7 +78,7 @@ public class MISAModuleRepository {
             command.getLogService().info("Loaded module information " + module.getModuleInfo().toString());
 
             // Try to load parameter schema
-            if(module.getParameterSchema() == null) {
+            if(module.getParameterSchemaJSON() == null) {
                 command.getLogService().warn("Could not load parameter schema for module " +module.getModuleInfo().toString());
             }
 

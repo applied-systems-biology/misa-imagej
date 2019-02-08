@@ -78,7 +78,7 @@ public class MISAModule {
      * Returns the parameter schema JSON if applicable
      * @return The parameter schema. If no matching executable is found or the executable crashes, returns null
      */
-    public String getParameterSchema() {
+    public String getParameterSchemaJSON() {
         if(parameterSchema == null && isCompatible()) {
             parameterSchema = queryParameterSchema();
         }
@@ -153,7 +153,7 @@ public class MISAModule {
      */
     public MISAModuleInstance instantiate() {
         Gson gson = GsonUtils.getGson();
-        JSONSchemaObject schema = gson.fromJson(getParameterSchema(), JSONSchemaObject.class);
+        JSONSchemaObject schema = gson.fromJson(getParameterSchemaJSON(), JSONSchemaObject.class);
         schema.id = "parameters";
         schema.update();
         MISAModuleInstance instance = new MISAModuleInstance(schema);

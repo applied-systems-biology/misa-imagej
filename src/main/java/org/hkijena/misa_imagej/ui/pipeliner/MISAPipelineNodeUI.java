@@ -70,7 +70,7 @@ public class MISAPipelineNodeUI extends JPanel implements ComponentListener {
 
         JButton connectButton = new JButton(UIUtils.getIconFromResources("connect.png"));
         connectButton.setToolTipText("Connect from another node");
-        initializeConnectMenu(UIUtils.addPopupMenuToComponent(connectButton));
+        initializeConnectMenu(UIUtils.addPopupMenuToComponent(connectButton), connectButton);
         UIUtils.makeFlat(connectButton);
         buttonPanel.add(connectButton);
 
@@ -84,7 +84,8 @@ public class MISAPipelineNodeUI extends JPanel implements ComponentListener {
         add(padding, BorderLayout.CENTER);
     }
 
-    private void initializeConnectMenu(JPopupMenu menu) {
+    private void initializeConnectMenu(JPopupMenu menu, JButton connectButton) {
+        boolean addedItem = false;
         for(MISAPipelineNode available : node.getAvailableInNodes()) {
             JMenuItem menuItem = new JMenuItem("From " + available.getName(),
                     new MonochromeColorIcon(UIUtils.getIconFromResources("module-template.png"),
@@ -98,7 +99,11 @@ public class MISAPipelineNodeUI extends JPanel implements ComponentListener {
                 }
             });
             menu.add(menuItem);
+            addedItem = true;
         }
+
+        if(!addedItem)
+            connectButton.setVisible(false);
     }
 
     private void editParameters() {

@@ -1,8 +1,8 @@
 package org.hkijena.misa_imagej.ui.parametereditor;
 
-import org.hkijena.misa_imagej.MISACommand;
+import ij.IJ;
 import org.hkijena.misa_imagej.api.MISAModuleInstance;
-import org.hkijena.misa_imagej.api.MISAParameterValidity;
+import org.hkijena.misa_imagej.api.MISAValidityReport;
 import org.hkijena.misa_imagej.api.MISASample;
 import org.hkijena.misa_imagej.ui.repository.MISAModuleRepositoryUI;
 import org.hkijena.misa_imagej.ui.workbench.MISAWorkbenchUI;
@@ -19,9 +19,12 @@ import java.nio.file.Path;
 
 public class MISAModuleInstanceUI extends JFrame {
 
-    private JLabel errorLabel;
+
 
     private MISAModuleInstance moduleInstance;
+
+    private JLabel errorLabel;
+    private JComboBox<MISASample> sampleList;
 
     /**
      * Create the dialog.
@@ -34,6 +37,8 @@ public class MISAModuleInstanceUI extends JFrame {
         // Create a new sample if necessary
         if(moduleInstance.getSamples().size() == 0)
             this.moduleInstance.addSample("New Sample");
+        else
+            refreshSampleList();
     }
 
     private void install(Path parameterSchema, Path importedDirectory, Path exportedDirectory, boolean forceCopy, boolean relativeDirectories) {
@@ -44,12 +49,12 @@ public class MISAModuleInstanceUI extends JFrame {
     }
 
     private boolean parametersAreValid() {
-        MISAParameterValidity report = moduleInstance.isValidParameter();
+        MISAValidityReport report = moduleInstance.getValidityReport();
 
         if (!report.isValid()) {
             StringBuilder message = new StringBuilder();
             if(!report.getInvalidEntries().isEmpty()) {
-                MISAParameterValidity.Entry e = report.getInvalidEntries().values().stream().findFirst().get();
+                MISAValidityReport.Entry e = report.getInvalidEntries().values().stream().findFirst().get();
                 if(!e.getCategories().isEmpty()) {
                     message.append(e.getCategories().stream().findFirst().get());
                     if(e.getCategories().size() > 1)
@@ -260,23 +265,13 @@ public class MISAModuleInstanceUI extends JFrame {
         toolBar.add(addSampleButton);
 
         {
-            JComboBox<MISASample> sampleList = new JComboBox<>();
+            sampleList = new JComboBox<>();
             moduleInstance.addPropertyChangeListener(propertyChangeEvent -> {
                 if(propertyChangeEvent.getPropertyName().equals("samples")) {
-                    DefaultComboBoxModel<MISASample> model = new DefaultComboBoxModel<>();
-                    for(MISASample sample : moduleInstance.getSamples()) {
-                        model.addElement(sample);
-                    }
-                    sampleList.setModel(model);
+                    refreshSampleList();
                 }
                 else if(propertyChangeEvent.getPropertyName().equals("currentSample")) {
-                    if(moduleInstance.getCurrentSample() != null) {
-                        sampleList.setSelectedItem(moduleInstance.getCurrentSample());
-                        sampleList.setEnabled(true);
-                    }
-                    else {
-                        sampleList.setEnabled(false);
-                    }
+                    refreshSampleList();
                 }
             });
             sampleList.addItemListener(itemEvent -> {
@@ -292,6 +287,21 @@ public class MISAModuleInstanceUI extends JFrame {
         removeSampleButton.setToolTipText("Remove current sample");
         removeSampleButton.addActionListener(actionEvent -> removeSample());
         toolBar.add(removeSampleButton);
+    }
+
+    private void refreshSampleList() {
+        DefaultComboBoxModel<MISASample> model = new DefaultComboBoxModel<>();
+        for(MISASample sample : moduleInstance.getSamples()) {
+            model.addElement(sample);
+        }
+        sampleList.setModel(model);
+        if(moduleInstance.getCurrentSample() != null) {
+            sampleList.setSelectedItem(moduleInstance.getCurrentSample());
+            sampleList.setEnabled(true);
+        }
+        else {
+            sampleList.setEnabled(false);
+        }
     }
 
     private void addSample() {

@@ -3,7 +3,7 @@ package org.hkijena.misa_imagej.api.json;
 import com.google.gson.JsonElement;
 import com.google.gson.annotations.SerializedName;
 import org.hkijena.misa_imagej.api.MISAValidatable;
-import org.hkijena.misa_imagej.api.MISAParameterValidity;
+import org.hkijena.misa_imagej.api.MISAValidityReport;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.beans.PropertyChangeListener;
@@ -336,8 +336,8 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
     }
 
     @Override
-    public MISAParameterValidity isValidParameter() {
-        MISAParameterValidity report = new MISAParameterValidity();
+    public MISAValidityReport getValidityReport() {
+        MISAValidityReport report = new MISAValidityReport();
         if(hasValue())
             report.report(this, null, true, "");
         else
@@ -345,12 +345,12 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
 
         if(properties != null) {
             for(JSONSchemaObject object : properties.values()) {
-                report.merge(object.isValidParameter(), object.id == null ? "" : object.id);
+                report.merge(object.getValidityReport(), object.id == null ? "" : object.id);
             }
         }
         if(items != null) {
             for(int i = 0; i < items.size(); ++i) {
-                report.merge(items.get(i).isValidParameter(), "[" + i + "]");
+                report.merge(items.get(i).getValidityReport(), "[" + i + "]");
             }
         }
 

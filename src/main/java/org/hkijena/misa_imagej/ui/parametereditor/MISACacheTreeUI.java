@@ -2,7 +2,6 @@ package org.hkijena.misa_imagej.ui.parametereditor;
 
 import org.apache.commons.collections.ListUtils;
 import org.hkijena.misa_imagej.api.MISACache;
-import org.hkijena.misa_imagej.api.MISAModuleInstance;
 import org.hkijena.misa_imagej.api.MISASample;
 import org.hkijena.misa_imagej.utils.ui.ColorIcon;
 
@@ -12,18 +11,16 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeCellRenderer;
 import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
-public class CacheListTree extends JTree {
+public class MISACacheTreeUI extends JTree {
 
     private MISASample sample;
     private Entry currentEntry;
 
-    public CacheListTree() {
+    public MISACacheTreeUI() {
         initialize();
     }
 
@@ -62,12 +59,12 @@ public class CacheListTree extends JTree {
     }
 
     protected Entry createRootEntry() {
-        return new CacheListTree.Entry("'" + sample.name + "' data",
+        return new MISACacheTreeUI.Entry("'" + sample.name + "' data",
                 ListUtils.union(sample.getImportedCaches(), sample.getExportedCaches()));
     }
 
     protected Entry createEntry(MISACache cache) {
-        return new CacheListTree.Entry(cache.getRelativePathName(), Arrays.asList(cache));
+        return new MISACacheTreeUI.Entry(cache.getRelativePathName(), Arrays.asList(cache));
     }
 
     private void refresh() {
@@ -77,14 +74,14 @@ public class CacheListTree extends JTree {
             DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode(currentEntry);
 
             // Imported data
-            DefaultMutableTreeNode importedNode = new DefaultMutableTreeNode(new CacheListTree.Entry("Input", sample.getImportedCaches()));
+            DefaultMutableTreeNode importedNode = new DefaultMutableTreeNode(new MISACacheTreeUI.Entry("Input", sample.getImportedCaches()));
             for(MISACache cache : sample.getImportedCaches()) {
                 importedNode.add(new DefaultMutableTreeNode(createEntry(cache)));
             }
             rootNode.add(importedNode);
 
             // Exported data
-            DefaultMutableTreeNode exportedNode = new DefaultMutableTreeNode(new CacheListTree.Entry("Output", sample.getExportedCaches()));
+            DefaultMutableTreeNode exportedNode = new DefaultMutableTreeNode(new MISACacheTreeUI.Entry("Output", sample.getExportedCaches()));
             for(MISACache cache : sample.getExportedCaches()) {
                 exportedNode.add(new DefaultMutableTreeNode(createEntry(cache)));
             }

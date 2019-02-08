@@ -9,12 +9,10 @@ import javax.swing.*;
 
 public class MISAFolderLinkDataSourceUI extends MISADataSourceUI {
 
-    private MISAFolderLinkDataSource dataSource;
     private JTextField display;
 
     public MISAFolderLinkDataSourceUI(MISADataSource dataSource) {
         super(dataSource);
-        this.dataSource = (MISAFolderLinkDataSource)dataSource;
         refreshDisplay();
     }
 
@@ -33,7 +31,7 @@ public class MISAFolderLinkDataSourceUI extends MISADataSourceUI {
             chooser.setMultiSelectionEnabled(false);
             chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
             if(chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-                dataSource.setSourceFolder(chooser.getSelectedFile().toPath());
+                getNativeDataSource().setSourceFolder(chooser.getSelectedFile().toPath());
             }
             refreshDisplay();
         });
@@ -42,11 +40,15 @@ public class MISAFolderLinkDataSourceUI extends MISADataSourceUI {
     }
 
     private void refreshDisplay() {
-        if (dataSource == null || display == null)
+        if (getNativeDataSource() == null || display == null)
             return;
-        if(dataSource.getSourceFolder() == null)
+        if(getNativeDataSource().getSourceFolder() == null)
             display.setText("<No data set>");
         else
-            display.setText(dataSource.getSourceFolder().toString());
+            display.setText(getNativeDataSource().getSourceFolder().toString());
+    }
+
+    private MISAFolderLinkDataSource getNativeDataSource() {
+        return (MISAFolderLinkDataSource)getDataSource();
     }
 }

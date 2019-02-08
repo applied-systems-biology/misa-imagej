@@ -2,7 +2,7 @@ package org.hkijena.misa_imagej.api;
 
 import java.util.*;
 
-public class MISAParameterValidity {
+public class MISAValidityReport {
 
     public static class Entry {
         private Object object;
@@ -50,11 +50,11 @@ public class MISAParameterValidity {
 
     private Map<Object, Entry> entries = new HashMap<>();
 
-    public MISAParameterValidity() {
+    public MISAValidityReport() {
 
     }
 
-    public MISAParameterValidity(Object target, String category, boolean valid, String message) {
+    public MISAValidityReport(Object target, String category, boolean valid, String message) {
         this.report(target, category, valid, message);
     }
 
@@ -85,7 +85,7 @@ public class MISAParameterValidity {
      * @param subreport
      * @param category
      */
-    public void merge(MISAParameterValidity subreport, String... category) {
+    public void merge(MISAValidityReport subreport, String... category) {
         for(Object key : subreport.entries.keySet()) {
             if(entries.containsKey(key)) {
                 Entry src = subreport.entries.get(key);
