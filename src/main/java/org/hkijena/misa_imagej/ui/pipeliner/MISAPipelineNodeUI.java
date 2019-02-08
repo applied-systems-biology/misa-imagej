@@ -66,13 +66,19 @@ public class MISAPipelineNodeUI extends JPanel implements ComponentListener {
         JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.LINE_AXIS));
 
-        buttonPanel.add(Box.createHorizontalGlue());
-
         JButton connectButton = new JButton(UIUtils.getIconFromResources("connect.png"));
         connectButton.setToolTipText("Connect from another node");
         initializeConnectMenu(UIUtils.addPopupMenuToComponent(connectButton), connectButton);
         UIUtils.makeFlat(connectButton);
         buttonPanel.add(connectButton);
+
+        buttonPanel.add(Box.createHorizontalGlue());
+
+        JButton removeNodeButton = new JButton(UIUtils.getIconFromResources("remove.png"));
+        removeNodeButton.setToolTipText("Remove entry");
+        removeNodeButton.addActionListener(actionEvent -> removeNode());
+        UIUtils.makeFlat(removeNodeButton);
+        buttonPanel.add(removeNodeButton);
 
         JButton editParametersButton = new JButton(UIUtils.getIconFromResources("edit.png"));
         editParametersButton.setToolTipText("Edit parameters");
@@ -83,6 +89,8 @@ public class MISAPipelineNodeUI extends JPanel implements ComponentListener {
         padding.add(buttonPanel, BorderLayout.SOUTH);
         add(padding, BorderLayout.CENTER);
     }
+
+
 
     private void initializeConnectMenu(JPopupMenu menu, JButton connectButton) {
         boolean addedItem = false;
@@ -104,6 +112,14 @@ public class MISAPipelineNodeUI extends JPanel implements ComponentListener {
 
         if(!addedItem)
             connectButton.setVisible(false);
+    }
+
+    private void removeNode() {
+        if(JOptionPane.showConfirmDialog(this, "Do you really want to remove the entry '" +
+                node.getName() + "'?", "Remove entry", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE)
+                == JOptionPane.YES_OPTION) {
+            node.pipeline.removeNode(node);
+        }
     }
 
     private void editParameters() {

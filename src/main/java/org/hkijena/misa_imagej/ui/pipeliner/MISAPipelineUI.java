@@ -51,7 +51,9 @@ public class MISAPipelineUI extends JPanel implements MouseMotionListener, Mouse
         pipelineListener = (propertyChangeEvent -> {
             if(propertyChangeEvent.getPropertyName().equals("addNode") ||
                     propertyChangeEvent.getPropertyName().equals("addEdge") ||
-                    propertyChangeEvent.getPropertyName().equals("removeEdge")) {
+                    propertyChangeEvent.getPropertyName().equals("removeEdge") ||
+                    propertyChangeEvent.getPropertyName().equals("removeNode") ||
+                    propertyChangeEvent.getPropertyName().equals("isolateNode")) {
                 refresh();
             }
         });

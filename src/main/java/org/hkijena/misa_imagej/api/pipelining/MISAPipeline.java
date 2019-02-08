@@ -1,5 +1,6 @@
 package org.hkijena.misa_imagej.api.pipelining;
 
+import com.google.common.collect.Maps;
 import com.google.gson.annotations.SerializedName;
 import org.hkijena.misa_imagej.api.*;
 import org.hkijena.misa_imagej.api.datasources.MISAPipelineNodeDataSource;
@@ -28,11 +29,13 @@ public class MISAPipeline implements MISAValidatable {
      * @return
      */
     public MISAPipelineNode addNode(MISAModule module) {
+        String id = generateNodeName(module);
         MISAPipelineNode node = new MISAPipelineNode(this);
+        node.id = id;
         node.moduleInstance = module.instantiate();
         node.setModuleName(module.getModuleInfo().getName());
         node.setName(module.getModuleInfo().getDescription());
-        nodes.put(generateNodeName(module), node);
+        nodes.put(id, node);
         propertyChangeSupport.firePropertyChange("addNode", null, node);
         node.moduleInstance.addPropertyChangeListener(propertyChangeEvent -> {
             if(propertyChangeEvent.getPropertyName().equals("samples")) {
@@ -42,6 +45,43 @@ public class MISAPipeline implements MISAValidatable {
         });
         synchronizeSamples();
         return node;
+    }
+
+    /**
+     * Removes the node
+     * @param node
+     */
+    public void removeNode(MISAPipelineNode node) {
+        isolateNode(node);
+        nodes.remove(node.id);
+        propertyChangeSupport.firePropertyChange("removeNode", null, node);
+    }
+
+    /**
+     * Removes all connections from and to this node
+     * @param node
+     */
+    public void isolateNode(MISAPipelineNode node) {
+        propertyChangeSupport.firePropertyChange("isolateNode", null, node);
+        List<Map.Entry<MISAPipelineNode, MISAPipelineNode>> toRemove = new ArrayList<>();
+
+        for(Map.Entry<MISAPipelineNode, Set<MISAPipelineNode>> kv : edges.entrySet()) {
+            if(kv.getKey() == node) {
+                for(MISAPipelineNode target : edges.get(node)) {
+                    toRemove.add(Maps.immutableEntry(node, target));
+                }
+            }
+            else {
+                for(MISAPipelineNode target : kv.getValue()) {
+                    if(target == node)
+                        toRemove.add(Maps.immutableEntry(target, node));
+                }
+            }
+        }
+
+        for(Map.Entry<MISAPipelineNode, MISAPipelineNode> rem : toRemove) {
+            removeEdge(rem.getKey(), rem.getValue());
+        }
     }
 
     public boolean canAddEdge(MISAPipelineNode source, MISAPipelineNode target) {

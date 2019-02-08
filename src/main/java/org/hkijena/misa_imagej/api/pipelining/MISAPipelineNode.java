@@ -11,6 +11,8 @@ import java.util.List;
 
 public class MISAPipelineNode {
 
+    public transient String id;
+
     @SerializedName("name")
     private String name;
 
@@ -107,5 +109,9 @@ public class MISAPipelineNode {
 
     public void removePropertyChangeListener(PropertyChangeListener listener) {
         propertyChangeSupport.removePropertyChangeListener(listener);
+    }
+
+    public String getId() {
+        return id;
     }
 }
