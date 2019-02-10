@@ -4,11 +4,9 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Maps;
 import com.google.gson.*;
-import com.google.gson.annotations.SerializedName;
 import org.hkijena.misa_imagej.api.*;
 import org.hkijena.misa_imagej.api.datasources.MISAPipelineNodeDataSource;
 import org.hkijena.misa_imagej.api.repository.MISAModule;
-import org.jfree.data.json.impl.JSONObject;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -34,12 +32,11 @@ public class MISAPipeline implements MISAValidatable {
      */
     public MISAPipelineNode addNode(MISAModule module) {
         MISAPipelineNode node = new MISAPipelineNode(this);
-        node.moduleInstance = module.instantiate();
         node.setModuleName(module.getModuleInfo().getName());
         node.setName(module.getModuleInfo().getDescription());
         nodes.add(node);
         propertyChangeSupport.firePropertyChange("addNode", null, node);
-        node.moduleInstance.addPropertyChangeListener(propertyChangeEvent -> {
+        node.getModuleInstance().addPropertyChangeListener(propertyChangeEvent -> {
             if(propertyChangeEvent.getPropertyName().equals("samples")) {
                 synchronizeSamples();
                 updateCacheDataSources();
@@ -178,14 +175,14 @@ public class MISAPipeline implements MISAValidatable {
     private void synchronizeSamples() {
         Set<String> sampleNames = new HashSet<>();
         for(MISAPipelineNode node : nodes) {
-            for(MISASample sample : node.moduleInstance.getSamples()) {
+            for(MISASample sample : node.getModuleInstance().getSamples()) {
                 sampleNames.add(sample.name);
             }
         }
         for(MISAPipelineNode node : nodes) {
             for(String sample : sampleNames) {
-                if(!node.moduleInstance.getSampleNames().contains(sample)) {
-                    node.moduleInstance.addSample(sample);
+                if(!node.getModuleInstance().getSampleNames().contains(sample)) {
+                    node.getModuleInstance().addSample(sample);
                 }
             }
         }
@@ -198,7 +195,7 @@ public class MISAPipeline implements MISAValidatable {
         for(Map.Entry<MISAPipelineNode, Set<MISAPipelineNode>> kv : edges.entrySet()) {
             MISAPipelineNode source = kv.getKey();
             for(MISAPipelineNode target : kv.getValue()) {
-                for(MISASample sample : target.moduleInstance.getSamples()) {
+                for(MISASample sample : target.getModuleInstance().getSamples()) {
                     for(MISACache cache : sample.getImportedCaches()) {
                         // Add any missing data source to the cache
                         if(cache.getAvailableDataSources().stream().noneMatch(misaDataSource -> {
@@ -215,7 +212,7 @@ public class MISAPipeline implements MISAValidatable {
         }
         List<MISADataSource> toRemove = new ArrayList<>();
         for(MISAPipelineNode target : nodes) {
-            for(MISASample sample : target.moduleInstance.getSamples()) {
+            for(MISASample sample : target.getModuleInstance().getSamples()) {
                 for (MISACache cache : sample.getImportedCaches()) {
                     toRemove.clear();
                     for(MISADataSource dataSource : cache.getAvailableDataSources()) {
@@ -244,7 +241,7 @@ public class MISAPipeline implements MISAValidatable {
         public JsonElement serialize(MISAPipeline pipeline, Type type, JsonSerializationContext jsonSerializationContext) {
             BiMap<String, MISAPipelineNode> nodes = HashBiMap.create();
             for(MISAPipelineNode node : pipeline.nodes) {
-                nodes.put(generateNodeName(nodes, node.moduleInstance.getModule()), node);
+                nodes.put(generateNodeName(nodes, node.getModuleInstance().getModule()), node);
             }
 
             List<JsonObject> edges = new ArrayList<>();
@@ -262,7 +259,7 @@ public class MISAPipeline implements MISAValidatable {
                         edges.add(edge);
                     }
 
-                    for(MISASample sample : target.moduleInstance.getSamples()) {
+                    for(MISASample sample : target.getModuleInstance().getSamples()) {
                         for(MISACache cache : sample.getImportedCaches()) {
                             if(cache.getDataSource() instanceof MISAPipelineNodeDataSource) {
                                 MISAPipelineNodeDataSource dataSource = (MISAPipelineNodeDataSource)cache.getDataSource();

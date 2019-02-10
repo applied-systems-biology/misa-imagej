@@ -9,7 +9,6 @@ import org.hkijena.misa_imagej.utils.ui.MonochromeColorIcon;
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
@@ -97,9 +96,9 @@ public class MISAPipelineNodeUI extends JPanel implements ComponentListener {
         for(MISAPipelineNode available : node.getAvailableInNodes()) {
             JMenuItem menuItem = new JMenuItem("From " + available.getName(),
                     new MonochromeColorIcon(UIUtils.getIconFromResources("module-template.png"),
-                            available.moduleInstance.getModuleInfo().toColor()));
+                            available.getModuleInstance().getModuleInfo().toColor()));
             menuItem.addActionListener(actionEvent -> {
-                node.pipeline.addEdge(available, node);
+                node.getPipeline().addEdge(available, node);
             });
             available.addPropertyChangeListener(propertyChangeEvent -> {
                 if(propertyChangeEvent.getPropertyName().equals("name")) {
@@ -118,13 +117,13 @@ public class MISAPipelineNodeUI extends JPanel implements ComponentListener {
         if(JOptionPane.showConfirmDialog(this, "Do you really want to remove the entry '" +
                 node.getName() + "'?", "Remove entry", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE)
                 == JOptionPane.YES_OPTION) {
-            node.pipeline.removeNode(node);
+            node.getPipeline().removeNode(node);
         }
     }
 
     private void editParameters() {
-        MISAModuleInstanceUI editor = new MISAModuleInstanceUI(node.moduleInstance, true);
-        editor.setTitle("MISA++ pipeline tool - Parameters for " + node.getName() + " (" + node.moduleInstance.getModuleInfo().getName() + ")");
+        MISAModuleInstanceUI editor = new MISAModuleInstanceUI(node.getModuleInstance(), true);
+        editor.setTitle("MISA++ pipeline tool - Parameters for " + node.getName() + " (" + node.getModuleInstance().getModuleInfo().getName() + ")");
         editor.setVisible(true);
 
         // Java separates between JFrame and JDialog
@@ -178,7 +177,7 @@ public class MISAPipelineNodeUI extends JPanel implements ComponentListener {
     protected void paintComponent(Graphics graphics) {
         super.paintComponent(graphics);
 
-        graphics.setColor(node.moduleInstance.getModuleInfo().toColor());
+        graphics.setColor(node.getModuleInstance().getModuleInfo().toColor());
         graphics.fillRect(0,0, getWidth() - 1, 8);
         graphics.setColor(BORDER_COLOR);
         graphics.drawRect(0,0,getWidth() - 1, getHeight() - 1);

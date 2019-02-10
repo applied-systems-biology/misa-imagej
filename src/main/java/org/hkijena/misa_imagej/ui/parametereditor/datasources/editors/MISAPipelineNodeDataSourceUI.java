@@ -57,7 +57,7 @@ public class MISAPipelineNodeDataSourceUI extends MISADataSourceUI {
     private void refreshDisplay() {
         MutableComboBoxModel<MISACache> model = new DefaultComboBoxModel<>();
         String currentSample = getDataSource().getCache().getSample().name;
-        for(MISACache cache : getNativeDataSource().getSourceNode().moduleInstance.
+        for(MISACache cache : getNativeDataSource().getSourceNode().getModuleInstance().
                 getSample(currentSample).getExportedCaches()) {
             model.addElement(cache);
         }

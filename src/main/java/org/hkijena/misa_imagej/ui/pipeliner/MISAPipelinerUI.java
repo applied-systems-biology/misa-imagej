@@ -11,7 +11,6 @@ import org.hkijena.misa_imagej.ui.parametereditor.MISACacheTreeUI;
 import org.hkijena.misa_imagej.ui.repository.MISAModuleListCellRenderer;
 import org.hkijena.misa_imagej.utils.GsonUtils;
 import org.hkijena.misa_imagej.utils.UIUtils;
-import org.jdesktop.swingx.JXTaskPane;
 
 import javax.swing.*;
 import java.awt.*;
@@ -19,14 +18,12 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.StandardOpenOption;
 import java.util.HashMap;
 import java.util.Map;
 
 public class MISAPipelinerUI extends JFrame {
 
     private MISAPipeline pipeline = new MISAPipeline();
-    private MISAModuleRepository repository;
     private JList<MISAModule> moduleList;
     private MISACacheTreeUI cacheTree;
     private MISAPipelineUI pipelineEditor;
@@ -36,9 +33,8 @@ public class MISAPipelinerUI extends JFrame {
      */
     private Map<MISAModule, MISAModuleInstance> uiParameterSchemata = new HashMap<>();
 
-    public MISAPipelinerUI(MISAModuleRepository repository)
+    public MISAPipelinerUI()
     {
-        this.repository = repository;
         initialize();
         refresh();
     }
@@ -158,9 +154,9 @@ public class MISAPipelinerUI extends JFrame {
     private void refresh() {
         // Refresh the list of available modules
         uiParameterSchemata.clear();
-        repository.refresh();
+        MISAModuleRepository.getInstance().refresh();
         DefaultListModel<MISAModule> model = new DefaultListModel<>();
-        for(MISAModule module : repository.getModules()) {
+        for(MISAModule module : MISAModuleRepository.getInstance().getModules()) {
             model.addElement(module);
             MISAModuleInstance instance = module.instantiate();
             instance.addSample("Preview");

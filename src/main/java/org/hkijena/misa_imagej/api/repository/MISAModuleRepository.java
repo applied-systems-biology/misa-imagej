@@ -21,9 +21,9 @@ import java.util.*;
  */
 public class MISAModuleRepository {
 
-    public static final Path USER_MODULE_PATH = FilesystemUtils.getSystemConfigPath().resolve("MISA-ImageJ").resolve("misa-modules");
+    private static MISAModuleRepository instance;
 
-    private MISACommand command;
+    public static final Path USER_MODULE_PATH = FilesystemUtils.getSystemConfigPath().resolve("MISA-ImageJ").resolve("misa-modules");
 
     /**
      * Paths where to look for modules
@@ -34,8 +34,7 @@ public class MISAModuleRepository {
      */
     private List<MISAModule> modules = new ArrayList<>();
 
-    public MISAModuleRepository(MISACommand command) {
-        this.command = command;
+    private MISAModuleRepository() {
         paths.add(USER_MODULE_PATH);
         if(OSUtils.detectOperatingSystem() == OperatingSystem.Linux) {
             paths.add(Paths.get("/usr/lib/misaxx/modules"));
@@ -49,10 +48,14 @@ public class MISAModuleRepository {
         return Collections.unmodifiableList(modules);
     }
 
+    public MISAModule getModule(String name) {
+        Optional<MISAModule> result = modules.stream().filter(misaModule -> misaModule.getModuleInfo().getName().equals(name)).findFirst();
+        return result.orElse(null);
+    }
+
     public void refresh() {
         modules.clear();
         for(Path path : paths) {
-            command.getLogService().info("Checking for MISA++ modules in " + path);
             if(Files.isDirectory(path)) {
                 File f = path.toFile();
                 File[] files = f.listFiles();
@@ -66,20 +69,17 @@ public class MISAModuleRepository {
     }
 
     private void tryLoadModule(String path) {
-        command.getLogService().info("Trying to load MISA++ module " + path);
         Gson gson = GsonUtils.getGson();
         try (InputStreamReader r = new InputStreamReader(new FileInputStream(path))) {
             MISAModule module = gson.fromJson(r, MISAModule.class);
             module.linkPath = path;
             if(module.getModuleInfo() == null) {
-                command.getLogService().info("Error: Unable load MISA++ module " + path + " as no module info could be retrieved!");
                 return;
             }
-            command.getLogService().info("Loaded module information " + module.getModuleInfo().toString());
 
             // Try to load parameter schema
             if(module.getParameterSchemaJSON() == null) {
-                command.getLogService().warn("Could not load parameter schema for module " +module.getModuleInfo().toString());
+                return;
             }
 
             modules.add(module);
@@ -87,5 +87,11 @@ public class MISAModuleRepository {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public static MISAModuleRepository getInstance() {
+        if(instance == null)
+            instance = new MISAModuleRepository();
+        return instance;
     }
 }

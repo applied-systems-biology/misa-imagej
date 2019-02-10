@@ -2,6 +2,8 @@ package org.hkijena.misa_imagej.api.pipelining;
 
 import com.google.gson.annotations.SerializedName;
 import org.hkijena.misa_imagej.api.MISAModuleInstance;
+import org.hkijena.misa_imagej.api.repository.MISAModule;
+import org.hkijena.misa_imagej.api.repository.MISAModuleRepository;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -28,9 +30,9 @@ public class MISAPipelineNode {
 
     private transient PropertyChangeSupport propertyChangeSupport;
 
-    public transient MISAPipeline pipeline;
+    private transient MISAPipeline pipeline;
 
-    public transient MISAModuleInstance moduleInstance;
+    private transient MISAModuleInstance moduleInstance;
 
     public MISAPipelineNode() {
         this.propertyChangeSupport = new PropertyChangeSupport(this);
@@ -47,8 +49,8 @@ public class MISAPipelineNode {
      */
     public Collection<MISAPipelineNode> getAvailableInNodes() {
         List<MISAPipelineNode> result = new ArrayList<>();
-        for(MISAPipelineNode source : pipeline.getNodes()) {
-            if(pipeline.canAddEdge(source, this)) {
+        for(MISAPipelineNode source : getPipeline().getNodes()) {
+            if(getPipeline().canAddEdge(source, this)) {
                 result.add(source);
             }
         }
@@ -61,7 +63,7 @@ public class MISAPipelineNode {
 
     public void setName(String name) {
         this.name = name;
-        this.moduleInstance.setName(name);
+        this.getModuleInstance().setName(name);
         propertyChangeSupport.firePropertyChange("name", null, null);
     }
 
@@ -107,5 +109,18 @@ public class MISAPipelineNode {
 
     public void removePropertyChangeListener(PropertyChangeListener listener) {
         propertyChangeSupport.removePropertyChangeListener(listener);
+    }
+
+    public MISAPipeline getPipeline() {
+        return pipeline;
+    }
+
+    public MISAModuleInstance getModuleInstance() {
+        if(moduleInstance == null) {
+            // Instantiate the module
+            MISAModule module = MISAModuleRepository.getInstance().getModule(moduleName);
+            moduleInstance = module.instantiate();
+        }
+        return moduleInstance;
     }
 }

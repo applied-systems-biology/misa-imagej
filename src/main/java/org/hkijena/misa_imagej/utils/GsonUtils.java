@@ -13,13 +13,17 @@ public class GsonUtils {
 
     }
 
-    public static Gson getGson() {
+    public static GsonBuilder getGsonBuilder() {
         GsonBuilder builder = new GsonBuilder();
         builder.setPrettyPrinting().serializeNulls();
         builder.registerTypeAdapter(JSONSchemaObjectType.class, new JSONSchemaObjectType.JSONAdapter());
         builder.registerTypeAdapter(Path.class, new NIOPathJsonTypeAdapter());
         builder.registerTypeAdapter(MISAPipeline.class, new MISAPipeline.JSONAdapter());
-        return builder.create();
+        return builder;
+    }
+
+    public static Gson getGson() {
+        return getGsonBuilder().create();
     }
 
     public static <T> T fromJsonFile(Gson gson, Path filename, Class<T> klass) throws IOException {

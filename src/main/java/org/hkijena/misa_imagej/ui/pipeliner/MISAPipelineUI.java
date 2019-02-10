@@ -11,7 +11,6 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
@@ -230,7 +229,7 @@ public class MISAPipelineUI extends JPanel implements MouseMotionListener, Mouse
             super(UIUtils.getIconFromResources("remove.png"));
             this.source = source;
             this.target = target;
-            addActionListener(actionEvent -> source.pipeline.removeEdge(source, target));
+            addActionListener(actionEvent -> source.getPipeline().removeEdge(source, target));
         }
 
     }

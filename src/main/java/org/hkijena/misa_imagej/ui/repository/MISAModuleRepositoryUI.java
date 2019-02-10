@@ -27,7 +27,6 @@ import java.nio.file.Paths;
 public class MISAModuleRepositoryUI extends JFrame {
 
     private MISACommand command;
-    private MISAModuleRepository moduleRepository;
     private static MISAModuleRepositoryUI instance;
     private JList<MISAModule> misaModuleJList;
     private JPanel detailPanel;
@@ -44,7 +43,6 @@ public class MISAModuleRepositoryUI extends JFrame {
 
     private MISAModuleRepositoryUI(MISACommand command) {
         instance = this;
-        moduleRepository = new MISAModuleRepository(command);
         this.command = command;
         initialize();
         refreshModuleList();
@@ -95,7 +93,7 @@ public class MISAModuleRepositoryUI extends JFrame {
 
         JButton launcherPipeliner = new JButton("Connect modules together ...", UIUtils.getIconFromResources("connect.png"));
         launcherPipeliner.addActionListener(actionEvent -> {
-            MISAPipelinerUI pipelinerUI = new MISAPipelinerUI(moduleRepository);
+            MISAPipelinerUI pipelinerUI = new MISAPipelinerUI();
             pipelinerUI.setVisible(true);
         });
         toolBar.add(launcherPipeliner);
@@ -182,13 +180,13 @@ public class MISAModuleRepositoryUI extends JFrame {
     }
 
     private void refreshModuleList() {
-        moduleRepository.refresh();
+        MISAModuleRepository.getInstance().refresh();
         DefaultListModel<MISAModule> model = (DefaultListModel<MISAModule>)misaModuleJList.getModel();
         model.clear();
-        for(MISAModule module : moduleRepository.getModules()) {
+        for(MISAModule module : MISAModuleRepository.getInstance().getModules()) {
             model.addElement(module);
         }
-        if(moduleRepository.getModules().size() > 0) {
+        if(MISAModuleRepository.getInstance().getModules().size() > 0) {
             detailPanel.setVisible(true);
             misaModuleJList.setSelectedIndex(0);
         }
