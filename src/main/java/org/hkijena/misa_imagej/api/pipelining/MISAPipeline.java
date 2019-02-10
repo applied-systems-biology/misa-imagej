@@ -34,6 +34,13 @@ public class MISAPipeline implements MISAValidatable {
         MISAPipelineNode node = new MISAPipelineNode(this);
         node.setModuleName(module.getModuleInfo().getName());
         node.setName(module.getModuleInfo().getDescription());
+        node.setPipeline(this);
+        addNode(node);
+        return node;
+    }
+
+    private void addNode(MISAPipelineNode node) {
+        node.setPipeline(this);
         nodes.add(node);
         propertyChangeSupport.firePropertyChange("addNode", null, node);
         node.getModuleInstance().addPropertyChangeListener(propertyChangeEvent -> {
@@ -43,7 +50,6 @@ public class MISAPipeline implements MISAValidatable {
             }
         });
         synchronizeSamples();
-        return node;
     }
 
     /**
@@ -238,8 +244,7 @@ public class MISAPipeline implements MISAValidatable {
             Map<String, MISAPipelineNode> nodes = new HashMap<>();
             for(Map.Entry<String, JsonElement> kv : jsonElement.getAsJsonObject().getAsJsonObject("nodes").entrySet()) {
                 MISAPipelineNode node = jsonDeserializationContext.deserialize(kv.getValue(), MISAPipelineNode.class);
-                node.setPipeline(result);
-                result.nodes.add(node);
+                result.addNode(node);
                 nodes.put(kv.getKey(), node);
             }
             for(JsonElement element : jsonElement.getAsJsonObject().getAsJsonArray("edges")) {
@@ -247,6 +252,8 @@ public class MISAPipeline implements MISAValidatable {
                 MISAPipelineNode target = nodes.get(element.getAsJsonObject().getAsJsonPrimitive("target-node").getAsString());
                 result.addEdge(source, target);
             }
+            result.synchronizeSamples();
+            result.updateCacheDataSources();
             return result;
         }
 
