@@ -234,7 +234,20 @@ public class MISAPipeline implements MISAValidatable {
 
         @Override
         public MISAPipeline deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
-            return null;
+            MISAPipeline result = new MISAPipeline();
+            Map<String, MISAPipelineNode> nodes = new HashMap<>();
+            for(Map.Entry<String, JsonElement> kv : jsonElement.getAsJsonObject().getAsJsonObject("nodes").entrySet()) {
+                MISAPipelineNode node = jsonDeserializationContext.deserialize(kv.getValue(), MISAPipelineNode.class);
+                node.setPipeline(result);
+                result.nodes.add(node);
+                nodes.put(kv.getKey(), node);
+            }
+            for(JsonElement element : jsonElement.getAsJsonObject().getAsJsonArray("edges")) {
+                MISAPipelineNode source = nodes.get(element.getAsJsonObject().getAsJsonPrimitive("source-node").getAsString());
+                MISAPipelineNode target = nodes.get(element.getAsJsonObject().getAsJsonPrimitive("target-node").getAsString());
+                result.addEdge(source, target);
+            }
+            return result;
         }
 
         @Override

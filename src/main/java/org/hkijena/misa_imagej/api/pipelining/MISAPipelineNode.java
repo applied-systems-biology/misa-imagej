@@ -40,7 +40,7 @@ public class MISAPipelineNode {
 
     public MISAPipelineNode(MISAPipeline pipeline) {
         this.propertyChangeSupport = new PropertyChangeSupport(this);
-        this.pipeline = pipeline;
+        this.setPipeline(pipeline);
     }
 
     /**
@@ -122,5 +122,9 @@ public class MISAPipelineNode {
             moduleInstance = module.instantiate();
         }
         return moduleInstance;
+    }
+
+    public void setPipeline(MISAPipeline pipeline) {
+        this.pipeline = pipeline;
     }
 }

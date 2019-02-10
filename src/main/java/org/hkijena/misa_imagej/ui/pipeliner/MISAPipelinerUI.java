@@ -132,10 +132,6 @@ public class MISAPipelinerUI extends JFrame {
         return toolboxPanel;
     }
 
-    private void open() {
-
-    }
-
     private void save() {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
@@ -144,6 +140,21 @@ public class MISAPipelinerUI extends JFrame {
                 Gson gson = GsonUtils.getGson();
                 String json = gson.toJson(pipeline);
                 Files.write(fileChooser.getSelectedFile().toPath(), json.getBytes(Charsets.UTF_8));
+            }
+            catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    private void open() {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        if(fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            try {
+                Gson gson = GsonUtils.getGson();
+                pipeline = GsonUtils.fromJsonFile(gson, fileChooser.getSelectedFile().toPath(), MISAPipeline.class);
+                refresh();
             }
             catch (IOException e) {
                 throw new RuntimeException(e);
