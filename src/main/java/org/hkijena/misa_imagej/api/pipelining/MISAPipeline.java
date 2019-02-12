@@ -10,7 +10,9 @@ import org.hkijena.misa_imagej.api.repository.MISAModule;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.io.IOException;
 import java.lang.reflect.Type;
+import java.nio.file.Path;
 import java.util.*;
 
 public class MISAPipeline implements MISAValidatable {
@@ -20,6 +22,8 @@ public class MISAPipeline implements MISAValidatable {
     private transient Map<MISAPipelineNode, Set<MISAPipelineNode>> edges = new HashMap<>();
 
     private transient PropertyChangeSupport propertyChangeSupport;
+
+    private transient Set<String> samples = new HashSet<>();
 
     public MISAPipeline() {
         propertyChangeSupport = new PropertyChangeSupport(this);
@@ -179,14 +183,13 @@ public class MISAPipeline implements MISAValidatable {
      * Synchronizes samples across all modules
      */
     private void synchronizeSamples() {
-        Set<String> sampleNames = new HashSet<>();
         for(MISAPipelineNode node : nodes) {
             for(MISASample sample : node.getModuleInstance().getSamples()) {
-                sampleNames.add(sample.name);
+                samples.add(sample.name);
             }
         }
         for(MISAPipelineNode node : nodes) {
-            for(String sample : sampleNames) {
+            for(String sample : samples) {
                 if(!node.getModuleInstance().getSampleNames().contains(sample)) {
                     node.getModuleInstance().addSample(sample);
                 }
@@ -236,6 +239,14 @@ public class MISAPipeline implements MISAValidatable {
         }
     }
 
+    /**
+     * Exports the pipeline into an executable state
+     * @param exportDirectory
+     */
+    public void export(Path exportDirectory) throws IOException {
+
+    }
+
     public static class JSONAdapter implements JsonDeserializer<MISAPipeline>, JsonSerializer<MISAPipeline> {
 
         @Override
@@ -244,6 +255,7 @@ public class MISAPipeline implements MISAValidatable {
             Map<String, MISAPipelineNode> nodes = new HashMap<>();
             for(Map.Entry<String, JsonElement> kv : jsonElement.getAsJsonObject().getAsJsonObject("nodes").entrySet()) {
                 MISAPipelineNode node = jsonDeserializationContext.deserialize(kv.getValue(), MISAPipelineNode.class);
+                node.getModuleInstance().setName(node.getName());
                 result.addNode(node);
                 nodes.put(kv.getKey(), node);
             }
@@ -251,6 +263,9 @@ public class MISAPipeline implements MISAValidatable {
                 MISAPipelineNode source = nodes.get(element.getAsJsonObject().getAsJsonPrimitive("source-node").getAsString());
                 MISAPipelineNode target = nodes.get(element.getAsJsonObject().getAsJsonPrimitive("target-node").getAsString());
                 result.addEdge(source, target);
+            }
+            for(JsonElement element : jsonElement.getAsJsonObject().getAsJsonArray("samples")) {
+                result.samples.add(element.getAsString());
             }
             result.synchronizeSamples();
             result.updateCacheDataSources();
@@ -299,6 +314,7 @@ public class MISAPipeline implements MISAValidatable {
             }
 
             JsonObject result = new JsonObject();
+            result.add("samples", jsonSerializationContext.serialize(pipeline.samples));
             result.add("nodes", jsonSerializationContext.serialize(new HashMap<>(nodes)));
             result.add("edges", jsonSerializationContext.serialize(edges));
 

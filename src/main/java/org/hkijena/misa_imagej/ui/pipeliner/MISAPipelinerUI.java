@@ -57,9 +57,9 @@ public class MISAPipelinerUI extends JFrame {
 
         toolBar.add(Box.createHorizontalGlue());
 
-        JButton refreshButton = new JButton("Refresh", UIUtils.getIconFromResources("refresh.png"));
-        refreshButton.addActionListener(actionEvent -> refresh());;
-        toolBar.add(refreshButton);
+        JButton exportButton = new JButton("Export", UIUtils.getIconFromResources("export.png"));
+        exportButton.addActionListener(actionEvent -> export());
+        exportButton.add(saveButton);
 
         add(toolBar, BorderLayout.NORTH);
         JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
@@ -126,10 +126,31 @@ public class MISAPipelinerUI extends JFrame {
         instantiateButton.addActionListener(actionEvent -> addInstance());
         toolboxToolbar.add(instantiateButton);
 
+        toolboxToolbar.add(Box.createHorizontalGlue());
+
+        JButton refreshButton = new JButton(UIUtils.getIconFromResources("refresh.png"));
+        refreshButton.setToolTipText("Refresh list of available modules");
+        refreshButton.addActionListener(actionEvent -> refresh());
+        toolboxToolbar.add(refreshButton);
+
         toolboxPanel.add(toolboxToolbar, BorderLayout.SOUTH);
 
 
         return toolboxPanel;
+    }
+
+    private void export() {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        fileChooser.setDialogTitle("Export pipeline");
+        if(fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            try {
+               pipeline.export(fileChooser.getSelectedFile().toPath());
+            }
+            catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     private void save() {
