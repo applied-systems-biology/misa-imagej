@@ -4,6 +4,7 @@ import com.google.common.base.Charsets;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Maps;
+import com.google.common.io.Resources;
 import com.google.gson.*;
 import org.hkijena.misa_imagej.api.*;
 import org.hkijena.misa_imagej.api.datasources.MISAPipelineNodeDataSource;
@@ -11,6 +12,7 @@ import org.hkijena.misa_imagej.api.repository.MISAModule;
 import org.hkijena.misa_imagej.utils.FilesystemUtils;
 import org.hkijena.misa_imagej.utils.GsonUtils;
 import org.hkijena.misa_imagej.utils.OSUtils;
+import org.hkijena.misa_imagej.utils.ResourceUtils;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -320,18 +322,35 @@ public class MISAPipeline implements MISAValidatable {
                     relativeDirectories);
         }
 
+        // Create generic runner (Python)
+        exportPython(exportDirectory);
+
         // Create runners for the current OS
         switch(OSUtils.detectOperatingSystem()) {
             case Linux:
-                exportToLinux(exportDirectory);
+                exportBash(exportDirectory);
                 break;
             default:
                 throw new UnsupportedOperationException("Export not supported for this operating system!");
         }
     }
 
+    /**
+     * Exports the pipeline as Python script
+     * @param exportDirectory
+     * @throws IOException
+     */
+    private void exportPython(Path exportDirectory) throws IOException {
+        String python = Resources.toString(ResourceUtils.getPluginResource("python_pipeline.py"), Charsets.UTF_8);
+        Files.write(exportDirectory.resolve("run.py"), python.getBytes(Charsets.UTF_8));
+    }
 
-    private void exportToLinux(Path exportDirectory) throws IOException {
+    /**
+     * Exports the pipeline as BASH script
+     * @param exportDirectory
+     * @throws IOException
+     */
+    private void exportBash(Path exportDirectory) throws IOException {
         try(BufferedWriter writer = new BufferedWriter(new FileWriter(exportDirectory.resolve("run.sh").toString()))) {
             writer.write("#!/bin/bash\n");
             writer.write("# --------------------------------------\n");
