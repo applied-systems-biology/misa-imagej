@@ -1,9 +1,9 @@
 package org.hkijena.misa_imagej.ui.parametereditor;
 
-import ij.IJ;
 import org.hkijena.misa_imagej.api.MISAModuleInstance;
 import org.hkijena.misa_imagej.api.MISAValidityReport;
 import org.hkijena.misa_imagej.api.MISASample;
+import org.hkijena.misa_imagej.ui.MISAValidityReportStatusUI;
 import org.hkijena.misa_imagej.ui.repository.MISAModuleRepositoryUI;
 import org.hkijena.misa_imagej.ui.workbench.MISAWorkbenchUI;
 import org.hkijena.misa_imagej.utils.FilesystemUtils;
@@ -23,7 +23,7 @@ public class MISAModuleInstanceUI extends JFrame {
 
     private MISAModuleInstance moduleInstance;
 
-    private JLabel errorLabel;
+    private MISAValidityReportStatusUI validityReportStatusUI;
     private JComboBox<MISASample> sampleList;
 
     /**
@@ -50,37 +50,8 @@ public class MISAModuleInstanceUI extends JFrame {
 
     private boolean parametersAreValid() {
         MISAValidityReport report = moduleInstance.getValidityReport();
-
-        if (!report.isValid()) {
-            StringBuilder message = new StringBuilder();
-            if(!report.getInvalidEntries().isEmpty()) {
-                MISAValidityReport.Entry e = report.getInvalidEntries().values().stream().findFirst().get();
-                if(!e.getCategories().isEmpty()) {
-                    message.append(e.getCategories().stream().findFirst().get());
-                    if(e.getCategories().size() > 1)
-                        message.append("...");
-                    message.append(": ");
-                }
-                message.append(e.getMessage());
-
-                if(report.getInvalidEntries().size() > 1) {
-                    message.append(" (");
-                    message.append(report.getEntries().size() - 1);
-                    message.append(" more)");
-                }
-            }
-            else {
-                message.append("Parameters are invalid!");
-            }
-            errorLabel.setText(message.toString());
-            errorLabel.setIcon(UIUtils.getIconFromResources("error.png"));
-            return false;
-        }
-        else {
-            errorLabel.setText("Parameters are valid");
-            errorLabel.setIcon(null);
-            return true;
-        }
+        validityReportStatusUI.setReport(report);
+        return report.isValid();
     }
 
     /**
@@ -139,29 +110,20 @@ public class MISAModuleInstanceUI extends JFrame {
 
         MISAModuleRepositoryUI.getInstance().getCommand().getUiService().getDefaultUI().getConsolePane().show();
 
-        MISARunDialogUI dialog = new MISARunDialogUI(this);
+        MISARunModuleDialogUI dialog = new MISARunModuleDialogUI(this);
         dialog.setLocationRelativeTo(this);
-        if (dialog.showDialog() == MISARunDialogUI.ACCEPT_OPTION) {
+        if (dialog.showDialog() == MISARunModuleDialogUI.ACCEPT_OPTION) {
             try {
                 Files.createDirectories(dialog.getImportedPath());
                 Files.createDirectories(dialog.getExportedPath());
                 Files.createDirectories(dialog.getParameterFilePath().getParent());
-
-                if (!FilesystemUtils.directoryIsEmpty(dialog.getImportedPath())) {
-                    JOptionPane.showMessageDialog(this, "The directory " + dialog.getImportedPath().toString() + " must be empty!", "Run", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-                if (!FilesystemUtils.directoryIsEmpty(dialog.getExportedPath())) {
-                    JOptionPane.showMessageDialog(this, "The directory " + dialog.getExportedPath().toString() + " must be empty!", "Run", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
 
                 // Write the parameter schema
                 install(dialog.getParameterFilePath(), dialog.getImportedPath(), dialog.getExportedPath(), false, false);
 
                 // Run the executable
                 MISAModuleRepositoryUI.getInstance().getCommand().getLogService().info("Starting worker process ...");
-                ProcessBuilder pb = new ProcessBuilder(getModuleInstance().getModule().executablePath, "--parameters", dialog.getParameterFilePath().toString());
+                ProcessBuilder pb = new ProcessBuilder(getModuleInstance().getModule().getExecutablePath(), "--parameters", dialog.getParameterFilePath().toString());
                 Process p = pb.start();
                 new ProcessStreamToStringGobbler(p.getInputStream(), s -> MISAModuleRepositoryUI.getInstance().getCommand().getLogService().info(s)).start();
                 new ProcessStreamToStringGobbler(p.getErrorStream(), s -> MISAModuleRepositoryUI.getInstance().getCommand().getLogService().error(s)).start();
@@ -246,8 +208,8 @@ public class MISAModuleInstanceUI extends JFrame {
 
         // Status bar
         JXStatusBar statusBar = new JXStatusBar();
-        errorLabel = new JLabel("Ready");
-        statusBar.add(errorLabel);
+        validityReportStatusUI = new MISAValidityReportStatusUI();
+        statusBar.add(validityReportStatusUI);
         add(statusBar, BorderLayout.SOUTH);
     }
 

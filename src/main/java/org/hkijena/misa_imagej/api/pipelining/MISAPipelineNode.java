@@ -2,6 +2,8 @@ package org.hkijena.misa_imagej.api.pipelining;
 
 import com.google.gson.annotations.SerializedName;
 import org.hkijena.misa_imagej.api.MISAModuleInstance;
+import org.hkijena.misa_imagej.api.MISAValidatable;
+import org.hkijena.misa_imagej.api.MISAValidityReport;
 import org.hkijena.misa_imagej.api.repository.MISAModule;
 import org.hkijena.misa_imagej.api.repository.MISAModuleRepository;
 
@@ -11,7 +13,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class MISAPipelineNode {
+public class MISAPipelineNode implements MISAValidatable {
+
+    @SerializedName("id")
+    private String id;
 
     @SerializedName("name")
     private String name;
@@ -126,5 +131,21 @@ public class MISAPipelineNode {
 
     public void setPipeline(MISAPipeline pipeline) {
         this.pipeline = pipeline;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+        propertyChangeSupport.firePropertyChange("id", null, null);
+    }
+
+    @Override
+    public MISAValidityReport getValidityReport() {
+        MISAValidityReport report = new MISAValidityReport();
+        report.merge(getModuleInstance().getValidityReport());
+        return report;
     }
 }

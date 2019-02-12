@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class MISARunDialogUI extends JDialog {
+public class MISARunModuleDialogUI extends JDialog {
 
     public static final int ACCEPT_OPTION = 0;
     public static final int REJECT_OPTION = 1;
@@ -19,7 +19,7 @@ public class MISARunDialogUI extends JDialog {
     private FileSelection exportedPath;
     private boolean dialogOK = false;
 
-    public MISARunDialogUI(Frame parent) {
+    public MISARunModuleDialogUI(Frame parent) {
         super(parent, "Run MISA++ workload");
         initialize();
         generatePaths();
@@ -32,7 +32,7 @@ public class MISARunDialogUI extends JDialog {
             importedPath.setPath(tmppath.resolve("imported"));
             exportedPath.setPath(tmppath.resolve("exported"));
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 

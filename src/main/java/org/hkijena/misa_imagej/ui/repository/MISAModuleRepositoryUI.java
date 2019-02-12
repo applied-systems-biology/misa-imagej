@@ -70,9 +70,9 @@ public class MISAModuleRepositoryUI extends JFrame {
 
             if(fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
                 MISAModule module = new MISAModule();
-                module.executablePath = fileChooser.getSelectedFile().getAbsolutePath();
-                module.operatingSystem = OSUtils.detectOperatingSystem();
-                module.operatingSystemArchitecture = OSUtils.detectArchitecture();
+                module.setExecutablePath(fileChooser.getSelectedFile().getAbsolutePath());
+                module.setOperatingSystem(OSUtils.detectOperatingSystem());
+                module.setOperatingSystemArchitecture(OSUtils.detectArchitecture());
                 if(module.getModuleInfo() != null) {
                     Gson gson = GsonUtils.getGson();
                     try(JsonWriter writer = new JsonWriter(new FileWriter(MISAModuleRepository.USER_MODULE_PATH.resolve(module.getGeneratedFileName() + ".json").toString()))) {

@@ -21,13 +21,13 @@ import java.nio.file.Path;
 public class MISAModule {
 
     @SerializedName("executable-path")
-    public String executablePath;
+    private String executablePath;
 
     @SerializedName("operating-system")
-    public OperatingSystem operatingSystem;
+    private OperatingSystem operatingSystem;
 
     @SerializedName("architecture")
-    public OperatingSystemArchitecture operatingSystemArchitecture;
+    private OperatingSystemArchitecture operatingSystemArchitecture;
 
     /**
      * Contains the info about this module
@@ -71,7 +71,7 @@ public class MISAModule {
     public boolean isCompatible() {
         OperatingSystem os = OSUtils.detectOperatingSystem();
         OperatingSystemArchitecture arch = OSUtils.detectArchitecture();
-        return OSUtils.isCompatible(os, arch, operatingSystem, operatingSystemArchitecture);
+        return OSUtils.isCompatible(os, arch, getOperatingSystem(), getOperatingSystemArchitecture());
     }
 
     /**
@@ -97,7 +97,7 @@ public class MISAModule {
         try {
             Path tmppath = Files.createTempFile("MISAParameterSchema", ".json");
 //            System.out.println(executablePath + " " + tmppath.toString());
-            ProcessBuilder pb = new ProcessBuilder(executablePath, "--write-parameter-schema", tmppath.toString());
+            ProcessBuilder pb = new ProcessBuilder(getExecutablePath(), "--write-parameter-schema", tmppath.toString());
             Process p = pb.start();
             if(p.waitFor() == 0) {
                 return new String(Files.readAllBytes(tmppath));
@@ -111,7 +111,7 @@ public class MISAModule {
 
     private String queryModuleInfo() {
         try {
-            ProcessBuilder pb = new ProcessBuilder(executablePath, "--module-info");
+            ProcessBuilder pb = new ProcessBuilder(getExecutablePath(), "--module-info");
             Process p = pb.start();
             if(p.waitFor() == 0) {
                 try(BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
@@ -144,7 +144,7 @@ public class MISAModule {
      * @return
      */
     public String getGeneratedFileName() {
-        return getModuleInfo().getName() + "-" + getModuleInfo().getVersion() + "-" + operatingSystem.toString() + "-" + operatingSystemArchitecture.toString();
+        return getModuleInfo().getName() + "-" + getModuleInfo().getVersion() + "-" + getOperatingSystem().toString() + "-" + getOperatingSystemArchitecture().toString();
     }
 
     /**
@@ -162,4 +162,27 @@ public class MISAModule {
         return instance;
     }
 
+    public String getExecutablePath() {
+        return executablePath;
+    }
+
+    public void setExecutablePath(String executablePath) {
+        this.executablePath = executablePath;
+    }
+
+    public OperatingSystem getOperatingSystem() {
+        return operatingSystem;
+    }
+
+    public void setOperatingSystem(OperatingSystem operatingSystem) {
+        this.operatingSystem = operatingSystem;
+    }
+
+    public OperatingSystemArchitecture getOperatingSystemArchitecture() {
+        return operatingSystemArchitecture;
+    }
+
+    public void setOperatingSystemArchitecture(OperatingSystemArchitecture operatingSystemArchitecture) {
+        this.operatingSystemArchitecture = operatingSystemArchitecture;
+    }
 }

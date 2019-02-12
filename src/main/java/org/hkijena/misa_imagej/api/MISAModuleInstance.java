@@ -1,6 +1,5 @@
 package org.hkijena.misa_imagej.api;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.hkijena.misa_imagej.api.json.JSONSchemaObject;
@@ -11,9 +10,7 @@ import org.hkijena.misa_imagej.utils.GsonUtils;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Collections;
@@ -93,13 +90,13 @@ public class MISAModuleInstance implements MISAValidatable {
         samples.put(name, sample);
         propertyChangeSupport.firePropertyChange("samples", null, null);
 
-        if(samples.size() == 1) {
+        if (samples.size() == 1) {
             setCurrentSample(name);
         }
     }
 
     public void removeSample(String name) {
-        if(currentSample != null && currentSample.name.equals(name))
+        if (currentSample != null && currentSample.name.equals(name))
             currentSample = null;
         samples.remove(name);
         propertyChangeSupport.firePropertyChange("samples", null, null);
@@ -111,14 +108,14 @@ public class MISAModuleInstance implements MISAValidatable {
     }
 
     public MISASample getCurrentSample() {
-        if(currentSample == null && samples.size() > 0)
+        if (currentSample == null && samples.size() > 0)
             return samples.values().stream().findFirst().get();
         return currentSample;
     }
 
     public void setCurrentSample(String name) {
         MISASample sample = getSample(name);
-        if(sample != currentSample) {
+        if (sample != currentSample) {
             currentSample = sample;
             propertyChangeSupport.firePropertyChange("currentSample", null, null);
         }
@@ -141,15 +138,11 @@ public class MISAModuleInstance implements MISAValidatable {
     }
 
     /**
-     * Writes the final JSON parameter
+     * Returns the parameters as JSON object
      *
-     * @param parameterSchema   where the parameter will be written
-     * @param importedDirectory The physical path of the import directory where ImageJ data is exported if needed.
-     * @param exportedDirectory The physical path of the export directory where everything will be cached
-     * @param forceCopy         If true, the importer will copy the files into the imported directory even if not necessary
+     * @return
      */
-    public void install(Path parameterSchema, Path importedDirectory, Path exportedDirectory, boolean forceCopy, boolean relativeDirectories) {
-
+    public JsonElement getParametersAsJson(Path importedDirectory, Path exportedDirectory) {
         JSONSchemaObject parameters = new JSONSchemaObject(JSONSchemaObjectType.jsonObject);
 
         // Save properties
@@ -157,35 +150,47 @@ public class MISAModuleInstance implements MISAValidatable {
         parameters.addProperty("runtime", runtimeParameters);
         parameters.addProperty("samples", new JSONSchemaObject(JSONSchemaObjectType.jsonObject));
 
-        for(MISASample sample : samples.values()) {
+        for (MISASample sample : samples.values()) {
             parameters.getPropertyFromPath("samples").addProperty(sample.name, sample.getParameters());
         }
 
         parameters.ensurePropertyFromPath("filesystem").addProperty("source", JSONSchemaObject.createString("directories"));
-        if(!relativeDirectories) {
-            parameters.ensurePropertyFromPath("filesystem").addProperty("input-directory",
-                    JSONSchemaObject.createString(importedDirectory.toString()));
-            parameters.ensurePropertyFromPath("filesystem").addProperty("output-directory",
-                    JSONSchemaObject.createString(exportedDirectory.toString()));
-        }
-        else {
-            parameters.ensurePropertyFromPath("filesystem").addProperty("input-directory",
-                    JSONSchemaObject.createString(parameterSchema.getParent().relativize(importedDirectory).toString()));
-            parameters.ensurePropertyFromPath("filesystem").addProperty("output-directory",
-                    JSONSchemaObject.createString(parameterSchema.getParent().relativize(exportedDirectory).toString()));
+        parameters.ensurePropertyFromPath("filesystem").addProperty("input-directory",
+                JSONSchemaObject.createString(importedDirectory.toString()));
+        parameters.ensurePropertyFromPath("filesystem").addProperty("output-directory",
+                JSONSchemaObject.createString(exportedDirectory.toString()));
+
+        return parameters.toJson();
+    }
+
+    /**
+     * Writes the final JSON parameter
+     *
+     * @param parameterJsonPath where the parameter will be written
+     * @param importedDirectory The physical path of the import directory where ImageJ data is exported if needed.
+     * @param exportedDirectory The physical path of the export directory where everything will be cached
+     * @param forceCopy         If true, the importer will copy the files into the imported directory even if not necessary
+     */
+    public void install(Path parameterJsonPath, Path importedDirectory, Path exportedDirectory, boolean forceCopy, boolean relativeDirectories) {
+
+        JsonElement parameterJson;
+        if (relativeDirectories) {
+            parameterJson = getParametersAsJson(parameterJsonPath.getParent().relativize(importedDirectory),
+                    parameterJsonPath.getParent().relativize(exportedDirectory));
+        } else {
+            parameterJson = getParametersAsJson(importedDirectory, exportedDirectory);
         }
 
         // Write the parameter schema
-        Gson gson = GsonUtils.getGson();
-        try(OutputStreamWriter w = new OutputStreamWriter(new FileOutputStream(parameterSchema.toString()))) {
-            w.write(gson.toJson(parameters.toValue()));
+        try {
+            GsonUtils.toJsonFile(GsonUtils.getGson(), parameterJson, parameterJsonPath);
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
 
         // Install imported data into their proper filesystem locations
-        for(MISASample sample : samples.values()) {
-            for(MISACache cache : sample.getImportedCaches()) {
+        for (MISASample sample : samples.values()) {
+            for (MISACache cache : sample.getImportedCaches()) {
                 Path cachePath = importedDirectory.resolve(sample.name).resolve(cache.getFilesystemEntry().getInternalPath());
                 cache.install(cachePath, forceCopy);
             }
@@ -194,6 +199,7 @@ public class MISAModuleInstance implements MISAValidatable {
 
     /**
      * Generates the parameter schema report
+     *
      * @return
      */
     @Override
@@ -203,7 +209,7 @@ public class MISAModuleInstance implements MISAValidatable {
         report.merge(algorithmParameters.getValidityReport(), "Algorithm parameters");
         report.merge(runtimeParameters.getValidityReport(), "Runtime parameters");
 
-        for(MISASample sample : samples.values()) {
+        for (MISASample sample : samples.values()) {
             report.merge(sample.getValidityReport(), "Samples", sample.name);
         }
 
@@ -212,13 +218,14 @@ public class MISAModuleInstance implements MISAValidatable {
 
     /**
      * Load parameters from the provided JSON
+     *
      * @param root
      */
     public void loadParameters(JsonObject root) {
         // Add missing samples & merge their parameters
-        if(root.has("samples")) {
-            for(Map.Entry<String, JsonElement> kv : root.getAsJsonObject("samples").entrySet()) {
-                if(!samples.containsKey(kv.getKey())) {
+        if (root.has("samples")) {
+            for (Map.Entry<String, JsonElement> kv : root.getAsJsonObject("samples").entrySet()) {
+                if (!samples.containsKey(kv.getKey())) {
                     addSample(kv.getKey());
                 }
                 samples.get(kv.getKey()).getParameters().setValueFromJson(kv.getValue());
@@ -226,10 +233,10 @@ public class MISAModuleInstance implements MISAValidatable {
         }
 
         // Merge parameters
-        if(root.has("algorithm")) {
+        if (root.has("algorithm")) {
             algorithmParameters.setValueFromJson(root.get("algorithm"));
         }
-        if(root.has("runtime")) {
+        if (root.has("runtime")) {
             runtimeParameters.setValueFromJson(root.get("runtime"));
         }
 

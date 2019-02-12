@@ -1,6 +1,6 @@
 package org.hkijena.misa_imagej.api.json;
 
-import com.google.gson.JsonElement;
+import com.google.gson.*;
 import com.google.gson.annotations.SerializedName;
 import org.hkijena.misa_imagej.api.MISAValidatable;
 import org.hkijena.misa_imagej.api.MISAValidityReport;
@@ -217,23 +217,30 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
         return nd;
     }
 
-    public Object toValue() {
+    public JsonElement toJson() {
         switch (type) {
             case jsonString:
             case jsonNumber:
             case jsonBoolean:
-                return getValue();
+                if(getValue() instanceof String)
+                    return new JsonPrimitive((String)getValue());
+                else if(getValue() instanceof Number)
+                    return new JsonPrimitive((Number)getValue());
+                else if(getValue() instanceof Boolean)
+                    return new JsonPrimitive((Boolean)getValue());
+                else
+                    return JsonNull.INSTANCE;
             case jsonArray: {
-                ArrayList<Object> result = new ArrayList<>();
+                JsonArray result = new JsonArray();
                 for (JSONSchemaObject obj : items) {
-                    result.add(obj.toValue());
+                    result.add(obj.toJson());
                 }
                 return result;
             }
             case jsonObject: {
-                HashMap<String, Object> result = new HashMap<>();
+                JsonObject result = new JsonObject();
                 for (Map.Entry<String, JSONSchemaObject> kv : properties.entrySet()) {
-                    result.put(kv.getKey(), kv.getValue().toValue());
+                    result.add(kv.getKey(), kv.getValue().toJson());
                 }
                 return result;
             }

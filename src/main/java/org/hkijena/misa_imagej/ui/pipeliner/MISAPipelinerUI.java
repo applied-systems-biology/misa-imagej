@@ -1,23 +1,24 @@
 package org.hkijena.misa_imagej.ui.pipeliner;
 
-import com.google.common.base.Charsets;
 import com.google.gson.Gson;
 import org.hkijena.misa_imagej.api.MISACache;
 import org.hkijena.misa_imagej.api.MISAModuleInstance;
+import org.hkijena.misa_imagej.api.MISAValidityReport;
 import org.hkijena.misa_imagej.api.pipelining.MISAPipeline;
 import org.hkijena.misa_imagej.api.repository.MISAModule;
 import org.hkijena.misa_imagej.api.repository.MISAModuleRepository;
+import org.hkijena.misa_imagej.ui.MISAValidityReportStatusUI;
 import org.hkijena.misa_imagej.ui.parametereditor.MISACacheTreeUI;
 import org.hkijena.misa_imagej.ui.repository.MISAModuleListCellRenderer;
 import org.hkijena.misa_imagej.utils.GsonUtils;
 import org.hkijena.misa_imagej.utils.UIUtils;
+import org.jdesktop.swingx.JXStatusBar;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,6 +33,7 @@ public class MISAPipelinerUI extends JFrame {
      * We use this to give users an easy overview of a module
      */
     private Map<MISAModule, MISAModuleInstance> uiParameterSchemata = new HashMap<>();
+    private MISAValidityReportStatusUI validityReportStatusUI;
 
     public MISAPipelinerUI()
     {
@@ -57,9 +59,17 @@ public class MISAPipelinerUI extends JFrame {
 
         toolBar.add(Box.createHorizontalGlue());
 
+        JButton validateButton = new JButton("Check parameters", UIUtils.getIconFromResources("checkmark.png"));
+        validateButton.addActionListener(actionEvent -> validityReportStatusUI.setReport(pipeline.getValidityReport()));
+        toolBar.add(validateButton);
+
         JButton exportButton = new JButton("Export", UIUtils.getIconFromResources("export.png"));
         exportButton.addActionListener(actionEvent -> export());
-        exportButton.add(saveButton);
+        toolBar.add(exportButton);
+
+        JButton runButton = new JButton("Run", UIUtils.getIconFromResources("run.png"));
+        runButton.addActionListener(actionEvent -> runPipeline());
+        toolBar.add(runButton);
 
         add(toolBar, BorderLayout.NORTH);
         JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
@@ -74,6 +84,12 @@ public class MISAPipelinerUI extends JFrame {
         }, tabbedPane);
         splitPane.setResizeWeight(1);
         add(splitPane, BorderLayout.CENTER);
+
+        // Status bar
+        JXStatusBar statusBar = new JXStatusBar();
+        validityReportStatusUI = new MISAValidityReportStatusUI();
+        statusBar.add(validityReportStatusUI);
+        add(statusBar, BorderLayout.SOUTH);
     }
 
     private JPanel createToolbox() {
@@ -140,12 +156,33 @@ public class MISAPipelinerUI extends JFrame {
     }
 
     private void export() {
+        MISAValidityReport report = pipeline.getValidityReport();
+        validityReportStatusUI.setReport(report);
+        if(!report.isValid())
+            return;
+
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         fileChooser.setDialogTitle("Export pipeline");
         if(fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
             try {
-               pipeline.export(fileChooser.getSelectedFile().toPath());
+               pipeline.export(fileChooser.getSelectedFile().toPath(), true, true);
+            }
+            catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    private void runPipeline() {
+        MISAValidityReport report = pipeline.getValidityReport();
+        validityReportStatusUI.setReport(report);
+        if(!report.isValid())
+            return;
+        MISARunPipelineDialogUI dialogUI = new MISARunPipelineDialogUI(this);
+        if(dialogUI.showDialog() == MISARunPipelineDialogUI.ACCEPT_OPTION) {
+            try {
+                pipeline.export(dialogUI.getExportPath(), false, false);
             }
             catch (IOException e) {
                 throw new RuntimeException(e);
@@ -158,9 +195,7 @@ public class MISAPipelinerUI extends JFrame {
         fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
         if(fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
             try {
-                Gson gson = GsonUtils.getGson();
-                String json = gson.toJson(pipeline);
-                Files.write(fileChooser.getSelectedFile().toPath(), json.getBytes(Charsets.UTF_8));
+               pipeline.save(fileChooser.getSelectedFile().toPath());
             }
             catch (IOException e) {
                 throw new RuntimeException(e);

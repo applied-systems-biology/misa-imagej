@@ -91,4 +91,12 @@ public class MISASample implements MISAValidatable {
     public MISAModuleInstance getModuleInstance() {
         return moduleInstance;
     }
+
+    public MISACache getExportedCacheByRelativePath(String path) {
+        return getExportedCaches().stream().filter(misaCache -> misaCache.getRelativePath().equals(path)).findFirst().orElse(null);
+    }
+
+    public MISACache getImportedCacheByRelativePath(String path) {
+        return getImportedCaches().stream().filter(misaCache -> misaCache.getRelativePath().equals(path)).findFirst().orElse(null);
+    }
 }
