@@ -21,9 +21,9 @@ public class GenericJSONSchemaObjectEditorUI extends JSONSchemaObjectEditorUI {
 
     @Override
     public void populate(JSONSchemaEditorUI schemaEditorUI) {
-        if(getJsonSchemaObject().type == JSONSchemaObjectType.jsonObject) {
+        if(getJsonSchemaObject().getType() == JSONSchemaObjectType.jsonObject) {
             // Do not do anything. Instead create editors for the contained objects
-            ArrayList<JSONSchemaObject> objects = new ArrayList<>(getJsonSchemaObject().properties.values());
+            ArrayList<JSONSchemaObject> objects = new ArrayList<>(getJsonSchemaObject().getProperties().values());
             objects.sort(Comparator.comparingInt(JSONSchemaObject::getMaxDepth).thenComparing(JSONSchemaObject::getName));
 
             for(JSONSchemaObject obj : objects) {
@@ -32,16 +32,16 @@ public class GenericJSONSchemaObjectEditorUI extends JSONSchemaObjectEditorUI {
                 }
             }
         }
-        else if(getJsonSchemaObject().enum_values != null) {
+        else if(getJsonSchemaObject().getEnumValues() != null) {
             // Create a combo box within this panel
             setLayout(new BorderLayout());
             JComboBox<Object> comboBox = new JComboBox<>();
-            comboBox.setToolTipText(getJsonSchemaObject().description);
+            comboBox.setToolTipText(getJsonSchemaObject().getDescription());
             DefaultComboBoxModel<Object> model = new DefaultComboBoxModel<>();
 
-            for(Object d : getJsonSchemaObject().enum_values) {
+            for(Object d : getJsonSchemaObject().getEnumValues()) {
                 model.addElement(d);
-                if(d.equals(getJsonSchemaObject().default_value)) {
+                if(d.equals(getJsonSchemaObject().getDefaultValue())) {
                     model.setSelectedItem(d);
                 }
             }
@@ -54,13 +54,13 @@ public class GenericJSONSchemaObjectEditorUI extends JSONSchemaObjectEditorUI {
 
             schemaEditorUI.insertObjectEditorUI(this, true);
         }
-        else if(getJsonSchemaObject().type == JSONSchemaObjectType.jsonString) {
+        else if(getJsonSchemaObject().getType() == JSONSchemaObjectType.jsonString) {
             // Create a string editor
             setLayout(new BorderLayout());
-            JTextField edit = new JTextField(getJsonSchemaObject().default_value != null ? (String)getJsonSchemaObject().default_value : "");
-            edit.setToolTipText(getJsonSchemaObject().description);
-            if(getJsonSchemaObject().default_value != null) {
-                edit.setText((String)getJsonSchemaObject().default_value);
+            JTextField edit = new JTextField(getJsonSchemaObject().getDefaultValue() != null ? (String) getJsonSchemaObject().getDefaultValue() : "");
+            edit.setToolTipText(getJsonSchemaObject().getDescription());
+            if(getJsonSchemaObject().getDefaultValue() != null) {
+                edit.setText((String) getJsonSchemaObject().getDefaultValue());
             }
             add(edit, BorderLayout.CENTER);
 
@@ -69,17 +69,17 @@ public class GenericJSONSchemaObjectEditorUI extends JSONSchemaObjectEditorUI {
             });
             schemaEditorUI.insertObjectEditorUI(this, true);
         }
-        else if(getJsonSchemaObject().type == JSONSchemaObjectType.jsonNumber) {
+        else if(getJsonSchemaObject().getType() == JSONSchemaObjectType.jsonNumber) {
             // Create a spinner where the user can edit the value
             setLayout(new BorderLayout());
             JSpinner edit = new JSpinner();
             Dimension dim = edit.getPreferredSize();
             edit.setModel(new SpinnerNumberModel(0.0, -Double.MAX_VALUE, Double.MAX_VALUE, 1));
             edit.setPreferredSize(dim);
-            edit.setToolTipText(getJsonSchemaObject().description);
+            edit.setToolTipText(getJsonSchemaObject().getDescription());
 
-            if(getJsonSchemaObject().default_value != null) {
-                edit.setValue(getJsonSchemaObject().default_value);
+            if(getJsonSchemaObject().getDefaultValue() != null) {
+                edit.setValue(getJsonSchemaObject().getDefaultValue());
             }
             add(edit, BorderLayout.CENTER);
 
@@ -88,15 +88,15 @@ public class GenericJSONSchemaObjectEditorUI extends JSONSchemaObjectEditorUI {
             });
             schemaEditorUI.insertObjectEditorUI(this, true);
         }
-        else if(getJsonSchemaObject().type == JSONSchemaObjectType.jsonBoolean) {
+        else if(getJsonSchemaObject().getType() == JSONSchemaObjectType.jsonBoolean) {
             setLayout(new BorderLayout());
             // Create a checkbox
             JCheckBox checkBox = new JCheckBox();
-            checkBox.setToolTipText(getJsonSchemaObject().description);
+            checkBox.setToolTipText(getJsonSchemaObject().getDescription());
             checkBox.setText(getJsonSchemaObject().getName());
 
-            if(getJsonSchemaObject().default_value != null) {
-                checkBox.setSelected((boolean)getJsonSchemaObject().default_value);
+            if(getJsonSchemaObject().getDefaultValue() != null) {
+                checkBox.setSelected((boolean) getJsonSchemaObject().getDefaultValue());
             }
             add(checkBox, BorderLayout.CENTER);
             checkBox.addActionListener(actionEvent -> {
@@ -106,7 +106,7 @@ public class GenericJSONSchemaObjectEditorUI extends JSONSchemaObjectEditorUI {
             schemaEditorUI.insertObjectEditorUI(this, false);
         }
         else {
-            throw new UnsupportedOperationException("Unknown schema object type " + getJsonSchemaObject().type);
+            throw new UnsupportedOperationException("Unknown schema object type " + getJsonSchemaObject().getType());
         }
 
     }

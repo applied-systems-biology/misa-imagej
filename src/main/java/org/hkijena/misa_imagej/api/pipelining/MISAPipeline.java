@@ -4,6 +4,7 @@ import com.google.common.base.Charsets;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Maps;
+import com.google.common.eventbus.Subscribe;
 import com.google.common.io.Resources;
 import com.google.gson.*;
 import org.hkijena.misa_imagej.api.*;
@@ -66,13 +67,20 @@ public class MISAPipeline implements MISAValidatable {
         node.setPipeline(this);
         nodes.add(node);
         propertyChangeSupport.firePropertyChange("addNode", null, node);
-        node.getModuleInstance().addPropertyChangeListener(propertyChangeEvent -> {
-            if (propertyChangeEvent.getPropertyName().equals("samples")) {
-                synchronizeSamples();
-                updateCacheDataSources();
-            }
-        });
+        node.getModuleInstance().getEventBus().register(this);
         synchronizeSamples();
+    }
+
+    @Subscribe
+    public void handleNodeSamplesChanged(MISAModuleInstance.AddedSampleEvent event) {
+        synchronizeSamples();
+        updateCacheDataSources();
+    }
+
+    @Subscribe
+    public void handleNodeSamplesChanged(MISAModuleInstance.RemovedSampleEvent event) {
+        synchronizeSamples();
+        updateCacheDataSources();
     }
 
     /**

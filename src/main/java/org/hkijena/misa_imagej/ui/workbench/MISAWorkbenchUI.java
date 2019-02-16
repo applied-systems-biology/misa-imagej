@@ -27,6 +27,7 @@ public class MISAWorkbenchUI extends JFrame{
         getContentPane().setLayout(new BorderLayout(8, 8));
         setTitle("MISA++ Workbench for ImageJ");
         setIconImage(UIUtils.getIconFromResources("misaxx.png").getImage());
+        UIUtils.setToAskOnClose(this, "Do you really want to close this analysis tool?", "Close window");
 
         initializeToolbar();
 

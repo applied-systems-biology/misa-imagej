@@ -49,6 +49,7 @@ public class MISAPipelinerUI extends JFrame {
         getContentPane().setLayout(new BorderLayout());
         setTitle("MISA++ for ImageJ - Pipeline tool");
         setIconImage(UIUtils.getIconFromResources("misaxx.png").getImage());
+        UIUtils.setToAskOnClose(this, "Do you really want to close this pipeline builder?", "Close window");
 
         JToolBar toolBar = new JToolBar();
 

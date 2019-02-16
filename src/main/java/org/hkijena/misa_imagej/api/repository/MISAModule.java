@@ -158,7 +158,7 @@ public class MISAModule {
     public MISAModuleInstance instantiate() {
         Gson gson = GsonUtils.getGson();
         JSONSchemaObject schema = gson.fromJson(getParameterSchemaJSON(), JSONSchemaObject.class);
-        schema.id = "parameters";
+        schema.setId("parameters");
         schema.update();
         MISAModuleInstance instance = new MISAModuleInstance(schema);
         instance.setModuleInfo(getModuleInfo());

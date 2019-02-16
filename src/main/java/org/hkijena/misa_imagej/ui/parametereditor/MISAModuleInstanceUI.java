@@ -1,5 +1,6 @@
 package org.hkijena.misa_imagej.ui.parametereditor;
 
+import com.google.common.eventbus.Subscribe;
 import org.hkijena.misa_imagej.api.MISAModuleInstance;
 import org.hkijena.misa_imagej.api.MISAValidityReport;
 import org.hkijena.misa_imagej.api.MISASample;
@@ -12,6 +13,8 @@ import org.jdesktop.swingx.JXStatusBar;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -161,6 +164,8 @@ public class MISAModuleInstanceUI extends JFrame {
         getContentPane().setLayout(new BorderLayout(8, 8));
         setTitle("MISA++ for ImageJ - " + getModuleInstance().getModuleInfo().toString());
         setIconImage(UIUtils.getIconFromResources("misaxx.png").getImage());
+        UIUtils.setToAskOnClose(this, "Do you really want to close this parameter editor?", "Close window");
+
         SampleParametersEditorUI sampleParametersEditorUI = new SampleParametersEditorUI(this);
         AlgorithmParametersEditorUI algorithmParametersEditorUI = new AlgorithmParametersEditorUI(this);
         RuntimeParametersEditorUI runtimeParametersEditorUI = new RuntimeParametersEditorUI(this);
@@ -224,14 +229,7 @@ public class MISAModuleInstanceUI extends JFrame {
 
         {
             sampleList = new JComboBox<>();
-            moduleInstance.addPropertyChangeListener(propertyChangeEvent -> {
-                if(propertyChangeEvent.getPropertyName().equals("samples")) {
-                    refreshSampleList();
-                }
-                else if(propertyChangeEvent.getPropertyName().equals("currentSample")) {
-                    refreshSampleList();
-                }
-            });
+            moduleInstance.getEventBus().register(this);
             sampleList.addItemListener(itemEvent -> {
                 if(moduleInstance.getSamples().size() > 0 && sampleList.getSelectedItem() != null) {
                     moduleInstance.setCurrentSample(((MISASample)sampleList.getSelectedItem()).name);
@@ -245,6 +243,21 @@ public class MISAModuleInstanceUI extends JFrame {
         removeSampleButton.setToolTipText("Remove current sample");
         removeSampleButton.addActionListener(actionEvent -> removeSample());
         toolBar.add(removeSampleButton);
+    }
+
+    @Subscribe
+    public void handleSamplesChanged(MISAModuleInstance.AddedSampleEvent event) {
+        refreshSampleList();
+    }
+
+    @Subscribe
+    public void handleSamplesChanged(MISAModuleInstance.RemovedSampleEvent event) {
+        refreshSampleList();
+    }
+
+    @Subscribe
+    public void handleSamplesChanged(MISAModuleInstance.ChangedCurrentSampleEvent event) {
+        refreshSampleList();
     }
 
     private void refreshSampleList() {

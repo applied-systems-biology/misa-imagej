@@ -35,8 +35,8 @@ public class JSONSchemaEditorRegistry {
     public static JSONSchemaObjectEditorUI getEditorFor(JSONSchemaObject schemaObject) {
         if(isInitialized)
             initialize();
-        if(schemaObject.serializationId != null) {
-            Class<? extends JSONSchemaObjectEditorUI> result = registeredEditors.getOrDefault(schemaObject.serializationId, null);
+        if(schemaObject.getSerializationId() != null) {
+            Class<? extends JSONSchemaObjectEditorUI> result = registeredEditors.getOrDefault(schemaObject.getSerializationId(), null);
             if(result != null) {
                 try {
                     return result.getConstructor(JSONSchemaObject.class).newInstance(schemaObject);

@@ -1,5 +1,6 @@
 package org.hkijena.misa_imagej.ui.parametereditor;
 
+import com.google.common.eventbus.Subscribe;
 import org.hkijena.misa_imagej.api.MISACache;
 import org.hkijena.misa_imagej.api.MISAModuleInstance;
 import org.hkijena.misa_imagej.api.MISASample;
@@ -86,11 +87,12 @@ public class SampleDataEditorUI extends JPanel {
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, cacheListPanel, editPanel);
         add(splitPane, BorderLayout.CENTER);
 
-        parameterSchema.addPropertyChangeListener(propertyChangeEvent -> {
-            if(propertyChangeEvent.getPropertyName().equals("currentSample")) {
-                setCurrentSample(parameterSchema.getCurrentSample());
-            }
-        });
+        parameterSchema.getEventBus().register(this);
+        setCurrentSample(parameterSchema.getCurrentSample());
+    }
+
+    @Subscribe
+    public void handleCurrentSampleChanged(MISAModuleInstance.ChangedCurrentSampleEvent event) {
         setCurrentSample(parameterSchema.getCurrentSample());
     }
 

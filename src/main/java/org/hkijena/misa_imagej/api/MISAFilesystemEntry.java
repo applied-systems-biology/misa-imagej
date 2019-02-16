@@ -29,13 +29,13 @@ public class MISAFilesystemEntry implements Cloneable {
         this.name = name;
         this.ioType = ioType;
         if(sourceObject.hasPropertyFromPath("external-path")) {
-            externalPath = sourceObject.getPropertyFromPath("external-path").default_value.toString();
+            externalPath = sourceObject.getPropertyFromPath("external-path").getDefaultValue().toString();
         }
         if(sourceObject.hasPropertyFromPath("metadata")) {
             metadata = (JSONSchemaObject) sourceObject.getPropertyFromPath("metadata").clone();
         }
         if(sourceObject.hasPropertyFromPath("children")) {
-            for(Map.Entry<String, JSONSchemaObject> entry : sourceObject.getPropertyFromPath("children").properties.entrySet()) {
+            for(Map.Entry<String, JSONSchemaObject> entry : sourceObject.getPropertyFromPath("children").getProperties().entrySet()) {
                 children.put(entry.getKey(), new MISAFilesystemEntry(this, entry.getValue(), entry.getKey(), ioType));
             }
         }

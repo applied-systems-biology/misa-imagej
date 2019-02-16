@@ -1,5 +1,6 @@
 package org.hkijena.misa_imagej.ui.parametereditor.json_schema;
 
+import com.google.common.eventbus.Subscribe;
 import org.hkijena.misa_imagej.api.json.JSONSchemaObject;
 import org.hkijena.misa_imagej.utils.UIUtils;
 import org.jdesktop.swingx.JXTextField;
@@ -79,7 +80,7 @@ public class JSONSchemaEditorUI extends JPanel {
      */
     public void insertObjectEditorUI(JSONSchemaObjectEditorUI ui, boolean withLabel) {
         // Filtering
-        if(!enableObjectsButton.isSelected() && ui.getJsonSchemaObject().parent != currentObject)
+        if(!enableObjectsButton.isSelected() && ui.getJsonSchemaObject().getParent() != currentObject)
             return;
         if(objectFilter.getText() != null && !objectFilter.getText().isEmpty()) {
             String searchText = ui.getJsonSchemaObject().getName().toLowerCase();
@@ -88,16 +89,16 @@ public class JSONSchemaEditorUI extends JPanel {
             }
         }
 
-        JSONSchemaObject parent = ui.getJsonSchemaObject().parent;
+        JSONSchemaObject parent = ui.getJsonSchemaObject().getParent();
 
         if(parent != null && parent != lastObjectEditorSchemaParent && parent.getDepth() >= getCurrentObject().getDepth()) {
-            String parentPath = getCurrentObject().id + parent.getValuePath().substring(getCurrentObject().getValuePath().length());
+            String parentPath = getCurrentObject().getId() + parent.getValuePath().substring(getCurrentObject().getValuePath().length());
 
             // Announce the object
             final boolean first = lastObjectEditorSchemaParent == null;
             lastObjectEditorSchemaParent = parent;
             JLabel description = new JLabel(parentPath);
-            description.setIcon(parent.type.getIcon());
+            description.setIcon(parent.getType().getIcon());
             description.setFont(description.getFont().deriveFont(14.0f));
             objectEditor.add(description, new GridBagConstraints() {
                 {
@@ -112,7 +113,7 @@ public class JSONSchemaEditorUI extends JPanel {
         }
         if(withLabel) {
             JLabel description = new JLabel(ui.getJsonSchemaObject().getName());
-            description.setIcon(ui.getJsonSchemaObject().type.getIcon());
+            description.setIcon(ui.getJsonSchemaObject().getType().getIcon());
             objectEditor.add(description, new GridBagConstraints() {
                 {
                     anchor = GridBagConstraints.WEST;
@@ -215,15 +216,10 @@ public class JSONSchemaEditorUI extends JPanel {
     }
 
     public void setSchema(JSONSchemaObject jsonSchema) {
-        if(jsonSchema != null && jsonSchema.properties != null && jsonSchema.properties.size() > 0) {
+        if(jsonSchema != null && jsonSchema.getProperties() != null && jsonSchema.getProperties().size() > 0) {
             jsonTree.setModel(new DefaultTreeModel(jsonSchema.toTreeNode()));
             setCurrentSchema(jsonSchema);
-            jsonSchema.addPropertyChangeListener(propertyChangeEvent -> {
-                if(jsonSchema == getCurrentObject()) {
-                    jsonTree.setModel(new DefaultTreeModel(jsonSchema.toTreeNode()));
-                    refreshEditor();
-                }
-            });
+            jsonSchema.getEventBus().register(this);
 
             jsonTree.setEnabled(true);
             objectEditor.setEnabled(true);
@@ -233,6 +229,22 @@ public class JSONSchemaEditorUI extends JPanel {
             setCurrentSchema(null);
             jsonTree.setEnabled(false);
             objectEditor.setEnabled(false);
+        }
+    }
+
+    @Subscribe
+    public void handleSchemaEvent(JSONSchemaObject.AddedAdditionalPropertyEvent event) {
+        if(event.getProperty().getParent() == getCurrentObject()) {
+            jsonTree.setModel(new DefaultTreeModel(event.getProperty().getParent().toTreeNode()));
+            refreshEditor();
+        }
+    }
+
+    @Subscribe
+    public void handleSchemaEvent(JSONSchemaObject.RemovedAdditionalPropertyEvent event) {
+        if(event.getProperty().getParent() == getCurrentObject()) {
+            jsonTree.setModel(new DefaultTreeModel(event.getProperty().getParent().toTreeNode()));
+            refreshEditor();
         }
     }
 
@@ -275,7 +287,7 @@ public class JSONSchemaEditorUI extends JPanel {
             if(o instanceof JSONSchemaObject) {
                 setText(o.toString());
                 JSONSchemaObject entry = (JSONSchemaObject)o;
-                setIcon(entry.type.getIcon());
+                setIcon(entry.getType().getIcon());
             }
             else {
                 setText(o.toString());

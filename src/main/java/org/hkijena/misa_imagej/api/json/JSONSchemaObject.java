@@ -1,13 +1,12 @@
 package org.hkijena.misa_imagej.api.json;
 
+import com.google.common.eventbus.EventBus;
 import com.google.gson.*;
 import com.google.gson.annotations.SerializedName;
 import org.hkijena.misa_imagej.api.MISAValidatable;
 import org.hkijena.misa_imagej.api.MISAValidityReport;
 
 import javax.swing.tree.DefaultMutableTreeNode;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
 import java.util.*;
 
 /**
@@ -15,46 +14,46 @@ import java.util.*;
  */
 public class JSONSchemaObject implements Cloneable, MISAValidatable {
 
-    public transient String id;
+    private transient String id;
 
-    public transient JSONSchemaObject parent = null;
+    private transient JSONSchemaObject parent = null;
 
-    private transient PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
+    private transient EventBus eventBus = new EventBus();
 
     private transient Object value = null;
 
     @SerializedName("type")
-    public JSONSchemaObjectType type;
+    private JSONSchemaObjectType type;
 
     @SerializedName("title")
-    public String title = null;
+    private String title = null;
 
     @SerializedName("description")
-    public String description = null;
+    private String description = null;
 
     @SerializedName("properties")
-    public Map<String, JSONSchemaObject> properties = new HashMap<>();
+    private Map<String, JSONSchemaObject> properties = new HashMap<>();
 
     @SerializedName("items")
-    public List<JSONSchemaObject> items = new ArrayList<>();
+    private List<JSONSchemaObject> items = new ArrayList<>();
 
     @SerializedName("default")
-    public Object default_value = null;
+    private Object defaultValue = null;
 
     @SerializedName("enum")
-    public List<Object> enum_values = null;
+    private List<Object> enumValues = null;
 
     @SerializedName("required")
-    public List<String> required_properties = new ArrayList<>();
+    private List<String> requiredProperties = new ArrayList<>();
 
     @SerializedName("additionalProperties")
-    public JSONSchemaObject additionalProperties = null;
+    private JSONSchemaObject additionalProperties = null;
 
     @SerializedName("misa:serialization-id")
-    public String serializationId = null;
+    private String serializationId = null;
 
     @SerializedName("misa:serialization-hierarchy")
-    public List<String> serializationHierarchy = new ArrayList<>();
+    private List<String> serializationHierarchy = new ArrayList<>();
 
     public JSONSchemaObject() {
     }
@@ -70,46 +69,46 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
 
     public static JSONSchemaObject createArray(List<Object> value) {
         JSONSchemaObject result = new JSONSchemaObject(JSONSchemaObjectType.jsonArray);
-        result.value = value;
+        result.setValue(value);
         return result;
     }
 
     public static JSONSchemaObject createNumber(double number) {
         JSONSchemaObject result = new JSONSchemaObject(JSONSchemaObjectType.jsonNumber);
-        result.value = number;
+        result.setValue(number);
         return result;
     }
 
     public static JSONSchemaObject createBoolean(boolean b) {
         JSONSchemaObject result = new JSONSchemaObject(JSONSchemaObjectType.jsonBoolean);
-        result.value = b;
+        result.setValue(b);
         return result;
     }
 
     public static JSONSchemaObject createString(String string) {
         JSONSchemaObject result = new JSONSchemaObject(JSONSchemaObjectType.jsonString);
-        result.value = string;
+        result.setValue(string);
         return result;
     }
 
     @Override
     public Object clone() {
         JSONSchemaObject obj = new JSONSchemaObject();
-        obj.type = type;
-        obj.title = title;
-        obj.description = description;
-        obj.default_value = default_value;
-        obj.enum_values = enum_values;
-        obj.value = value;
-        obj.required_properties = required_properties;
-        obj.additionalProperties = additionalProperties;
-        obj.serializationId = serializationId;
-        obj.properties = new HashMap<>();
-        for(Map.Entry<String, JSONSchemaObject> kv : properties.entrySet()) {
-            obj.properties.put(kv.getKey(), (JSONSchemaObject) kv.getValue().clone());
+        obj.type = getType();
+        obj.setTitle(getTitle());
+        obj.setDescription(getDescription());
+        obj.setDefaultValue(getDefaultValue());
+        obj.setEnumValues(getEnumValues());
+        obj.setValue(getValue());
+        obj.setRequiredProperties(getRequiredProperties());
+        obj.setAdditionalProperties(getAdditionalProperties());
+        obj.setSerializationId(getSerializationId());
+        obj.setProperties(new HashMap<>());
+        for(Map.Entry<String, JSONSchemaObject> kv : getProperties().entrySet()) {
+            obj.getProperties().put(kv.getKey(), (JSONSchemaObject) kv.getValue().clone());
         }
-        obj.serializationHierarchy = new ArrayList<>();
-        obj.serializationHierarchy.addAll(serializationHierarchy);
+        obj.setSerializationHierarchy(new ArrayList<>());
+        obj.getSerializationHierarchy().addAll(getSerializationHierarchy());
         obj.update();
         return obj;
     }
@@ -120,8 +119,8 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
      */
     public JSONSchemaObject getAdditionalPropertiesTemplate() {
         JSONSchemaObject obj;
-        if(additionalProperties != null) {
-            obj =  (JSONSchemaObject) additionalProperties.clone();
+        if(getAdditionalProperties() != null) {
+            obj =  (JSONSchemaObject) getAdditionalProperties().clone();
         }
         else {
             obj = createObject();
@@ -136,34 +135,35 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
      */
     public JSONSchemaObject addAdditionalProperty(String name) {
         JSONSchemaObject obj = getAdditionalPropertiesTemplate();
-        properties.put(name, obj);
-        obj.id = name;
-        obj.parent = this;
+        getProperties().put(name, obj);
+        obj.setId(name);
+        obj.setParent(this);
         obj.update();
 
         // Notify the change
-        triggerStructureChangedEvent();
+        getEventBus().post(new AddedAdditionalPropertyEvent(obj));
 
         return obj;
     }
 
     public void removeAdditionalProperty(String name) {
-        properties.remove(name);
+        JSONSchemaObject obj = getProperties().get(name);
+        getProperties().remove(name);
 
         // Notify the change
-        triggerStructureChangedEvent();
+        getEventBus().post(new RemovedAdditionalPropertyEvent(obj));
     }
 
     public void update() {
         // Set the default value
         if(getValue() == null) {
-            setValue(default_value);
+            setValue(getDefaultValue());
         }
 
         // Update the map Ids & parent
-        for(Map.Entry<String, JSONSchemaObject> kv : properties.entrySet()) {
-            kv.getValue().id = kv.getKey();
-            kv.getValue().parent = this;
+        for(Map.Entry<String, JSONSchemaObject> kv : getProperties().entrySet()) {
+            kv.getValue().setId(kv.getKey());
+            kv.getValue().setParent(this);
             kv.getValue().update();
         }
     }
@@ -173,11 +173,11 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
      * @return
      */
     public int getMaxDepth() {
-        if (properties.isEmpty())
+        if (getProperties().isEmpty())
             return 0;
         else {
             int d = 0;
-            for(Map.Entry<String, JSONSchemaObject> kv : properties.entrySet()) {
+            for(Map.Entry<String, JSONSchemaObject> kv : getProperties().entrySet()) {
                 d = Math.max(d, kv.getValue().getMaxDepth() + 1);
             }
             return d;
@@ -189,14 +189,14 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
      * @return
      */
     public int getDepth() {
-        if(parent == null)
+        if(getParent() == null)
             return 0;
         else
-            return parent.getDepth() + 1;
+            return getParent().getDepth() + 1;
     }
 
     public String getName() {
-        return (title == null || title.isEmpty()) ? id : title;
+        return (getTitle() == null || getTitle().isEmpty()) ? getId() : getTitle();
     }
 
     @Override
@@ -207,7 +207,7 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
     public DefaultMutableTreeNode toTreeNode() {
         DefaultMutableTreeNode nd = new DefaultMutableTreeNode(this);
 
-        ArrayList<JSONSchemaObject> objects = new ArrayList<>(properties.values());
+        ArrayList<JSONSchemaObject> objects = new ArrayList<>(getProperties().values());
         objects.sort(Comparator.comparingInt(JSONSchemaObject::getMaxDepth));
 
        for(JSONSchemaObject obj : objects) {
@@ -218,7 +218,7 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
     }
 
     public JsonElement toJson() {
-        switch (type) {
+        switch (getType()) {
             case jsonString:
             case jsonNumber:
             case jsonBoolean:
@@ -232,28 +232,28 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
                     return JsonNull.INSTANCE;
             case jsonArray: {
                 JsonArray result = new JsonArray();
-                for (JSONSchemaObject obj : items) {
+                for (JSONSchemaObject obj : getItems()) {
                     result.add(obj.toJson());
                 }
                 return result;
             }
             case jsonObject: {
                 JsonObject result = new JsonObject();
-                for (Map.Entry<String, JSONSchemaObject> kv : properties.entrySet()) {
+                for (Map.Entry<String, JSONSchemaObject> kv : getProperties().entrySet()) {
                     result.add(kv.getKey(), kv.getValue().toJson());
                 }
                 return result;
             }
             default:
-                throw new RuntimeException("Unknown type " + type);
+                throw new RuntimeException("Unknown type " + getType());
         }
     }
 
     public String getValuePath() {
-        if(parent == null)
+        if(getParent() == null)
             return "";
         else
-            return parent.getValuePath() + "/" + id;
+            return getParent().getValuePath() + "/" + getId();
     }
 
     /**
@@ -264,7 +264,7 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
     public JSONSchemaObject getPropertyFromPath(String... path) {
         JSONSchemaObject result = this;
         for(String v : path) {
-            result = result.properties.get(v);
+            result = result.getProperties().get(v);
         }
         return result;
     }
@@ -272,8 +272,8 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
     public boolean hasPropertyFromPath(String... path) {
         JSONSchemaObject current = this;
         for(String v : path) {
-            if(current.properties.containsKey(v))
-                current = current.properties.get(v);
+            if(current.getProperties().containsKey(v))
+                current = current.getProperties().get(v);
             else {
                 return false;
             }
@@ -283,7 +283,7 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
 
     public JSONSchemaObject addProperty(String key, JSONSchemaObject property) {
         JSONSchemaObject copy = (JSONSchemaObject)property.clone();
-        properties.put(key, copy);
+        getProperties().put(key, copy);
         update();
         return copy;
     }
@@ -291,8 +291,8 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
     public JSONSchemaObject ensurePropertyFromPath(String... path) {
         JSONSchemaObject current = this;
         for(String v : path) {
-            if(current.properties.containsKey(v))
-                current = current.properties.get(v);
+            if(current.getProperties().containsKey(v))
+                current = current.getProperties().get(v);
             else
                 current = current.addProperty(v, JSONSchemaObject.createObject());
         }
@@ -301,7 +301,7 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
 
     private void flatten_(List<JSONSchemaObject> result) {
         result.add(this);
-        for(Map.Entry<String, JSONSchemaObject> kv : properties.entrySet()) {
+        for(Map.Entry<String, JSONSchemaObject> kv : getProperties().entrySet()) {
             kv.getValue().flatten_(result);
         }
     }
@@ -312,34 +312,17 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
         return result;
     }
 
-    public void addPropertyChangeListener( PropertyChangeListener l )
-    {
-        propertyChangeSupport.addPropertyChangeListener( l );
-    }
-
-    public void removePropertyChangeListener( PropertyChangeListener l )
-    {
-        propertyChangeSupport.removePropertyChangeListener( l );
-    }
-
     public Object getValue() {
         return value;
     }
 
     public void setValue(Object value) {
-        Object old = this.value;
         this.value = value;
-        propertyChangeSupport.firePropertyChange("value", old, value);
+        getEventBus().post(new ValueChangedEvent(this));
     }
 
     public boolean hasValue() {
-        return type == JSONSchemaObjectType.jsonObject || value != null;
-    }
-
-    private void triggerStructureChangedEvent() {
-        propertyChangeSupport.firePropertyChange("structure", null, null);
-        if(parent != null)
-            parent.triggerStructureChangedEvent();
+        return getType() == JSONSchemaObjectType.jsonObject || getValue() != null;
     }
 
     @Override
@@ -350,14 +333,14 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
         else
             report.report(this, null, false, "Value is not set");
 
-        if(properties != null) {
-            for(JSONSchemaObject object : properties.values()) {
-                report.merge(object.getValidityReport(), object.id == null ? "" : object.id);
+        if(getProperties() != null) {
+            for(JSONSchemaObject object : getProperties().values()) {
+                report.merge(object.getValidityReport(), object.getId() == null ? "" : object.getId());
             }
         }
-        if(items != null) {
-            for(int i = 0; i < items.size(); ++i) {
-                report.merge(items.get(i).getValidityReport(), "[" + i + "]");
+        if(getItems() != null) {
+            for(int i = 0; i < getItems().size(); ++i) {
+                report.merge(getItems().get(i).getValidityReport(), "[" + i + "]");
             }
         }
 
@@ -367,7 +350,7 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
     public void setValueFromJson(JsonElement json) {
         if(json.isJsonNull())
             return;
-        switch(type) {
+        switch(getType()) {
             case jsonBoolean:
                 setValue(json.getAsBoolean());
                 break;
@@ -385,6 +368,146 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
                     ensurePropertyFromPath(kv.getKey()).setValueFromJson(kv.getValue());
                 }
                 break;
+        }
+    }
+
+    public EventBus getEventBus() {
+        return eventBus;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public JSONSchemaObject getParent() {
+        return parent;
+    }
+
+    public void setParent(JSONSchemaObject parent) {
+        this.parent = parent;
+    }
+
+    public JSONSchemaObjectType getType() {
+        return type;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Map<String, JSONSchemaObject> getProperties() {
+        return properties;
+    }
+
+    public void setProperties(Map<String, JSONSchemaObject> properties) {
+        this.properties = properties;
+    }
+
+    public List<JSONSchemaObject> getItems() {
+        return items;
+    }
+
+    public void setItems(List<JSONSchemaObject> items) {
+        this.items = items;
+    }
+
+    public Object getDefaultValue() {
+        return defaultValue;
+    }
+
+    public void setDefaultValue(Object defaultValue) {
+        this.defaultValue = defaultValue;
+    }
+
+    public List<Object> getEnumValues() {
+        return enumValues;
+    }
+
+    public void setEnumValues(List<Object> enumValues) {
+        this.enumValues = enumValues;
+    }
+
+    public List<String> getRequiredProperties() {
+        return requiredProperties;
+    }
+
+    public void setRequiredProperties(List<String> requiredProperties) {
+        this.requiredProperties = requiredProperties;
+    }
+
+    public JSONSchemaObject getAdditionalProperties() {
+        return additionalProperties;
+    }
+
+    public void setAdditionalProperties(JSONSchemaObject additionalProperties) {
+        this.additionalProperties = additionalProperties;
+    }
+
+    public String getSerializationId() {
+        return serializationId;
+    }
+
+    public void setSerializationId(String serializationId) {
+        this.serializationId = serializationId;
+    }
+
+    public List<String> getSerializationHierarchy() {
+        return serializationHierarchy;
+    }
+
+    public void setSerializationHierarchy(List<String> serializationHierarchy) {
+        this.serializationHierarchy = serializationHierarchy;
+    }
+
+    public static class ValueChangedEvent {
+        private JSONSchemaObject schemaObject;
+
+        public ValueChangedEvent(JSONSchemaObject schemaObject) {
+            this.schemaObject = schemaObject;
+        }
+
+        public JSONSchemaObject getSchemaObject() {
+            return schemaObject;
+        }
+    }
+
+    public static class AddedAdditionalPropertyEvent {
+        private JSONSchemaObject property;
+
+        public AddedAdditionalPropertyEvent(JSONSchemaObject property) {
+            this.property = property;
+        }
+
+        public JSONSchemaObject getProperty() {
+            return property;
+        }
+    }
+
+    public static class RemovedAdditionalPropertyEvent {
+        private JSONSchemaObject property;
+
+        public RemovedAdditionalPropertyEvent(JSONSchemaObject property) {
+            this.property = property;
+        }
+
+        public JSONSchemaObject getProperty() {
+            return property;
         }
     }
 }

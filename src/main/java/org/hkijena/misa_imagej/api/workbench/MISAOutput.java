@@ -1,7 +1,6 @@
 package org.hkijena.misa_imagej.api.workbench;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.hkijena.misa_imagej.api.*;
 import org.hkijena.misa_imagej.api.json.JSONSchemaObject;
@@ -12,8 +11,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 public class MISAOutput {
 
@@ -35,7 +32,7 @@ public class MISAOutput {
     private void loadParameterSchema() throws IOException {
         Gson gson = GsonUtils.getGson();
         JSONSchemaObject schema = gson.fromJson(new String(Files.readAllBytes(getRootPath().resolve("parameter-schema.json"))), JSONSchemaObject.class);
-        schema.id = "parameters";
+        schema.setId("parameters");
         schema.update();
         moduleInstance = new MISAModuleInstance(schema);
     }

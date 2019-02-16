@@ -1,5 +1,6 @@
 package org.hkijena.misa_imagej.api;
 
+import com.google.common.eventbus.EventBus;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.hkijena.misa_imagej.api.json.JSONSchemaObject;
@@ -8,8 +9,6 @@ import org.hkijena.misa_imagej.api.repository.MISAModule;
 import org.hkijena.misa_imagej.api.repository.MISAModuleInfo;
 import org.hkijena.misa_imagej.utils.GsonUtils;
 
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collection;
@@ -43,8 +42,6 @@ public class MISAModuleInstance implements MISAValidatable {
      */
     private Map<String, MISASample> samples = new HashMap<>();
 
-    private PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
-
     private MISASample currentSample = null;
 
     private MISAModuleInfo moduleInfo;
@@ -53,10 +50,12 @@ public class MISAModuleInstance implements MISAValidatable {
 
     private String name = "module";
 
+    private EventBus eventBus = new EventBus();
+
     public MISAModuleInstance(JSONSchemaObject object) {
-        algorithmParameters = object.properties.get("algorithm");
-        runtimeParameters = object.properties.get("runtime");
-        sampleParametersTemplate = object.properties.get("samples").getAdditionalPropertiesTemplate();
+        algorithmParameters = object.getProperties().get("algorithm");
+        runtimeParameters = object.getProperties().get("runtime");
+        sampleParametersTemplate = object.getProperties().get("samples").getAdditionalPropertiesTemplate();
         sampleImportedFilesystemTemplate = new MISAFilesystemEntry(null,
                 object.getPropertyFromPath("filesystem", "json-data", "imported", "children").getAdditionalPropertiesTemplate(),
                 "",
@@ -88,7 +87,7 @@ public class MISAModuleInstance implements MISAValidatable {
                 (MISAFilesystemEntry) sampleImportedFilesystemTemplate.clone(),
                 (MISAFilesystemEntry) sampleExportedFilesystemTemplate.clone());
         samples.put(name, sample);
-        propertyChangeSupport.firePropertyChange("samples", null, null);
+        getEventBus().post(new AddedSampleEvent(sample));
 
         if (samples.size() == 1) {
             setCurrentSample(name);
@@ -98,9 +97,10 @@ public class MISAModuleInstance implements MISAValidatable {
     public void removeSample(String name) {
         if (currentSample != null && currentSample.name.equals(name))
             currentSample = null;
+        MISASample removed = samples.get(name);
         samples.remove(name);
-        propertyChangeSupport.firePropertyChange("samples", null, null);
-        propertyChangeSupport.firePropertyChange("currentSample", null, null);
+        getEventBus().post(new RemovedSampleEvent(removed));
+        getEventBus().post(new ChangedCurrentSampleEvent(currentSample));
     }
 
     public MISASample getSample(String name) {
@@ -117,7 +117,7 @@ public class MISAModuleInstance implements MISAValidatable {
         MISASample sample = getSample(name);
         if (sample != currentSample) {
             currentSample = sample;
-            propertyChangeSupport.firePropertyChange("currentSample", null, null);
+            getEventBus().post(new ChangedCurrentSampleEvent(currentSample));
         }
     }
 
@@ -127,14 +127,6 @@ public class MISAModuleInstance implements MISAValidatable {
 
     public JSONSchemaObject getRuntimeParameters() {
         return runtimeParameters;
-    }
-
-    public void addPropertyChangeListener(PropertyChangeListener l) {
-        propertyChangeSupport.addPropertyChangeListener(l);
-    }
-
-    public void removePropertyChangeListener(PropertyChangeListener l) {
-        propertyChangeSupport.removePropertyChangeListener(l);
     }
 
     /**
@@ -264,5 +256,45 @@ public class MISAModuleInstance implements MISAValidatable {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public EventBus getEventBus() {
+        return eventBus;
+    }
+
+    public static class AddedSampleEvent {
+        private MISASample sample;
+
+        public AddedSampleEvent(MISASample sample) {
+            this.sample = sample;
+        }
+
+        public MISASample getSample() {
+            return sample;
+        }
+    }
+
+    public static class RemovedSampleEvent {
+        private MISASample sample;
+
+        public RemovedSampleEvent(MISASample sample) {
+            this.sample = sample;
+        }
+
+        public MISASample getSample() {
+            return sample;
+        }
+    }
+
+    public static class ChangedCurrentSampleEvent {
+        private MISASample sample;
+
+        public ChangedCurrentSampleEvent(MISASample sample) {
+            this.sample = sample;
+        }
+
+        public MISASample getSample() {
+            return sample;
+        }
     }
 }

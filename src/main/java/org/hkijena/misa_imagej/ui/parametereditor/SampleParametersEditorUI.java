@@ -1,5 +1,6 @@
 package org.hkijena.misa_imagej.ui.parametereditor;
 
+import com.google.common.eventbus.Subscribe;
 import org.hkijena.misa_imagej.api.MISAModuleInstance;
 import org.hkijena.misa_imagej.ui.parametereditor.json_schema.JSONSchemaEditorUI;
 
@@ -23,15 +24,16 @@ public class SampleParametersEditorUI extends JPanel {
         add(jsonSchemaEditorUI, BorderLayout.CENTER);
 
         // Add events
-        parameterSchema.addPropertyChangeListener(propertyChangeEvent -> {
-            if(propertyChangeEvent.getPropertyName().equals("currentSample")) {
-                if(parameterSchema.getCurrentSample() != null) {
-                    jsonSchemaEditorUI.setSchema(parameterSchema.getCurrentSample().getParameters());
-                }
-                else {
-                    jsonSchemaEditorUI.setSchema(null);
-                }
-            }
-        });
+        parameterSchema.getEventBus().register(this);
+    }
+
+    @Subscribe
+    public void handleCurrentSampleChanged(MISAModuleInstance.ChangedCurrentSampleEvent event) {
+        if(parameterSchema.getCurrentSample() != null) {
+            jsonSchemaEditorUI.setSchema(parameterSchema.getCurrentSample().getParameters());
+        }
+        else {
+            jsonSchemaEditorUI.setSchema(null);
+        }
     }
 }

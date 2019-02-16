@@ -1,8 +1,10 @@
 package org.hkijena.misa_imagej.ui.parametereditor;
 
+import com.google.common.eventbus.Subscribe;
 import org.hkijena.misa_imagej.api.MISACache;
 import org.hkijena.misa_imagej.api.MISACacheIOType;
 import org.hkijena.misa_imagej.api.MISADataSource;
+import org.hkijena.misa_imagej.api.MISASample;
 import org.hkijena.misa_imagej.ui.parametereditor.datasources.MISADataSourceUI;
 import org.hkijena.misa_imagej.ui.parametereditor.datasources.MISADataSourceUIRegistry;
 import org.hkijena.misa_imagej.utils.UIUtils;
@@ -37,11 +39,7 @@ public class MISACacheUI extends JPanel {
                 menu.add(menuItem);
             }
 
-            cache.addPropertyChangeListener(propertyChangeEvent -> {
-                if(propertyChangeEvent.getPropertyName().equals("dataSource")) {
-                    updateEditorUI();
-                }
-            });
+            cache.getEventBus().register(this);
 
             if(cache.getDataSource() == null) {
                 if(cache.getPreferredDataSource() != null) {
@@ -55,6 +53,11 @@ public class MISACacheUI extends JPanel {
             add(selectDataSourceButton, BorderLayout.EAST);
             updateEditorUI();
         }
+    }
+
+    @Subscribe
+    public void handleDataSourceChangeEvent(MISACache.DataSourceChangeEvent event) {
+        updateEditorUI();
     }
 
     private void updateEditorUI() {

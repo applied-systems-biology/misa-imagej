@@ -1,11 +1,10 @@
 package org.hkijena.misa_imagej.api;
 
 
+import com.google.common.eventbus.EventBus;
 import org.hkijena.misa_imagej.api.datasources.MISAFolderLinkDataSource;
 
 import java.awt.*;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.List;
@@ -24,7 +23,7 @@ public class MISACache implements MISAValidatable {
 
     private List<MISADataSource> availableDatasources = new ArrayList<>();
 
-    private PropertyChangeSupport propertyChangeSupport;
+    private EventBus eventBus = new EventBus();
 
     /**
      * List of attachments TODO
@@ -33,7 +32,6 @@ public class MISACache implements MISAValidatable {
 
 
     public MISACache(MISASample sample, MISAFilesystemEntry filesystemEntry) {
-        this.propertyChangeSupport = new PropertyChangeSupport(this);
         this.sample = sample;
         this.filesystemEntry = filesystemEntry;
 
@@ -75,7 +73,7 @@ public class MISACache implements MISAValidatable {
      */
     public String getPatternSerializationID() {
         if(getFilesystemEntry().metadata.hasPropertyFromPath("pattern")) {
-            return getFilesystemEntry().metadata.getPropertyFromPath("pattern").serializationId;
+            return getFilesystemEntry().metadata.getPropertyFromPath("pattern").getSerializationId();
         }
         return null;
     }
@@ -87,7 +85,7 @@ public class MISACache implements MISAValidatable {
      */
     public String getDescriptionSerializationID() {
         if(getFilesystemEntry().metadata.hasPropertyFromPath("description")) {
-            return getFilesystemEntry().metadata.getPropertyFromPath("description").serializationId;
+            return getFilesystemEntry().metadata.getPropertyFromPath("description").getSerializationId();
         }
         return null;
     }
@@ -204,7 +202,7 @@ public class MISACache implements MISAValidatable {
 
     public void setDataSource(MISADataSource dataSource) {
         this.dataSource = dataSource;
-        propertyChangeSupport.firePropertyChange("dataSource", null, null);
+        getEventBus().post(new DataSourceChangeEvent(this, this.dataSource));
     }
 
     /**
@@ -214,11 +212,25 @@ public class MISACache implements MISAValidatable {
         return dataSource;
     }
 
-    public void addPropertyChangeListener(PropertyChangeListener listener) {
-        propertyChangeSupport.addPropertyChangeListener(listener);
+    public EventBus getEventBus() {
+        return eventBus;
     }
 
-    public void removePropertyChangeListener(PropertyChangeListener listener) {
-        propertyChangeSupport.removePropertyChangeListener(listener);
+    public static class DataSourceChangeEvent {
+        private MISACache cache;
+        private MISADataSource dataSource;
+
+        public DataSourceChangeEvent(MISACache cache, MISADataSource dataSource) {
+            this.cache = cache;
+            this.dataSource = dataSource;
+        }
+
+        public MISACache getCache() {
+            return cache;
+        }
+
+        public MISADataSource getDataSource() {
+            return dataSource;
+        }
     }
 }
