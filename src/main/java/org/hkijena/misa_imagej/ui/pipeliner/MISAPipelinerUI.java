@@ -5,11 +5,15 @@ import org.hkijena.misa_imagej.api.MISACache;
 import org.hkijena.misa_imagej.api.MISAModuleInstance;
 import org.hkijena.misa_imagej.api.MISAValidityReport;
 import org.hkijena.misa_imagej.api.pipelining.MISAPipeline;
+import org.hkijena.misa_imagej.api.pipelining.MISAPipelineNode;
 import org.hkijena.misa_imagej.api.repository.MISAModule;
 import org.hkijena.misa_imagej.api.repository.MISAModuleRepository;
 import org.hkijena.misa_imagej.ui.MISAValidityReportStatusUI;
+import org.hkijena.misa_imagej.ui.parametereditor.CancelableProcessUI;
 import org.hkijena.misa_imagej.ui.parametereditor.MISACacheTreeUI;
 import org.hkijena.misa_imagej.ui.repository.MISAModuleListCellRenderer;
+import org.hkijena.misa_imagej.ui.repository.MISAModuleRepositoryUI;
+import org.hkijena.misa_imagej.ui.workbench.MISAWorkbenchUI;
 import org.hkijena.misa_imagej.utils.GsonUtils;
 import org.hkijena.misa_imagej.utils.UIUtils;
 import org.jdesktop.swingx.JXStatusBar;
@@ -19,8 +23,8 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.List;
 
 public class MISAPipelinerUI extends JFrame {
 
@@ -166,7 +170,7 @@ public class MISAPipelinerUI extends JFrame {
         fileChooser.setDialogTitle("Export pipeline");
         if(fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
             try {
-               pipeline.export(fileChooser.getSelectedFile().toPath(), true, true);
+               pipeline.export(fileChooser.getSelectedFile().toPath(), true, true, false);
             }
             catch (IOException e) {
                 throw new RuntimeException(e);
@@ -182,7 +186,34 @@ public class MISAPipelinerUI extends JFrame {
         MISARunPipelineDialogUI dialogUI = new MISARunPipelineDialogUI(this);
         if(dialogUI.showDialog() == MISARunPipelineDialogUI.ACCEPT_OPTION) {
             try {
-                pipeline.export(dialogUI.getExportPath(), false, false);
+                pipeline.export(dialogUI.getExportPath(), false, false, true);
+                List<ProcessBuilder> processes = new ArrayList<>();
+                for(MISAPipelineNode node : pipeline.traverse()) {
+                    processes.add(node.getModuleInstance().getModule().run(dialogUI.getExportPath().resolve(node.getId()).resolve("parameters.json")));
+                }
+
+                // Run the executable
+                MISAModuleRepositoryUI.getInstance().getCommand().getLogService().info("Starting worker process ...");
+                CancelableProcessUI processUI = new CancelableProcessUI(processes);
+                processUI.setLocationRelativeTo(this);
+
+                // React to changes in status
+                processUI.addPropertyChangeListener(propertyChangeEvent -> {
+                    if(processUI.getStatus() == CancelableProcessUI.Status.Done ||
+                            processUI.getStatus() == CancelableProcessUI.Status.Canceled ||
+                            processUI.getStatus() == CancelableProcessUI.Status.Failed) {
+                        setEnabled(true);
+                        if(processUI.getStatus() == CancelableProcessUI.Status.Failed) {
+                            JOptionPane.showMessageDialog(this, "There was an error during calculation. Please check the console to see the cause of this error.", "Error", JOptionPane.ERROR_MESSAGE);
+                        }
+                        MISAPipelineOutputUI ui = new MISAPipelineOutputUI(pipeline, dialogUI.getExportPath());
+                        ui.setLocationRelativeTo(this);
+                        ui.setVisible(true);
+                    }
+                });
+
+                setEnabled(false);
+                processUI.start();
             }
             catch (IOException e) {
                 throw new RuntimeException(e);

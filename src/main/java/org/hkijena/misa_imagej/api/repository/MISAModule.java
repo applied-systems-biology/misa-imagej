@@ -109,6 +109,10 @@ public class MISAModule {
         return null;
     }
 
+    public ProcessBuilder run(Path parameters) {
+        return new ProcessBuilder(executablePath, "--parameters", parameters.toString());
+    }
+
     private String queryModuleInfo() {
         try {
             ProcessBuilder pb = new ProcessBuilder(getExecutablePath(), "--module-info");

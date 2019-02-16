@@ -7,7 +7,6 @@ import org.hkijena.misa_imagej.ui.MISAValidityReportStatusUI;
 import org.hkijena.misa_imagej.ui.repository.MISAModuleRepositoryUI;
 import org.hkijena.misa_imagej.ui.workbench.MISAWorkbenchUI;
 import org.hkijena.misa_imagej.utils.FilesystemUtils;
-import org.hkijena.misa_imagej.utils.ProcessStreamToStringGobbler;
 import org.hkijena.misa_imagej.utils.UIUtils;
 import org.jdesktop.swingx.JXStatusBar;
 
@@ -16,6 +15,8 @@ import java.awt.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.List;
 
 public class MISAModuleInstanceUI extends JFrame {
 
@@ -123,12 +124,7 @@ public class MISAModuleInstanceUI extends JFrame {
 
                 // Run the executable
                 MISAModuleRepositoryUI.getInstance().getCommand().getLogService().info("Starting worker process ...");
-                ProcessBuilder pb = new ProcessBuilder(getModuleInstance().getModule().getExecutablePath(), "--parameters", dialog.getParameterFilePath().toString());
-                Process p = pb.start();
-                new ProcessStreamToStringGobbler(p.getInputStream(), s -> MISAModuleRepositoryUI.getInstance().getCommand().getLogService().info(s)).start();
-                new ProcessStreamToStringGobbler(p.getErrorStream(), s -> MISAModuleRepositoryUI.getInstance().getCommand().getLogService().error(s)).start();
-
-                CancelableProcessUI processUI = new CancelableProcessUI(p);
+                CancelableProcessUI processUI = new CancelableProcessUI(Arrays.asList(getModuleInstance().getModule().run(dialog.getParameterFilePath())));
                 processUI.setLocationRelativeTo(this);
 
                 // React to changes in status
@@ -136,7 +132,7 @@ public class MISAModuleInstanceUI extends JFrame {
                     if(processUI.getStatus() == CancelableProcessUI.Status.Done) {
                         setEnabled(true);
                         if(JOptionPane.showConfirmDialog(this, "The calculated finished. Do you want to analyze the results?",
-                                "Calulcation finished", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION) {
+                                "Calculation finished", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION) {
                             MISAWorkbenchUI ui = new MISAWorkbenchUI();
                             ui.setVisible(true);
                             ui.open(dialog.getExportedPath());
@@ -152,7 +148,7 @@ public class MISAModuleInstanceUI extends JFrame {
                 });
 
                 setEnabled(false);
-                processUI.showDialog();
+                processUI.start();
 
             } catch (IOException e) {
                 e.printStackTrace();
