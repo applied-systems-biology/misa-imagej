@@ -24,7 +24,7 @@ public class JSONSchemaEditorUI extends JPanel {
     private JTree jsonTree;
     private JPanel objectEditor;
     private JComponent topPanel;
-    private JSONSchemaObject currentObject = null;
+
 
     private int objectEditorRows = 0;
     private JSONSchemaObject lastObjectEditorSchemaParent = null;
@@ -32,6 +32,9 @@ public class JSONSchemaEditorUI extends JPanel {
     private JToggleButton enableObjectsButton;
     private JToggleButton showAllObjects;
     private JXTextField objectFilter;
+
+    private JSONSchemaObject displayedSchema = null;
+    private JSONSchemaObject schema = null;
 
     /**
      * Creates a JSON schema editor with a panel on top of the tree
@@ -47,8 +50,8 @@ public class JSONSchemaEditorUI extends JPanel {
         this(null);
     }
 
-    private void setCurrentSchema(JSONSchemaObject obj) {
-        currentObject = obj;
+    private void setDisplayedSchema(JSONSchemaObject obj) {
+        this.displayedSchema = obj;
         updateEditor();
     }
 
@@ -59,8 +62,8 @@ public class JSONSchemaEditorUI extends JPanel {
         objectEditor.revalidate();
         objectEditor.repaint();
 
-        if(currentObject != null) {
-            JSONSchemaEditorRegistry.getEditorFor(currentObject).populate(this);
+        if(displayedSchema != null) {
+            JSONSchemaEditorRegistry.getEditorFor(displayedSchema).populate(this);
             objectEditor.add(new JPanel(), new GridBagConstraints() {
                 {
                     anchor = GridBagConstraints.PAGE_START;
@@ -80,7 +83,7 @@ public class JSONSchemaEditorUI extends JPanel {
      */
     public void insertObjectEditorUI(JSONSchemaObjectEditorUI ui, boolean withLabel) {
         // Filtering
-        if(!enableObjectsButton.isSelected() && ui.getJsonSchemaObject().getParent() != currentObject)
+        if(!enableObjectsButton.isSelected() && ui.getJsonSchemaObject().getParent() != displayedSchema)
             return;
         if(objectFilter.getText() != null && !objectFilter.getText().isEmpty()) {
             String searchText = ui.getJsonSchemaObject().getName().toLowerCase();
@@ -91,8 +94,8 @@ public class JSONSchemaEditorUI extends JPanel {
 
         JSONSchemaObject parent = ui.getJsonSchemaObject().getParent();
 
-        if(parent != null && parent != lastObjectEditorSchemaParent && parent.getDepth() >= getCurrentObject().getDepth()) {
-            String parentPath = getCurrentObject().getId() + parent.getValuePath().substring(getCurrentObject().getValuePath().length());
+        if(parent != null && parent != lastObjectEditorSchemaParent && parent.getDepth() >= displayedSchema.getDepth()) {
+            String parentPath = displayedSchema.getId() + parent.getValuePath().substring(displayedSchema.getValuePath().length());
 
             // Announce the object
             final boolean first = lastObjectEditorSchemaParent == null;
@@ -176,17 +179,17 @@ public class JSONSchemaEditorUI extends JPanel {
             objectFilter.getDocument().addDocumentListener(new DocumentListener() {
                 @Override
                 public void insertUpdate(DocumentEvent documentEvent) {
-                    refreshEditor();
+                    setDisplayedSchema(displayedSchema);
                 }
 
                 @Override
                 public void removeUpdate(DocumentEvent documentEvent) {
-                    refreshEditor();
+                    setDisplayedSchema(displayedSchema);
                 }
 
                 @Override
                 public void changedUpdate(DocumentEvent documentEvent) {
-                    refreshEditor();
+                    setDisplayedSchema(displayedSchema);
                 }
             });
             toolBar.add(objectFilter);
@@ -209,16 +212,17 @@ public class JSONSchemaEditorUI extends JPanel {
         jsonTree.addTreeSelectionListener(e -> {
             if(jsonTree.getLastSelectedPathComponent() != null) {
                 DefaultMutableTreeNode nd = (DefaultMutableTreeNode)jsonTree.getLastSelectedPathComponent();
-                setCurrentSchema((JSONSchemaObject)nd.getUserObject());
+                setDisplayedSchema((JSONSchemaObject)nd.getUserObject());
             }
         });
 
     }
 
     public void setSchema(JSONSchemaObject jsonSchema) {
+        this.schema = jsonSchema;
         if(jsonSchema != null && jsonSchema.getProperties() != null && jsonSchema.getProperties().size() > 0) {
             jsonTree.setModel(new DefaultTreeModel(jsonSchema.toTreeNode()));
-            setCurrentSchema(jsonSchema);
+            setDisplayedSchema(jsonSchema);
             jsonSchema.getEventBus().register(this);
 
             jsonTree.setEnabled(true);
@@ -226,7 +230,7 @@ public class JSONSchemaEditorUI extends JPanel {
         }
         else {
             jsonTree.setModel(new DefaultTreeModel(new DefaultMutableTreeNode("No properties to edit")));
-            setCurrentSchema(null);
+            setDisplayedSchema(null);
             jsonTree.setEnabled(false);
             objectEditor.setEnabled(false);
         }
@@ -234,7 +238,7 @@ public class JSONSchemaEditorUI extends JPanel {
 
     @Subscribe
     public void handleSchemaEvent(JSONSchemaObject.AddedAdditionalPropertyEvent event) {
-        if(event.getProperty().getParent() == getCurrentObject()) {
+        if(event.getProperty().getParent() == displayedSchema) {
             jsonTree.setModel(new DefaultTreeModel(event.getProperty().getParent().toTreeNode()));
             refreshEditor();
         }
@@ -242,24 +246,16 @@ public class JSONSchemaEditorUI extends JPanel {
 
     @Subscribe
     public void handleSchemaEvent(JSONSchemaObject.RemovedAdditionalPropertyEvent event) {
-        if(event.getProperty().getParent() == getCurrentObject()) {
+        if(event.getProperty().getParent() == displayedSchema) {
             jsonTree.setModel(new DefaultTreeModel(event.getProperty().getParent().toTreeNode()));
             refreshEditor();
         }
     }
 
     public void refreshEditor() {
-        if(getCurrentObject() != null) {
-            setSchema(getCurrentObject());
+        if(schema != null) {
+            setSchema(schema);
         }
-    }
-
-    /**
-     * Returns the currently selected object
-     * @return
-     */
-    public JSONSchemaObject getCurrentObject() {
-        return currentObject;
     }
 
     /**

@@ -164,7 +164,8 @@ public class MISAModuleInstanceUI extends JFrame {
         getContentPane().setLayout(new BorderLayout(8, 8));
         setTitle("MISA++ for ImageJ - " + getModuleInstance().getModuleInfo().toString());
         setIconImage(UIUtils.getIconFromResources("misaxx.png").getImage());
-        UIUtils.setToAskOnClose(this, "Do you really want to close this parameter editor?", "Close window");
+        if(!editOnlyMode)
+            UIUtils.setToAskOnClose(this, "Do you really want to close this parameter editor?", "Close window");
 
         SampleParametersEditorUI sampleParametersEditorUI = new SampleParametersEditorUI(this);
         AlgorithmParametersEditorUI algorithmParametersEditorUI = new AlgorithmParametersEditorUI(this);
