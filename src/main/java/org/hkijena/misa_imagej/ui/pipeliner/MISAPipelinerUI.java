@@ -13,7 +13,6 @@ import org.hkijena.misa_imagej.ui.parametereditor.CancelableProcessUI;
 import org.hkijena.misa_imagej.ui.parametereditor.MISACacheTreeUI;
 import org.hkijena.misa_imagej.ui.repository.MISAModuleListCellRenderer;
 import org.hkijena.misa_imagej.ui.repository.MISAModuleRepositoryUI;
-import org.hkijena.misa_imagej.ui.workbench.MISAWorkbenchUI;
 import org.hkijena.misa_imagej.utils.GsonUtils;
 import org.hkijena.misa_imagej.utils.UIUtils;
 import org.jdesktop.swingx.JXStatusBar;
@@ -77,7 +76,7 @@ public class MISAPipelinerUI extends JFrame {
 
         add(toolBar, BorderLayout.NORTH);
         JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
-        tabbedPane.addTab("Available modules", createToolbox());
+        tabbedPane.addTab("Available modules", createModuleList());
 
         pipelineEditor = new MISAPipelineUI();
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, new JScrollPane(pipelineEditor) {
@@ -96,7 +95,7 @@ public class MISAPipelinerUI extends JFrame {
         add(statusBar, BorderLayout.SOUTH);
     }
 
-    private JPanel createToolbox() {
+    private JPanel createModuleList() {
         JPanel  toolboxPanel = new JPanel(new BorderLayout());
         moduleList = new JList<>();
         moduleList.setCellRenderer(new MISAModuleListCellRenderer());
