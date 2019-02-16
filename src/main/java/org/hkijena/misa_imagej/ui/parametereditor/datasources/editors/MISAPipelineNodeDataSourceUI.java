@@ -2,6 +2,7 @@ package org.hkijena.misa_imagej.ui.parametereditor.datasources.editors;
 
 import org.hkijena.misa_imagej.api.MISACache;
 import org.hkijena.misa_imagej.api.MISADataSource;
+import org.hkijena.misa_imagej.api.MISASample;
 import org.hkijena.misa_imagej.api.datasources.MISAPipelineNodeDataSource;
 import org.hkijena.misa_imagej.ui.parametereditor.datasources.MISADataSourceUI;
 import org.hkijena.misa_imagej.utils.UIUtils;
@@ -52,6 +53,35 @@ public class MISAPipelineNodeDataSourceUI extends MISADataSourceUI {
     }
 
     private void applyToAllSamples() {
+        if(JOptionPane.showConfirmDialog(this, "Apply this connection to all samples?",
+                "Apply to all samples", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION) {
+            for(MISASample sample : getNativeDataSource ().getCache().getSample().getModuleInstance().getSamples()) {
+                if(sample != getNativeDataSource().getCache().getSample()) {
+                    for(MISACache targetCache : sample.getImportedCaches()) {
+                        // Look for the cache that is equivalent
+                        if(targetCache.getRelativePath().equals(getNativeDataSource().getCache().getRelativePath())) {
+                            // Find the correct data source that is coming from the same node as this data source
+                            MISADataSource ds = targetCache.getAvailableDataSources().stream().filter(misaDataSource -> {
+                                if(misaDataSource instanceof  MISAPipelineNodeDataSource) {
+                                    MISAPipelineNodeDataSource p = (MISAPipelineNodeDataSource)misaDataSource;
+                                    if(p.getSourceNode() == getNativeDataSource().getSourceNode()) {
+                                        return true;
+                                    }
+                                }
+                               return false;
+                            }).findFirst().get();
+
+                            // Find the equivalent source cache
+                            MISACache sourceCache = getNativeDataSource().getSourceNode().getModuleInstance().getSample(sample.name).getExportedCacheByRelativePath(
+                                    getNativeDataSource().getSourceCache().getRelativePath());
+                            ((MISAPipelineNodeDataSource)ds).setSourceCache(sourceCache);
+                            targetCache.setDataSource(ds);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private void refreshDisplay() {
