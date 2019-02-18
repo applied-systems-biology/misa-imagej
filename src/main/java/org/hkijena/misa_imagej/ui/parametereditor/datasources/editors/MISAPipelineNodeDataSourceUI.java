@@ -101,6 +101,7 @@ public class MISAPipelineNodeDataSourceUI extends MISADataSourceUI {
             // Select the first one that is available
             if(model.getSize() != 0) {
                 getNativeDataSource().setSourceCache(model.getElementAt(0));
+                refreshDisplay();
             }
         }
     }
