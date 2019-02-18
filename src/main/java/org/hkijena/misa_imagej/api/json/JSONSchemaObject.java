@@ -201,7 +201,7 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
 
     @Override
     public String toString() {
-        return getName();
+        return getValuePath();
     }
 
     public DefaultMutableTreeNode toTreeNode() {
@@ -313,6 +313,8 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
     }
 
     public Object getValue() {
+        if(defaultValue != null && value == null)
+            value = defaultValue;
         return value;
     }
 
@@ -329,9 +331,9 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
     public MISAValidityReport getValidityReport() {
         MISAValidityReport report = new MISAValidityReport();
         if(hasValue())
-            report.report(this, null, true, "");
+            report.report(this, "Parameters", true, "");
         else
-            report.report(this, null, false, "Value is not set");
+            report.report(this, "Parameters", false, "Value is not set");
 
         if(getProperties() != null) {
             for(JSONSchemaObject object : getProperties().values()) {

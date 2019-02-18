@@ -281,7 +281,7 @@ public class JSONSchemaEditorUI extends JPanel {
 
             Object o = ((DefaultMutableTreeNode)value).getUserObject();
             if(o instanceof JSONSchemaObject) {
-                setText(o.toString());
+                setText(((JSONSchemaObject)o).getName());
                 JSONSchemaObject entry = (JSONSchemaObject)o;
                 setIcon(entry.getType().getIcon());
             }
