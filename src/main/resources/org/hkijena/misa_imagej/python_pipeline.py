@@ -11,17 +11,26 @@ detected_modules = {}
 
 
 def setup_module_paths():
+    # Add user config
     if platform.system() == "Linux":
-        module_paths.append("/usr/lib/misaxx/modules")
-        module_paths.append("/usr/local/lib/misaxx/modules")
-        module_paths.append("/usr/local/lib32/misaxx/modules")
-        module_paths.append("/usr/local/lib64/misaxx/modules")
         if "XDG_CONFIG_HOME" in os.environ:
             module_paths.append(os.environ["XDG_CONFIG_HOME"] + "/MISA-ImageJ/misa-modules/")
         else:
             module_paths.append(os.environ["HOME"] + "/.config/MISA-ImageJ/misa-modules/")
     elif platform.system() == "Windows":
         module_paths.append(os.environ["APPDATA"] + "/MISA-ImageJ/misa-modules/")
+
+    # Add environment paths
+    if "MISA_MODULE_LINK_PATHS" in os.environ:
+        for path in os.environ["MISA_MODULE_LINK_PATHS"].split(";"):
+            module_paths.append(path)
+
+    # Add global config
+    if platform.system() == "Linux":
+        module_paths.append("/usr/lib/misaxx/modules")
+        module_paths.append("/usr/local/lib/misaxx/modules")
+        module_paths.append("/usr/local/lib32/misaxx/modules")
+        module_paths.append("/usr/local/lib64/misaxx/modules")
 
 
 def get_module_id(module_link):

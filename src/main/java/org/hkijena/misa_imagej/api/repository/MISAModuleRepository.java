@@ -36,6 +36,11 @@ public class MISAModuleRepository {
 
     private MISAModuleRepository() {
         paths.add(USER_MODULE_PATH);
+        if(System.getenv().containsKey("MISA_MODULE_LINK_PATHS")) {
+            for(String path : System.getenv("MISA_MODULE_LINK_PATHS").split(";")) {
+                paths.add(Paths.get(path));
+            }
+        }
         if(OSUtils.detectOperatingSystem() == OperatingSystem.Linux) {
             paths.add(Paths.get("/usr/lib/misaxx/modules"));
             paths.add(Paths.get("/usr/local/lib32/misaxx/modules"));
