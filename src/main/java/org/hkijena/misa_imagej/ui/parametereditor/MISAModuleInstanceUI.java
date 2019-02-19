@@ -182,7 +182,13 @@ public class MISAModuleInstanceUI extends JFrame {
         // Toolbar
         JToolBar toolBar = new JToolBar();
 
-//        initalizeSampleManagerUI(toolBar);
+        JButton importParametersButton = new JButton("Import parameters", UIUtils.getIconFromResources("open.png"));
+        importParametersButton.addActionListener(e -> importParameters());
+        toolBar.add(importParametersButton);
+
+        JButton importFolderButton = new JButton("Import folder", UIUtils.getIconFromResources("open.png"));
+        importFolderButton.addActionListener(e -> importFolder());
+        toolBar.add(importFolderButton);
 
         toolBar.add(Box.createHorizontalGlue());
 
@@ -209,6 +215,12 @@ public class MISAModuleInstanceUI extends JFrame {
         validityReportStatusUI = new MISAValidityReportStatusUI();
         statusBar.add(validityReportStatusUI);
         add(statusBar, BorderLayout.SOUTH);
+    }
+
+    private void importFolder() {
+    }
+
+    private void importParameters() {
     }
 
     public MISAModuleInstance getModuleInstance() {
