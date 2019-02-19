@@ -12,7 +12,6 @@ public class AddSamplesDialog extends JDialog {
 
     private MISAModuleInstance moduleInstance;
     private JTextArea samplesInput;
-    private MISAValidityReportStatusUI validityReportStatusUI;
 
     public AddSamplesDialog(Window parent, MISAModuleInstance moduleInstance) {
         super(parent);
@@ -39,9 +38,6 @@ public class AddSamplesDialog extends JDialog {
 
         JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.LINE_AXIS));
-
-        validityReportStatusUI = new MISAValidityReportStatusUI();
-        buttonPanel.add(validityReportStatusUI);
 
         buttonPanel.add(Box.createHorizontalGlue());
 
