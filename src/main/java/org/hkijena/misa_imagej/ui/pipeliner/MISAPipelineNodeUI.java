@@ -122,8 +122,9 @@ public class MISAPipelineNodeUI extends JPanel implements ComponentListener {
     }
 
     private void editParameters() {
-        MISAModuleInstanceUI editor = new MISAModuleInstanceUI(node.getModuleInstance(), true);
-        editor.setTitle("MISA++ pipeline tool - Parameters for " + node.getName() + " (" + node.getModuleInstance().getModuleInfo().getName() + ")");
+        MISAModuleInstanceUI editor = new MISAModuleInstanceUI(node.getModuleInstance(), true, false);
+        editor.setTitle("MISA++ pipeline tool - Parameters for " + node.getName()
+                + " (" + node.getModuleInstance().getModuleInfo().getName() + ")");
         editor.setVisible(true);
 
         // Java separates between JFrame and JDialog

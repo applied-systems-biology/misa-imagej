@@ -1,4 +1,4 @@
-package org.hkijena.misa_imagej.ui.parametereditor;
+package org.hkijena.misa_imagej.ui.components;
 
 import org.hkijena.misa_imagej.ui.repository.MISAModuleRepositoryUI;
 import org.hkijena.misa_imagej.utils.ProcessStreamToStringGobbler;

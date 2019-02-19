@@ -59,7 +59,7 @@ public class MISACacheTreeUI extends JTree {
     }
 
     protected Entry createRootEntry() {
-        return new MISACacheTreeUI.Entry("'" + sample.name + "' data",
+        return new MISACacheTreeUI.Entry("'" + sample.getName() + "' data",
                 ListUtils.union(sample.getImportedCaches(), sample.getExportedCaches()));
     }
 

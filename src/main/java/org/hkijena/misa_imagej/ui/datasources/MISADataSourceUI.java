@@ -1,4 +1,4 @@
-package org.hkijena.misa_imagej.ui.parametereditor.datasources;
+package org.hkijena.misa_imagej.ui.datasources;
 
 import org.hkijena.misa_imagej.api.MISADataSource;
 

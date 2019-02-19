@@ -1,17 +1,17 @@
 package org.hkijena.misa_imagej.ui.parametereditor;
 
 import org.hkijena.misa_imagej.api.MISAModuleInstance;
-import org.hkijena.misa_imagej.ui.parametereditor.json_schema.JSONSchemaEditorUI;
+import org.hkijena.misa_imagej.ui.json.JSONSchemaEditorUI;
 
 import javax.swing.*;
 import java.awt.*;
 
-public class RuntimeParametersEditorUI extends JPanel {
+public class MISARuntimeParametersUI extends JPanel {
 
     private MISAModuleInstance parameterSchema;
 
-    public RuntimeParametersEditorUI(MISAModuleInstanceUI app) {
-        this.parameterSchema = app.getModuleInstance();
+    public MISARuntimeParametersUI(MISAModuleInstance app) {
+        this.parameterSchema = app;
         initialize();
     }
 

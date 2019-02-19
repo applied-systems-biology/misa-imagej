@@ -1,5 +1,8 @@
 package org.hkijena.misa_imagej.api;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
+import com.google.common.collect.Maps;
 import com.google.common.eventbus.EventBus;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -40,9 +43,7 @@ public class MISAModuleInstance implements MISAValidatable {
     /**
      * The samples
      */
-    private Map<String, MISASample> samples = new HashMap<>();
-
-    private MISASample currentSample = null;
+    private BiMap<String, MISASample> samples = HashBiMap.create();
 
     private MISAModuleInfo moduleInfo;
 
@@ -66,12 +67,8 @@ public class MISAModuleInstance implements MISAValidatable {
                 MISACacheIOType.Exported);
     }
 
-    public Collection<String> getSampleNames() {
-        return Collections.unmodifiableCollection(samples.keySet());
-    }
-
-    public Collection<MISASample> getSamples() {
-        return Collections.unmodifiableCollection(samples.values());
+    public BiMap<String, MISASample> getSamples() {
+        return Maps.unmodifiableBiMap(samples);
     }
 
     public void addSample(String name) {
@@ -82,43 +79,39 @@ public class MISAModuleInstance implements MISAValidatable {
             }
             name = name + " (" + counter + ")";
         }
-        MISASample sample = new MISASample(this, name,
+        MISASample sample = new MISASample(this,
                 (JSONSchemaObject) sampleParametersTemplate.clone(),
                 (MISAFilesystemEntry) sampleImportedFilesystemTemplate.clone(),
                 (MISAFilesystemEntry) sampleExportedFilesystemTemplate.clone());
         samples.put(name, sample);
         getEventBus().post(new AddedSampleEvent(sample));
-
-        if (samples.size() == 1) {
-            setCurrentSample(name);
-        }
     }
 
     public void removeSample(String name) {
-        if (currentSample != null && currentSample.name.equals(name))
-            currentSample = null;
         MISASample removed = samples.get(name);
         samples.remove(name);
         getEventBus().post(new RemovedSampleEvent(removed));
-        getEventBus().post(new ChangedCurrentSampleEvent(currentSample));
+    }
+
+    public void removeSample(MISASample sample) {
+        samples.remove(sample.getName());
+        getEventBus().post(new RemovedSampleEvent(sample));
+    }
+
+    public boolean renameSample(MISASample sample, String newName) {
+        if(newName == null || newName.isEmpty())
+            return false;
+        if(samples.containsKey(newName))
+            return false;
+        String oldName = sample.getName();
+        samples.remove(oldName);
+        samples.put(newName, sample);
+        getEventBus().post(new RenamedSampleEvent(sample));
+        return true;
     }
 
     public MISASample getSample(String name) {
         return samples.get(name);
-    }
-
-    public MISASample getCurrentSample() {
-        if (currentSample == null && samples.size() > 0)
-            return samples.values().stream().findFirst().get();
-        return currentSample;
-    }
-
-    public void setCurrentSample(String name) {
-        MISASample sample = getSample(name);
-        if (sample != currentSample) {
-            currentSample = sample;
-            getEventBus().post(new ChangedCurrentSampleEvent(currentSample));
-        }
     }
 
     public JSONSchemaObject getAlgorithmParameters() {
@@ -143,7 +136,7 @@ public class MISAModuleInstance implements MISAValidatable {
         parameters.addProperty("samples", new JSONSchemaObject(JSONSchemaObjectType.jsonObject));
 
         for (MISASample sample : samples.values()) {
-            parameters.getPropertyFromPath("samples").addProperty(sample.name, sample.getParameters());
+            parameters.getPropertyFromPath("samples").addProperty(sample.getName(), sample.getParameters());
         }
 
         parameters.ensurePropertyFromPath("filesystem").addProperty("source", JSONSchemaObject.createString("directories"));
@@ -183,7 +176,7 @@ public class MISAModuleInstance implements MISAValidatable {
         // Install imported data into their proper filesystem locations
         for (MISASample sample : samples.values()) {
             for (MISACache cache : sample.getImportedCaches()) {
-                Path cachePath = importedDirectory.resolve(sample.name).resolve(cache.getFilesystemEntry().getInternalPath());
+                Path cachePath = importedDirectory.resolve(sample.getName()).resolve(cache.getFilesystemEntry().getInternalPath());
                 cache.install(cachePath, forceCopy);
             }
         }
@@ -202,7 +195,7 @@ public class MISAModuleInstance implements MISAValidatable {
         report.merge(runtimeParameters.getValidityReport(), "Runtime parameters");
 
         for (MISASample sample : samples.values()) {
-            report.merge(sample.getValidityReport(), "Samples", sample.name);
+            report.merge(sample.getValidityReport(), "Samples", sample.getName());
         }
 
         return report;
@@ -286,10 +279,10 @@ public class MISAModuleInstance implements MISAValidatable {
         }
     }
 
-    public static class ChangedCurrentSampleEvent {
+    public static class RenamedSampleEvent {
         private MISASample sample;
 
-        public ChangedCurrentSampleEvent(MISASample sample) {
+        public RenamedSampleEvent(MISASample sample) {
             this.sample = sample;
         }
 

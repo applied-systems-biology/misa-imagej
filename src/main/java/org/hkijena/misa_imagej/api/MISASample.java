@@ -2,6 +2,7 @@ package org.hkijena.misa_imagej.api;
 
 import org.hkijena.misa_imagej.api.json.JSONSchemaObject;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,11 +12,6 @@ import java.util.List;
 public class MISASample implements MISAValidatable {
 
     private MISAModuleInstance moduleInstance;
-
-    /**
-     * Name of the sample
-     */
-    public String name;
 
     /**
      * Parametes of this sample
@@ -30,9 +26,8 @@ public class MISASample implements MISAValidatable {
 
     private List<MISACache> exportedCaches = new ArrayList<>();
 
-    public MISASample(MISAModuleInstance moduleInstance, String name, JSONSchemaObject parameters, MISAFilesystemEntry importedFilesystem, MISAFilesystemEntry exportedFilesystem) {
+    public MISASample(MISAModuleInstance moduleInstance, JSONSchemaObject parameters, MISAFilesystemEntry importedFilesystem, MISAFilesystemEntry exportedFilesystem) {
         this.moduleInstance = moduleInstance;
-        this.name = name;
         this.parameters = parameters;
         this.importedFilesystem = importedFilesystem;
         this.exportedFilesystem = exportedFilesystem;
@@ -70,7 +65,12 @@ public class MISASample implements MISAValidatable {
 
     @Override
     public String toString() {
-        return name;
+        return getName();
+    }
+
+    public Color toColor() {
+        float h = Math.abs(getName().hashCode() % 256) / 255.0f;
+        return Color.getHSBColor(h, 0.8f, 0.8f);
     }
 
     @Override
@@ -98,5 +98,12 @@ public class MISASample implements MISAValidatable {
 
     public MISACache getImportedCacheByRelativePath(String path) {
         return getImportedCaches().stream().filter(misaCache -> misaCache.getRelativePath().equals(path)).findFirst().orElse(null);
+    }
+
+    /**
+     * Name of the sample
+     */
+    public String getName() {
+        return getModuleInstance().getSamples().inverse().get(this);
     }
 }

@@ -1,8 +1,8 @@
-package org.hkijena.misa_imagej.ui.parametereditor.datasources.editors;
+package org.hkijena.misa_imagej.ui.datasources.editors;
 
 import org.hkijena.misa_imagej.api.MISADataSource;
 import org.hkijena.misa_imagej.api.datasources.MISAFolderLinkDataSource;
-import org.hkijena.misa_imagej.ui.parametereditor.datasources.MISADataSourceUI;
+import org.hkijena.misa_imagej.ui.datasources.MISADataSourceUI;
 import org.hkijena.misa_imagej.utils.UIUtils;
 
 import javax.swing.*;

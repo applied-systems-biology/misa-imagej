@@ -28,11 +28,11 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
     @SerializedName("title")
     private String title = null;
 
-    @SerializedName("description")
-    private String description = null;
+//    @SerializedName("description")
+//    private String description = null;
 
     @SerializedName("properties")
-    private Map<String, JSONSchemaObject> properties = new HashMap<>();
+    private HashMap<String, JSONSchemaObject> properties = new HashMap<>();
 
     @SerializedName("items")
     private List<JSONSchemaObject> items = new ArrayList<>();
@@ -54,6 +54,12 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
 
     @SerializedName("misa:serialization-hierarchy")
     private List<String> serializationHierarchy = new ArrayList<>();
+
+    @SerializedName("misa:documentation-title")
+    private String documentationTitle = null;
+
+    @SerializedName("misa:documentation-description")
+    private String documentationDescription = null;
 
     public JSONSchemaObject() {
     }
@@ -96,7 +102,9 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
         JSONSchemaObject obj = new JSONSchemaObject();
         obj.type = getType();
         obj.setTitle(getTitle());
-        obj.setDescription(getDescription());
+//        obj.setDescription(getDescription());
+        obj.documentationTitle = this.documentationTitle;
+        obj.documentationDescription = this.documentationDescription;
         obj.setDefaultValue(getDefaultValue());
         obj.setEnumValues(getEnumValues());
         obj.setValue(getValue());
@@ -405,19 +413,19 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
         this.title = title;
     }
 
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
+//    public String getDescription() {
+//        return description;
+//    }
+//
+//    public void setDescription(String description) {
+//        this.description = description;
+//    }
 
     public Map<String, JSONSchemaObject> getProperties() {
         return properties;
     }
 
-    public void setProperties(Map<String, JSONSchemaObject> properties) {
+    public void setProperties(HashMap<String, JSONSchemaObject> properties) {
         this.properties = properties;
     }
 
@@ -475,6 +483,44 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
 
     public void setSerializationHierarchy(List<String> serializationHierarchy) {
         this.serializationHierarchy = serializationHierarchy;
+    }
+
+    public String getDocumentationTitle() {
+        if(documentationTitle != null && !documentationTitle.isEmpty())
+            return documentationTitle;
+        else
+            return getName();
+    }
+
+    public void setDocumentationTitle(String documentationTitle) {
+        this.documentationTitle = documentationTitle;
+    }
+
+    public boolean hasDocumentationDescription() {
+        return this.documentationDescription != null && !this.documentationDescription.isEmpty();
+    }
+
+    public String getDocumentationDescription() {
+        return documentationDescription;
+    }
+
+    public void setDocumentationDescription(String documentationDescription) {
+        this.documentationDescription = documentationDescription;
+    }
+    
+    public String getTooltip() {
+        StringBuilder tooltip = new StringBuilder();
+        tooltip.append("<html>");
+        if(this.hasDocumentationDescription()) {
+            tooltip.append(this.getDocumentationDescription());
+            tooltip.append("<br/><br/>");
+            tooltip.append("<i>").append("(").append(this.getName()).append(")").append("</i>");
+        }
+        else {
+            tooltip.append("(").append(this.getName()).append(")");
+        }
+        tooltip.append("</html>");
+        return tooltip.toString();
     }
 
     public static class ValueChangedEvent {

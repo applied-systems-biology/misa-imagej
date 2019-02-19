@@ -8,6 +8,7 @@ import org.hkijena.misa_imagej.api.repository.MISAModuleRepository;
 import org.hkijena.misa_imagej.ui.parametereditor.MISAModuleInstanceUI;
 import org.hkijena.misa_imagej.ui.perfanalysis.MISARuntimeLogUI;
 import org.hkijena.misa_imagej.ui.pipeliner.MISAPipelinerUI;
+import org.hkijena.misa_imagej.ui.components.renderers.MISAModuleListCellRenderer;
 import org.hkijena.misa_imagej.utils.GsonUtils;
 import org.hkijena.misa_imagej.utils.OSUtils;
 import org.hkijena.misa_imagej.utils.UIUtils;
@@ -118,14 +119,14 @@ public class MISAModuleRepositoryUI extends JFrame {
         // Detail panel
         JLabel descriptionTitle;
         JLabel descriptionVersionId;
-        JLabel descriptionSourceFile;
+        JTextField descriptionSourceFile;
         JButton removeModuleButton;
         detailPanel = new JPanel(new GridBagLayout());
         {
             descriptionTitle = UIUtils.createDescriptionLabelUI(detailPanel, "<Title>", 0, 0);
             descriptionTitle.setFont(descriptionTitle.getFont().deriveFont(18f));
             descriptionVersionId = UIUtils.createDescriptionLabelUI(detailPanel, "<VersionID>", 1, 0);
-            descriptionSourceFile = UIUtils.createDescriptionLabelUI(detailPanel, "<SourceFile>", 2, 0);
+            descriptionSourceFile = UIUtils.createDescriptionTextFieldUI(detailPanel, "<SourceFile>", 2, 0);
             UIUtils.addFillerGridBagComponent(detailPanel, 3);
 
             removeModuleButton = new JButton("Remove", UIUtils.getIconFromResources("delete.png"));
@@ -147,7 +148,8 @@ public class MISAModuleRepositoryUI extends JFrame {
 
             JButton launchButton = new JButton("Launch", UIUtils.getIconFromResources("run.png"));
             launchButton.addActionListener(actionEvent -> {
-                MISAModuleInstanceUI launcher = new MISAModuleInstanceUI(misaModuleJList.getSelectedValue().instantiate(), false);
+                MISAModuleInstanceUI launcher = new MISAModuleInstanceUI(misaModuleJList.getSelectedValue().instantiate(),
+                        false, true);
                 launcher.setVisible(true);
             });
             UIUtils.addToGridBag(detailPanel, launchButton, 5, 0);

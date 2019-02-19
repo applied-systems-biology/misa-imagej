@@ -1,7 +1,8 @@
-package org.hkijena.misa_imagej.ui.parametereditor.json_schema;
+package org.hkijena.misa_imagej.ui.json;
 
 import com.google.common.eventbus.Subscribe;
 import org.hkijena.misa_imagej.api.json.JSONSchemaObject;
+import org.hkijena.misa_imagej.ui.components.renderers.JSONSchemaObjectTreeCellRenderer;
 import org.hkijena.misa_imagej.utils.UIUtils;
 import org.jdesktop.swingx.JXTextField;
 
@@ -10,7 +11,6 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreeCellRenderer;
 import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
 
@@ -115,8 +115,9 @@ public class JSONSchemaEditorUI extends JPanel {
             });
         }
         if(withLabel) {
-            JLabel description = new JLabel(ui.getJsonSchemaObject().getName());
+            JLabel description = new JLabel(ui.getJsonSchemaObject().getDocumentationTitle());
             description.setIcon(ui.getJsonSchemaObject().getType().getIcon());
+            description.setToolTipText(ui.getJsonSchemaObject().getTooltip());
             objectEditor.add(description, new GridBagConstraints() {
                 {
                     anchor = GridBagConstraints.WEST;
@@ -143,7 +144,7 @@ public class JSONSchemaEditorUI extends JPanel {
     private void initialize() {
         setLayout(new BorderLayout());
 
-        JPanel treePanel = new JPanel(new BorderLayout(8, 8));
+        JPanel treePanel = new JPanel(new BorderLayout());
         {
             // If enabled, add panel
             if(topPanel != null) {
@@ -152,10 +153,13 @@ public class JSONSchemaEditorUI extends JPanel {
 
             // Create tree
             jsonTree = new JTree();
-            jsonTree.setMinimumSize(new Dimension(128, 0));
             jsonTree.setCellRenderer(new JSONSchemaObjectTreeCellRenderer());
             jsonTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-            treePanel.add(jsonTree, BorderLayout.CENTER);
+            treePanel.add(new JScrollPane(jsonTree) {
+                {
+                    setMinimumSize(new Dimension(128, 0));
+                }
+            }, BorderLayout.CENTER);
         }
 
         JPanel editPanel = new JPanel(new BorderLayout());
@@ -264,43 +268,6 @@ public class JSONSchemaEditorUI extends JPanel {
      */
     public boolean getObjectLimitEnabled() {
         return !showAllObjects.isSelected();
-    }
-
-    private class JSONSchemaObjectTreeCellRenderer extends JLabel implements TreeCellRenderer {
-        public JSONSchemaObjectTreeCellRenderer() {
-            setOpaque(true);
-            setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
-        }
-
-        @Override
-        public Component getTreeCellRendererComponent(JTree jTree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) {
-
-            if(jTree.getFont() != null) {
-                setFont(jTree.getFont());
-            }
-
-            Object o = ((DefaultMutableTreeNode)value).getUserObject();
-            if(o instanceof JSONSchemaObject) {
-                setText(((JSONSchemaObject)o).getName());
-                JSONSchemaObject entry = (JSONSchemaObject)o;
-                setIcon(entry.getType().getIcon());
-            }
-            else {
-                setText(o.toString());
-                setIcon(null);
-            }
-
-            // Update status
-            // Update status
-            if(selected) {
-                setBackground(new Color(184, 207, 229));
-            }
-            else {
-                setBackground(new Color(255,255,255));
-            }
-
-            return this;
-        }
     }
 
 }

@@ -1,12 +1,10 @@
-package org.hkijena.misa_imagej.ui.parametereditor.datasources.editors;
+package org.hkijena.misa_imagej.ui.datasources.editors;
 
 import ij.ImagePlus;
 import ij.WindowManager;
-import org.hkijena.misa_imagej.api.MISACache;
 import org.hkijena.misa_imagej.api.MISADataSource;
 import org.hkijena.misa_imagej.api.datasources.MISAOMETiffDataSource;
-import org.hkijena.misa_imagej.ui.parametereditor.datasources.MISADataSourceUI;
-import org.hkijena.misa_imagej.api.caches.MISAOMETiffCache;
+import org.hkijena.misa_imagej.ui.datasources.MISADataSourceUI;
 import org.hkijena.misa_imagej.utils.UIUtils;
 import org.hkijena.misa_imagej.utils.swappers.OMETiffSwapper;
 import org.hkijena.misa_imagej.utils.ui.ImagePlusJMenuItem;

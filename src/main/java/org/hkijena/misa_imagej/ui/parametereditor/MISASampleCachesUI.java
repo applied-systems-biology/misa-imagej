@@ -1,10 +1,10 @@
 package org.hkijena.misa_imagej.ui.parametereditor;
 
-import com.google.common.eventbus.Subscribe;
 import org.hkijena.misa_imagej.api.MISACache;
 import org.hkijena.misa_imagej.api.MISAModuleInstance;
 import org.hkijena.misa_imagej.api.MISASample;
 import org.hkijena.misa_imagej.api.MISACacheIOType;
+import org.hkijena.misa_imagej.ui.components.MISASampleComboBox;
 import org.hkijena.misa_imagej.utils.UIUtils;
 import org.jdesktop.swingx.JXTextField;
 
@@ -15,18 +15,17 @@ import java.awt.*;
 
 import static org.hkijena.misa_imagej.utils.UIUtils.UI_PADDING;
 
-public class SampleDataEditorUI extends JPanel {
+public class MISASampleCachesUI extends JPanel {
 
     private JPanel sampleEditor;
     private MISACacheTreeUI cacheList;
-    private MISAModuleInstance parameterSchema;
+    private MISAModuleInstance moduleInstance;
     private JXTextField objectFilter;
 
     private int cacheEditorRows = 0;
-    private MISACacheIOType editorLastIOType;
 
-    public SampleDataEditorUI(MISAModuleInstanceUI app) {
-        this.parameterSchema = app.getModuleInstance();
+    public MISASampleCachesUI(MISAModuleInstance moduleInstance) {
+        this.moduleInstance = moduleInstance;
         initialize();
         refreshEditor();
     }
@@ -35,9 +34,20 @@ public class SampleDataEditorUI extends JPanel {
         setLayout(new BorderLayout());
 
         // List of caches
-        JPanel cacheListPanel = new JPanel(new BorderLayout(8, 8));
+        JPanel cacheListPanel = new JPanel(new BorderLayout());
+
+        // Add the sample selection
+        MISASampleComboBox sampleComboBox = new MISASampleComboBox(moduleInstance);
+        sampleComboBox.addItemListener(e -> setCurrentSample(sampleComboBox.getCurrentSample()));
+        cacheListPanel.add(sampleComboBox, BorderLayout.NORTH);
+
+        // Add the cache list
         cacheList = new MISACacheTreeUI();
-        cacheListPanel.add(cacheList, BorderLayout.CENTER);
+        cacheListPanel.add(new JScrollPane(cacheList) {
+            {
+                setMinimumSize(new Dimension(128, 0));
+            }
+        }, BorderLayout.CENTER);
 
         cacheList.addPropertyChangeListener(propertyChangeEvent -> {
             if(propertyChangeEvent.getPropertyName().equals("currentCacheList")) {
@@ -87,13 +97,8 @@ public class SampleDataEditorUI extends JPanel {
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, cacheListPanel, editPanel);
         add(splitPane, BorderLayout.CENTER);
 
-        parameterSchema.getEventBus().register(this);
-        setCurrentSample(parameterSchema.getCurrentSample());
-    }
-
-    @Subscribe
-    public void handleCurrentSampleChanged(MISAModuleInstance.ChangedCurrentSampleEvent event) {
-        setCurrentSample(parameterSchema.getCurrentSample());
+        // Set cache
+        setCurrentSample(sampleComboBox.getCurrentSample());
     }
 
     private void setCurrentSample(MISASample sample) {
@@ -103,7 +108,7 @@ public class SampleDataEditorUI extends JPanel {
     public void refreshEditor() {
         sampleEditor.removeAll();
         sampleEditor.setLayout(new GridBagLayout());
-        editorLastIOType = null;
+        MISACacheIOType editorLastIOType = null;
         cacheEditorRows = 0;
 
         if(cacheList.getCurrentCacheList() != null) {

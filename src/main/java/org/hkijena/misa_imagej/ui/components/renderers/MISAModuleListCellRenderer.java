@@ -1,8 +1,7 @@
-package org.hkijena.misa_imagej.ui.repository;
+package org.hkijena.misa_imagej.ui.components.renderers;
 
 import org.hkijena.misa_imagej.api.repository.MISAModule;
 import org.hkijena.misa_imagej.utils.UIUtils;
-import org.hkijena.misa_imagej.utils.ui.ColorIcon;
 import org.hkijena.misa_imagej.utils.ui.MonochromeColorIcon;
 
 import javax.swing.*;

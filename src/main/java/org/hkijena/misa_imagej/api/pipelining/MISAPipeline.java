@@ -42,8 +42,6 @@ public class MISAPipeline implements MISAValidatable {
 
     private transient PropertyChangeSupport propertyChangeSupport;
 
-    private transient Set<String> samples = new HashSet<>();
-
     public MISAPipeline() {
         propertyChangeSupport = new PropertyChangeSupport(this);
     }
@@ -68,18 +66,16 @@ public class MISAPipeline implements MISAValidatable {
         nodes.add(node);
         propertyChangeSupport.firePropertyChange("addNode", null, node);
         node.getModuleInstance().getEventBus().register(this);
-        synchronizeSamples();
+        updateCacheDataSources();
     }
 
     @Subscribe
     public void handleNodeSamplesChanged(MISAModuleInstance.AddedSampleEvent event) {
-        synchronizeSamples();
         updateCacheDataSources();
     }
 
     @Subscribe
     public void handleNodeSamplesChanged(MISAModuleInstance.RemovedSampleEvent event) {
-        synchronizeSamples();
         updateCacheDataSources();
     }
 
@@ -222,15 +218,16 @@ public class MISAPipeline implements MISAValidatable {
     /**
      * Synchronizes samples across all modules
      */
-    private void synchronizeSamples() {
+    public void synchronizeSamples() {
+        Set<String> samples = new HashSet<>();
         for (MISAPipelineNode node : nodes) {
-            for (MISASample sample : node.getModuleInstance().getSamples()) {
-                samples.add(sample.name);
+            for (MISASample sample : node.getModuleInstance().getSamples().values()) {
+                samples.add(sample.getName());
             }
         }
         for (MISAPipelineNode node : nodes) {
             for (String sample : samples) {
-                if (!node.getModuleInstance().getSampleNames().contains(sample)) {
+                if (!node.getModuleInstance().getSamples().containsKey(sample)) {
                     node.getModuleInstance().addSample(sample);
                 }
             }
@@ -244,7 +241,7 @@ public class MISAPipeline implements MISAValidatable {
         for (Map.Entry<MISAPipelineNode, Set<MISAPipelineNode>> kv : edges.entrySet()) {
             MISAPipelineNode source = kv.getKey();
             for (MISAPipelineNode target : kv.getValue()) {
-                for (MISASample sample : target.getModuleInstance().getSamples()) {
+                for (MISASample sample : target.getModuleInstance().getSamples().values()) {
                     for (MISACache cache : sample.getImportedCaches()) {
                         // Add any missing data source to the cache
                         if (cache.getAvailableDataSources().stream().noneMatch(misaDataSource -> {
@@ -261,7 +258,7 @@ public class MISAPipeline implements MISAValidatable {
         }
         List<MISADataSource> toRemove = new ArrayList<>();
         for (MISAPipelineNode target : nodes) {
-            for (MISASample sample : target.getModuleInstance().getSamples()) {
+            for (MISASample sample : target.getModuleInstance().getSamples().values()) {
                 for (MISACache cache : sample.getImportedCaches()) {
                     toRemove.clear();
                     for (MISADataSource dataSource : cache.getAvailableDataSources()) {
@@ -352,17 +349,17 @@ public class MISAPipeline implements MISAValidatable {
     private void preInitializeLinks(Path exportDirectory) throws IOException {
         for (MISAPipelineNode node : traverse()) {
             // Link results into the caches if needed
-            for (MISASample sample : node.getModuleInstance().getSamples()) {
+            for (MISASample sample : node.getModuleInstance().getSamples().values()) {
                 for (MISACache cache : sample.getImportedCaches()) {
                     if (cache.getDataSource() instanceof MISAPipelineNodeDataSource) {
                         MISAPipelineNodeDataSource pipelineNodeDataSource = (MISAPipelineNodeDataSource) cache.getDataSource();
                         Path sourceLink = exportDirectory.resolve(pipelineNodeDataSource.getSourceNode().getId())
                                 .resolve("exported")
-                                .resolve(sample.name)
+                                .resolve(sample.getName())
                                 .resolve(pipelineNodeDataSource.getSourceCache().getRelativePath());
                         Path targetLink = exportDirectory.resolve(node.getId())
                                 .resolve("imported")
-                                .resolve(sample.name)
+                                .resolve(sample.getName())
                                 .resolve(pipelineNodeDataSource.getCache().getRelativePath());
                         Files.createDirectories(sourceLink);
                         Files.createDirectories(targetLink.getParent());
@@ -412,17 +409,17 @@ public class MISAPipeline implements MISAValidatable {
                 writer.write("\n");
                 writer.write("# -- " + node.getName() + " (" + node.getId() + ")" + "\n");
                 // Link results into the caches if needed
-                for (MISASample sample : node.getModuleInstance().getSamples()) {
+                for (MISASample sample : node.getModuleInstance().getSamples().values()) {
                     for (MISACache cache : sample.getImportedCaches()) {
                         if (cache.getDataSource() instanceof MISAPipelineNodeDataSource) {
                             MISAPipelineNodeDataSource pipelineNodeDataSource = (MISAPipelineNodeDataSource) cache.getDataSource();
                             Path sourceLink = Paths.get(pipelineNodeDataSource.getSourceNode().getId())
                                     .resolve("exported")
-                                    .resolve(sample.name)
+                                    .resolve(sample.getName())
                                     .resolve(pipelineNodeDataSource.getSourceCache().getRelativePath());
                             Path targetLink = Paths.get(node.getId())
                                     .resolve("imported")
-                                    .resolve(sample.name)
+                                    .resolve(sample.getName())
                                     .resolve(pipelineNodeDataSource.getCache().getRelativePath());
                             writer.write("rm -rv \"$PWD/" + targetLink.toString() + "\"\n");
                             writer.write("ln -s \"$PWD/" + sourceLink.toString() + "\" \"$PWD/" + targetLink.toString() + "\"\n");
@@ -488,10 +485,6 @@ public class MISAPipeline implements MISAValidatable {
                 MISAPipelineNode target = nodes.get(asJsonObject.getAsJsonPrimitive("target-node").getAsString());
                 result.addEdge(source, target);
             }
-            for (JsonElement element : jsonElement.getAsJsonObject().getAsJsonArray("samples")) {
-                result.samples.add(element.getAsString());
-            }
-            result.synchronizeSamples();
             result.updateCacheDataSources();
 
             // Assign pipeline caches
@@ -544,7 +537,7 @@ public class MISAPipeline implements MISAValidatable {
                         edges.add(edge);
                     }
 
-                    for (MISASample sample : target.getModuleInstance().getSamples()) {
+                    for (MISASample sample : target.getModuleInstance().getSamples().values()) {
                         for (MISACache cache : sample.getImportedCaches()) {
                             if (cache.getDataSource() instanceof MISAPipelineNodeDataSource) {
                                 MISAPipelineNodeDataSource dataSource = (MISAPipelineNodeDataSource) cache.getDataSource();
@@ -554,7 +547,7 @@ public class MISAPipeline implements MISAValidatable {
                                     edge.addProperty("target-node", nodes.inverse().get(target));
                                     edge.addProperty("source-cache", dataSource.getSourceCache().getRelativePath());
                                     edge.addProperty("target-cache", dataSource.getCache().getRelativePath());
-                                    edge.addProperty("sample", sample.name);
+                                    edge.addProperty("sample", sample.getName());
                                     edges.add(edge);
                                 }
                             }
@@ -565,7 +558,6 @@ public class MISAPipeline implements MISAValidatable {
             }
 
             JsonObject result = new JsonObject();
-            result.add("samples", jsonSerializationContext.serialize(pipeline.samples));
             result.add("nodes", jsonSerializationContext.serialize(new HashMap<>(nodes)));
             result.add("edges", jsonSerializationContext.serialize(edges));
             result.add("parameters", jsonSerializationContext.serialize(nodeParameters));

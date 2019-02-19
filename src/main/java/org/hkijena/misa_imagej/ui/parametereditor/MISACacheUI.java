@@ -4,9 +4,8 @@ import com.google.common.eventbus.Subscribe;
 import org.hkijena.misa_imagej.api.MISACache;
 import org.hkijena.misa_imagej.api.MISACacheIOType;
 import org.hkijena.misa_imagej.api.MISADataSource;
-import org.hkijena.misa_imagej.api.MISASample;
-import org.hkijena.misa_imagej.ui.parametereditor.datasources.MISADataSourceUI;
-import org.hkijena.misa_imagej.ui.parametereditor.datasources.MISADataSourceUIRegistry;
+import org.hkijena.misa_imagej.ui.datasources.MISADataSourceUI;
+import org.hkijena.misa_imagej.ui.datasources.MISADataSourceUIRegistry;
 import org.hkijena.misa_imagej.utils.UIUtils;
 
 import javax.swing.*;

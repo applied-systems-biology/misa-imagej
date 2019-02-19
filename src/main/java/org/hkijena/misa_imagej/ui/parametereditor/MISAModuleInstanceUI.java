@@ -1,10 +1,9 @@
 package org.hkijena.misa_imagej.ui.parametereditor;
 
-import com.google.common.eventbus.Subscribe;
 import org.hkijena.misa_imagej.api.MISAModuleInstance;
 import org.hkijena.misa_imagej.api.MISAValidityReport;
-import org.hkijena.misa_imagej.api.MISASample;
-import org.hkijena.misa_imagej.ui.MISAValidityReportStatusUI;
+import org.hkijena.misa_imagej.ui.components.MISAValidityReportStatusUI;
+import org.hkijena.misa_imagej.ui.components.CancelableProcessUI;
 import org.hkijena.misa_imagej.ui.repository.MISAModuleRepositoryUI;
 import org.hkijena.misa_imagej.ui.workbench.MISAWorkbenchUI;
 import org.hkijena.misa_imagej.utils.FilesystemUtils;
@@ -13,36 +12,31 @@ import org.jdesktop.swingx.JXStatusBar;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.List;
 
 public class MISAModuleInstanceUI extends JFrame {
 
 
 
-    private MISAModuleInstance moduleInstance;
+    private org.hkijena.misa_imagej.api.MISAModuleInstance moduleInstance;
 
     private MISAValidityReportStatusUI validityReportStatusUI;
-    private JComboBox<MISASample> sampleList;
+//    private JComboBox<MISASample> sampleList;
 
     /**
      * Create the dialog.
      */
-    public MISAModuleInstanceUI(MISAModuleInstance moduleInstance, boolean editOnlyMode) {
+    public MISAModuleInstanceUI(org.hkijena.misa_imagej.api.MISAModuleInstance moduleInstance, boolean editOnlyMode, boolean addDefaultSample) {
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         this.moduleInstance = moduleInstance;
         initialize(editOnlyMode);
 
         // Create a new sample if necessary
-        if(moduleInstance.getSamples().size() == 0)
+        if(moduleInstance.getSamples().size() == 0 && addDefaultSample)
             this.moduleInstance.addSample("New Sample");
-        else
-            refreshSampleList();
     }
 
     private void install(Path parameterSchema, Path importedDirectory, Path exportedDirectory, boolean forceCopy, boolean relativeDirectories) {
@@ -145,7 +139,10 @@ public class MISAModuleInstanceUI extends JFrame {
                             processUI.getStatus() == CancelableProcessUI.Status.Canceled) {
                         setEnabled(true);
                         if(processUI.getStatus() == CancelableProcessUI.Status.Failed) {
-                            JOptionPane.showMessageDialog(this, "There was an error during calculation. Please check the console to see the cause of this error.", "Error", JOptionPane.ERROR_MESSAGE);
+                            JOptionPane.showMessageDialog(this,
+                                    "There was an error during calculation. Please check the console to see the cause of this error.",
+                                    "Error",
+                                    JOptionPane.ERROR_MESSAGE);
                         }
                     }
                 });
@@ -167,26 +164,25 @@ public class MISAModuleInstanceUI extends JFrame {
         if(!editOnlyMode)
             UIUtils.setToAskOnClose(this, "Do you really want to close this parameter editor?", "Close window");
 
-        SampleParametersEditorUI sampleParametersEditorUI = new SampleParametersEditorUI(this);
-        AlgorithmParametersEditorUI algorithmParametersEditorUI = new AlgorithmParametersEditorUI(this);
-        RuntimeParametersEditorUI runtimeParametersEditorUI = new RuntimeParametersEditorUI(this);
-        SampleDataEditorUI sampleDataEditorUI = new SampleDataEditorUI(this);
-
-        // Menu bar
-        initializeMenuBar();
+        MISASampleManagerUI sampleManagerUI = new MISASampleManagerUI(getModuleInstance());
+        MISASampleParametersUI sampleParametersEditorUI = new MISASampleParametersUI(getModuleInstance());
+        AlgorithmParametersEditorUI algorithmParametersEditorUI = new AlgorithmParametersEditorUI(getModuleInstance());
+        MISARuntimeParametersUI MISARuntimeParametersUI = new MISARuntimeParametersUI(getModuleInstance());
+        MISASampleCachesUI MISASampleCachesUI = new MISASampleCachesUI(getModuleInstance());
 
         // Tabs with settings
         JTabbedPane tabbedPane = new JTabbedPane();
-        tabbedPane.addTab("Data", sampleDataEditorUI);
+        tabbedPane.addTab("Samples", sampleManagerUI);
+        tabbedPane.addTab("Data", MISASampleCachesUI);
         tabbedPane.addTab("Sample parameters", sampleParametersEditorUI);
         tabbedPane.addTab("Algorithm parameters", algorithmParametersEditorUI);
-        tabbedPane.addTab("Runtime", runtimeParametersEditorUI);
+        tabbedPane.addTab("Runtime", MISARuntimeParametersUI);
         add(tabbedPane, BorderLayout.CENTER);
 
         // Toolbar
         JToolBar toolBar = new JToolBar();
 
-        initalizeSampleManagerUI(toolBar);
+//        initalizeSampleManagerUI(toolBar);
 
         toolBar.add(Box.createHorizontalGlue());
 
@@ -213,82 +209,6 @@ public class MISAModuleInstanceUI extends JFrame {
         validityReportStatusUI = new MISAValidityReportStatusUI();
         statusBar.add(validityReportStatusUI);
         add(statusBar, BorderLayout.SOUTH);
-    }
-
-    private void initializeMenuBar() {
-//        JMenuBar menuBar = new JMenuBar();
-//        JMenu samplesMenu = new JMenu("Samples");
-//        menuBar.add(samplesMenu);
-//        setJMenuBar(menuBar);
-    }
-
-    private void initalizeSampleManagerUI(JToolBar toolBar) {
-        // Add sample button
-        JButton addSampleButton = new JButton("Add sample", UIUtils.getIconFromResources("add.png"));
-        addSampleButton.addActionListener(actionEvent -> addSample());
-        toolBar.add(addSampleButton);
-
-        {
-            sampleList = new JComboBox<>();
-            moduleInstance.getEventBus().register(this);
-            sampleList.addItemListener(itemEvent -> {
-                if(moduleInstance.getSamples().size() > 0 && sampleList.getSelectedItem() != null) {
-                    moduleInstance.setCurrentSample(((MISASample)sampleList.getSelectedItem()).name);
-                }
-            });
-            toolBar.add(sampleList);
-        }
-
-        // Remove sample button
-        JButton removeSampleButton = new JButton(UIUtils.getIconFromResources("delete.png"));
-        removeSampleButton.setToolTipText("Remove current sample");
-        removeSampleButton.addActionListener(actionEvent -> removeSample());
-        toolBar.add(removeSampleButton);
-    }
-
-    @Subscribe
-    public void handleSamplesChanged(MISAModuleInstance.AddedSampleEvent event) {
-        refreshSampleList();
-    }
-
-    @Subscribe
-    public void handleSamplesChanged(MISAModuleInstance.RemovedSampleEvent event) {
-        refreshSampleList();
-    }
-
-    @Subscribe
-    public void handleSamplesChanged(MISAModuleInstance.ChangedCurrentSampleEvent event) {
-        refreshSampleList();
-    }
-
-    private void refreshSampleList() {
-        DefaultComboBoxModel<MISASample> model = new DefaultComboBoxModel<>();
-        for(MISASample sample : moduleInstance.getSamples()) {
-            model.addElement(sample);
-        }
-        sampleList.setModel(model);
-        if(moduleInstance.getCurrentSample() != null) {
-            sampleList.setSelectedItem(moduleInstance.getCurrentSample());
-            sampleList.setEnabled(true);
-        }
-        else {
-            sampleList.setEnabled(false);
-        }
-    }
-
-    private void addSample() {
-        String result = JOptionPane.showInputDialog(this, "Sample name", "Add sample", JOptionPane.PLAIN_MESSAGE);
-        if(result != null && !result.isEmpty()) {
-            moduleInstance.addSample(result);
-        }
-    }
-
-    private void removeSample() {
-        if(JOptionPane.showConfirmDialog(this,
-                "Do you really want to remove this sample?",
-                "Remove sample", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-            moduleInstance.removeSample(moduleInstance.getCurrentSample().name);
-        }
     }
 
     public MISAModuleInstance getModuleInstance() {

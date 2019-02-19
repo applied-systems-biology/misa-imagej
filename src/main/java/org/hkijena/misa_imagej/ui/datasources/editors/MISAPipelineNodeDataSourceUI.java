@@ -1,10 +1,10 @@
-package org.hkijena.misa_imagej.ui.parametereditor.datasources.editors;
+package org.hkijena.misa_imagej.ui.datasources.editors;
 
 import org.hkijena.misa_imagej.api.MISACache;
 import org.hkijena.misa_imagej.api.MISADataSource;
 import org.hkijena.misa_imagej.api.MISASample;
 import org.hkijena.misa_imagej.api.datasources.MISAPipelineNodeDataSource;
-import org.hkijena.misa_imagej.ui.parametereditor.datasources.MISADataSourceUI;
+import org.hkijena.misa_imagej.ui.datasources.MISADataSourceUI;
 import org.hkijena.misa_imagej.utils.UIUtils;
 import org.hkijena.misa_imagej.utils.ui.ColorIcon;
 
@@ -55,7 +55,7 @@ public class MISAPipelineNodeDataSourceUI extends MISADataSourceUI {
     private void applyToAllSamples() {
         if(JOptionPane.showConfirmDialog(this, "Apply this connection to all samples?",
                 "Apply to all samples", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION) {
-            for(MISASample sample : getNativeDataSource ().getCache().getSample().getModuleInstance().getSamples()) {
+            for(MISASample sample : getNativeDataSource ().getCache().getSample().getModuleInstance().getSamples().values()) {
                 if(sample != getNativeDataSource().getCache().getSample()) {
                     for(MISACache targetCache : sample.getImportedCaches()) {
                         // Look for the cache that is equivalent
@@ -72,7 +72,7 @@ public class MISAPipelineNodeDataSourceUI extends MISADataSourceUI {
                             }).findFirst().get();
 
                             // Find the equivalent source cache
-                            MISACache sourceCache = getNativeDataSource().getSourceNode().getModuleInstance().getSample(sample.name).getExportedCacheByRelativePath(
+                            MISACache sourceCache = getNativeDataSource().getSourceNode().getModuleInstance().getSample(sample.getName()).getExportedCacheByRelativePath(
                                     getNativeDataSource().getSourceCache().getRelativePath());
                             ((MISAPipelineNodeDataSource)ds).setSourceCache(sourceCache);
                             targetCache.setDataSource(ds);
@@ -86,7 +86,7 @@ public class MISAPipelineNodeDataSourceUI extends MISADataSourceUI {
 
     private void refreshDisplay() {
         MutableComboBoxModel<MISACache> model = new DefaultComboBoxModel<>();
-        String currentSample = getDataSource().getCache().getSample().name;
+        String currentSample = getDataSource().getCache().getSample().getName();
         for(MISACache cache : getNativeDataSource().getSourceNode().getModuleInstance().
                 getSample(currentSample).getExportedCaches()) {
             model.addElement(cache);

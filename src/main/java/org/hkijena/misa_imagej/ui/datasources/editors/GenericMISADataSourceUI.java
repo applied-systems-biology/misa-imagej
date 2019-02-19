@@ -1,9 +1,7 @@
-package org.hkijena.misa_imagej.ui.parametereditor.datasources.editors;
+package org.hkijena.misa_imagej.ui.datasources.editors;
 
-import org.hkijena.misa_imagej.api.MISACache;
 import org.hkijena.misa_imagej.api.MISADataSource;
-import org.hkijena.misa_imagej.ui.parametereditor.datasources.MISADataSourceUI;
-import org.hkijena.misa_imagej.utils.UIUtils;
+import org.hkijena.misa_imagej.ui.datasources.MISADataSourceUI;
 
 import java.awt.*;
 

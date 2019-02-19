@@ -1,4 +1,4 @@
-package org.hkijena.misa_imagej.ui;
+package org.hkijena.misa_imagej.ui.components;
 
 import org.hkijena.misa_imagej.api.MISAValidityReport;
 import org.hkijena.misa_imagej.utils.UIUtils;
@@ -7,7 +7,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 

@@ -1,8 +1,8 @@
-package org.hkijena.misa_imagej.ui.parametereditor.json_schema.editors;
+package org.hkijena.misa_imagej.ui.json.editors;
 
 import org.hkijena.misa_imagej.api.json.JSONSchemaObject;
 import org.hkijena.misa_imagej.api.json.JSONSchemaObjectType;
-import org.hkijena.misa_imagej.ui.parametereditor.json_schema.*;
+import org.hkijena.misa_imagej.ui.json.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -36,7 +36,7 @@ public class GenericJSONSchemaObjectEditorUI extends JSONSchemaObjectEditorUI {
             // Create a combo box within this panel
             setLayout(new BorderLayout());
             JComboBox<Object> comboBox = new JComboBox<>();
-            comboBox.setToolTipText(getJsonSchemaObject().getDescription());
+            comboBox.setToolTipText(getJsonSchemaObject().getTooltip());
             DefaultComboBoxModel<Object> model = new DefaultComboBoxModel<>();
 
             for(Object d : getJsonSchemaObject().getEnumValues()) {
@@ -58,7 +58,7 @@ public class GenericJSONSchemaObjectEditorUI extends JSONSchemaObjectEditorUI {
             // Create a string editor
             setLayout(new BorderLayout());
             JTextField edit = new JTextField(getJsonSchemaObject().getDefaultValue() != null ? (String) getJsonSchemaObject().getDefaultValue() : "");
-            edit.setToolTipText(getJsonSchemaObject().getDescription());
+            edit.setToolTipText(getJsonSchemaObject().getTooltip());
             if(getJsonSchemaObject().getDefaultValue() != null) {
                 edit.setText((String) getJsonSchemaObject().getDefaultValue());
             }
@@ -76,7 +76,7 @@ public class GenericJSONSchemaObjectEditorUI extends JSONSchemaObjectEditorUI {
             Dimension dim = edit.getPreferredSize();
             edit.setModel(new SpinnerNumberModel(0.0, -Double.MAX_VALUE, Double.MAX_VALUE, 1));
             edit.setPreferredSize(dim);
-            edit.setToolTipText(getJsonSchemaObject().getDescription());
+            edit.setToolTipText(getJsonSchemaObject().getTooltip());
 
             if(getJsonSchemaObject().getDefaultValue() != null) {
                 edit.setValue(getJsonSchemaObject().getDefaultValue());
@@ -92,8 +92,8 @@ public class GenericJSONSchemaObjectEditorUI extends JSONSchemaObjectEditorUI {
             setLayout(new BorderLayout());
             // Create a checkbox
             JCheckBox checkBox = new JCheckBox();
-            checkBox.setToolTipText(getJsonSchemaObject().getDescription());
-            checkBox.setText(getJsonSchemaObject().getName());
+            checkBox.setToolTipText(getJsonSchemaObject().getTooltip());
+            checkBox.setText(getJsonSchemaObject().getDocumentationTitle());
 
             if(getJsonSchemaObject().getDefaultValue() != null) {
                 checkBox.setSelected((boolean) getJsonSchemaObject().getDefaultValue());

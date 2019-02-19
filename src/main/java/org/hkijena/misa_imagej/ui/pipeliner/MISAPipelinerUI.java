@@ -8,10 +8,10 @@ import org.hkijena.misa_imagej.api.pipelining.MISAPipeline;
 import org.hkijena.misa_imagej.api.pipelining.MISAPipelineNode;
 import org.hkijena.misa_imagej.api.repository.MISAModule;
 import org.hkijena.misa_imagej.api.repository.MISAModuleRepository;
-import org.hkijena.misa_imagej.ui.MISAValidityReportStatusUI;
-import org.hkijena.misa_imagej.ui.parametereditor.CancelableProcessUI;
+import org.hkijena.misa_imagej.ui.components.MISAValidityReportStatusUI;
+import org.hkijena.misa_imagej.ui.components.CancelableProcessUI;
 import org.hkijena.misa_imagej.ui.parametereditor.MISACacheTreeUI;
-import org.hkijena.misa_imagej.ui.repository.MISAModuleListCellRenderer;
+import org.hkijena.misa_imagej.ui.components.renderers.MISAModuleListCellRenderer;
 import org.hkijena.misa_imagej.ui.repository.MISAModuleRepositoryUI;
 import org.hkijena.misa_imagej.utils.GsonUtils;
 import org.hkijena.misa_imagej.utils.UIUtils;
@@ -274,7 +274,7 @@ public class MISAPipelinerUI extends JFrame {
 
     private void updateCacheTree() {
         if(moduleList.getSelectedValue() != null) {
-            cacheTree.setSample(uiParameterSchemata.get(moduleList.getSelectedValue()).getCurrentSample());
+            cacheTree.setSample(uiParameterSchemata.get(moduleList.getSelectedValue()).getSample("Preview"));
         }
     }
 

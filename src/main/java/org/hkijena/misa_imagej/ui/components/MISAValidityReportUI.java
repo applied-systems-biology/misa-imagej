@@ -1,4 +1,4 @@
-package org.hkijena.misa_imagej.ui;
+package org.hkijena.misa_imagej.ui.components;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Strings;

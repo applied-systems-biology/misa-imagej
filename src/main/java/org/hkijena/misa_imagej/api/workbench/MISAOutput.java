@@ -52,20 +52,20 @@ public class MISAOutput {
         JsonObject parameters = gson.fromJson(new String(Files.readAllBytes(getRootPath().resolve("parameters.json"))), JsonObject.class);
         if(parameters.getAsJsonObject("filesystem").get("source").getAsString().equals("directories")) {
             Path inputDirectory = Paths.get(parameters.getAsJsonObject("filesystem").get("input-directory").getAsString());
-            for(MISASample sample : moduleInstance.getSamples()) {
-                sample.getImportedFilesystem().externalPath = inputDirectory.resolve(sample.name).toString();
-                sample.getExportedFilesystem().externalPath = rootPath.resolve(sample.name).toString(); // Can load it from the root path
+            for(MISASample sample : moduleInstance.getSamples().values()) {
+                sample.getImportedFilesystem().externalPath = inputDirectory.resolve(sample.getName()).toString();
+                sample.getExportedFilesystem().externalPath = rootPath.resolve(sample.getName()).toString(); // Can load it from the root path
             }
         }
         else if(parameters.getAsJsonObject("filesystem").get("source").getAsString().equals("json")) {
-            for(MISASample sample : moduleInstance.getSamples()) {
-                sample.getExportedFilesystem().externalPath = rootPath.resolve(sample.name).toString(); // Can load it from the root path
+            for(MISASample sample : moduleInstance.getSamples().values()) {
+                sample.getExportedFilesystem().externalPath = rootPath.resolve(sample.getName()).toString(); // Can load it from the root path
 
                 // Assign all other paths from JSON data
                 sample.getImportedFilesystem().setExternalPathFromJson(parameters.getAsJsonObject("filesystem").getAsJsonObject("json-data").
-                        getAsJsonObject("imported").getAsJsonObject(sample.name));
+                        getAsJsonObject("imported").getAsJsonObject(sample.getName()));
                 sample.getImportedFilesystem().setExternalPathFromJson(parameters.getAsJsonObject("filesystem").getAsJsonObject("json-data").
-                        getAsJsonObject("exported").getAsJsonObject(sample.name));
+                        getAsJsonObject("exported").getAsJsonObject(sample.getName()));
             }
         }
 

@@ -1,4 +1,4 @@
-package org.hkijena.misa_imagej.ui.parametereditor.json_schema;
+package org.hkijena.misa_imagej.ui.json;
 
 import org.hkijena.misa_imagej.api.json.JSONSchemaObject;
 
