@@ -1,5 +1,6 @@
 package org.hkijena.misa_imagej.ui.pipeliner;
 
+import com.google.common.eventbus.Subscribe;
 import com.google.gson.Gson;
 import org.hkijena.misa_imagej.api.MISACache;
 import org.hkijena.misa_imagej.api.MISAModuleInstance;
@@ -15,6 +16,7 @@ import org.hkijena.misa_imagej.ui.components.renderers.MISAModuleListCellRendere
 import org.hkijena.misa_imagej.ui.repository.MISAModuleRepositoryUI;
 import org.hkijena.misa_imagej.utils.GsonUtils;
 import org.hkijena.misa_imagej.utils.UIUtils;
+import org.hkijena.misa_imagej.utils.ui.MonochromeColorIcon;
 import org.jdesktop.swingx.JXStatusBar;
 
 import javax.swing.*;
@@ -31,6 +33,10 @@ public class MISAPipelinerUI extends JFrame {
     private JList<MISAModule> moduleList;
     private MISACacheTreeUI cacheTree;
     private MISAPipelineUI pipelineEditor;
+    private JList<String> sampleList;
+    private JToggleButton synchronizeAllSamplesToggle;
+
+    private boolean isCurrentlySynchronizing = false;
 
     /**
      * We use this to give users an easy overview of a module
@@ -78,6 +84,7 @@ public class MISAPipelinerUI extends JFrame {
         add(toolBar, BorderLayout.NORTH);
         JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
         tabbedPane.addTab("Available modules", createModuleList());
+        tabbedPane.addTab("Samples", createSampleManager());
 
         pipelineEditor = new MISAPipelineUI();
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, new JScrollPane(pipelineEditor) {
@@ -94,6 +101,9 @@ public class MISAPipelinerUI extends JFrame {
         validityReportStatusUI = new MISAValidityReportStatusUI();
         statusBar.add(validityReportStatusUI);
         add(statusBar, BorderLayout.SOUTH);
+
+        // Connect events
+        pipeline.getEventBus().register(this);
     }
 
     private JPanel createModuleList() {
@@ -155,8 +165,59 @@ public class MISAPipelinerUI extends JFrame {
 
         toolboxPanel.add(toolboxToolbar, BorderLayout.SOUTH);
 
+        return toolboxPanel;
+    }
+
+    private JPanel createSampleManager() {
+        JPanel  toolboxPanel = new JPanel(new BorderLayout());
+        sampleList = new JList<>();
+        sampleList.setCellRenderer(new SampleListRenderer(pipeline));
+        sampleList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+        toolboxPanel.add(new JScrollPane(sampleList), BorderLayout.CENTER);
+
+        JToolBar toolboxToolbar = new JToolBar();
+
+        JButton synchronizeSelected = new JButton("Synchronize selected", UIUtils.getIconFromResources("connect.png"));
+        synchronizeSelected.setToolTipText("Synchronizes the selected samples between all nodes that are working on the samples");
+        synchronizeSelected.addActionListener(actionEvent -> synchronizeSelectedSamples());
+        toolboxToolbar.add(synchronizeSelected);
+
+        toolboxToolbar.add(Box.createHorizontalGlue());
+
+        synchronizeAllSamplesToggle = new JToggleButton("Autosync", UIUtils.getIconFromResources("connect.png"));
+        synchronizeAllSamplesToggle.setSelected(true);
+        synchronizeAllSamplesToggle.setToolTipText("If enabled, all nodes have the same set of samples");
+        synchronizeAllSamplesToggle.addActionListener(actionEvent -> {
+            if(synchronizeAllSamplesToggle.isSelected())
+                synchronizeAllSamples();
+        });
+        toolboxToolbar.add(synchronizeAllSamplesToggle);
+
+        toolboxPanel.add(toolboxToolbar, BorderLayout.SOUTH);
 
         return toolboxPanel;
+    }
+
+    private void synchronizeAllSamples() {
+        for(String sample : pipeline.getSampleNames()) {
+            for(MISAPipelineNode node : pipeline.getNodes()) {
+                if(!node.getModuleInstance().getSamples().containsKey(sample))
+                    node.getModuleInstance().addSample(sample);
+            }
+        }
+    }
+
+    private void synchronizeSelectedSamples() {
+        Set<MISAPipelineNode> synchronizedNodes = new HashSet<>();
+        for(String sample : new ArrayList<>(sampleList.getSelectedValuesList())) {
+            synchronizedNodes.addAll(pipeline.getNodesContainingSample(sample));
+        }
+        for(String sample : new ArrayList<>(sampleList.getSelectedValuesList())) {
+            for(MISAPipelineNode node : synchronizedNodes) {
+                if(!node.getModuleInstance().getSamples().containsKey(sample))
+                    node.getModuleInstance().addSample(sample);
+            }
+        }
     }
 
     private void export() {
@@ -204,7 +265,9 @@ public class MISAPipelinerUI extends JFrame {
                             processUI.getStatus() == CancelableProcessUI.Status.Failed) {
                         setEnabled(true);
                         if(processUI.getStatus() == CancelableProcessUI.Status.Failed) {
-                            JOptionPane.showMessageDialog(this, "There was an error during calculation. Please check the console to see the cause of this error.", "Error", JOptionPane.ERROR_MESSAGE);
+                            JOptionPane.showMessageDialog(this,
+                                    "There was an error during calculation. Please check the console to see the cause of this error.",
+                                    "Error", JOptionPane.ERROR_MESSAGE);
                         }
                         MISAPipelineOutputUI ui = new MISAPipelineOutputUI(pipeline, dialogUI.getExportPath());
                         ui.setLocationRelativeTo(this);
@@ -249,7 +312,7 @@ public class MISAPipelinerUI extends JFrame {
         }
     }
 
-    private void refresh() {
+    private void refreshModuleList() {
         // Refresh the list of available modules
         uiParameterSchemata.clear();
         MISAModuleRepository.getInstance().refresh();
@@ -261,6 +324,21 @@ public class MISAPipelinerUI extends JFrame {
             uiParameterSchemata.put(module, instance);
         }
         moduleList.setModel(model);
+    }
+
+    private void refreshSampleList() {
+        List<String> samples = new ArrayList<>(pipeline.getSampleNames());
+        samples.sort(Comparator.naturalOrder());
+        DefaultListModel<String> model = new DefaultListModel<>();
+        for(String sample : samples) {
+            model.addElement(sample);
+        }
+        sampleList.setModel(model);
+    }
+
+    private void refresh() {
+        refreshModuleList();
+        refreshSampleList();
 
         // Update the editor UI
         pipelineEditor.setPipeline(pipeline);
@@ -275,6 +353,111 @@ public class MISAPipelinerUI extends JFrame {
     private void updateCacheTree() {
         if(moduleList.getSelectedValue() != null) {
             cacheTree.setSample(uiParameterSchemata.get(moduleList.getSelectedValue()).getSample("Preview"));
+        }
+    }
+
+    @Subscribe
+    public void handleSampleChangedEvents(MISAPipeline.AddedSampleEvent event) {
+        if(isCurrentlySynchronizing)
+            return;
+
+        if(synchronizeAllSamplesToggle.isSelected()) {
+            isCurrentlySynchronizing = true;
+            String sample = event.getSample().getName();
+            for(MISAPipelineNode node : pipeline.getNodes()) {
+                if(!node.getModuleInstance().getSamples().containsKey(sample)) {
+                    node.getModuleInstance().addSample(sample);
+                }
+            }
+            isCurrentlySynchronizing = false;
+        }
+        refreshSampleList();
+    }
+
+    @Subscribe
+    public void handleSampleChangedEvents(MISAPipeline.RemovedSampleEvent event) {
+        if(isCurrentlySynchronizing)
+            return;
+
+        if(synchronizeAllSamplesToggle.isSelected()) {
+            isCurrentlySynchronizing = true;
+            String sample = event.getRemovedSampleName();
+            for(MISAPipelineNode node : pipeline.getNodes()) {
+                if(node.getModuleInstance().getSamples().containsKey(sample)) {
+                    node.getModuleInstance().removeSample(sample);
+                }
+            }
+            isCurrentlySynchronizing = false;
+        }
+
+        refreshSampleList();
+    }
+
+    @Subscribe
+    public void handleSampleChangedEvents(MISAPipeline.RenameSampleEvent event) {
+        if(isCurrentlySynchronizing)
+            return;
+
+        if(synchronizeAllSamplesToggle.isSelected()) {
+            isCurrentlySynchronizing = true;
+            String sample = event.getSample().getName();
+            for(MISAPipelineNode node : pipeline.getNodes()) {
+                if(node.getModuleInstance().getSamples().containsKey(event.getOldName())) {
+                    node.getModuleInstance().renameSample(node.getModuleInstance().getSample(event.getOldName()), sample);
+                }
+            }
+            isCurrentlySynchronizing = false;
+        }
+
+        refreshSampleList();
+    }
+
+    @Subscribe
+    public void handleSampleChangedEvents(MISAPipeline.RemovedNodeEvent event) {
+        refreshSampleList();
+    }
+
+    @Subscribe
+    public void handleSampleChangedEvents(MISAPipeline.AddedNodeEvent event) {
+        refreshSampleList();
+    }
+
+    public static class SampleListRenderer extends JLabel implements ListCellRenderer<String> {
+
+        private MISAPipeline pipeline;
+        private MonochromeColorIcon icon = new MonochromeColorIcon(UIUtils.getIconFromResources("sample-template.png"));
+
+        public SampleListRenderer(MISAPipeline pipeline) {
+            this.pipeline = pipeline;
+            this.setIcon(icon);
+            this.setOpaque(true);
+            setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
+        }
+
+        @Override
+        public Component getListCellRendererComponent(JList<? extends String> list, String sample, int index, boolean isSelected, boolean cellHasFocus) {
+
+            if(sample != null) {
+                setText(sample);
+                Collection<MISAPipelineNode> nodes = pipeline.getNodesContainingSample(sample);
+
+                // Generate a color for the set of samples
+                int hashCode = 0;
+                for(MISAPipelineNode node : nodes) {
+                    hashCode += node.hashCode();
+                }
+                float h = Math.abs(hashCode % 256) / 255.0f;
+                icon.setColor(Color.getHSBColor(h, 0.5f, 1));
+            }
+
+            if(isSelected || cellHasFocus) {
+                setBackground(new Color(184, 207, 229));
+            }
+            else {
+                setBackground(new Color(255,255,255));
+            }
+
+            return this;
         }
     }
 

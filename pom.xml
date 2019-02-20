@@ -7,17 +7,17 @@
     <groupId>org.hkijena</groupId>
     <artifactId>misa_imagej</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <name>misa_imagej</name>
+    <removedSampleName>misa_imagej</removedSampleName>
     <description>Allows running MISA++ workloads from within ImageJ</description>
     <url>https://asb-git.hki-jena.de/RGerst/misa_imagej</url>
     <inceptionYear>2018</inceptionYear>
     <organization>
-        <name>Leibniz Institute for Natural Product Research and Infection Biology - Hans Knöll Institute (HKI)</name>
+        <removedSampleName>Leibniz Institute for Natural Product Research and Infection Biology - Hans Knöll Institute (HKI)</removedSampleName>
         <url>https://www.leibniz-hki.de/</url>
     </organization>
     <licenses>
         <license>
-            <name>CC0 1.0 Universal License</name>
+            <removedSampleName>CC0 1.0 Universal License</removedSampleName>
             <url>http://creativecommons.org/publicdomain/zero/1.0/</url>
             <distribution>repo</distribution>
         </license>
@@ -25,18 +25,18 @@
     <developers>
         <developer>
             <id>RGerst</id>
-            <name>Ruman Gerst</name>
+            <removedSampleName>Ruman Gerst</removedSampleName>
             <url>https://www.leibniz-hki.de/en/asb-staff-details.html?member=1027</url>
         </developer>
     </developers>
     <contributors>
         <contributor>
-            <name>None</name>
+            <removedSampleName>None</removedSampleName>
         </contributor>
     </contributors>
     <mailingLists>
         <mailingList>
-            <name>Image.sc Forum</name>
+            <removedSampleName>Image.sc Forum</removedSampleName>
             <archive>https://forum.image.sc/</archive>
         </mailingList>
     </mailingLists>

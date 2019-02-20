@@ -14,7 +14,6 @@ public class MISASampleListCellRenderer extends JLabel implements ListCellRender
 
     public MISASampleListCellRenderer() {
         this.setIcon(icon);
-        this.setOpaque(false);
         setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
     }
 

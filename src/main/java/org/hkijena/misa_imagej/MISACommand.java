@@ -85,7 +85,7 @@ public class MISACommand implements Command {
 	}
 
 	public static void main(final String... args) {
-//		fiji.Debug.runPlugIn(MISACommand.class.getName(), null, false);
+//		fiji.Debug.runPlugIn(MISACommand.class.getRemovedSampleName(), null, false);
 //		fiji.Debug.run("MISA ImageJ", "");
 		// Launch ImageJ as usual.
 		final ImageJ ij = new ImageJ();

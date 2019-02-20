@@ -12,10 +12,8 @@ import org.hkijena.misa_imagej.api.json.JSONSchemaObjectType;
 import org.hkijena.misa_imagej.api.repository.MISAModule;
 import org.hkijena.misa_imagej.api.repository.MISAModuleInfo;
 import org.hkijena.misa_imagej.utils.GsonUtils;
-import org.jfree.data.json.impl.JSONObject;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 
@@ -90,12 +88,13 @@ public class MISAModuleInstance implements MISAValidatable {
     public void removeSample(String name) {
         MISASample removed = samples.get(name);
         samples.remove(name);
-        getEventBus().post(new RemovedSampleEvent(removed));
+        getEventBus().post(new RemovedSampleEvent(removed, name));
     }
 
     public void removeSample(MISASample sample) {
+        String sampleName = sample.getName();
         samples.remove(sample.getName());
-        getEventBus().post(new RemovedSampleEvent(sample));
+        getEventBus().post(new RemovedSampleEvent(sample, sampleName));
     }
 
     public boolean renameSample(MISASample sample, String newName) {
@@ -106,7 +105,7 @@ public class MISAModuleInstance implements MISAValidatable {
         String oldName = sample.getName();
         samples.remove(oldName);
         samples.put(newName, sample);
-        getEventBus().post(new RenamedSampleEvent(sample));
+        getEventBus().post(new RenamedSampleEvent(oldName, sample));
         return true;
     }
 
@@ -283,25 +282,37 @@ public class MISAModuleInstance implements MISAValidatable {
 
     public static class RemovedSampleEvent {
         private MISASample sample;
+        private String removedSampleName;
 
-        public RemovedSampleEvent(MISASample sample) {
+        public RemovedSampleEvent(MISASample sample, String removedSampleName) {
             this.sample = sample;
+            this.removedSampleName = removedSampleName;
         }
 
         public MISASample getSample() {
             return sample;
+        }
+
+        public String getRemovedSampleName() {
+            return removedSampleName;
         }
     }
 
     public static class RenamedSampleEvent {
+        private String oldName;
         private MISASample sample;
 
-        public RenamedSampleEvent(MISASample sample) {
+        public RenamedSampleEvent(String oldName, MISASample sample) {
+            this.oldName = oldName;
             this.sample = sample;
         }
 
         public MISASample getSample() {
             return sample;
+        }
+
+        public String getOldName() {
+            return oldName;
         }
     }
 }

@@ -16,7 +16,6 @@ import org.hkijena.misa_imagej.utils.GsonUtils;
 import org.hkijena.misa_imagej.utils.OSUtils;
 import org.hkijena.misa_imagej.utils.ResourceUtils;
 
-import java.beans.PropertyChangeListener;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -87,6 +86,7 @@ public class MISAPipeline implements MISAValidatable {
     public void removeNode(MISAPipelineNode node) {
         isolateNode(node);
         nodes.remove(node);
+        node.getModuleInstance().getEventBus().unregister(this);
         eventBus.post(new RemovedNodeEvent(node));
     }
 
@@ -171,6 +171,32 @@ public class MISAPipeline implements MISAValidatable {
 
     public Collection<MISAPipelineNode> getNodes() {
         return Collections.unmodifiableCollection(nodes);
+    }
+
+    /**
+     * Returns the names of all samples as union over all sample names of all nodes
+     * @return
+     */
+    public Collection<String> getSampleNames() {
+        Set<String> result = new HashSet<>();
+        for(MISAPipelineNode node : nodes) {
+            result.addAll(node.getModuleInstance().getSamples().keySet());
+        }
+        return result;
+    }
+
+    /**
+     * Returns all nodes that have the sepcified sample
+     * @param sampleName
+     * @return
+     */
+    public Collection<MISAPipelineNode> getNodesContainingSample(String sampleName) {
+        Set<MISAPipelineNode> result = new HashSet<>();
+        for(MISAPipelineNode node : nodes) {
+            if(node.getModuleInstance().getSamples().containsKey(sampleName))
+                result.add(node);
+        }
+        return result;
     }
 
     @Override
@@ -561,6 +587,27 @@ public class MISAPipeline implements MISAValidatable {
         }
     }
 
+    @Subscribe
+    public void handleNodeSampleEvent(MISAModuleInstance.AddedSampleEvent event) {
+        MISAPipelineNode node = nodes.stream().filter(misaPipelineNode -> misaPipelineNode.getModuleInstance()
+                == event.getSample().getModuleInstance()).findFirst().get();
+        eventBus.post(new AddedSampleEvent(node, event.getSample()));
+    }
+
+    @Subscribe
+    public void handleNodeSampleEvent(MISAModuleInstance.RemovedSampleEvent event) {
+        MISAPipelineNode node = nodes.stream().filter(misaPipelineNode -> misaPipelineNode.getModuleInstance()
+                == event.getSample().getModuleInstance()).findFirst().get();
+        eventBus.post(new RemovedSampleEvent(node, event.getSample(), event.getRemovedSampleName()));
+    }
+
+    @Subscribe
+    public void handleNodeSampleEvent(MISAModuleInstance.RenamedSampleEvent event) {
+        MISAPipelineNode node = nodes.stream().filter(misaPipelineNode -> misaPipelineNode.getModuleInstance()
+                == event.getSample().getModuleInstance()).findFirst().get();
+        eventBus.post(new RenameSampleEvent(node, event.getOldName(), event.getSample()));
+    }
+
     public static class AddedNodeEvent {
         private MISAPipelineNode node;
 
@@ -618,6 +665,72 @@ public class MISAPipeline implements MISAValidatable {
 
         public MISAPipelineNode getTarget() {
             return target;
+        }
+    }
+
+    public static class AddedSampleEvent {
+        private MISAPipelineNode node;
+        private MISASample sample;
+
+        public AddedSampleEvent(MISAPipelineNode node, MISASample sample) {
+            this.node = node;
+            this.sample = sample;
+        }
+
+        public MISAPipelineNode getNode() {
+            return node;
+        }
+
+        public MISASample getSample() {
+            return sample;
+        }
+    }
+
+    public static class RemovedSampleEvent {
+        private MISAPipelineNode node;
+        private MISASample sample;
+        private String removedSampleName;
+
+        public RemovedSampleEvent(MISAPipelineNode node, MISASample sample, String removedSampleName) {
+            this.node = node;
+            this.sample = sample;
+            this.removedSampleName = removedSampleName;
+        }
+
+        public MISAPipelineNode getNode() {
+            return node;
+        }
+
+        public MISASample getSample() {
+            return sample;
+        }
+
+        public String getRemovedSampleName() {
+            return removedSampleName;
+        }
+    }
+
+    public static class RenameSampleEvent {
+        private MISAPipelineNode node;
+        private String oldName;
+        private MISASample sample;
+
+        public RenameSampleEvent(MISAPipelineNode node, String oldName, MISASample sample) {
+            this.node = node;
+            this.oldName = oldName;
+            this.sample = sample;
+        }
+
+        public MISAPipelineNode getNode() {
+            return node;
+        }
+
+        public MISASample getSample() {
+            return sample;
+        }
+
+        public String getOldName() {
+            return oldName;
         }
     }
 }
