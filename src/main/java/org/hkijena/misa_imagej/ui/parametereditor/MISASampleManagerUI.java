@@ -64,6 +64,8 @@ public class MISASampleManagerUI extends JPanel {
     private void addSamples() {
         AddSamplesDialog dialog = new AddSamplesDialog(SwingUtilities.getWindowAncestor(this), moduleInstance);
         dialog.setModal(true);
+        dialog.pack();
+        dialog.setSize(new Dimension(500,400));
         dialog.setLocationRelativeTo(this);
         dialog.setVisible(true);
     }

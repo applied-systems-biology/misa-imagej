@@ -64,6 +64,8 @@ public class MISAWorkbenchUI extends JFrame{
             ui.setHideOpenButton(true);
             ui.open(misaOutput.getRuntimeLogPath());
             ui.setTitle(misaOutput.getRootPath().toString() + " - MISA++ runtime analysis");
+            ui.pack();
+            ui.setSize(new Dimension(800,600));
             ui.setVisible(true);
         }
     }

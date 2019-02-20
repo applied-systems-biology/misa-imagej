@@ -100,6 +100,8 @@ public class MISARunPipelineDialogUI extends JDialog {
 
     public int showDialog() {
         setModal(true);
+        pack();
+        setSize(new Dimension(500,400));
         setVisible(true);
         if(dialogOK)
             return ACCEPT_OPTION;

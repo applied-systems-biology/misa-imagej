@@ -102,6 +102,8 @@ public class MISAModuleRepositoryUI extends JFrame {
         JButton launchAnalyzer = new JButton("Analyze result ...", UIUtils.getIconFromResources("graph.png"));
         launchAnalyzer.addActionListener(actionEvent -> {
             MISAWorkbenchUI workbench = new MISAWorkbenchUI();
+            workbench.pack();
+            workbench.setSize(new Dimension(800,600));
             workbench.setVisible(true);
         });
         toolBar.add(launchAnalyzer);
@@ -110,6 +112,8 @@ public class MISAModuleRepositoryUI extends JFrame {
         launchRuntimeLogUI.setToolTipText("Analyze runtime log");
         launchRuntimeLogUI.addActionListener(actionEvent -> {
             MISARuntimeLogUI runtimeLogUI = new MISARuntimeLogUI();
+            runtimeLogUI.pack();
+            runtimeLogUI.setSize(new Dimension(800,600));
             runtimeLogUI.setVisible(true);
         });
         toolBar.add(launchRuntimeLogUI);
@@ -150,6 +154,8 @@ public class MISAModuleRepositoryUI extends JFrame {
             launchButton.addActionListener(actionEvent -> {
                 MISAModuleInstanceUI launcher = new MISAModuleInstanceUI(misaModuleJList.getSelectedValue().instantiate(),
                         false, true);
+                launcher.pack();
+                launcher.setSize(new Dimension(800,600));
                 launcher.setVisible(true);
             });
             UIUtils.addToGridBag(detailPanel, launchButton, 5, 0);

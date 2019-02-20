@@ -138,6 +138,8 @@ public class MISARunModuleDialogUI extends JDialog {
     }
 
     public int showDialog() {
+        pack();
+        setSize(500, 400);
         setModal(true);
         setVisible(true);
         if(dialogOK)
