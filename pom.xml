@@ -7,52 +7,52 @@
     <groupId>org.hkijena</groupId>
     <artifactId>misa_imagej</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <removedSampleName>misa_imagej</removedSampleName>
+    <name>misa_imagej</name>
     <description>Allows running MISA++ workloads from within ImageJ</description>
     <url>https://asb-git.hki-jena.de/RGerst/misa_imagej</url>
     <inceptionYear>2018</inceptionYear>
     <organization>
-        <removedSampleName>Leibniz Institute for Natural Product Research and Infection Biology - Hans Knöll Institute (HKI)</removedSampleName>
+        <name>Leibniz Institute for Natural Product Research and Infection Biology - Hans Knöll Institute (HKI)</name>
         <url>https://www.leibniz-hki.de/</url>
     </organization>
     <licenses>
         <license>
-            <removedSampleName>CC0 1.0 Universal License</removedSampleName>
-            <url>http://creativecommons.org/publicdomain/zero/1.0/</url>
+            <name>BSD-2-Clause</name>
+            <url>https://opensource.org/licenses/BSD-2-Clause</url>
             <distribution>repo</distribution>
         </license>
     </licenses>
     <developers>
         <developer>
             <id>RGerst</id>
-            <removedSampleName>Ruman Gerst</removedSampleName>
+            <name>Ruman Gerst</name>
             <url>https://www.leibniz-hki.de/en/asb-staff-details.html?member=1027</url>
         </developer>
     </developers>
     <contributors>
         <contributor>
-            <removedSampleName>None</removedSampleName>
+            <name>None</name>
         </contributor>
     </contributors>
     <mailingLists>
         <mailingList>
-            <removedSampleName>Image.sc Forum</removedSampleName>
-            <archive>https://forum.image.sc/</archive>
+            <name>HKI Jena</name>
+            <archive>https://www.leibniz-hki.de/de/angewandte-systembiologie.html</archive>
         </mailingList>
     </mailingLists>
     <scm>
-        <connection>scm:git:git://github.com/imagej/tutorials</connection>
-        <developerConnection>scm:git:git@github.com:imagej/tutorials</developerConnection>
+        <connection>scm:git:https://asb-git.hki-jena.de/RGerst/misa-imagej.git</connection>
+        <developerConnection>scm:git:https://rgerst@asb-git.hki-jena.de/RGerst/misa-imagej.git</developerConnection>
         <tag>HEAD</tag>
-        <url>https://github.com/imagej/tutorials</url>
+        <url>https://asb-git.hki-jena.de/RGerst/misa-imagej</url>
     </scm>
     <issueManagement>
-        <system>GitHub Issues</system>
-        <url>http://github.com/imagej/tutorials/issues</url>
+        <system>GitLab Issues</system>
+        <url>https://asb-git.hki-jena.de/RGerst/misa-imagej/issues</url>
     </issueManagement>
     <ciManagement>
-        <system>Travis CI</system>
-        <url>https://travis-ci.org/imagej/tutorials</url>
+        <system>GitLab CI</system>
+        <url>https://asb-git.hki-jena.de/RGerst/misa-imagej/pipelines</url>
     </ciManagement>
 
     <parent>
