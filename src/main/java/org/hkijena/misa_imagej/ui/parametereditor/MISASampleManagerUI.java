@@ -91,34 +91,42 @@ public class MISASampleManagerUI extends JPanel {
             Icon icon = new MonochromeColorIcon(UIUtils.getIconFromResources("sample-template.png"), sample.toColor());
             JLabel label = new JLabel(sample.getName(), icon, SwingConstants.LEFT);
             final int row_ = row++;
-            sampleList.add(label, new GridBagConstraints() {
+            JButton renameButton = new JButton(UIUtils.getIconFromResources("edit.png"));
+            renameButton.setToolTipText("Rename sample");
+            UIUtils.makeFlat(renameButton);
+            renameButton.addActionListener(e -> renameSample(sample));
+            sampleList.add(renameButton, new GridBagConstraints() {
                 {
                     gridx = 0;
                     gridy = row_;
-                    weightx = 1;
                     insets = UIUtils.UI_PADDING;
                     anchor = GridBagConstraints.WEST;
-                    fill = GridBagConstraints.HORIZONTAL;
+                    fill = GridBagConstraints.NONE;
+                    weightx = 0;
                 }
             });
 
-            JButton renameButton = new JButton("Rename", UIUtils.getIconFromResources("edit.png"));
-            renameButton.addActionListener(e -> renameSample(sample));
-            sampleList.add(renameButton, new GridBagConstraints() {
+            JButton removeButton = new JButton(UIUtils.getIconFromResources("delete.png"));
+            removeButton.setToolTipText("Remove sample");
+            UIUtils.makeFlat(removeButton);
+            removeButton.addActionListener(e -> removeSample(sample));
+            sampleList.add(removeButton, new GridBagConstraints() {
                 {
                     gridx = 1;
                     gridy = row_;
                     insets = UIUtils.UI_PADDING;
+                    anchor = GridBagConstraints.WEST;
+                    weightx = 0;
+                    fill = GridBagConstraints.NONE;
                 }
             });
-
-            JButton removeButton = new JButton("Remove", UIUtils.getIconFromResources("delete.png"));
-            removeButton.addActionListener(e -> removeSample(sample));
-            sampleList.add(removeButton, new GridBagConstraints() {
+            sampleList.add(label, new GridBagConstraints() {
                 {
                     gridx = 2;
                     gridy = row_;
+                    weightx = 1;
                     insets = UIUtils.UI_PADDING;
+                    fill = GridBagConstraints.HORIZONTAL;
                 }
             });
         }

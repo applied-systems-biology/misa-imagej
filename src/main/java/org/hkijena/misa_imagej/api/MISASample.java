@@ -69,6 +69,8 @@ public class MISASample implements MISAValidatable {
     }
 
     public Color toColor() {
+        if(getName() == null)
+            return Color.WHITE;
         float h = Math.abs(getName().hashCode() % 256) / 255.0f;
         return Color.getHSBColor(h, 0.8f, 0.8f);
     }

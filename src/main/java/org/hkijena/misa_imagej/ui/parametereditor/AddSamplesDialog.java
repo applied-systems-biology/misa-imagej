@@ -34,7 +34,7 @@ public class AddSamplesDialog extends JDialog {
         add(infoArea, BorderLayout.NORTH);
 
         samplesInput = new JTextArea();
-        add(samplesInput, BorderLayout.CENTER);
+        add(new JScrollPane(samplesInput), BorderLayout.CENTER);
 
         JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.LINE_AXIS));
