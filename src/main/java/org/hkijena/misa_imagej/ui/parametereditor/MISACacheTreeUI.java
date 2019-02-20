@@ -1,5 +1,6 @@
 package org.hkijena.misa_imagej.ui.parametereditor;
 
+import com.google.common.eventbus.EventBus;
 import org.apache.commons.collections.ListUtils;
 import org.hkijena.misa_imagej.api.MISACache;
 import org.hkijena.misa_imagej.api.MISASample;
@@ -19,6 +20,7 @@ public class MISACacheTreeUI extends JTree {
 
     private MISASample sample;
     private Entry currentEntry;
+    private EventBus eventBus = new EventBus();
 
     public MISACacheTreeUI() {
         initialize();
@@ -55,7 +57,7 @@ public class MISACacheTreeUI extends JTree {
 
     public void setCurrentCacheList(Entry entry) {
         this.currentEntry = entry;
-        firePropertyChange("currentCacheList", null, null);
+        eventBus.post(new ChangedCurrentCacheListEvent(this));
     }
 
     protected Entry createRootEntry() {
@@ -94,6 +96,10 @@ public class MISACacheTreeUI extends JTree {
             this.setModel(new DefaultTreeModel(new DefaultMutableTreeNode("No properties to edit")));
             setCurrentCacheList(null);
         }
+    }
+
+    public EventBus getEventBus() {
+        return eventBus;
     }
 
     public static class CellRenderer extends JLabel implements TreeCellRenderer {
@@ -160,6 +166,18 @@ public class MISACacheTreeUI extends JTree {
         @Override
         public String toString() {
             return name;
+        }
+    }
+
+    public static class ChangedCurrentCacheListEvent {
+        private MISACacheTreeUI tree;
+
+        public ChangedCurrentCacheListEvent(MISACacheTreeUI tree) {
+            this.tree = tree;
+        }
+
+        public MISACacheTreeUI getTree() {
+            return tree;
         }
     }
 }

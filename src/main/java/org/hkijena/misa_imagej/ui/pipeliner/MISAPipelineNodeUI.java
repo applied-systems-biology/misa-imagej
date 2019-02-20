@@ -1,5 +1,6 @@
 package org.hkijena.misa_imagej.ui.pipeliner;
 
+import com.google.common.eventbus.Subscribe;
 import org.hkijena.misa_imagej.api.pipelining.MISAPipelineNode;
 import org.hkijena.misa_imagej.ui.parametereditor.MISAModuleInstanceUI;
 import org.hkijena.misa_imagej.utils.UIUtils;
@@ -100,9 +101,10 @@ public class MISAPipelineNodeUI extends JPanel implements ComponentListener {
             menuItem.addActionListener(actionEvent -> {
                 node.getPipeline().addEdge(available, node);
             });
-            available.addPropertyChangeListener(propertyChangeEvent -> {
-                if(propertyChangeEvent.getPropertyName().equals("name")) {
-                    menuItem.setText("From " + available.getName());
+            available.getEventBus().register(new Object() {
+                @Subscribe
+                public void handleNameChangeEvent(MISAPipelineNode.ChangedNameEvent event) {
+                    menuItem.setText("From " + event.getNode().getName());
                 }
             });
             menu.add(menuItem);

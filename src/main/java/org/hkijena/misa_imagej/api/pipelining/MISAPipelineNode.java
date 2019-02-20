@@ -1,5 +1,6 @@
 package org.hkijena.misa_imagej.api.pipelining;
 
+import com.google.common.eventbus.EventBus;
 import com.google.gson.annotations.SerializedName;
 import org.hkijena.misa_imagej.api.MISAModuleInstance;
 import org.hkijena.misa_imagej.api.MISAValidatable;
@@ -33,18 +34,17 @@ public class MISAPipelineNode implements MISAValidatable {
     @SerializedName("y")
     private int y;
 
-    private transient PropertyChangeSupport propertyChangeSupport;
-
     private transient MISAPipeline pipeline;
 
     private transient MISAModuleInstance moduleInstance;
 
+    private transient EventBus eventBus = new EventBus();
+
     public MISAPipelineNode() {
-        this.propertyChangeSupport = new PropertyChangeSupport(this);
+
     }
 
     public MISAPipelineNode(MISAPipeline pipeline) {
-        this.propertyChangeSupport = new PropertyChangeSupport(this);
         this.setPipeline(pipeline);
     }
 
@@ -69,7 +69,7 @@ public class MISAPipelineNode implements MISAValidatable {
     public void setName(String name) {
         this.name = name;
         this.getModuleInstance().setName(name);
-        propertyChangeSupport.firePropertyChange("name", null, null);
+        eventBus.post(new ChangedNameEvent(this));
     }
 
     public String getDescription() {
@@ -78,7 +78,7 @@ public class MISAPipelineNode implements MISAValidatable {
 
     public void setDescription(String description) {
         this.description = description;
-        propertyChangeSupport.firePropertyChange("description", null, null);
+        eventBus.post(new ChangedDescriptionEvent(this));
     }
 
     public String getModuleName() {
@@ -87,7 +87,6 @@ public class MISAPipelineNode implements MISAValidatable {
 
     public void setModuleName(String moduleName) {
         this.moduleName = moduleName;
-        propertyChangeSupport.firePropertyChange("moduleName", null, null);
     }
 
     public int getX() {
@@ -96,7 +95,7 @@ public class MISAPipelineNode implements MISAValidatable {
 
     public void setX(int x) {
         this.x = x;
-        propertyChangeSupport.firePropertyChange("x", null, null);
+        eventBus.post(new ChangedPositionEvent(this));
     }
 
     public int getY() {
@@ -105,15 +104,7 @@ public class MISAPipelineNode implements MISAValidatable {
 
     public void setY(int y) {
         this.y = y;
-        propertyChangeSupport.firePropertyChange("y", null, null);
-    }
-
-    public void addPropertyChangeListener(PropertyChangeListener listener) {
-        propertyChangeSupport.addPropertyChangeListener(listener);
-    }
-
-    public void removePropertyChangeListener(PropertyChangeListener listener) {
-        propertyChangeSupport.removePropertyChangeListener(listener);
+        eventBus.post(new ChangedPositionEvent(this));
     }
 
     public MISAPipeline getPipeline() {
@@ -139,7 +130,7 @@ public class MISAPipelineNode implements MISAValidatable {
 
     public void setId(String id) {
         this.id = id;
-        propertyChangeSupport.firePropertyChange("id", null, null);
+        eventBus.post(new ChangedIdEvent(this));
     }
 
     @Override
@@ -147,5 +138,57 @@ public class MISAPipelineNode implements MISAValidatable {
         MISAValidityReport report = new MISAValidityReport();
         report.merge(getModuleInstance().getValidityReport());
         return report;
+    }
+
+    public EventBus getEventBus() {
+        return eventBus;
+    }
+
+    public static class ChangedNameEvent {
+        private MISAPipelineNode node;
+
+        public ChangedNameEvent(MISAPipelineNode node) {
+            this.node = node;
+        }
+
+        public MISAPipelineNode getNode() {
+            return node;
+        }
+    }
+
+    public static class ChangedDescriptionEvent {
+        private MISAPipelineNode node;
+
+        public ChangedDescriptionEvent(MISAPipelineNode node) {
+            this.node = node;
+        }
+
+        public MISAPipelineNode getNode() {
+            return node;
+        }
+    }
+
+    public static class ChangedIdEvent {
+        private MISAPipelineNode node;
+
+        public ChangedIdEvent(MISAPipelineNode node) {
+            this.node = node;
+        }
+
+        public MISAPipelineNode getNode() {
+            return node;
+        }
+    }
+
+    public static class ChangedPositionEvent {
+        private MISAPipelineNode node;
+
+        public ChangedPositionEvent(MISAPipelineNode node) {
+            this.node = node;
+        }
+
+        public MISAPipelineNode getNode() {
+            return node;
+        }
     }
 }

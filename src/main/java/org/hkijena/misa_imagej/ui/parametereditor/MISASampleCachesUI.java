@@ -1,5 +1,6 @@
 package org.hkijena.misa_imagej.ui.parametereditor;
 
+import com.google.common.eventbus.Subscribe;
 import org.hkijena.misa_imagej.api.MISACache;
 import org.hkijena.misa_imagej.api.MISAModuleInstance;
 import org.hkijena.misa_imagej.api.MISASample;
@@ -49,11 +50,7 @@ public class MISASampleCachesUI extends JPanel {
             }
         }, BorderLayout.CENTER);
 
-        cacheList.addPropertyChangeListener(propertyChangeEvent -> {
-            if(propertyChangeEvent.getPropertyName().equals("currentCacheList")) {
-                refreshEditor();
-            }
-        });
+        cacheList.getEventBus().register(this);
 
         // Create editor
         JPanel editPanel = new JPanel(new BorderLayout());
@@ -103,6 +100,11 @@ public class MISASampleCachesUI extends JPanel {
 
     private void setCurrentSample(MISASample sample) {
        cacheList.setSample(sample);
+    }
+
+    @Subscribe
+    public void handleChangedCurrentCacheListEvent(MISACacheTreeUI.ChangedCurrentCacheListEvent event) {
+        refreshEditor();
     }
 
     public void refreshEditor() {

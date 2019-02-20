@@ -1,5 +1,6 @@
 package org.hkijena.misa_imagej.ui.pipeliner;
 
+import com.google.common.eventbus.Subscribe;
 import org.hkijena.misa_imagej.api.pipelining.MISAPipeline;
 import org.hkijena.misa_imagej.api.pipelining.MISAPipelineNode;
 import org.hkijena.misa_imagej.utils.GraphicsUtils;
@@ -26,8 +27,6 @@ public class MISAPipelineUI extends JPanel implements MouseMotionListener, Mouse
     private MISAPipelineNodeUI currentlyDragged;
     private Point currentlyDraggedOffset = new Point();
 
-    private PropertyChangeListener pipelineListener;
-
     private Map<MISAPipelineNode, MISAPipelineNodeUI> nodeUIMap = new HashMap<>();
     private List<RemoveEdgeButton> removeEdgeButtonList = new ArrayList<>();
 
@@ -45,17 +44,26 @@ public class MISAPipelineUI extends JPanel implements MouseMotionListener, Mouse
         setBackground(Color.WHITE);
         addMouseListener(this);
         addMouseMotionListener(this);
+    }
 
-        // Update the UI when something changes
-        pipelineListener = (propertyChangeEvent -> {
-            if(propertyChangeEvent.getPropertyName().equals("addNode") ||
-                    propertyChangeEvent.getPropertyName().equals("addEdge") ||
-                    propertyChangeEvent.getPropertyName().equals("removeEdge") ||
-                    propertyChangeEvent.getPropertyName().equals("removeNode") ||
-                    propertyChangeEvent.getPropertyName().equals("isolateNode")) {
-                refresh();
-            }
-        });
+    @Subscribe
+    public void handleNodeUpdateEvent(MISAPipeline.AddedNodeEvent event) {
+        refresh();
+    }
+
+    @Subscribe
+    public void handleNodeUpdateEvent(MISAPipeline.AddedEdgeEvent event) {
+        refresh();
+    }
+
+    @Subscribe
+    public void handleNodeUpdateEvent(MISAPipeline.RemovedEdgeEvent event) {
+        refresh();
+    }
+
+    @Subscribe
+    public void handleNodeUpdateEvent(MISAPipeline.RemovedNodeEvent event) {
+        refresh();
     }
 
     public void refresh() {
@@ -83,9 +91,9 @@ public class MISAPipelineUI extends JPanel implements MouseMotionListener, Mouse
 
     public void setPipeline(MISAPipeline pipeline) {
         if(this.pipeline != null)
-            this.pipeline.removePropertyChangeListener(pipelineListener);
+            this.pipeline.getEventBus().unregister(this);
         this.pipeline = pipeline;
-        this.pipeline.addPropertyChangeListener(pipelineListener);
+        this.pipeline.getEventBus().register(this);
         refresh();
     }
 

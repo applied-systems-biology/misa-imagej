@@ -4,6 +4,7 @@ import com.google.common.base.Charsets;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Maps;
+import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.google.common.io.Resources;
 import com.google.gson.*;
@@ -16,7 +17,6 @@ import org.hkijena.misa_imagej.utils.OSUtils;
 import org.hkijena.misa_imagej.utils.ResourceUtils;
 
 import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -40,10 +40,10 @@ public class MISAPipeline implements MISAValidatable {
      */
     private transient Map<MISAPipelineNode, Set<MISAPipelineNode>> edgesInverted = new HashMap<>();
 
-    private transient PropertyChangeSupport propertyChangeSupport;
+    private transient EventBus eventBus = new EventBus();
 
     public MISAPipeline() {
-        propertyChangeSupport = new PropertyChangeSupport(this);
+
     }
 
     /**
@@ -64,7 +64,7 @@ public class MISAPipeline implements MISAValidatable {
     private void addNode(MISAPipelineNode node) {
         node.setPipeline(this);
         nodes.add(node);
-        propertyChangeSupport.firePropertyChange("addNode", null, node);
+        eventBus.post(new AddedNodeEvent(node));
         node.getModuleInstance().getEventBus().register(this);
         updateCacheDataSources();
     }
@@ -87,7 +87,7 @@ public class MISAPipeline implements MISAValidatable {
     public void removeNode(MISAPipelineNode node) {
         isolateNode(node);
         nodes.remove(node);
-        propertyChangeSupport.firePropertyChange("removeNode", null, node);
+        eventBus.post(new RemovedNodeEvent(node));
     }
 
     /**
@@ -96,7 +96,6 @@ public class MISAPipeline implements MISAValidatable {
      * @param node
      */
     public void isolateNode(MISAPipelineNode node) {
-        propertyChangeSupport.firePropertyChange("isolateNode", null, node);
         List<Map.Entry<MISAPipelineNode, MISAPipelineNode>> toRemove = new ArrayList<>();
 
         for (Map.Entry<MISAPipelineNode, Set<MISAPipelineNode>> kv : edges.entrySet()) {
@@ -150,7 +149,7 @@ public class MISAPipeline implements MISAValidatable {
             edgesInverted.put(target, new HashSet<>(Arrays.asList(source)));
 
         updateCacheDataSources();
-        propertyChangeSupport.firePropertyChange("addEdge", null, null);
+        eventBus.post(new AddedEdgeEvent(source, target));
         return true;
     }
 
@@ -166,16 +165,8 @@ public class MISAPipeline implements MISAValidatable {
             return false;
         boolean result = edges.get(source).remove(target);
         updateCacheDataSources();
-        propertyChangeSupport.firePropertyChange("removeEdge", null, null);
+        eventBus.post(new RemovedEdgeEvent(source, target));
         return result;
-    }
-
-    public void addPropertyChangeListener(PropertyChangeListener listener) {
-        propertyChangeSupport.addPropertyChangeListener(listener);
-    }
-
-    public void removePropertyChangeListener(PropertyChangeListener listener) {
-        propertyChangeSupport.removePropertyChangeListener(listener);
     }
 
     public Collection<MISAPipelineNode> getNodes() {
@@ -467,6 +458,10 @@ public class MISAPipeline implements MISAValidatable {
         Files.write(filename, json.getBytes(Charsets.UTF_8));
     }
 
+    public EventBus getEventBus() {
+        return eventBus;
+    }
+
     public static class JSONAdapter implements JsonDeserializer<MISAPipeline>, JsonSerializer<MISAPipeline> {
 
         @Override
@@ -563,6 +558,66 @@ public class MISAPipeline implements MISAValidatable {
             result.add("parameters", jsonSerializationContext.serialize(nodeParameters));
 
             return result;
+        }
+    }
+
+    public static class AddedNodeEvent {
+        private MISAPipelineNode node;
+
+        public AddedNodeEvent(MISAPipelineNode node) {
+            this.node = node;
+        }
+
+        public MISAPipelineNode getNode() {
+            return node;
+        }
+    }
+
+    public static class RemovedNodeEvent {
+        private MISAPipelineNode node;
+
+        public RemovedNodeEvent(MISAPipelineNode node) {
+            this.node = node;
+        }
+
+        public MISAPipelineNode getNode() {
+            return node;
+        }
+    }
+
+    public static class AddedEdgeEvent {
+        private MISAPipelineNode source;
+        private MISAPipelineNode target;
+
+        public AddedEdgeEvent(MISAPipelineNode source, MISAPipelineNode target) {
+            this.source = source;
+            this.target = target;
+        }
+
+        public MISAPipelineNode getSource() {
+            return source;
+        }
+
+        public MISAPipelineNode getTarget() {
+            return target;
+        }
+    }
+
+    public static class RemovedEdgeEvent {
+        private MISAPipelineNode source;
+        private MISAPipelineNode target;
+
+        public RemovedEdgeEvent(MISAPipelineNode source, MISAPipelineNode target) {
+            this.source = source;
+            this.target = target;
+        }
+
+        public MISAPipelineNode getSource() {
+            return source;
+        }
+
+        public MISAPipelineNode getTarget() {
+            return target;
         }
     }
 }
