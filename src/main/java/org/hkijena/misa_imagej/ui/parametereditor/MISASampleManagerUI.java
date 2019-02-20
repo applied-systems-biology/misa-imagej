@@ -100,7 +100,6 @@ public class MISASampleManagerUI extends JPanel {
                     gridx = 0;
                     gridy = row_;
                     insets = UIUtils.UI_PADDING;
-                    anchor = GridBagConstraints.WEST;
                     fill = GridBagConstraints.NONE;
                     weightx = 0;
                 }
@@ -131,7 +130,7 @@ public class MISASampleManagerUI extends JPanel {
             });
         }
 
-        UIUtils.addFillerGridBagComponent(sampleList, row);
+        UIUtils.addFillerGridBagComponent(sampleList, row, 2);
 
         revalidate();
         repaint();

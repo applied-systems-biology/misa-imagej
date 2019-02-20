@@ -102,6 +102,19 @@ public class UIUtils {
         });
     }
 
+    public static void addFillerGridBagComponent(JComponent component, int row, int column) {
+        component.add(new JPanel(), new GridBagConstraints() {
+            {
+                anchor = GridBagConstraints.PAGE_START;
+                gridx = column;
+                gridy = row;
+                fill = GridBagConstraints.HORIZONTAL | GridBagConstraints.VERTICAL;
+                weightx = 1;
+                weighty = 1;
+            }
+        });
+    }
+
     public static JPopupMenu addPopupMenuToComponent(Component target) {
         JPopupMenu popupMenu = new JPopupMenu();
         target.addMouseListener(new MouseAdapter() {
