@@ -4,6 +4,7 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Maps;
 import com.google.common.eventbus.EventBus;
+import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.hkijena.misa_imagej.api.json.JSONSchemaObject;
@@ -11,12 +12,11 @@ import org.hkijena.misa_imagej.api.json.JSONSchemaObjectType;
 import org.hkijena.misa_imagej.api.repository.MISAModule;
 import org.hkijena.misa_imagej.api.repository.MISAModuleInfo;
 import org.hkijena.misa_imagej.utils.GsonUtils;
+import org.jfree.data.json.impl.JSONObject;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 public class MISAModuleInstance implements MISAValidatable {
@@ -202,15 +202,29 @@ public class MISAModuleInstance implements MISAValidatable {
     }
 
     /**
+     * Loads parameters from a JSON file
+     * @param parameterFile
+     * @param samplePolicy
+     * @throws IOException
+     */
+    public void loadParameters(Path parameterFile, MISASamplePolicy samplePolicy) throws IOException {
+        Gson gson = GsonUtils.getGson();
+        this.loadParameters(GsonUtils.fromJsonFile(gson, parameterFile, JsonObject.class),
+                MISASamplePolicy.createMissingSamples);
+    }
+
+    /**
      * Load parameters from the provided JSON
      *
      * @param root
      */
-    public void loadParameters(JsonObject root) {
+    public void loadParameters(JsonObject root, MISASamplePolicy samplePolicy) {
         // Add missing samples & merge their parameters
         if (root.has("samples")) {
             for (Map.Entry<String, JsonElement> kv : root.getAsJsonObject("samples").entrySet()) {
                 if (!samples.containsKey(kv.getKey())) {
+                    if(samplePolicy != MISASamplePolicy.createMissingSamples)
+                        continue;
                     addSample(kv.getKey());
                 }
                 samples.get(kv.getKey()).getParameters().setValueFromJson(kv.getValue());

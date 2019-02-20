@@ -17,6 +17,8 @@ public class MISACacheUI extends JPanel {
 
     private MISADataSourceUI editor;
 
+    private JButton selectDataSourceButton;
+
     public MISACacheUI(MISACache cache) {
         this.cache = cache;
         initialize();
@@ -26,8 +28,8 @@ public class MISACacheUI extends JPanel {
         if(cache.getIOType() == MISACacheIOType.Imported) {
             setLayout(new BorderLayout());
 
-            JButton selectDataSourceButton = new JButton(UIUtils.getIconFromResources("database.png"));
-            selectDataSourceButton.setToolTipText("Change data source");
+            selectDataSourceButton = new JButton(UIUtils.getIconFromResources("database.png"));
+            selectDataSourceButton.setToolTipText("Click this button to list all available data sources for the cache.");
             JPopupMenu menu = UIUtils.addPopupMenuToComponent(selectDataSourceButton);
 
             for(MISADataSource source : cache.getAvailableDataSources()) {
@@ -60,6 +62,12 @@ public class MISACacheUI extends JPanel {
     }
 
     private void updateEditorUI() {
+        // Change data source button text
+        if(cache.getDataSource() != null)
+            selectDataSourceButton.setText(cache.getDataSource().getName());
+        else
+            selectDataSourceButton.setText(null);
+
         if(editor != null)
             remove(editor);
         editor = MISADataSourceUIRegistry.getEditorFor(cache.getDataSource());

@@ -1,5 +1,6 @@
 package org.hkijena.misa_imagej.ui.components;
 
+import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import org.hkijena.misa_imagej.api.MISAModuleInstance;
 import org.hkijena.misa_imagej.api.MISASample;
@@ -14,10 +15,15 @@ public class MISASampleComboBox extends JComboBox<MISASample> {
 
     private MISAModuleInstance moduleInstance;
 
+    private EventBus eventBus = new EventBus();
+
     public MISASampleComboBox(MISAModuleInstance moduleInstance) {
         this.moduleInstance = moduleInstance;
         this.setRenderer(new MISASampleListCellRenderer());
         this.moduleInstance.getEventBus().register(this);
+        this.addItemListener(e -> {
+            eventBus.post(new SelectionChangedEvent(this.getCurrentSample()));
+        });
         refreshItems();
     }
 
@@ -40,6 +46,8 @@ public class MISASampleComboBox extends JComboBox<MISASample> {
         if(moduleInstance.getSamples().isEmpty()) {
             this.setModel(new DefaultComboBoxModel<>());
             this.setEnabled(false);
+            this.setSelectedItem(null);
+            eventBus.post(new SelectionChangedEvent(null));
         }
         else {
             MISASample current = getSelectedItem() instanceof MISASample ? (MISASample)getSelectedItem() : null;
@@ -58,10 +66,27 @@ public class MISASampleComboBox extends JComboBox<MISASample> {
                 this.setSelectedItem(model.getElementAt(0));
             else
                 this.setSelectedItem(null);
+            eventBus.post(new SelectionChangedEvent(this.getCurrentSample()));
         }
     }
 
     public MISASample getCurrentSample() {
         return getSelectedItem() instanceof MISASample ? ((MISASample)getSelectedItem()) : null;
+    }
+
+    public EventBus getEventBus() {
+        return eventBus;
+    }
+
+    public static class SelectionChangedEvent {
+        private MISASample sample;
+
+        public SelectionChangedEvent(MISASample sample) {
+            this.sample = sample;
+        }
+
+        public MISASample getSample() {
+            return sample;
+        }
     }
 }

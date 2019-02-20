@@ -6,6 +6,8 @@ import org.hkijena.misa_imagej.ui.datasources.MISADataSourceUI;
 import org.hkijena.misa_imagej.utils.UIUtils;
 
 import javax.swing.*;
+import java.awt.*;
+import java.io.IOException;
 
 public class MISAFolderLinkDataSourceUI extends MISADataSourceUI {
 
@@ -24,6 +26,19 @@ public class MISAFolderLinkDataSourceUI extends MISADataSourceUI {
         display.setEditable(false);
         add(display);
 
+        JButton openInFilemanagerButton = new JButton(UIUtils.getIconFromResources("target.png"));
+        openInFilemanagerButton.setToolTipText("Open in file manager");
+        openInFilemanagerButton.addActionListener(e -> {
+            if(getNativeDataSource().getSourceFolder() != null) {
+                try {
+                    Desktop.getDesktop().open(getNativeDataSource().getSourceFolder().toFile());
+                } catch (IOException e1) {
+                    throw new RuntimeException(e1);
+                }
+            }
+        });
+        add(openInFilemanagerButton);
+
         JButton selectButton = new JButton(UIUtils.getIconFromResources("open.png"));
         selectButton.addActionListener(actionEvent -> {
             JFileChooser chooser = new JFileChooser();
@@ -36,6 +51,8 @@ public class MISAFolderLinkDataSourceUI extends MISADataSourceUI {
             refreshDisplay();
         });
         add(selectButton);
+
+
         refreshDisplay();
     }
 
@@ -43,7 +60,7 @@ public class MISAFolderLinkDataSourceUI extends MISADataSourceUI {
         if (getNativeDataSource() == null || display == null)
             return;
         if(getNativeDataSource().getSourceFolder() == null)
-            display.setText("<No data set>");
+            display.setText("<No path set>");
         else
             display.setText(getNativeDataSource().getSourceFolder().toString());
     }

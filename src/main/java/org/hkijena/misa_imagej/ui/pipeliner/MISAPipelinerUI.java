@@ -10,7 +10,7 @@ import org.hkijena.misa_imagej.api.repository.MISAModule;
 import org.hkijena.misa_imagej.api.repository.MISAModuleRepository;
 import org.hkijena.misa_imagej.ui.components.MISAValidityReportStatusUI;
 import org.hkijena.misa_imagej.ui.components.CancelableProcessUI;
-import org.hkijena.misa_imagej.ui.parametereditor.MISACacheTreeUI;
+import org.hkijena.misa_imagej.ui.components.MISACacheTreeUI;
 import org.hkijena.misa_imagej.ui.components.renderers.MISAModuleListCellRenderer;
 import org.hkijena.misa_imagej.ui.repository.MISAModuleRepositoryUI;
 import org.hkijena.misa_imagej.utils.GsonUtils;

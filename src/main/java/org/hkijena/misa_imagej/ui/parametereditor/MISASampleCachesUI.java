@@ -5,6 +5,7 @@ import org.hkijena.misa_imagej.api.MISACache;
 import org.hkijena.misa_imagej.api.MISAModuleInstance;
 import org.hkijena.misa_imagej.api.MISASample;
 import org.hkijena.misa_imagej.api.MISACacheIOType;
+import org.hkijena.misa_imagej.ui.components.MISACacheTreeUI;
 import org.hkijena.misa_imagej.ui.components.MISASampleComboBox;
 import org.hkijena.misa_imagej.utils.UIUtils;
 import org.jdesktop.swingx.JXTextField;
@@ -22,6 +23,7 @@ public class MISASampleCachesUI extends JPanel {
     private MISACacheTreeUI cacheList;
     private MISAModuleInstance moduleInstance;
     private JXTextField objectFilter;
+    private MISASampleComboBox sampleComboBox;
 
     private int cacheEditorRows = 0;
 
@@ -38,8 +40,8 @@ public class MISASampleCachesUI extends JPanel {
         JPanel cacheListPanel = new JPanel(new BorderLayout());
 
         // Add the sample selection
-        MISASampleComboBox sampleComboBox = new MISASampleComboBox(moduleInstance);
-        sampleComboBox.addItemListener(e -> setCurrentSample(sampleComboBox.getCurrentSample()));
+        sampleComboBox = new MISASampleComboBox(moduleInstance);
+        sampleComboBox.getEventBus().register(this);
         cacheListPanel.add(sampleComboBox, BorderLayout.NORTH);
 
         // Add the cache list
@@ -105,6 +107,11 @@ public class MISASampleCachesUI extends JPanel {
     @Subscribe
     public void handleChangedCurrentCacheListEvent(MISACacheTreeUI.ChangedCurrentCacheListEvent event) {
         refreshEditor();
+    }
+
+    @Subscribe
+    public void handleCurrentSampleChangedEvent(MISASampleComboBox.SelectionChangedEvent event) {
+        cacheList.setSample(event.getSample());
     }
 
     public void refreshEditor() {

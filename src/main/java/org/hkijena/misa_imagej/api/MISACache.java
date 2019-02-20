@@ -8,6 +8,7 @@ import java.awt.*;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class MISACache implements MISAValidatable {
 
@@ -150,6 +151,30 @@ public class MISACache implements MISAValidatable {
         if(getIOType() == MISACacheIOType.Imported) {
             getDataSource().install(installFolder, forceCopy);
         }
+    }
+
+    /**
+     * Gets a data source by type
+     * @param klass
+     * @param <T>
+     * @return
+     */
+    public <T extends MISADataSource> T getDataSourceByType(Class<T> klass) {
+        return (T)getAvailableDataSources().stream().filter(klass::isInstance).findFirst().get();
+    }
+
+    /**
+     * Gets all data sources that have the speciefied type
+     * @param klass
+     * @param <T>
+     * @return
+     */
+    public <T extends MISADataSource> List<T> getDataSourcesByType(Class<T> klass) {
+        List<T> result = new ArrayList<>();
+        getAvailableDataSources().stream().filter(klass::isInstance).forEach(misaDataSource -> {
+            result.add((T)misaDataSource);
+        });
+        return result;
     }
 
     /**

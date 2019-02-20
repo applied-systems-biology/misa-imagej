@@ -1,7 +1,10 @@
 package org.hkijena.misa_imagej.ui.parametereditor;
 
+import org.hkijena.misa_imagej.api.MISACache;
 import org.hkijena.misa_imagej.api.MISAModuleInstance;
+import org.hkijena.misa_imagej.api.MISASamplePolicy;
 import org.hkijena.misa_imagej.api.MISAValidityReport;
+import org.hkijena.misa_imagej.api.datasources.MISAFolderLinkDataSource;
 import org.hkijena.misa_imagej.ui.components.MISAValidityReportStatusUI;
 import org.hkijena.misa_imagej.ui.components.CancelableProcessUI;
 import org.hkijena.misa_imagej.ui.repository.MISAModuleRepositoryUI;
@@ -13,6 +16,7 @@ import org.jdesktop.swingx.JXStatusBar;
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
+import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -218,9 +222,62 @@ public class MISAModuleInstanceUI extends JFrame {
     }
 
     private void importFolder() {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        fileChooser.setDialogTitle("Import directory structure");
+        if(fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            boolean foundParameters = false;
+            try {
+                Path rootPath = fileChooser.getSelectedFile().toPath();
+                if(Files.exists(rootPath.resolve("parameters.json"))) {
+                    moduleInstance.loadParameters(fileChooser.getSelectedFile().toPath(), MISASamplePolicy.createMissingSamples);
+                    foundParameters = true;
+                }
+            }
+            catch(IOException e) {
+                throw new RuntimeException(e);
+            }
+            try {
+                Path rootPath = fileChooser.getSelectedFile().toPath();
+                final boolean finalFoundParameters = foundParameters;
+                Files.walk(rootPath, 1, FileVisitOption.FOLLOW_LINKS).filter(Files::isDirectory).forEach(absoluteSamplePath -> {
+                    if(rootPath.equals(absoluteSamplePath))
+                        return;
+                    String sample = absoluteSamplePath.getFileName().toString();
+
+                    // Create a new sample if applicable
+                    if(!finalFoundParameters)
+                        moduleInstance.addSample(sample);
+
+                    // Look for a cache with matching internal path
+                    for(MISACache cache : moduleInstance.getSample(sample).getImportedCaches()) {
+                        Path absoluteCachePath = absoluteSamplePath.resolve(cache.getRelativePath());
+                        if(Files.isDirectory(absoluteCachePath)) {
+                            MISAFolderLinkDataSource dataSource = cache.getDataSourceByType(MISAFolderLinkDataSource.class);
+                            dataSource.setSourceFolder(absoluteCachePath);
+                            cache.setDataSource(dataSource);
+                        }
+                    }
+                });
+            }
+            catch(IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     private void importParameters() {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        fileChooser.setDialogTitle("Import parameter file");
+        if(fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            try {
+                moduleInstance.loadParameters(fileChooser.getSelectedFile().toPath(), MISASamplePolicy.createMissingSamples);
+            }
+            catch(IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     public MISAModuleInstance getModuleInstance() {

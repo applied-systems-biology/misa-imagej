@@ -1,4 +1,4 @@
-package org.hkijena.misa_imagej.ui.parametereditor;
+package org.hkijena.misa_imagej.ui.components;
 
 import com.google.common.eventbus.EventBus;
 import org.apache.commons.collections.ListUtils;

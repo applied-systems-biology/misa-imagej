@@ -43,8 +43,8 @@ public class MISAOutput {
     }
 
     private void loadParameters() throws  IOException {
-        Gson gson = GsonUtils.getGson();
-        moduleInstance.loadParameters(gson.fromJson(new String(Files.readAllBytes(getRootPath().resolve("parameters.json"))), JsonObject.class));
+        moduleInstance.loadParameters(getRootPath().resolve("parameters.json"),
+                MISASamplePolicy.createMissingSamples);
     }
 
     private void loadFilesystem() throws IOException {
