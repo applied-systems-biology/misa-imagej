@@ -5,6 +5,7 @@ import com.google.gson.*;
 import com.google.gson.annotations.SerializedName;
 import org.hkijena.misa_imagej.api.MISAValidatable;
 import org.hkijena.misa_imagej.api.MISAValidityReport;
+import org.hkijena.misa_imagej.utils.GsonUtils;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.util.*;
@@ -34,8 +35,8 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
     @SerializedName("properties")
     private HashMap<String, JSONSchemaObject> properties = new HashMap<>();
 
-    @SerializedName("items")
-    private List<JSONSchemaObject> items = new ArrayList<>();
+    @SerializedName("additionalItems")
+    private JSONSchemaObject additionalItems = null;
 
     @SerializedName("default")
     private Object defaultValue = null;
@@ -239,11 +240,7 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
                 else
                     return JsonNull.INSTANCE;
             case jsonArray: {
-                JsonArray result = new JsonArray();
-                for (JSONSchemaObject obj : getItems()) {
-                    result.add(obj.toJson());
-                }
-                return result;
+                return GsonUtils.getGson().toJsonTree(getValue());
             }
             case jsonObject: {
                 JsonObject result = new JsonObject();
@@ -348,11 +345,6 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
                 report.merge(object.getValidityReport(), object.getId() == null ? "" : object.getId());
             }
         }
-        if(getItems() != null) {
-            for(int i = 0; i < getItems().size(); ++i) {
-                report.merge(getItems().get(i).getValidityReport(), "[" + i + "]");
-            }
-        }
 
         return report;
     }
@@ -429,12 +421,12 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
         this.properties = properties;
     }
 
-    public List<JSONSchemaObject> getItems() {
-        return items;
+    public JSONSchemaObject getAdditionalItems() {
+        return additionalItems;
     }
 
-    public void setItems(List<JSONSchemaObject> items) {
-        this.items = items;
+    public void setAdditionalItems(JSONSchemaObject additionalItems) {
+        this.additionalItems = additionalItems;
     }
 
     public Object getDefaultValue() {
