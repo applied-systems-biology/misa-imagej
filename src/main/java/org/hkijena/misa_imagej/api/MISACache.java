@@ -112,7 +112,45 @@ public class MISACache implements MISAValidatable {
      * @return
      */
     public String getCacheTypeName() {
+        if(getFilesystemEntry().metadata.hasPropertyFromPath("description")) {
+            String name = getFilesystemEntry().metadata.getPropertyFromPath("description").getDocumentationTitle();
+            if(name != null && !name.isEmpty())
+                return name;
+        }
         return getPatternSerializationID() + " -> " + getDescriptionSerializationID();
+    }
+
+    /**
+     * Returns the documentation for this cache
+     * @return
+     */
+    public String getCacheDocumentation() {
+        if(getFilesystemEntry().metadata.hasPropertyFromPath("description")) {
+           return getFilesystemEntry().metadata.getPropertyFromPath("description").getDocumentationDescription();
+        }
+        return null;
+    }
+
+    /**
+     * Returns the documentation for the pattern of this cache
+     * @return
+     */
+    public String getCachePatternTypeName() {
+        if(getFilesystemEntry().metadata.hasPropertyFromPath("pattern")) {
+            return getFilesystemEntry().metadata.getPropertyFromPath("pattern").getDocumentationTitle();
+        }
+        return null;
+    }
+
+    /**
+     * Returns the documentation for the pattern of this cache
+     * @return
+     */
+    public String getCachePatternDocumentation() {
+        if(getFilesystemEntry().metadata.hasPropertyFromPath("pattern")) {
+            return getFilesystemEntry().metadata.getPropertyFromPath("pattern").getDocumentationDescription();
+        }
+        return null;
     }
 
     @Override

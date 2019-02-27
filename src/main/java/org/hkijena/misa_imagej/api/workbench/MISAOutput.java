@@ -42,7 +42,7 @@ public class MISAOutput {
         moduleInfo = gson.fromJson(new String(Files.readAllBytes(getRootPath().resolve("misa-module-info.json"))), MISAModuleInfo.class);
     }
 
-    private void loadParameters() throws  IOException {
+    private void loadParameters() throws IOException {
         moduleInstance.loadParameters(getRootPath().resolve("parameters.json"),
                 MISASamplePolicy.createMissingSamples);
     }

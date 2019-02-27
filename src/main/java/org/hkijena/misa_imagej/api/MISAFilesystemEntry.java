@@ -65,16 +65,6 @@ public class MISAFilesystemEntry implements Cloneable {
     }
 
     public void findCaches(MISASample sample, List<MISACache> result) {
-        Path relativePath = null;
-        switch(ioType) {
-            case Imported:
-                break;
-            case Exported:
-                break;
-            default:
-                throw new UnsupportedOperationException();
-        }
-
         MISACache cache = MISACacheRegistry.getCacheFor(sample,this);
         if(cache.isValid())
             result.add(cache);
