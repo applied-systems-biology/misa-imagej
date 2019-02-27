@@ -1,6 +1,7 @@
 package org.hkijena.misa_imagej.ui.perfanalysis;
 
 import com.google.common.base.CharMatcher;
+import com.google.common.eventbus.EventBus;
 import com.google.gson.Gson;
 import org.hkijena.misa_imagej.api.MISARuntimeLog;
 import org.hkijena.misa_imagej.utils.GsonUtils;
@@ -19,7 +20,6 @@ import org.jfree.data.xy.XYIntervalSeries;
 import org.jfree.data.xy.XYIntervalSeriesCollection;
 
 import javax.swing.*;
-import javax.swing.border.Border;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.geom.RectangularShape;
@@ -31,13 +31,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MISARuntimeLogUI extends JFrame {
+public class MISARuntimeLogUI extends JPanel {
 
     private MISARuntimeLog runtimeLog;
     private ChartPanel ganttChartPanel;
     private JTable summaryTable;
+    private EventBus eventBus = new EventBus();
 
-    private JLabel statusLabel;
     private JButton openButton;
 
     private JToggleButton ganttWithBorderToggle;
@@ -47,12 +47,9 @@ public class MISARuntimeLogUI extends JFrame {
     }
 
     private void initialize() {
-        setSize(800, 600);
-        setIconImage(UIUtils.getIconFromResources("misaxx.png").getImage());
-        getContentPane().setLayout(new BorderLayout(8, 8));
-        setTitle("MISA++ runtime analysis");
-
         JToolBar toolBar = new JToolBar();
+
+        setLayout(new BorderLayout());
 
         openButton = new JButton("Open ...", UIUtils.getIconFromResources("open.png"));
         openButton.addActionListener(actionEvent -> {
@@ -66,16 +63,10 @@ public class MISARuntimeLogUI extends JFrame {
         toolBar.add(openButton);
         add(toolBar, BorderLayout.NORTH);
 
-        JTabbedPane tabbedPane = new JTabbedPane();
+        JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.BOTTOM);
         tabbedPane.addTab("Timeline", initializeGantt());
         tabbedPane.addTab("Summary", initializeSummaryPanel());
         add(tabbedPane, BorderLayout.CENTER);
-
-        JXStatusBar statusBar = new JXStatusBar();
-        statusLabel = new JLabel("Ready");
-        statusBar.add(statusLabel);
-        add(statusBar, BorderLayout.SOUTH);
-
     }
 
     private JPanel initializeGantt() {
@@ -114,17 +105,15 @@ public class MISARuntimeLogUI extends JFrame {
 
     public void open(MISARuntimeLog log) {
         this.runtimeLog = log;
+        eventBus.post(new RuntimeLogChangedEvent(runtimeLog, null));
         rebuildCharts();
     }
 
     public void open(Path path) {
-        statusLabel.setText("Ready");
-        setTitle("MISA++ runtime analysis");
         Gson gson = GsonUtils.getGson();
         try {
             runtimeLog = gson.fromJson(new String(Files.readAllBytes(path)), MISARuntimeLog.class);
-            statusLabel.setText(path.toString());
-            setTitle(path.toString() + " - MISA++ runtime analysis");
+            eventBus.post(new RuntimeLogChangedEvent(runtimeLog, path));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -233,5 +222,27 @@ public class MISARuntimeLogUI extends JFrame {
             openButton.setVisible(false);
         else
             openButton.setVisible(true);
+    }
+
+    public EventBus getEventBus() {
+        return eventBus;
+    }
+
+    public static class RuntimeLogChangedEvent {
+        private MISARuntimeLog runtimeLog;
+        private Path path;
+
+        public RuntimeLogChangedEvent(MISARuntimeLog runtimeLog, Path path) {
+            this.runtimeLog = runtimeLog;
+            this.path = path;
+        }
+
+        public MISARuntimeLog getRuntimeLog() {
+            return runtimeLog;
+        }
+
+        public Path getPath() {
+            return path;
+        }
     }
 }

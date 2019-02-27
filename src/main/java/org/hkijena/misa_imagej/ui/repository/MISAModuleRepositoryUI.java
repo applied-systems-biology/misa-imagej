@@ -6,6 +6,7 @@ import org.hkijena.misa_imagej.MISACommand;
 import org.hkijena.misa_imagej.api.repository.MISAModule;
 import org.hkijena.misa_imagej.api.repository.MISAModuleRepository;
 import org.hkijena.misa_imagej.ui.parametereditor.MISAModuleInstanceUI;
+import org.hkijena.misa_imagej.ui.perfanalysis.MISARuntimeLogFrameUI;
 import org.hkijena.misa_imagej.ui.perfanalysis.MISARuntimeLogUI;
 import org.hkijena.misa_imagej.ui.pipeliner.MISAPipelinerUI;
 import org.hkijena.misa_imagej.ui.components.renderers.MISAModuleListCellRenderer;
@@ -111,7 +112,7 @@ public class MISAModuleRepositoryUI extends JFrame {
         JButton launchRuntimeLogUI = new JButton(UIUtils.getIconFromResources("clock.png"));
         launchRuntimeLogUI.setToolTipText("Analyze runtime log");
         launchRuntimeLogUI.addActionListener(actionEvent -> {
-            MISARuntimeLogUI runtimeLogUI = new MISARuntimeLogUI();
+            MISARuntimeLogFrameUI runtimeLogUI = new MISARuntimeLogFrameUI();
             runtimeLogUI.pack();
             runtimeLogUI.setSize(new Dimension(800,600));
             runtimeLogUI.setVisible(true);

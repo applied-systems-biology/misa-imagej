@@ -11,12 +11,18 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MISAWorkbenchUI extends JFrame{
 
     private JLabel statusLabel;
-    private JButton showRuntimeLogButton;
     private MISAOutput misaOutput;
+
+    private JTabbedPane tabbedPane;
+    private MISACacheBrowserUI cacheBrowserUI;
+    private MISARuntimeLogUI runtimeLogUI;
+    private List<MISAAttachmentBrowserUI> attachmentBrowserUIList = new ArrayList<>();
 
     public MISAWorkbenchUI() {
         initialize();
@@ -28,6 +34,16 @@ public class MISAWorkbenchUI extends JFrame{
         setTitle("MISA++ Workbench for ImageJ");
         setIconImage(UIUtils.getIconFromResources("misaxx.png").getImage());
         UIUtils.setToAskOnClose(this, "Do you really want to close this analysis tool?", "Close window");
+
+        cacheBrowserUI = new MISACacheBrowserUI();
+        runtimeLogUI = new MISARuntimeLogUI();
+        runtimeLogUI.setHideOpenButton(true);
+
+        tabbedPane = new JTabbedPane();
+        tabbedPane.addTab("Data browser", cacheBrowserUI);
+        tabbedPane.addTab("Runtime log", runtimeLogUI);
+
+        add(tabbedPane, BorderLayout.CENTER);
 
         initializeToolbar();
 
@@ -44,10 +60,6 @@ public class MISAWorkbenchUI extends JFrame{
 
         toolBar.add(Box.createHorizontalGlue());
 
-        showRuntimeLogButton = new JButton("Analyze runtime", UIUtils.getIconFromResources("clock.png"));
-        showRuntimeLogButton.addActionListener(actionEvent -> showRuntimeLog());
-        toolBar.add(showRuntimeLogButton);
-
         add(toolBar, BorderLayout.NORTH);
     }
 
@@ -58,24 +70,14 @@ public class MISAWorkbenchUI extends JFrame{
         add(statusBar, BorderLayout.SOUTH);
     }
 
-    private void showRuntimeLog() {
-        if(misaOutput != null && misaOutput.getRuntimeLogPath().toFile().isFile()) {
-            MISARuntimeLogUI ui = new MISARuntimeLogUI();
-            ui.setHideOpenButton(true);
-            ui.open(misaOutput.getRuntimeLogPath());
-            ui.setTitle(misaOutput.getRootPath().toString() + " - MISA++ runtime analysis");
-            ui.pack();
-            ui.setSize(new Dimension(800,600));
-            ui.setVisible(true);
-        }
-    }
-
     public void open(Path path) {
         setTitle("MISA++ Workbench for ImageJ");
         misaOutput = null;
         try {
             misaOutput = new MISAOutput(path);
             setTitle(misaOutput.getRootPath().toString() + " - MISA++ Workbench for ImageJ");
+
+            runtimeLogUI.open(misaOutput.getRuntimeLogPath());
         }
         catch (IOException e) {
             throw new RuntimeException(e);
@@ -94,6 +96,5 @@ public class MISAWorkbenchUI extends JFrame{
     }
 
     private void updateUI() {
-        showRuntimeLogButton.setEnabled(misaOutput != null && misaOutput.getRuntimeLogPath().toFile().isFile());
     }
 }
