@@ -50,6 +50,8 @@ public class MISAPipelineOutputUI extends JFrame {
             analyzeButton.addActionListener(actionEvent -> {
                 MISAWorkbenchUI ui = new MISAWorkbenchUI();
                 ui.open(exportDirectory.resolve(node.getId()).resolve("exported"));
+                ui.pack();
+                ui.setSize(800, 600);
                 ui.setVisible(true);
             });
 

@@ -79,6 +79,7 @@ public class MISAWorkbenchUI extends JFrame{
             setTitle(misaOutput.getRootPath().toString() + " - MISA++ Workbench for ImageJ");
 
             runtimeLogUI.open(misaOutput.getRuntimeLogPath());
+            cacheBrowserUI.setMisaOutput(misaOutput);
         }
         catch (IOException e) {
             throw new RuntimeException(e);

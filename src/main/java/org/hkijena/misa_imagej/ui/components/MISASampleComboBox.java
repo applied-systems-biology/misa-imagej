@@ -18,13 +18,15 @@ public class MISASampleComboBox extends JComboBox<MISASample> {
     private EventBus eventBus = new EventBus();
 
     public MISASampleComboBox(MISAModuleInstance moduleInstance) {
-        this.moduleInstance = moduleInstance;
+        this();
+        setModuleInstance(moduleInstance);
+    }
+
+    public MISASampleComboBox() {
         this.setRenderer(new MISASampleListCellRenderer());
-        this.moduleInstance.getEventBus().register(this);
         this.addItemListener(e -> {
             eventBus.post(new SelectionChangedEvent(this.getCurrentSample()));
         });
-        refreshItems();
     }
 
     @Subscribe
@@ -43,7 +45,7 @@ public class MISASampleComboBox extends JComboBox<MISASample> {
     }
 
     private void refreshItems() {
-        if(moduleInstance.getSamples().isEmpty()) {
+        if(moduleInstance == null || moduleInstance.getSamples().isEmpty()) {
             this.setModel(new DefaultComboBoxModel<>());
             this.setEnabled(false);
             this.setSelectedItem(null);
@@ -76,6 +78,14 @@ public class MISASampleComboBox extends JComboBox<MISASample> {
 
     public EventBus getEventBus() {
         return eventBus;
+    }
+
+    public void setModuleInstance(MISAModuleInstance moduleInstance) {
+        if(this.moduleInstance != null)
+            this.moduleInstance.getEventBus().unregister(this);
+        this.moduleInstance = moduleInstance;
+        this.moduleInstance.getEventBus().register(this);
+        refreshItems();
     }
 
     public static class SelectionChangedEvent {

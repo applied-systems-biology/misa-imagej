@@ -271,6 +271,8 @@ public class MISAPipelinerUI extends JFrame {
                         }
                         MISAPipelineOutputUI ui = new MISAPipelineOutputUI(pipeline, dialogUI.getExportPath());
                         ui.setLocationRelativeTo(this);
+                        ui.pack();
+                        ui.setSize(800, 600);
                         ui.setVisible(true);
                     }
                 });

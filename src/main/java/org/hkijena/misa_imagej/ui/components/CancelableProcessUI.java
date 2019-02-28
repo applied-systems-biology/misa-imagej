@@ -10,6 +10,8 @@ import java.beans.PropertyChangeSupport;
 import java.util.List;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class CancelableProcessUI extends JDialog {
 
@@ -24,9 +26,14 @@ public class CancelableProcessUI extends JDialog {
     private Worker worker;
     private PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
     private Status status = Status.Ready;
+    private JTextArea statusLabel;
+    private JProgressBar currentTaskProgress;
+    private JProgressBar processProgress;
+    private int currentTask = 0;
+
+    private static final Pattern percentagePattern = Pattern.compile("<(\\d+)%>.*");
 
     public CancelableProcessUI(List<ProcessBuilder> processes) {
-
         setTitle("Working ...");
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         setSize(400, 100);
@@ -34,11 +41,32 @@ public class CancelableProcessUI extends JDialog {
 
         add(new JLabel("Please wait until the process is finished ..."), BorderLayout.NORTH);
 
-        JProgressBar progressBar = new JProgressBar();
-        progressBar.setIndeterminate(true);
-        add(progressBar, BorderLayout.CENTER);
+        JPanel centerPanel = new JPanel(new BorderLayout(8,8));
 
-        worker = new Worker(processes);
+        statusLabel = new JTextArea("Please wait ...");
+        statusLabel.setEditable(false);
+        statusLabel.setBorder(null);
+        statusLabel.setFont(statusLabel.getFont().deriveFont(Font.ITALIC));
+        centerPanel.add(statusLabel, BorderLayout.CENTER);
+
+        JPanel progressPanel = new JPanel();
+        progressPanel.setLayout(new BoxLayout(progressPanel, BoxLayout.PAGE_AXIS));
+
+        currentTaskProgress = new JProgressBar();
+        currentTaskProgress.setIndeterminate(true);
+        progressPanel.add(currentTaskProgress);
+
+        processProgress = new JProgressBar();
+        processProgress.setMaximum(processes.size());
+        processProgress.setValue(0);
+        processProgress.setString("0 / " + processes.size());
+        processProgress.setStringPainted(true);
+        progressPanel.add(processProgress);
+
+        centerPanel.add(progressPanel, BorderLayout.SOUTH);
+        add(centerPanel, BorderLayout.CENTER);
+
+        worker = new Worker(this, processes);
 
         JButton cancelButton = new JButton("Cancel");
         add(cancelButton, BorderLayout.SOUTH);
@@ -53,6 +81,7 @@ public class CancelableProcessUI extends JDialog {
             throw new RuntimeException("Worker is not ready!");
         setStatus(Status.Running);
         setModal(false);
+        pack();
         setVisible(true);
     }
 
@@ -83,23 +112,53 @@ public class CancelableProcessUI extends JDialog {
         propertyChangeSupport.removePropertyChangeListener( l );
     }
 
+    private void updateProgressAndStatus(String stdout, int currentProcess, int numProcesses) {
+        statusLabel.setText(stdout.replace("\t", "  "));
+
+        processProgress.setValue(currentProcess);
+        processProgress.setString(currentProcess + " / " + numProcesses);
+
+        if(currentTask != currentProcess) {
+            currentTaskProgress.setMaximum(100);
+            currentTaskProgress.setValue(0);
+            currentTaskProgress.setIndeterminate(true);
+        }
+
+        Matcher percentageMatch = percentagePattern.matcher(stdout.trim());
+        if(percentageMatch.matches()) {
+            try {
+                int percentage = Integer.parseInt(percentageMatch.group(1));
+                currentTaskProgress.setIndeterminate(false);
+                currentTaskProgress.setMaximum(100);
+                currentTaskProgress.setValue(percentage);
+            }
+            catch(NumberFormatException e) {
+            }
+        }
+
+    }
+
     public class Worker extends SwingWorker<Integer, Object> {
 
         private final List<ProcessBuilder> processes;
         private volatile Process currentProcess;
+        private volatile int currentProcessIndex;
+        private final CancelableProcessUI ui;
 
-        public Worker(List<ProcessBuilder> processes) {
+        public Worker(CancelableProcessUI ui, List<ProcessBuilder> processes) {
+            this.ui = ui;
             this.processes = processes;
         }
 
         @Override
         protected Integer doInBackground() throws Exception {
-            for(ProcessBuilder builder : processes) {
+            for(int i = 0; i < processes.size(); ++i) {
                 if(this.isCancelled())
                     return 1;
-                currentProcess = builder.start();
-                new ProcessStreamToStringGobbler(currentProcess.getInputStream(), s -> MISAModuleRepositoryUI.getInstance().getCommand().getLogService().info(s)).start();
-                new ProcessStreamToStringGobbler(currentProcess.getErrorStream(), s -> MISAModuleRepositoryUI.getInstance().getCommand().getLogService().error(s)).start();
+                currentProcess = processes.get(i).start();
+                currentProcessIndex = i;
+                new ProcessStreamToStringGobbler(currentProcess.getInputStream(), this::processInput).start();
+                new ProcessStreamToStringGobbler(currentProcess.getErrorStream(), this::processError).start();
                 int ret = currentProcess.waitFor();
                 if(ret != 0)
                     return ret;
@@ -125,6 +184,17 @@ public class CancelableProcessUI extends JDialog {
         public void cancelCurrentProcess() {
             if(currentProcess != null)
                 currentProcess.destroy();
+        }
+
+        private void processInput(String s) {
+            MISAModuleRepositoryUI.getInstance().getCommand().getLogService().info(s);
+            SwingUtilities.invokeLater(() -> {
+                ui.updateProgressAndStatus(s, currentProcessIndex, processes.size());
+            });
+        }
+
+        private void processError(String s) {
+            MISAModuleRepositoryUI.getInstance().getCommand().getLogService().error(s);
         }
     }
 }

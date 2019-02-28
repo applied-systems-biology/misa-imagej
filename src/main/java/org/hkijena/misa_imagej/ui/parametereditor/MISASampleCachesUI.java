@@ -151,7 +151,7 @@ public class MISASampleCachesUI extends JPanel {
                     editorLastIOType = cache.getIOType();
                 }
 
-                insertCacheEditorUI(new MISACacheUI(cache));
+                insertCacheEditorUI(new MISAInputCacheUI(cache));
             }
 
             sampleEditor.add(new JPanel(), new GridBagConstraints() {
@@ -170,7 +170,7 @@ public class MISASampleCachesUI extends JPanel {
         sampleEditor.repaint();
     }
 
-    private void insertCacheEditorUI(MISACacheUI ui) {
+    private void insertCacheEditorUI(MISAInputCacheUI ui) {
         if(objectFilter.getText() != null && !objectFilter.getText().isEmpty()) {
             String searchText = ui.getCache().getCacheTypeName().toLowerCase() + ui.getCache().getRelativePathName().toLowerCase();
             if(!searchText.contains(objectFilter.getText().toLowerCase())) {

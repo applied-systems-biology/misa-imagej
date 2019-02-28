@@ -11,7 +11,7 @@ import org.hkijena.misa_imagej.utils.UIUtils;
 import javax.swing.*;
 import java.awt.*;
 
-public class MISACacheUI extends JPanel {
+public class MISAInputCacheUI extends JPanel {
 
     private MISACache cache;
 
@@ -19,7 +19,7 @@ public class MISACacheUI extends JPanel {
 
     private JButton selectDataSourceButton;
 
-    public MISACacheUI(MISACache cache) {
+    public MISAInputCacheUI(MISACache cache) {
         this.cache = cache;
         initialize();
     }
