@@ -3,6 +3,7 @@ package org.hkijena.misa_imagej.ui.workbench;
 import org.hkijena.misa_imagej.api.workbench.MISAOutput;
 import org.hkijena.misa_imagej.ui.perfanalysis.MISARuntimeLogUI;
 import org.hkijena.misa_imagej.utils.UIUtils;
+import org.hkijena.misa_imagej.utils.ui.DocumentTabPane;
 import org.jdesktop.swingx.JXStatusBar;
 
 import javax.swing.*;
@@ -19,7 +20,7 @@ public class MISAWorkbenchUI extends JFrame{
     private JLabel statusLabel;
     private MISAOutput misaOutput;
 
-    private JTabbedPane tabbedPane;
+    private DocumentTabPane tabbedPane;
     private MISACacheBrowserUI cacheBrowserUI;
     private MISARuntimeLogUI runtimeLogUI;
     private List<MISAAttachmentBrowserUI> attachmentBrowserUIList = new ArrayList<>();
@@ -39,9 +40,9 @@ public class MISAWorkbenchUI extends JFrame{
         runtimeLogUI = new MISARuntimeLogUI();
         runtimeLogUI.setHideOpenButton(true);
 
-        tabbedPane = new JTabbedPane();
-        tabbedPane.addTab("Data browser", cacheBrowserUI);
-        tabbedPane.addTab("Runtime log", runtimeLogUI);
+        tabbedPane = new DocumentTabPane();
+        tabbedPane.addTab("Data browser", UIUtils.getIconFromResources("database.png"), cacheBrowserUI, DocumentTabPane.CloseMode.withDisabledCloseButton);
+        tabbedPane.addTab("Runtime log",  UIUtils.getIconFromResources("clock.png"), runtimeLogUI, DocumentTabPane.CloseMode.withDisabledCloseButton);
 
         add(tabbedPane, BorderLayout.CENTER);
 

@@ -11,6 +11,7 @@ import org.hkijena.misa_imagej.ui.repository.MISAModuleRepositoryUI;
 import org.hkijena.misa_imagej.ui.workbench.MISAWorkbenchUI;
 import org.hkijena.misa_imagej.utils.FilesystemUtils;
 import org.hkijena.misa_imagej.utils.UIUtils;
+import org.hkijena.misa_imagej.utils.ui.DocumentTabPane;
 import org.jdesktop.swingx.JXStatusBar;
 
 import javax.swing.*;
@@ -175,12 +176,12 @@ public class MISAModuleInstanceUI extends JFrame {
         MISASampleCachesUI MISASampleCachesUI = new MISASampleCachesUI(getModuleInstance());
 
         // Tabs with settings
-        JTabbedPane tabbedPane = new JTabbedPane();
-        tabbedPane.addTab("Samples", sampleManagerUI);
-        tabbedPane.addTab("Data", MISASampleCachesUI);
-        tabbedPane.addTab("Sample parameters", sampleParametersEditorUI);
-        tabbedPane.addTab("Algorithm parameters", algorithmParametersEditorUI);
-        tabbedPane.addTab("Runtime", MISARuntimeParametersUI);
+        DocumentTabPane tabbedPane = new DocumentTabPane();
+        tabbedPane.addTab("Samples", UIUtils.getIconFromResources("sample.png"), sampleManagerUI, DocumentTabPane.CloseMode.withoutCloseButton);
+        tabbedPane.addTab("Data", UIUtils.getIconFromResources("database.png"), MISASampleCachesUI, DocumentTabPane.CloseMode.withoutCloseButton);
+        tabbedPane.addTab("Sample parameters", UIUtils.getIconFromResources("edit.png"), sampleParametersEditorUI, DocumentTabPane.CloseMode.withoutCloseButton);
+        tabbedPane.addTab("Algorithm parameters", UIUtils.getIconFromResources("edit.png"), algorithmParametersEditorUI, DocumentTabPane.CloseMode.withoutCloseButton);
+        tabbedPane.addTab("Runtime", UIUtils.getIconFromResources("cog.png"), MISARuntimeParametersUI, DocumentTabPane.CloseMode.withoutCloseButton);
         add(tabbedPane, BorderLayout.CENTER);
 
         // Toolbar
