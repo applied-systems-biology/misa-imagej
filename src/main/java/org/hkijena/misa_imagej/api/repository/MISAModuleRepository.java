@@ -1,7 +1,6 @@
 package org.hkijena.misa_imagej.api.repository;
 
 import com.google.gson.Gson;
-import org.hkijena.misa_imagej.MISACommand;
 import org.hkijena.misa_imagej.utils.FilesystemUtils;
 import org.hkijena.misa_imagej.utils.GsonUtils;
 import org.hkijena.misa_imagej.utils.OSUtils;
@@ -54,7 +53,7 @@ public class MISAModuleRepository {
     }
 
     public MISAModule getModule(String name) {
-        Optional<MISAModule> result = modules.stream().filter(misaModule -> misaModule.getModuleInfo().getName().equals(name)).findFirst();
+        Optional<MISAModule> result = modules.stream().filter(misaModule -> misaModule.getModuleInfo().getId().equals(name)).findFirst();
         return result.orElse(null);
     }
 

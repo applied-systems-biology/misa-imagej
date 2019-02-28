@@ -46,7 +46,6 @@ public class MISAModuleInstanceUI extends JFrame {
 
     private void install(Path parameterSchema, Path importedDirectory, Path exportedDirectory, boolean forceCopy, boolean relativeDirectories) {
         setEnabled(false);
-        MISAModuleRepositoryUI.getInstance().getCommand().getUiService().getDefaultUI().getConsolePane().show();
         this.moduleInstance.install(parameterSchema, importedDirectory, exportedDirectory, forceCopy, relativeDirectories);
         setEnabled(true);
     }
@@ -110,8 +109,6 @@ public class MISAModuleInstanceUI extends JFrame {
 
         if(!parametersAreValid())
             return;
-
-        MISAModuleRepositoryUI.getInstance().getCommand().getUiService().getDefaultUI().getConsolePane().show();
 
         MISARunModuleDialogUI dialog = new MISARunModuleDialogUI(this);
         dialog.setLocationRelativeTo(this);

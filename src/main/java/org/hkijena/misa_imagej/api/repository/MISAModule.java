@@ -148,7 +148,7 @@ public class MISAModule {
      * @return
      */
     public String getGeneratedFileName() {
-        return getModuleInfo().getName() + "-" + getModuleInfo().getVersion() + "-" + getOperatingSystem().toString() + "-" + getOperatingSystemArchitecture().toString();
+        return getModuleInfo().getId() + "-" + getModuleInfo().getVersion() + "-" + getOperatingSystem().toString() + "-" + getOperatingSystemArchitecture().toString();
     }
 
     /**

@@ -53,8 +53,8 @@ public class MISAPipeline implements MISAValidatable {
      */
     public MISAPipelineNode addNode(MISAModule module) {
         MISAPipelineNode node = new MISAPipelineNode(this);
-        node.setModuleName(module.getModuleInfo().getName());
-        node.setName(module.getModuleInfo().getDescription());
+        node.setModuleName(module.getModuleInfo().getId());
+        node.setName(module.getModuleInfo().getName());
         node.setPipeline(this);
         addNode(node);
         return node;
@@ -303,7 +303,7 @@ public class MISAPipeline implements MISAValidatable {
                 String id = node.getId();
                 if (id == null || id.isEmpty()) {
                     if (node.getName() == null || node.getName().isEmpty()) {
-                        id = node.getModuleInstance().getModuleInfo().getName().toLowerCase().replace(' ', '-');
+                        id = node.getModuleInstance().getModuleInfo().getId().toLowerCase().replace(' ', '-');
                     } else {
                         id = node.getName().toLowerCase().replace(' ', '-');
                     }
@@ -417,7 +417,7 @@ public class MISAPipeline implements MISAValidatable {
                 usedModules.add(node.getModuleInstance().getModule());
             }
             for (MISAModule used : usedModules) {
-                String variable = used.getModuleInfo().getName().toUpperCase().replace('-', '_');
+                String variable = used.getModuleInfo().getId().toUpperCase().replace('-', '_');
                 writer.write(variable + "=\"" + used.getExecutablePath() + "\"\n");
                 moduleVariableMapping.put(used, variable);
             }

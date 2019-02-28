@@ -126,7 +126,7 @@ public class MISAPipelineNodeUI extends JPanel implements ComponentListener {
     private void editParameters() {
         MISAModuleInstanceUI editor = new MISAModuleInstanceUI(node.getModuleInstance(), true, false);
         editor.setTitle("MISA++ pipeline tool - Parameters for " + node.getName()
-                + " (" + node.getModuleInstance().getModuleInfo().getName() + ")");
+                + " (" + node.getModuleInstance().getModuleInfo().getId() + ")");
         editor.pack();
         editor.setSize(new Dimension(800,600));
         editor.setVisible(true);

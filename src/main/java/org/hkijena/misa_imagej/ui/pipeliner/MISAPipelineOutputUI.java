@@ -41,7 +41,7 @@ public class MISAPipelineOutputUI extends JFrame {
 
             JLabel icon = new JLabel(new MonochromeColorIcon(UIUtils.getIconFromResources("module-template.png"),
                     node.getModuleInstance().getModule().getModuleInfo().toColor()));
-            JLabel type = new JLabel(node.getModuleInstance().getModuleInfo().getName());
+            JLabel type = new JLabel(node.getModuleInstance().getModuleInfo().getId());
             JTextField name = new JTextField(node.getName());
             name.setToolTipText(node.getDescription());
             name.setEditable(false);

@@ -36,17 +36,17 @@ public class CancelableProcessUI extends JDialog {
     public CancelableProcessUI(List<ProcessBuilder> processes) {
         setTitle("Working ...");
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-        setSize(400, 100);
+        setSize(500, 400);
         setLayout(new BorderLayout(8, 8));
-
-        add(new JLabel("Please wait until the process is finished ..."), BorderLayout.NORTH);
 
         JPanel centerPanel = new JPanel(new BorderLayout(8,8));
 
         statusLabel = new JTextArea("Please wait ...");
         statusLabel.setEditable(false);
         statusLabel.setBorder(null);
-        statusLabel.setFont(statusLabel.getFont().deriveFont(Font.ITALIC));
+        statusLabel.setLineWrap(true);
+        statusLabel.setWrapStyleWord(true);
+        statusLabel.setOpaque(false);
         centerPanel.add(statusLabel, BorderLayout.CENTER);
 
         JPanel progressPanel = new JPanel();
@@ -68,12 +68,18 @@ public class CancelableProcessUI extends JDialog {
 
         worker = new Worker(this, processes);
 
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.LINE_AXIS));
+        buttonPanel.add(Box.createHorizontalGlue());
+
         JButton cancelButton = new JButton("Cancel");
-        add(cancelButton, BorderLayout.SOUTH);
+        buttonPanel.add(cancelButton);
         cancelButton.addActionListener(actionEvent -> {
             worker.cancel(true);
             worker.cancelCurrentProcess();
         } );
+
+        add(buttonPanel, BorderLayout.SOUTH);
     }
 
     public void start() {
@@ -82,6 +88,7 @@ public class CancelableProcessUI extends JDialog {
         setStatus(Status.Running);
         setModal(false);
         pack();
+        setSize(500,400);
         setVisible(true);
     }
 

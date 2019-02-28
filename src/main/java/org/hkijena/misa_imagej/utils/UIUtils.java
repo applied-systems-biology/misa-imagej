@@ -44,6 +44,26 @@ public class UIUtils {
         return description;
     }
 
+    public static JTextArea createDescriptionTextAreaUI(JPanel panel, String text, int row, int column) {
+        JTextArea description = new JTextArea(text);
+        description.setEditable(false);
+        description.setBorder(null);
+        description.setOpaque(false);
+        description.setWrapStyleWord(true);
+        description.setLineWrap(true);
+        panel.add(description, new GridBagConstraints() {
+            {
+                anchor = GridBagConstraints.WEST;
+                gridx = column;
+                gridy = row;
+                insets = UI_PADDING;
+                fill = GridBagConstraints.HORIZONTAL;
+                weightx = 1;
+            }
+        });
+        return description;
+    }
+
     public static void addToGridBag(JPanel panel, JButton component, int row, int column) {
         panel.add(component, new GridBagConstraints() {
             {

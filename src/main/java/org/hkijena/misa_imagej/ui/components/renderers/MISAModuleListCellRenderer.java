@@ -46,12 +46,12 @@ public class MISAModuleListCellRenderer extends JPanel implements ListCellRender
 
     @Override
     public Component getListCellRendererComponent(JList<? extends MISAModule> list, MISAModule value, int index, boolean isSelected, boolean cellHasFocus) {
-        nameLabel.setText(value.getModuleInfo().getDescription());
+        nameLabel.setText(value.getModuleInfo().getName());
         icon.setColor(value.getModuleInfo().toColor());
-        if(value.getModuleInfo().description == null || value.getModuleInfo().description.isEmpty())
+        if(value.getModuleInfo().getName() == null || value.getModuleInfo().getName().isEmpty())
             versionLabel.setText(value.getModuleInfo().getVersion());
         else
-            versionLabel.setText(value.getModuleInfo().getName() + " - " + value.getModuleInfo().getVersion());
+            versionLabel.setText(value.getModuleInfo().getId() + " - " + value.getModuleInfo().getVersion());
 
         if(isSelected) {
             setBackground(new Color(184, 207, 229));

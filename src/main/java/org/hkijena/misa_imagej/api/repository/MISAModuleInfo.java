@@ -4,44 +4,48 @@ import com.google.gson.annotations.SerializedName;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class MISAModuleInfo {
-    @SerializedName("name")
-    public String name;
+    @SerializedName("id")
+    private String id;
 
     @SerializedName("version")
-    public String version;
+    private String version;
+
+    @SerializedName("name")
+    private String name;
 
     @SerializedName("description")
-    public String description;
+    private String description;
 
     @SerializedName("dependencies")
-    public List<MISAModuleInfo> dependencies = new ArrayList<>();
+    private List<MISAModuleInfo> dependencies = new ArrayList<>();
 
     @Override
     public String toString() {
-        if(description == null || description.isEmpty()) {
-            return name + "-" + version;
+        if(getName() == null || getName().isEmpty()) {
+            return getId() + "-" + getVersion();
         }
         else {
-            return description + " (" + name + "-" + version + ")";
+            return getName() + " (" + getId() + "-" + getVersion() + ")";
         }
     }
 
-    public String getName() {
-        return name;
+    public String getId() {
+        return id;
     }
 
     public String getVersion() {
         return version;
     }
 
-    public String getDescription() {
-        if(description == null || description.isEmpty())
-            return name;
+    public String getName() {
+        if(name == null || name.isEmpty())
+            return getId();
         else
-            return description;
+            return name;
     }
 
     /**
@@ -49,7 +53,15 @@ public class MISAModuleInfo {
      * @return
      */
     public Color toColor() {
-        float h = Math.abs(getName().hashCode() % 256) / 255.0f;
+        float h = Math.abs(getId().hashCode() % 256) / 255.0f;
         return Color.getHSBColor(h, 0.8f, 0.8f);
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public List<MISAModuleInfo> getDependencies() {
+        return Collections.unmodifiableList(dependencies);
     }
 }

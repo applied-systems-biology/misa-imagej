@@ -7,7 +7,6 @@ import org.hkijena.misa_imagej.api.repository.MISAModule;
 import org.hkijena.misa_imagej.api.repository.MISAModuleRepository;
 import org.hkijena.misa_imagej.ui.parametereditor.MISAModuleInstanceUI;
 import org.hkijena.misa_imagej.ui.perfanalysis.MISARuntimeLogFrameUI;
-import org.hkijena.misa_imagej.ui.perfanalysis.MISARuntimeLogUI;
 import org.hkijena.misa_imagej.ui.pipeliner.MISAPipelinerUI;
 import org.hkijena.misa_imagej.ui.components.renderers.MISAModuleListCellRenderer;
 import org.hkijena.misa_imagej.utils.GsonUtils;
@@ -22,6 +21,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+
+import static org.hkijena.misa_imagej.utils.UIUtils.UI_PADDING;
 
 /**
  * User interface that allows the user to manage and select MISA++ modules
@@ -125,14 +126,64 @@ public class MISAModuleRepositoryUI extends JFrame {
         JLabel descriptionTitle;
         JLabel descriptionVersionId;
         JTextField descriptionSourceFile;
+        JTextArea moduleDescription;
         JButton removeModuleButton;
         detailPanel = new JPanel(new GridBagLayout());
         {
-            descriptionTitle = UIUtils.createDescriptionLabelUI(detailPanel, "<Title>", 0, 0);
+            descriptionTitle = new JLabel();
             descriptionTitle.setFont(descriptionTitle.getFont().deriveFont(18f));
-            descriptionVersionId = UIUtils.createDescriptionLabelUI(detailPanel, "<VersionID>", 1, 0);
-            descriptionSourceFile = UIUtils.createDescriptionTextFieldUI(detailPanel, "<SourceFile>", 2, 0);
-            UIUtils.addFillerGridBagComponent(detailPanel, 3);
+            detailPanel.add(descriptionTitle, new GridBagConstraints() {
+                {
+                    anchor = GridBagConstraints.WEST;
+                    gridx = 0;
+                    gridy = 0;
+                    insets = UI_PADDING;
+                }
+            });
+
+            descriptionVersionId = new JLabel();
+            detailPanel.add(descriptionVersionId, new GridBagConstraints() {
+                {
+                    anchor = GridBagConstraints.WEST;
+                    gridx = 0;
+                    gridy = 1;
+                    insets = UI_PADDING;
+                }
+            });
+
+            descriptionSourceFile = new JTextField();
+            descriptionSourceFile.setBorder(null);
+            descriptionSourceFile.setEditable(false);
+            descriptionSourceFile.setOpaque(false);
+            descriptionSourceFile.setFont(descriptionSourceFile.getFont().deriveFont(Font.ITALIC));
+            detailPanel.add(descriptionSourceFile, new GridBagConstraints() {
+                {
+                    anchor = GridBagConstraints.WEST;
+                    gridx = 0;
+                    gridy = 2;
+                    insets = UI_PADDING;
+                    weightx = 1;
+                    fill = GridBagConstraints.HORIZONTAL;
+                }
+            });
+
+            moduleDescription = new JTextArea();
+            moduleDescription.setBorder(null);
+            moduleDescription.setEditable(false);
+            moduleDescription.setOpaque(false);
+            moduleDescription.setLineWrap(true);
+            moduleDescription.setWrapStyleWord(true);
+            detailPanel.add(moduleDescription, new GridBagConstraints() {
+                {
+                    anchor = GridBagConstraints.WEST;
+                    gridx = 0;
+                    gridy = 3;
+                    insets = UI_PADDING;
+                    weightx = 1;
+                    weighty = 1;
+                    fill = GridBagConstraints.BOTH;
+                }
+            });
 
             removeModuleButton = new JButton("Remove", UIUtils.getIconFromResources("delete.png"));
             removeModuleButton.addActionListener(actionEvent -> {
@@ -168,9 +219,10 @@ public class MISAModuleRepositoryUI extends JFrame {
         misaModuleJList.addListSelectionListener(listSelectionEvent -> {
             MISAModule selectedModule = misaModuleJList.getSelectedValue();
             if(selectedModule != null && selectedModule.getModuleInfo() != null) {
-                descriptionTitle.setText(selectedModule.getModuleInfo().getDescription());
-                descriptionVersionId.setText(selectedModule.getModuleInfo().getName() + " version " + misaModuleJList.getSelectedValue().getModuleInfo().version);
+                descriptionTitle.setText(selectedModule.getModuleInfo().getName());
+                descriptionVersionId.setText(selectedModule.getModuleInfo().getId() + " version " + misaModuleJList.getSelectedValue().getModuleInfo().getVersion());
                 descriptionSourceFile.setText(selectedModule.getLinkPath());
+                moduleDescription.setText(selectedModule.getModuleInfo().getDescription());
 
                 File linkLocation = new File(selectedModule.getLinkPath());
                 if(linkLocation.getParentFile() != null && linkLocation.getParentFile().canWrite()) {
