@@ -2,6 +2,7 @@ package org.hkijena.misa_imagej.ui.components;
 
 import com.google.common.base.Charsets;
 import com.vladsch.flexmark.ast.Node;
+import com.vladsch.flexmark.ext.autolink.AutolinkExtension;
 import com.vladsch.flexmark.ext.tables.TablesExtension;
 import com.vladsch.flexmark.pdf.converter.PdfConverterExtension;
 import com.vladsch.flexmark.profiles.pegdown.Extensions;
@@ -13,19 +14,21 @@ import com.vladsch.flexmark.util.options.MutableDataSet;
 import org.hkijena.misa_imagej.utils.UIUtils;
 
 import javax.swing.*;
+import javax.swing.event.HyperlinkEvent;
 import javax.swing.text.html.CSS;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.StyleSheet;
 import java.awt.*;
 import java.awt.print.PrinterException;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.util.Arrays;
 
 public class MarkdownReader extends JPanel {
 
     static final MutableDataHolder OPTIONS = new MutableDataSet()
-            .set(Parser.EXTENSIONS, Arrays.asList(TablesExtension.create()));
+            .set(Parser.EXTENSIONS, Arrays.asList(TablesExtension.create(), AutolinkExtension.create()));
     static final String[] CSS_RULES = {"body { font-family: \"Sans-serif\"; }",
             "pre { background-color: #f5f2f0; border: 3px #f5f2f0 solid; }",
             "code { background-color: #f5f2f0; }",
@@ -46,6 +49,17 @@ public class MarkdownReader extends JPanel {
 
         content = new JTextPane();
         content.setEditable(false);
+        content.addHyperlinkListener(e -> {
+            if(e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+                if(Desktop.isDesktopSupported()) {
+                    try {
+                        Desktop.getDesktop().browse(e.getURL().toURI());
+                    } catch (Exception e1) {
+                        throw new RuntimeException(e1);
+                    }
+                }
+            }
+        });
 
         HTMLEditorKit kit = new HTMLEditorKit();
         initializeStyleSheet(kit.getStyleSheet());
