@@ -44,6 +44,12 @@ public class MISAModule {
      */
     private transient String parameterSchema;
 
+    /**
+     * The human-readable README in markdown format
+     * Queried from executable
+     */
+    private transient String readme;
+
     public MISAModule() {
 
     }
@@ -85,6 +91,17 @@ public class MISAModule {
         return parameterSchema;
     }
 
+    /**
+     * Returns the README if applicable
+     * @return null if the module is incompatible or crashes
+     */
+    public String getREADME() {
+        if(readme == null && isCompatible()) {
+            readme = queryReadme();
+        }
+        return readme;
+    }
+
     public String getLinkPath() {
         return linkPath;
     }
@@ -98,6 +115,26 @@ public class MISAModule {
             Path tmppath = Files.createTempFile("MISAParameterSchema", ".json");
 //            System.out.println(executablePath + " " + tmppath.toString());
             ProcessBuilder pb = new ProcessBuilder(getExecutablePath(), "--write-parameter-schema", tmppath.toString());
+            Process p = pb.start();
+            if(p.waitFor() == 0) {
+                return new String(Files.readAllBytes(tmppath));
+            }
+        } catch (IOException | InterruptedException e) {
+//            throw new RuntimeException(e);
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * Returns the README if possible
+     * @return The README JSON if successful. Otherwise null.
+     */
+    private String queryReadme() {
+        try {
+            Path tmppath = Files.createTempFile("MISA_README", ".md");
+//            System.out.println(executablePath + " " + tmppath.toString());
+            ProcessBuilder pb = new ProcessBuilder(getExecutablePath(), "--write-readme", tmppath.toString());
             Process p = pb.start();
             if(p.waitFor() == 0) {
                 return new String(Files.readAllBytes(tmppath));

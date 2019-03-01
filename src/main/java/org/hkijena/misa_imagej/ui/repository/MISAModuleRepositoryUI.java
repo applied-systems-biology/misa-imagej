@@ -5,6 +5,7 @@ import com.google.gson.stream.JsonWriter;
 import org.hkijena.misa_imagej.MISACommand;
 import org.hkijena.misa_imagej.api.repository.MISAModule;
 import org.hkijena.misa_imagej.api.repository.MISAModuleRepository;
+import org.hkijena.misa_imagej.ui.components.MarkdownReader;
 import org.hkijena.misa_imagej.ui.parametereditor.MISAModuleInstanceUI;
 import org.hkijena.misa_imagej.ui.perfanalysis.MISARuntimeLogFrameUI;
 import org.hkijena.misa_imagej.ui.pipeliner.MISAPipelinerUI;
@@ -128,6 +129,8 @@ public class MISAModuleRepositoryUI extends JFrame {
         JTextField descriptionSourceFile;
         JTextArea moduleDescription;
         JButton removeModuleButton;
+        JButton openModuleDocumentationButton;
+
         detailPanel = new JPanel(new GridBagLayout());
         {
             descriptionTitle = new JLabel();
@@ -185,6 +188,26 @@ public class MISAModuleRepositoryUI extends JFrame {
                 }
             });
 
+            openModuleDocumentationButton = new JButton("Show documentation", UIUtils.getIconFromResources("help.png"));
+            openModuleDocumentationButton.addActionListener(actionEvent -> {
+                MISAModule selectedModule = misaModuleJList.getSelectedValue();
+                if(selectedModule != null) {
+                    JFrame frame = new JFrame();
+                    frame.setTitle(selectedModule.getModuleInfo().getName() + " documentation - MISA++ for ImageJ");
+                    frame.setIconImage(UIUtils.getIconFromResources("misaxx.png").getImage());
+
+                    MarkdownReader reader = new MarkdownReader();
+                    reader.setMarkdown(selectedModule.getREADME());
+                    frame.setContentPane(reader);
+
+                    frame.pack();
+                    frame.setSize(800,600);
+                    frame.setVisible(true);
+                    frame.setExtendedState(frame.getExtendedState() | JFrame.MAXIMIZED_BOTH);
+                }
+            });
+            UIUtils.addToGridBag(detailPanel, openModuleDocumentationButton, 4, 0);
+
             removeModuleButton = new JButton("Remove", UIUtils.getIconFromResources("delete.png"));
             removeModuleButton.addActionListener(actionEvent -> {
                 MISAModule selectedModule = misaModuleJList.getSelectedValue();
@@ -200,7 +223,7 @@ public class MISAModuleRepositoryUI extends JFrame {
                     }
                 }
             });
-            UIUtils.addToGridBag(detailPanel, removeModuleButton, 4, 0);
+            UIUtils.addToGridBag(detailPanel, removeModuleButton, 5, 0);
 
             JButton launchButton = new JButton("Launch", UIUtils.getIconFromResources("run.png"));
             launchButton.addActionListener(actionEvent -> {
@@ -210,7 +233,7 @@ public class MISAModuleRepositoryUI extends JFrame {
                 launcher.setSize(new Dimension(800,600));
                 launcher.setVisible(true);
             });
-            UIUtils.addToGridBag(detailPanel, launchButton, 5, 0);
+            UIUtils.addToGridBag(detailPanel, launchButton, 6, 0);
         }
 
         // List of modules
