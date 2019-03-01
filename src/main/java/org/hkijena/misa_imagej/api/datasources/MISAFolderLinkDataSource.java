@@ -1,8 +1,10 @@
 package org.hkijena.misa_imagej.api.datasources;
 
+import com.google.common.io.MoreFiles;
 import org.hkijena.misa_imagej.api.MISACache;
 import org.hkijena.misa_imagej.api.MISADataSource;
 import org.hkijena.misa_imagej.api.MISAValidityReport;
+import org.hkijena.misa_imagej.utils.FilesystemUtils;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -19,11 +21,22 @@ public class MISAFolderLinkDataSource implements MISADataSource {
 
     @Override
     public void install(Path installFolder, boolean forceCopy) {
-        try {
-            Files.deleteIfExists(installFolder);
-            Files.createSymbolicLink(installFolder, getSourceFolder());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        if(forceCopy) {
+            try {
+                Files.createDirectories(installFolder);
+                FilesystemUtils.copyFileOrFolder(sourceFolder, installFolder);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        else {
+            try {
+                MoreFiles.createParentDirectories(installFolder);
+                Files.deleteIfExists(installFolder);
+                Files.createSymbolicLink(installFolder, getSourceFolder());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
