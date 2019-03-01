@@ -7,6 +7,7 @@ import org.hkijena.misa_imagej.api.MISAValidityReport;
 import org.hkijena.misa_imagej.api.datasources.MISAFolderLinkDataSource;
 import org.hkijena.misa_imagej.ui.components.MISAValidityReportStatusUI;
 import org.hkijena.misa_imagej.ui.components.CancelableProcessUI;
+import org.hkijena.misa_imagej.ui.components.MarkdownReader;
 import org.hkijena.misa_imagej.ui.repository.MISAModuleRepositoryUI;
 import org.hkijena.misa_imagej.ui.workbench.MISAWorkbenchUI;
 import org.hkijena.misa_imagej.utils.FilesystemUtils;
@@ -179,6 +180,14 @@ public class MISAModuleInstanceUI extends JFrame {
         tabbedPane.addTab("Sample parameters", UIUtils.getIconFromResources("edit.png"), sampleParametersEditorUI, DocumentTabPane.CloseMode.withoutCloseButton);
         tabbedPane.addTab("Algorithm parameters", UIUtils.getIconFromResources("edit.png"), algorithmParametersEditorUI, DocumentTabPane.CloseMode.withoutCloseButton);
         tabbedPane.addTab("Runtime", UIUtils.getIconFromResources("cog.png"), MISARuntimeParametersUI, DocumentTabPane.CloseMode.withoutCloseButton);
+
+        // Documentation tabs
+        tabbedPane.addSingletonTab("MODULE_HELP", "Module documentation", UIUtils.getIconFromResources("help.png"), new MarkdownReader() {
+            {
+                setMarkdown(moduleInstance.getModule().getREADME());
+            }
+        }, true);
+
         add(tabbedPane, BorderLayout.CENTER);
 
         // Toolbar
@@ -209,6 +218,15 @@ public class MISAModuleInstanceUI extends JFrame {
             runButton.addActionListener(actionEvent -> runMISA());
             toolBar.add(runButton);
         }
+
+        JButton helpButton = new JButton(UIUtils.getIconFromResources("help.png"));
+        JPopupMenu helpButtonMenu = UIUtils.addPopupMenuToComponent(helpButton);
+        {
+            JMenuItem moduleHelpButton = new JMenuItem("Module documentation", UIUtils.getIconFromResources("module.png"));
+            moduleHelpButton.addActionListener(e -> tabbedPane.selectSingletonTab("MODULE_HELP"));
+            helpButtonMenu.add(moduleHelpButton);
+        }
+        toolBar.add(helpButton);
 
         add(toolBar, BorderLayout.NORTH);
 

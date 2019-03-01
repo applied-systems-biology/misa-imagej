@@ -19,7 +19,7 @@ public class DocumentTabPane extends JTabbedPane {
     /**
      * Contains tabs that can be closed, but opened again
      */
-    private Map<Class<? extends Component>, DocumentTab> singletonTabs = new HashMap<>();
+    private Map<String, DocumentTab> singletonTabs = new HashMap<>();
 
     public DocumentTabPane() {
         super(JTabbedPane.TOP);
@@ -43,8 +43,10 @@ public class DocumentTabPane extends JTabbedPane {
         if(closeMode != CloseMode.withoutCloseButton) {
             JButton closeButton = new JButton(UIUtils.getIconFromResources("remove.png"));
             closeButton.setBorder(null);
+            closeButton.setBackground(Color.WHITE);
             closeButton.setOpaque(false);
             closeButton.setEnabled(closeMode != CloseMode.withDisabledCloseButton);
+            closeButton.addActionListener(e -> remove(component));
             tabPanel.add(Box.createHorizontalStrut(8));
             tabPanel.add(closeButton);
         }
@@ -60,26 +62,29 @@ public class DocumentTabPane extends JTabbedPane {
      * @param icon
      * @param component
      */
-    public void addSingletonTab(String title, Icon icon, Component component) {
+    public void addSingletonTab(String id, String title, Icon icon, Component component, boolean hidden) {
         DocumentTab tab = addTab(title, icon, component, CloseMode.withSilentCloseButton);
-        singletonTabs.put(component.getClass(), tab);
+        singletonTabs.put(id, tab);
+        if(hidden) {
+            remove(tab.getContent());
+        }
     }
 
     /**
      * Re-opens or selects a singleton tab
-     * @param componentClass
      */
-    public void selectSingletonTab(Class<? extends Component> componentClass) {
-        DocumentTab tab = singletonTabs.get(componentClass);
+    public void selectSingletonTab(String id) {
+        DocumentTab tab = singletonTabs.get(id);
         for(int i = 0; i < getTabCount(); ++i) {
             if(getTabComponentAt(i) == tab.getTabComponent()) {
-                setSelectedComponent(tab.getTabComponent());
+                setSelectedComponent(tab.getContent());
                 return;
             }
         }
 
         // Was closed; reinstantiate the component
         addTab(tab);
+        setSelectedIndex(getTabCount() - 1);
     }
 
     private void addTab(DocumentTab tab) {

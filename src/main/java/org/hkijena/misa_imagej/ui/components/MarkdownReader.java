@@ -57,7 +57,7 @@ public class MarkdownReader extends JPanel {
 
         JToolBar toolBar = new JToolBar();
 
-        JButton saveMarkdown = new JButton("Save as *.md", UIUtils.getIconFromResources("save.png"));
+        JButton saveMarkdown = new JButton("Save as Markdown", UIUtils.getIconFromResources("save.png"));
         saveMarkdown.addActionListener(e -> {
             JFileChooser fileChooser = new JFileChooser();
             fileChooser.setDialogTitle("Save as Markdown");
@@ -71,7 +71,7 @@ public class MarkdownReader extends JPanel {
         });
         toolBar.add(saveMarkdown);
 
-        JButton saveHTML = new JButton("Save as *.html", UIUtils.getIconFromResources("save.png"));
+        JButton saveHTML = new JButton("Save as HTML", UIUtils.getIconFromResources("save.png"));
         saveHTML.addActionListener(e -> {
             JFileChooser fileChooser = new JFileChooser();
             fileChooser.setDialogTitle("Save as HTML");
@@ -85,7 +85,7 @@ public class MarkdownReader extends JPanel {
         });
         toolBar.add(saveHTML);
 
-        JButton savePDF = new JButton("Save as *.pdf", UIUtils.getIconFromResources("save.png"));
+        JButton savePDF = new JButton("Save as PDF", UIUtils.getIconFromResources("save.png"));
         savePDF.addActionListener(e -> {
             JFileChooser fileChooser = new JFileChooser();
             fileChooser.setDialogTitle("Save as PDF");
