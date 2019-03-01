@@ -1,7 +1,11 @@
 package org.hkijena.misa_imagej.ui.workbench;
 
+import com.google.common.base.Charsets;
+import com.google.common.io.Resources;
 import org.hkijena.misa_imagej.api.workbench.MISAOutput;
+import org.hkijena.misa_imagej.ui.components.MarkdownReader;
 import org.hkijena.misa_imagej.ui.perfanalysis.MISARuntimeLogUI;
+import org.hkijena.misa_imagej.utils.ResourceUtils;
 import org.hkijena.misa_imagej.utils.UIUtils;
 import org.hkijena.misa_imagej.utils.ui.DocumentTabPane;
 import org.jdesktop.swingx.JXStatusBar;
@@ -41,8 +45,11 @@ public class MISAWorkbenchUI extends JFrame{
         runtimeLogUI.setHideOpenButton(true);
 
         tabbedPane = new DocumentTabPane();
-        tabbedPane.addTab("Data browser", UIUtils.getIconFromResources("database.png"), cacheBrowserUI, DocumentTabPane.CloseMode.withDisabledCloseButton);
-        tabbedPane.addTab("Runtime log",  UIUtils.getIconFromResources("clock.png"), runtimeLogUI, DocumentTabPane.CloseMode.withDisabledCloseButton);
+        tabbedPane.addSingletonTab("DATA_BROWSER", "Data browser", UIUtils.getIconFromResources("database.png"), cacheBrowserUI, false);
+        tabbedPane.addSingletonTab("RUNTIME_LOG", "Runtime log",  UIUtils.getIconFromResources("clock.png"), runtimeLogUI, false);
+
+        tabbedPane.addSingletonTab("HELP", "Documentation", UIUtils.getIconFromResources("help.png"),
+                MarkdownReader.fromResource("documentation/workbench.md"), true);
 
         add(tabbedPane, BorderLayout.CENTER);
 
@@ -58,8 +65,24 @@ public class MISAWorkbenchUI extends JFrame{
         JButton openButton = new JButton("Open ...", UIUtils.getIconFromResources("open.png"));
         openButton.addActionListener(actionEvent -> open());
         toolBar.add(openButton);
+        toolBar.addSeparator();
+
+        JButton openDataBrowserButton = new JButton("Browse data", UIUtils.getIconFromResources("database.png"));
+        openDataBrowserButton.addActionListener(e -> tabbedPane.selectSingletonTab("DATA_BROWSER"));
+        toolBar.add(openDataBrowserButton);
+
+        JButton openRuntimeLogButton = new JButton("Analyze runtime",  UIUtils.getIconFromResources("clock.png"));
+        openRuntimeLogButton.addActionListener(e -> tabbedPane.selectSingletonTab("RUNTIME_LOG"));
+        toolBar.add(openRuntimeLogButton);
+
+        JButton createAttachmentBrowserButton = new JButton("Analyze quantification results", UIUtils.getIconFromResources("graph.png"));
+        toolBar.add(createAttachmentBrowserButton);
 
         toolBar.add(Box.createHorizontalGlue());
+
+        JButton helpButton = new JButton(UIUtils.getIconFromResources("help.png"));
+        helpButton.addActionListener(e -> tabbedPane.selectSingletonTab("HELP"));
+        toolBar.add(helpButton);
 
         add(toolBar, BorderLayout.NORTH);
     }

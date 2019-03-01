@@ -1,6 +1,7 @@
 package org.hkijena.misa_imagej.ui.components;
 
 import com.google.common.base.Charsets;
+import com.google.common.io.Resources;
 import com.vladsch.flexmark.ast.Node;
 import com.vladsch.flexmark.ext.autolink.AutolinkExtension;
 import com.vladsch.flexmark.ext.tables.TablesExtension;
@@ -11,6 +12,7 @@ import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.util.options.MutableDataHolder;
 import com.vladsch.flexmark.util.options.MutableDataSet;
+import org.hkijena.misa_imagej.utils.ResourceUtils;
 import org.hkijena.misa_imagej.utils.UIUtils;
 
 import javax.swing.*;
@@ -150,5 +152,16 @@ public class MarkdownReader extends JPanel {
 
     public String getMarkdown() {
         return markdown;
+    }
+
+    public static MarkdownReader fromResource(String resourcePath) {
+        MarkdownReader reader = new MarkdownReader();
+        try {
+            String md = Resources.toString(ResourceUtils.getPluginResource(resourcePath), Charsets.UTF_8);
+            reader.setMarkdown(md);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return reader;
     }
 }

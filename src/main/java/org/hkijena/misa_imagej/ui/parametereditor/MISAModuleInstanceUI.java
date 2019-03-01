@@ -1,5 +1,7 @@
 package org.hkijena.misa_imagej.ui.parametereditor;
 
+import com.google.common.base.Charsets;
+import com.google.common.io.Resources;
 import org.hkijena.misa_imagej.api.MISACache;
 import org.hkijena.misa_imagej.api.MISAModuleInstance;
 import org.hkijena.misa_imagej.api.MISASamplePolicy;
@@ -11,6 +13,7 @@ import org.hkijena.misa_imagej.ui.components.MarkdownReader;
 import org.hkijena.misa_imagej.ui.repository.MISAModuleRepositoryUI;
 import org.hkijena.misa_imagej.ui.workbench.MISAWorkbenchUI;
 import org.hkijena.misa_imagej.utils.FilesystemUtils;
+import org.hkijena.misa_imagej.utils.ResourceUtils;
 import org.hkijena.misa_imagej.utils.UIUtils;
 import org.hkijena.misa_imagej.utils.ui.DocumentTabPane;
 import org.jdesktop.swingx.JXStatusBar;
@@ -187,6 +190,8 @@ public class MISAModuleInstanceUI extends JFrame {
                 setMarkdown(moduleInstance.getModule().getREADME());
             }
         }, true);
+        tabbedPane.addSingletonTab("HELP", "Documentation", UIUtils.getIconFromResources("help.png"),
+                MarkdownReader.fromResource("documentation/parameter-editor.md"), true);
 
         add(tabbedPane, BorderLayout.CENTER);
 
@@ -225,6 +230,10 @@ public class MISAModuleInstanceUI extends JFrame {
             JMenuItem moduleHelpButton = new JMenuItem("Module documentation", UIUtils.getIconFromResources("module.png"));
             moduleHelpButton.addActionListener(e -> tabbedPane.selectSingletonTab("MODULE_HELP"));
             helpButtonMenu.add(moduleHelpButton);
+
+            JMenuItem documentationButton = new JMenuItem("Documentation", UIUtils.getIconFromResources("help.png"));
+            documentationButton.addActionListener(e -> tabbedPane.selectSingletonTab("HELP"));
+            helpButtonMenu.add(documentationButton);
         }
         toolBar.add(helpButton);
 

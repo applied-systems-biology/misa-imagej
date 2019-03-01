@@ -1,6 +1,8 @@
 package org.hkijena.misa_imagej.ui.pipeliner;
 
+import com.google.common.base.Charsets;
 import com.google.common.eventbus.Subscribe;
+import com.google.common.io.Resources;
 import com.google.gson.Gson;
 import org.hkijena.misa_imagej.api.MISACache;
 import org.hkijena.misa_imagej.api.MISAModuleInstance;
@@ -12,10 +14,13 @@ import org.hkijena.misa_imagej.api.repository.MISAModuleRepository;
 import org.hkijena.misa_imagej.ui.components.MISAValidityReportStatusUI;
 import org.hkijena.misa_imagej.ui.components.CancelableProcessUI;
 import org.hkijena.misa_imagej.ui.components.MISACacheTreeUI;
+import org.hkijena.misa_imagej.ui.components.MarkdownReader;
 import org.hkijena.misa_imagej.ui.components.renderers.MISAModuleListCellRenderer;
 import org.hkijena.misa_imagej.ui.repository.MISAModuleRepositoryUI;
 import org.hkijena.misa_imagej.utils.GsonUtils;
+import org.hkijena.misa_imagej.utils.ResourceUtils;
 import org.hkijena.misa_imagej.utils.UIUtils;
+import org.hkijena.misa_imagej.utils.ui.DocumentTabPane;
 import org.hkijena.misa_imagej.utils.ui.MonochromeColorIcon;
 import org.jdesktop.swingx.JXStatusBar;
 
@@ -28,6 +33,8 @@ import java.util.*;
 import java.util.List;
 
 public class MISAPipelinerUI extends JFrame {
+
+    private DocumentTabPane documentTabPane;
 
     private MISAPipeline pipeline = new MISAPipeline();
     private JList<MISAModule> moduleList;
@@ -57,6 +64,8 @@ public class MISAPipelinerUI extends JFrame {
         setIconImage(UIUtils.getIconFromResources("misaxx.png").getImage());
         UIUtils.setToAskOnClose(this, "Do you really want to close this pipeline builder?", "Close window");
 
+        documentTabPane = new DocumentTabPane();
+
         JToolBar toolBar = new JToolBar();
 
         JButton openButton = new JButton("Open", UIUtils.getIconFromResources("open.png"));
@@ -81,6 +90,10 @@ public class MISAPipelinerUI extends JFrame {
         runButton.addActionListener(actionEvent -> runPipeline());
         toolBar.add(runButton);
 
+        JButton helpButton = new JButton(UIUtils.getIconFromResources("help.png"));
+        helpButton.addActionListener(e -> documentTabPane.selectSingletonTab("HELP"));
+        toolBar.add(helpButton);
+
         add(toolBar, BorderLayout.NORTH);
         JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
         tabbedPane.addTab("Available modules", createModuleList());
@@ -94,7 +107,12 @@ public class MISAPipelinerUI extends JFrame {
             }
         }, tabbedPane);
         splitPane.setResizeWeight(1);
-        add(splitPane, BorderLayout.CENTER);
+
+        documentTabPane.addTab("Pipeline", UIUtils.getIconFromResources("connect.png"), splitPane, DocumentTabPane.CloseMode.withoutCloseButton);
+        documentTabPane.addSingletonTab("HELP", "Documentation", UIUtils.getIconFromResources("help.png"),
+                MarkdownReader.fromResource("documentation/pipeliner.md"), true);
+
+        add(documentTabPane, BorderLayout.CENTER);
 
         // Status bar
         JXStatusBar statusBar = new JXStatusBar();
