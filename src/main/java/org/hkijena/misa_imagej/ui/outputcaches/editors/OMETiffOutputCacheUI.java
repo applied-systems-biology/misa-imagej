@@ -18,7 +18,7 @@ public class OMETiffOutputCacheUI extends ImageOutputCacheUI {
 
     @Override
     protected void initialize(boolean silent) {
-        JButton importBioformatsButton = createButton("Bioformats import", UIUtils.getIconFromResources("bioformants.png"), silent);
+        JButton importBioformatsButton = createButton("Bioformats import", UIUtils.getIconFromResources("bioformats.png"), silent);
         importBioformatsButton.addActionListener(e -> importBioformats());
         add(importBioformatsButton);
 
