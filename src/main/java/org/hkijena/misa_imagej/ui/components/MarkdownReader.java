@@ -2,14 +2,12 @@ package org.hkijena.misa_imagej.ui.components;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
-import com.vladsch.flexmark.ast.Node;
 import com.vladsch.flexmark.ext.autolink.AutolinkExtension;
 import com.vladsch.flexmark.ext.tables.TablesExtension;
-import com.vladsch.flexmark.pdf.converter.PdfConverterExtension;
-import com.vladsch.flexmark.profiles.pegdown.Extensions;
-import com.vladsch.flexmark.profiles.pegdown.PegdownOptionsAdapter;
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;
+import com.vladsch.flexmark.pdf.converter.PdfConverterExtension;
+import com.vladsch.flexmark.util.ast.Node;
 import com.vladsch.flexmark.util.options.MutableDataHolder;
 import com.vladsch.flexmark.util.options.MutableDataSet;
 import org.hkijena.misa_imagej.utils.ResourceUtils;
@@ -17,13 +15,10 @@ import org.hkijena.misa_imagej.utils.UIUtils;
 
 import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;
-import javax.swing.text.html.CSS;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.StyleSheet;
 import java.awt.*;
-import java.awt.print.PrinterException;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.util.Arrays;
 
