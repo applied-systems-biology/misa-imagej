@@ -7,6 +7,8 @@ import org.hkijena.misa_imagej.api.MISASample;
 import org.hkijena.misa_imagej.api.workbench.MISAOutput;
 import org.hkijena.misa_imagej.ui.components.MISACacheTreeUI;
 import org.hkijena.misa_imagej.ui.components.MISASampleComboBox;
+import org.hkijena.misa_imagej.ui.outputcaches.MISAOutputCacheUI;
+import org.hkijena.misa_imagej.ui.outputcaches.MISAOutputCacheUIRegistry;
 import org.hkijena.misa_imagej.utils.UIUtils;
 import org.jdesktop.swingx.JXTextField;
 
@@ -143,7 +145,7 @@ public class MISACacheBrowserUI extends JPanel {
                     editorLastIOType = cache.getIOType();
                 }
 
-                insertCacheBrowserUI(new MISAOutputCacheUI(misaOutput, cache));
+                insertCacheBrowserUI(MISAOutputCacheUIRegistry.getEditorFor(misaOutput, cache));
             }
 
             sampleBrowser.add(new JPanel(), new GridBagConstraints() {
