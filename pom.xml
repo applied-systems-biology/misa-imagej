@@ -109,7 +109,7 @@
         </dependency>
         <dependency>
             <groupId>com.vladsch.flexmark</groupId>
-            <artifactId>flexmark-ext-gfm-tables</artifactId>
+            <artifactId>flexmark-ext-tables</artifactId>
             <version>0.40.18</version>
         </dependency>
         <dependency>
