@@ -121,6 +121,22 @@ public class MISAModuleRepositoryUI extends JFrame {
         });
         toolBar.add(launchRuntimeLogUI);
 
+        JButton helpButton = new JButton(UIUtils.getIconFromResources("help.png"));
+        helpButton.addActionListener(e -> {
+            JFrame frame = new JFrame();
+            frame.setTitle("Module manager documentation - MISA++ for ImageJ");
+            frame.setIconImage(UIUtils.getIconFromResources("misaxx.png").getImage());
+
+            MarkdownReader reader = MarkdownReader.fromResource("documentation/launcher.md");
+            frame.setContentPane(reader);
+
+            frame.pack();
+            frame.setSize(800,600);
+            frame.setVisible(true);
+            frame.setExtendedState(frame.getExtendedState() | JFrame.MAXIMIZED_BOTH);
+        });
+        toolBar.add(helpButton);
+
         add(toolBar, BorderLayout.NORTH);
 
         // Detail panel
