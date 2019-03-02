@@ -11,8 +11,8 @@ public class ImageOutputCacheUI extends GenericMISAOutputCacheUI {
     }
 
     @Override
-    protected void initialize(boolean silent) {
-        super.initialize(true);
+    protected void initialize() {
+        super.initialize();
 
     }
 }

@@ -9,9 +9,13 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
+import java.awt.event.ActionEvent;
 import java.io.IOException;
 
 public class GenericMISAOutputCacheUI extends MISAOutputCacheUI {
+
+    private boolean isFirstButton = true;
+    private JPopupMenu additionalActionsMenu;
 
     public GenericMISAOutputCacheUI(MISAOutput misaOutput, MISACache cache) {
         super(misaOutput, cache);
@@ -19,30 +23,12 @@ public class GenericMISAOutputCacheUI extends MISAOutputCacheUI {
         setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
         add(Box.createHorizontalGlue());
 
-        initialize(false);
+        initialize();
     }
 
-    protected JButton createButton(String text, Icon icon, boolean silent) {
-        if(silent)
-            return new JButton(icon) {
-                {
-                    setToolTipText(text);
-                }
-            };
-        else
-            return new JButton(text, icon);
-    }
+    protected void initialize() {
 
-    protected void initialize(boolean silent) {
-        JButton copyPathButton = createButton("Copy path", UIUtils.getIconFromResources("copy.png"), silent);
-        copyPathButton.addActionListener(e -> {
-            StringSelection stringSelection = new StringSelection(getFilesystemPath().toString());
-            Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-            clipboard.setContents(stringSelection, null);
-        });
-        add(copyPathButton);
-
-        JButton openFolderButton = createButton("Open folder", UIUtils.getIconFromResources("open.png"), silent);
+        AbstractButton openFolderButton = createButton("Open folder", UIUtils.getIconFromResources("open.png"));
         openFolderButton.addActionListener(e -> {
             if(Desktop.isDesktopSupported()) {
                 try {
@@ -52,6 +38,34 @@ public class GenericMISAOutputCacheUI extends MISAOutputCacheUI {
                 }
             }
         });
-        add(openFolderButton);
+
+        AbstractButton copyPathButton = createButton("Copy path", UIUtils.getIconFromResources("copy.png"));
+        copyPathButton.addActionListener(e -> {
+            StringSelection stringSelection = new StringSelection(getFilesystemPath().toString());
+            Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+            clipboard.setContents(stringSelection, null);
+        });
+
     }
+
+    protected AbstractButton createButton(String text, Icon icon) {
+        if(isFirstButton) {
+            JButton button = new JButton(text, icon);
+            add(button);
+            isFirstButton = false;
+            return button;
+        }
+        else {
+            if(additionalActionsMenu == null) {
+                JButton additionalActions = new JButton("...");
+                additionalActionsMenu = UIUtils.addPopupMenuToComponent(additionalActions);
+                add(additionalActions);
+            }
+
+            JMenuItem item = new JMenuItem(text, icon);
+            additionalActionsMenu.add(item);
+            return item;
+        }
+    }
+
 }
