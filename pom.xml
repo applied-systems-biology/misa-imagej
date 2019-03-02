@@ -67,6 +67,10 @@
             <id>imagej.public</id>
             <url>http://maven.imagej.net/content/groups/public</url>
         </repository>
+        <repository>
+            <id>openmicroscopy</id>
+            <url>http://artifacts.openmicroscopy.org/artifactory/maven</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -121,6 +125,11 @@
             <groupId>com.vladsch.flexmark</groupId>
             <artifactId>flexmark-pdf-converter</artifactId>
             <version>0.40.18</version>
+        </dependency>
+        <dependency>
+            <groupId>ome</groupId>
+            <artifactId>bio-formats_plugins</artifactId>
+            <version>6.0.0</version>
         </dependency>
     </dependencies>
 

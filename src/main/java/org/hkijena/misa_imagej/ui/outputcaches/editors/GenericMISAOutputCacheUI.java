@@ -14,7 +14,7 @@ import java.io.IOException;
 
 public class GenericMISAOutputCacheUI extends MISAOutputCacheUI {
 
-    private boolean isFirstButton = true;
+    private JButton firstButton;
     private JPopupMenu additionalActionsMenu;
 
     public GenericMISAOutputCacheUI(MISAOutput misaOutput, MISACache cache) {
@@ -49,15 +49,15 @@ public class GenericMISAOutputCacheUI extends MISAOutputCacheUI {
     }
 
     protected AbstractButton createButton(String text, Icon icon) {
-        if(isFirstButton) {
-            JButton button = new JButton(text, icon);
-            add(button);
-            isFirstButton = false;
-            return button;
+        if(firstButton == null) {
+            firstButton = new JButton(text, icon);
+            add(firstButton);
+            return firstButton;
         }
         else {
             if(additionalActionsMenu == null) {
                 JButton additionalActions = new JButton("...");
+                additionalActions.setMaximumSize(new Dimension(1,(int)firstButton.getPreferredSize().getHeight()));
                 additionalActionsMenu = UIUtils.addPopupMenuToComponent(additionalActions);
                 add(additionalActions);
             }
