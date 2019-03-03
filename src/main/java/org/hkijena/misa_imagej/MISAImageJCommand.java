@@ -18,7 +18,7 @@ import org.scijava.thread.ThreadService;
 import org.scijava.ui.UIService;
 
 @Plugin(type = Command.class, menuPath = "Plugins>MISA++ for ImageJ ...")
-public class MISACommand implements Command {
+public class MISAImageJCommand implements Command {
 
 	@Parameter
 	OpService ops;
@@ -46,6 +46,10 @@ public class MISACommand implements Command {
 
 	@Parameter
     DatasetService datasetService;
+
+//	@Parameter
+//	MISAImageJService MISAImageJService;
+
 	/**
 	 * show a dialog and give the dialog access to required IJ2 Services
 	 */
@@ -85,12 +89,12 @@ public class MISACommand implements Command {
 	}
 
 	public static void main(final String... args) {
-//		fiji.Debug.runPlugIn(MISACommand.class.getRemovedSampleName(), null, false);
+//		fiji.Debug.runPlugIn(MISAImageJCommand.class.getRemovedSampleName(), null, false);
 //		fiji.Debug.run("MISA ImageJ", "");
 		// Launch ImageJ as usual.
 		final ImageJ ij = new ImageJ();
 		ij.ui().showUI();
-		ij.command().run(MISACommand.class, true);
+		ij.command().run(MISAImageJCommand.class, true);
 	}
 }
 

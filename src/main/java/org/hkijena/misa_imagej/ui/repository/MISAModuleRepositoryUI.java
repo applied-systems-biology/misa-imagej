@@ -2,7 +2,7 @@ package org.hkijena.misa_imagej.ui.repository;
 
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonWriter;
-import org.hkijena.misa_imagej.MISACommand;
+import org.hkijena.misa_imagej.MISAImageJCommand;
 import org.hkijena.misa_imagej.api.repository.MISAModule;
 import org.hkijena.misa_imagej.api.repository.MISAModuleRepository;
 import org.hkijena.misa_imagej.ui.components.MarkdownReader;
@@ -30,12 +30,12 @@ import static org.hkijena.misa_imagej.utils.UIUtils.UI_PADDING;
  */
 public class MISAModuleRepositoryUI extends JFrame {
 
-    private MISACommand command;
+    private MISAImageJCommand command;
     private static MISAModuleRepositoryUI instance;
     private JList<MISAModule> misaModuleJList;
     private JPanel detailPanel;
 
-    public static MISAModuleRepositoryUI getInstance(MISACommand command) {
+    public static MISAModuleRepositoryUI getInstance(MISAImageJCommand command) {
         if(instance == null)
             instance = new MISAModuleRepositoryUI(command);
         return instance;
@@ -45,7 +45,7 @@ public class MISAModuleRepositoryUI extends JFrame {
         return instance;
     }
 
-    private MISAModuleRepositoryUI(MISACommand command) {
+    private MISAModuleRepositoryUI(MISAImageJCommand command) {
         instance = this;
         this.command = command;
         initialize();
@@ -295,7 +295,7 @@ public class MISAModuleRepositoryUI extends JFrame {
         }
     }
 
-    public MISACommand getCommand() {
+    public MISAImageJCommand getCommand() {
         return command;
     }
 }
