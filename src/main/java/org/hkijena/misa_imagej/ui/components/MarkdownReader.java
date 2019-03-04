@@ -153,6 +153,7 @@ public class MarkdownReader extends JPanel {
         MarkdownReader reader = new MarkdownReader();
         try {
             String md = Resources.toString(ResourceUtils.getPluginResource(resourcePath), Charsets.UTF_8);
+            md = md.replace("image://", ResourceUtils.getPluginResource("").toString());
             reader.setMarkdown(md);
         } catch (IOException e) {
             throw new RuntimeException(e);
