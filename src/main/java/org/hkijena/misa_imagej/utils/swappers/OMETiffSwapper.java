@@ -4,7 +4,6 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
 
-import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
 import java.nio.file.Files;

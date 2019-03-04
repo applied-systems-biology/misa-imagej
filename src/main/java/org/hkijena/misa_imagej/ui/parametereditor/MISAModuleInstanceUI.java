@@ -1,19 +1,16 @@
 package org.hkijena.misa_imagej.ui.parametereditor;
 
-import com.google.common.base.Charsets;
-import com.google.common.io.Resources;
 import org.hkijena.misa_imagej.api.MISACache;
 import org.hkijena.misa_imagej.api.MISAModuleInstance;
 import org.hkijena.misa_imagej.api.MISASamplePolicy;
 import org.hkijena.misa_imagej.api.MISAValidityReport;
-import org.hkijena.misa_imagej.api.datasources.MISAFolderLinkDataSource;
-import org.hkijena.misa_imagej.ui.components.MISAValidityReportStatusUI;
+import org.hkijena.misa_imagej.extension.datasources.MISAFolderLinkDataSource;
 import org.hkijena.misa_imagej.ui.components.CancelableProcessUI;
+import org.hkijena.misa_imagej.ui.components.MISAValidityReportStatusUI;
 import org.hkijena.misa_imagej.ui.components.MarkdownReader;
 import org.hkijena.misa_imagej.ui.repository.MISAModuleRepositoryUI;
 import org.hkijena.misa_imagej.ui.workbench.MISAWorkbenchUI;
 import org.hkijena.misa_imagej.utils.FilesystemUtils;
-import org.hkijena.misa_imagej.utils.ResourceUtils;
 import org.hkijena.misa_imagej.utils.UIUtils;
 import org.hkijena.misa_imagej.utils.ui.DocumentTabPane;
 import org.jdesktop.swingx.JXStatusBar;

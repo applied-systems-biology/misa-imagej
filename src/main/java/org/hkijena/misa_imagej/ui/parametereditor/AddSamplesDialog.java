@@ -1,11 +1,9 @@
 package org.hkijena.misa_imagej.ui.parametereditor;
 
 import org.hkijena.misa_imagej.api.MISAModuleInstance;
-import org.hkijena.misa_imagej.ui.components.MISAValidityReportStatusUI;
 import org.hkijena.misa_imagej.utils.UIUtils;
 
 import javax.swing.*;
-import javax.swing.border.Border;
 import java.awt.*;
 
 public class AddSamplesDialog extends JDialog {

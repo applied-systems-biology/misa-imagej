@@ -2,6 +2,7 @@ package org.hkijena.misa_imagej.api;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import org.hkijena.misa_imagej.MISAImageJRegistryService;
 import org.hkijena.misa_imagej.utils.GsonUtils;
 
 import java.io.IOException;
@@ -34,7 +35,7 @@ public class MISAAttachment {
         Gson gson = GsonUtils.getGson();
         try {
             JsonElement element = GsonUtils.fromJsonFile(gson, path, JsonElement.class);
-            return MISASerializableRegistry.deserialize(element);
+            return MISAImageJRegistryService.getInstance().getSerializableRegistry().deserialize(element);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

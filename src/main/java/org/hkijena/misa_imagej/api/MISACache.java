@@ -2,13 +2,13 @@ package org.hkijena.misa_imagej.api;
 
 
 import com.google.common.eventbus.EventBus;
-import org.hkijena.misa_imagej.api.datasources.MISAFolderLinkDataSource;
+import org.hkijena.misa_imagej.extension.datasources.MISAFolderLinkDataSource;
 
 import java.awt.*;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class MISACache implements MISAValidatable {
 

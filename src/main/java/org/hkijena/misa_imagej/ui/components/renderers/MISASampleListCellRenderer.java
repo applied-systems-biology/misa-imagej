@@ -1,7 +1,6 @@
 package org.hkijena.misa_imagej.ui.components.renderers;
 
 import org.hkijena.misa_imagej.api.MISASample;
-import org.hkijena.misa_imagej.api.repository.MISAModule;
 import org.hkijena.misa_imagej.utils.UIUtils;
 import org.hkijena.misa_imagej.utils.ui.MonochromeColorIcon;
 

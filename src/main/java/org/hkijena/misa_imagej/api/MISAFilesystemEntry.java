@@ -1,6 +1,7 @@
 package org.hkijena.misa_imagej.api;
 
 import com.google.gson.JsonObject;
+import org.hkijena.misa_imagej.MISAImageJRegistryService;
 import org.hkijena.misa_imagej.api.json.JSONSchemaObject;
 
 import java.nio.file.Path;
@@ -65,7 +66,7 @@ public class MISAFilesystemEntry implements Cloneable {
     }
 
     public void findCaches(MISASample sample, List<MISACache> result) {
-        MISACache cache = MISACacheRegistry.getCacheFor(sample,this);
+        MISACache cache = MISAImageJRegistryService.getInstance().getCacheRegistry().getCacheFor(sample,this);
         if(cache.isValid())
             result.add(cache);
         for(MISAFilesystemEntry entry : children.values()) {

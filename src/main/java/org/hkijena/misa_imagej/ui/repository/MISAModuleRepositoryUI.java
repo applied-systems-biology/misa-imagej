@@ -6,14 +6,14 @@ import org.hkijena.misa_imagej.MISAImageJCommand;
 import org.hkijena.misa_imagej.api.repository.MISAModule;
 import org.hkijena.misa_imagej.api.repository.MISAModuleRepository;
 import org.hkijena.misa_imagej.ui.components.MarkdownReader;
+import org.hkijena.misa_imagej.ui.components.renderers.MISAModuleListCellRenderer;
 import org.hkijena.misa_imagej.ui.parametereditor.MISAModuleInstanceUI;
 import org.hkijena.misa_imagej.ui.perfanalysis.MISARuntimeLogFrameUI;
 import org.hkijena.misa_imagej.ui.pipeliner.MISAPipelinerUI;
-import org.hkijena.misa_imagej.ui.components.renderers.MISAModuleListCellRenderer;
+import org.hkijena.misa_imagej.ui.workbench.MISAWorkbenchUI;
 import org.hkijena.misa_imagej.utils.GsonUtils;
 import org.hkijena.misa_imagej.utils.OSUtils;
 import org.hkijena.misa_imagej.utils.UIUtils;
-import org.hkijena.misa_imagej.ui.workbench.MISAWorkbenchUI;
 
 import javax.swing.*;
 import java.awt.*;

@@ -2,9 +2,9 @@ package org.hkijena.misa_imagej.ui.parametereditor;
 
 import com.google.common.eventbus.Subscribe;
 import org.hkijena.misa_imagej.api.MISACache;
+import org.hkijena.misa_imagej.api.MISACacheIOType;
 import org.hkijena.misa_imagej.api.MISAModuleInstance;
 import org.hkijena.misa_imagej.api.MISASample;
-import org.hkijena.misa_imagej.api.MISACacheIOType;
 import org.hkijena.misa_imagej.ui.components.MISACacheTreeUI;
 import org.hkijena.misa_imagej.ui.components.MISASampleComboBox;
 import org.hkijena.misa_imagej.utils.UIUtils;

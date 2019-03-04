@@ -1,7 +1,5 @@
 package org.hkijena.misa_imagej.utils;
 
-import org.hkijena.misa_imagej.utils.OSUtils;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;

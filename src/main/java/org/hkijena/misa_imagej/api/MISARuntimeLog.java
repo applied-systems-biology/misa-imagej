@@ -1,7 +1,6 @@
 package org.hkijena.misa_imagej.api;
 
 import com.google.gson.annotations.SerializedName;
-import org.hkijena.misa_imagej.api.MISASerializable;
 
 import java.util.HashMap;
 import java.util.List;

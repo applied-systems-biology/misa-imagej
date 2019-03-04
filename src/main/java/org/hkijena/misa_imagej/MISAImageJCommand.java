@@ -1,7 +1,5 @@
 package org.hkijena.misa_imagej;
 
-import javax.swing.SwingUtilities;
-
 import io.scif.services.DatasetIOService;
 import net.imagej.DatasetService;
 import net.imagej.ImageJ;
@@ -14,47 +12,51 @@ import org.scijava.display.DisplayService;
 import org.scijava.log.LogService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
+import org.scijava.plugin.PluginService;
 import org.scijava.thread.ThreadService;
 import org.scijava.ui.UIService;
+
+import javax.swing.*;
 
 @Plugin(type = Command.class, menuPath = "Plugins>MISA++ for ImageJ ...")
 public class MISAImageJCommand implements Command {
 
 	@Parameter
-	OpService ops;
+	private OpService ops;
 
 	@Parameter
-	LogService log;
+	private LogService log;
 
 	@Parameter
-	UIService ui;
+	private UIService ui;
 
 	@Parameter
-	CommandService cmd;
+	private CommandService cmd;
 
 	@Parameter
-	StatusService status;
+	private StatusService status;
 
 	@Parameter
-	ThreadService thread;
+	private ThreadService thread;
 
 	@Parameter
-    DatasetIOService datasetIO;
+	private DatasetIOService datasetIO;
 
 	@Parameter
-	DisplayService display;
+	private DisplayService display;
 
 	@Parameter
-    DatasetService datasetService;
+	private DatasetService datasetService;
 
-//	@Parameter
-//	MISAImageJService MISAImageJService;
+	@Parameter
+	private PluginService pluginService;
 
 	/**
 	 * show a dialog and give the dialog access to required IJ2 Services
 	 */
 	@Override
 	public void run() {
+	    MISAImageJRegistryService.instantiate(pluginService);
 		SwingUtilities.invokeLater(() -> {
 			MISAModuleRepositoryUI.getInstance(this).setVisible(true);
 		});
@@ -89,12 +91,13 @@ public class MISAImageJCommand implements Command {
 	}
 
 	public static void main(final String... args) {
-//		fiji.Debug.runPlugIn(MISAImageJCommand.class.getRemovedSampleName(), null, false);
-//		fiji.Debug.run("MISA ImageJ", "");
-		// Launch ImageJ as usual.
 		final ImageJ ij = new ImageJ();
 		ij.ui().showUI();
 		ij.command().run(MISAImageJCommand.class, true);
+	}
+
+	public PluginService getPluginService() {
+		return pluginService;
 	}
 }
 

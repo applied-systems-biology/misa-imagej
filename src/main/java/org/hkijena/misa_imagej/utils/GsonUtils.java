@@ -1,6 +1,7 @@
 package org.hkijena.misa_imagej.utils;
 
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.hkijena.misa_imagej.api.json.JSONSchemaObjectType;
 import org.hkijena.misa_imagej.api.pipelining.MISAPipeline;
 

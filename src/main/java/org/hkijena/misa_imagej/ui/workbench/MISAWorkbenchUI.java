@@ -1,19 +1,14 @@
 package org.hkijena.misa_imagej.ui.workbench;
 
-import com.google.common.base.Charsets;
-import com.google.common.io.Resources;
 import org.hkijena.misa_imagej.api.workbench.MISAOutput;
 import org.hkijena.misa_imagej.ui.components.MarkdownReader;
 import org.hkijena.misa_imagej.ui.perfanalysis.MISARuntimeLogUI;
-import org.hkijena.misa_imagej.utils.ResourceUtils;
 import org.hkijena.misa_imagej.utils.UIUtils;
 import org.hkijena.misa_imagej.utils.ui.DocumentTabPane;
 import org.jdesktop.swingx.JXStatusBar;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;

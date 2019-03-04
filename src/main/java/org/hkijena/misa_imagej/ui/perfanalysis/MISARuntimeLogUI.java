@@ -6,7 +6,6 @@ import com.google.gson.Gson;
 import org.hkijena.misa_imagej.api.MISARuntimeLog;
 import org.hkijena.misa_imagej.utils.GsonUtils;
 import org.hkijena.misa_imagej.utils.UIUtils;
-import org.jdesktop.swingx.JXStatusBar;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;

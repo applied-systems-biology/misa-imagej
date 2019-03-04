@@ -1,8 +1,6 @@
 package org.hkijena.misa_imagej.ui.pipeliner;
 
-import com.google.common.base.Charsets;
 import com.google.common.eventbus.Subscribe;
-import com.google.common.io.Resources;
 import com.google.gson.Gson;
 import org.hkijena.misa_imagej.api.MISACache;
 import org.hkijena.misa_imagej.api.MISAModuleInstance;
@@ -11,14 +9,13 @@ import org.hkijena.misa_imagej.api.pipelining.MISAPipeline;
 import org.hkijena.misa_imagej.api.pipelining.MISAPipelineNode;
 import org.hkijena.misa_imagej.api.repository.MISAModule;
 import org.hkijena.misa_imagej.api.repository.MISAModuleRepository;
-import org.hkijena.misa_imagej.ui.components.MISAValidityReportStatusUI;
 import org.hkijena.misa_imagej.ui.components.CancelableProcessUI;
 import org.hkijena.misa_imagej.ui.components.MISACacheTreeUI;
+import org.hkijena.misa_imagej.ui.components.MISAValidityReportStatusUI;
 import org.hkijena.misa_imagej.ui.components.MarkdownReader;
 import org.hkijena.misa_imagej.ui.components.renderers.MISAModuleListCellRenderer;
 import org.hkijena.misa_imagej.ui.repository.MISAModuleRepositoryUI;
 import org.hkijena.misa_imagej.utils.GsonUtils;
-import org.hkijena.misa_imagej.utils.ResourceUtils;
 import org.hkijena.misa_imagej.utils.UIUtils;
 import org.hkijena.misa_imagej.utils.ui.DocumentTabPane;
 import org.hkijena.misa_imagej.utils.ui.MonochromeColorIcon;
@@ -29,8 +26,8 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.IOException;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 
 public class MISAPipelinerUI extends JFrame {
 

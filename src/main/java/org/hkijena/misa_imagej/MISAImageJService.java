@@ -1,8 +1,6 @@
 package org.hkijena.misa_imagej;
 
-import org.scijava.plugin.Plugin;
-import org.scijava.service.AbstractService;
-import org.scijava.service.Service;
+import org.hkijena.misa_imagej.ui.MISAImageJUIService;
 
-public interface MISAImageJService extends Service {
+public interface MISAImageJService extends MISAImageJUIService {
 }

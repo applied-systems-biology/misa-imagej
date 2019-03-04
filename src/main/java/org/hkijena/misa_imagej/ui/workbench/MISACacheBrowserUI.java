@@ -1,14 +1,12 @@
 package org.hkijena.misa_imagej.ui.workbench;
 
 import com.google.common.eventbus.Subscribe;
+import org.hkijena.misa_imagej.MISAImageJRegistryService;
 import org.hkijena.misa_imagej.api.MISACache;
 import org.hkijena.misa_imagej.api.MISACacheIOType;
-import org.hkijena.misa_imagej.api.MISASample;
 import org.hkijena.misa_imagej.api.workbench.MISAOutput;
 import org.hkijena.misa_imagej.ui.components.MISACacheTreeUI;
 import org.hkijena.misa_imagej.ui.components.MISASampleComboBox;
-import org.hkijena.misa_imagej.ui.outputcaches.MISAOutputCacheUI;
-import org.hkijena.misa_imagej.ui.outputcaches.MISAOutputCacheUIRegistry;
 import org.hkijena.misa_imagej.utils.UIUtils;
 import org.jdesktop.swingx.JXTextField;
 
@@ -145,7 +143,7 @@ public class MISACacheBrowserUI extends JPanel {
                     editorLastIOType = cache.getIOType();
                 }
 
-                insertCacheBrowserUI(MISAOutputCacheUIRegistry.getEditorFor(misaOutput, cache));
+                insertCacheBrowserUI(MISAImageJRegistryService.getInstance().getOutputCacheUIRegistry().getEditorFor(misaOutput, cache));
             }
 
             sampleBrowser.add(new JPanel(), new GridBagConstraints() {

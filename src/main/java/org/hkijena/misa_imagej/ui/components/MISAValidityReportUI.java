@@ -1,7 +1,6 @@
 package org.hkijena.misa_imagej.ui.components;
 
 import com.google.common.base.Joiner;
-import com.google.common.base.Strings;
 import org.hkijena.misa_imagej.api.MISAValidityReport;
 import org.hkijena.misa_imagej.utils.UIUtils;
 

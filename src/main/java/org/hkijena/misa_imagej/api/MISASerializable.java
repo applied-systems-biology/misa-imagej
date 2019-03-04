@@ -2,7 +2,6 @@ package org.hkijena.misa_imagej.api;
 
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
-import org.jfree.data.json.impl.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;

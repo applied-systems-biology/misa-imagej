@@ -1,11 +1,11 @@
 package org.hkijena.misa_imagej.ui.parametereditor;
 
 import com.google.common.eventbus.Subscribe;
+import org.hkijena.misa_imagej.MISAImageJRegistryService;
 import org.hkijena.misa_imagej.api.MISACache;
 import org.hkijena.misa_imagej.api.MISACacheIOType;
 import org.hkijena.misa_imagej.api.MISADataSource;
 import org.hkijena.misa_imagej.ui.datasources.MISADataSourceUI;
-import org.hkijena.misa_imagej.ui.datasources.MISADataSourceUIRegistry;
 import org.hkijena.misa_imagej.utils.UIUtils;
 
 import javax.swing.*;
@@ -70,7 +70,7 @@ public class MISAInputCacheUI extends JPanel {
 
         if(editor != null)
             remove(editor);
-        editor = MISADataSourceUIRegistry.getEditorFor(cache.getDataSource());
+        editor = MISAImageJRegistryService.getInstance().getDataSourceUIRegistry().getEditorFor(cache.getDataSource());
         add(editor, BorderLayout.CENTER);
         revalidate();
         repaint();
