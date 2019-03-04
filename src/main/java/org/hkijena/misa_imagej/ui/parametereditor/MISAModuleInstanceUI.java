@@ -45,9 +45,9 @@ public class MISAModuleInstanceUI extends JFrame {
             this.moduleInstance.addSample("New Sample");
     }
 
-    private void install(Path parameterSchema, Path importedDirectory, Path exportedDirectory, boolean forceCopy, boolean relativeDirectories) {
+    private void install(Path parameters, Path importedDirectory, Path exportedDirectory, boolean forceCopy, boolean relativeDirectories) {
         setEnabled(false);
-        this.moduleInstance.install(parameterSchema, importedDirectory, exportedDirectory, forceCopy, relativeDirectories);
+        this.moduleInstance.install(parameters, importedDirectory, exportedDirectory, forceCopy, relativeDirectories);
         setEnabled(true);
     }
 

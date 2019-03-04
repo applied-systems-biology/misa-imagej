@@ -46,7 +46,14 @@ public class DocumentTabPane extends JTabbedPane {
             closeButton.setBackground(Color.WHITE);
             closeButton.setOpaque(false);
             closeButton.setEnabled(closeMode != CloseMode.withDisabledCloseButton);
-            closeButton.addActionListener(e -> remove(component));
+            closeButton.addActionListener(e -> {
+                if(closeMode == CloseMode.withAskOnCloseButton &&
+                        JOptionPane.showConfirmDialog(component, "Do you really want to close this?",
+                                "Close tab", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) != JOptionPane.YES_OPTION) {
+                    return;
+                }
+                remove(component);
+            });
             tabPanel.add(Box.createHorizontalStrut(8));
             tabPanel.add(closeButton);
         }
