@@ -127,6 +127,11 @@
             <version>0.40.18</version>
         </dependency>
         <dependency>
+            <groupId>com.vladsch.flexmark</groupId>
+            <artifactId>flexmark-ext-toc</artifactId>
+            <version>0.40.18</version>
+        </dependency>
+        <dependency>
             <groupId>ome</groupId>
             <artifactId>bio-formats_plugins</artifactId>
             <version>6.0.0</version>

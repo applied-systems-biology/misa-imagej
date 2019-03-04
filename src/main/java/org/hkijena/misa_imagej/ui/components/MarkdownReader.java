@@ -4,6 +4,7 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import com.vladsch.flexmark.ext.autolink.AutolinkExtension;
 import com.vladsch.flexmark.ext.tables.TablesExtension;
+import com.vladsch.flexmark.ext.toc.TocExtension;
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.pdf.converter.PdfConverterExtension;
@@ -15,6 +16,9 @@ import org.hkijena.misa_imagej.utils.UIUtils;
 
 import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;
+import javax.swing.text.*;
+import javax.swing.text.html.HTML;
+import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.StyleSheet;
 import java.awt.*;
@@ -25,13 +29,15 @@ import java.util.Arrays;
 public class MarkdownReader extends JPanel {
 
     static final MutableDataHolder OPTIONS = new MutableDataSet()
-            .set(Parser.EXTENSIONS, Arrays.asList(TablesExtension.create(), AutolinkExtension.create()));
+            .set(Parser.EXTENSIONS, Arrays.asList(TablesExtension.create(), AutolinkExtension.create(), TocExtension.create()))
+            .set(TocExtension.LIST_CLASS, "toc-list");
     static final String[] CSS_RULES = {"body { font-family: \"Sans-serif\"; }",
             "pre { background-color: #f5f2f0; border: 3px #f5f2f0 solid; }",
             "code { background-color: #f5f2f0; }",
             "h2 { padding-top: 30px; }",
             "h3 { padding-top: 30px; }",
-            "th { border-bottom: 1px solid #c8c8c8; }"};
+            "th { border-bottom: 1px solid #c8c8c8; }",
+            ".toc-list { list-style: none; }"};
 
     private JScrollPane scrollPane;
     private JTextPane content;
@@ -47,12 +53,16 @@ public class MarkdownReader extends JPanel {
         content = new JTextPane();
         content.setEditable(false);
         content.addHyperlinkListener(e -> {
-            if(e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-                if(Desktop.isDesktopSupported()) {
-                    try {
-                        Desktop.getDesktop().browse(e.getURL().toURI());
-                    } catch (Exception e1) {
-                        throw new RuntimeException(e1);
+            if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+                if (e.getDescription() != null && e.getDescription().startsWith("#")) {
+                    SwingUtilities.invokeLater(() -> scrollToReference(e.getDescription().substring(1)));
+                } else {
+                    if (Desktop.isDesktopSupported()) {
+                        try {
+                            Desktop.getDesktop().browse(e.getURL().toURI());
+                        } catch (Exception e1) {
+                            throw new RuntimeException(e1);
+                        }
                     }
                 }
             }
@@ -72,7 +82,7 @@ public class MarkdownReader extends JPanel {
         saveMarkdown.addActionListener(e -> {
             JFileChooser fileChooser = new JFileChooser();
             fileChooser.setDialogTitle("Save as Markdown");
-            if(fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+            if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
                 try {
                     Files.write(fileChooser.getSelectedFile().toPath(), markdown.getBytes(Charsets.UTF_8));
                 } catch (IOException e1) {
@@ -86,9 +96,9 @@ public class MarkdownReader extends JPanel {
         saveHTML.addActionListener(e -> {
             JFileChooser fileChooser = new JFileChooser();
             fileChooser.setDialogTitle("Save as HTML");
-            if(fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+            if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
                 try {
-                    Files.write(fileChooser.getSelectedFile().toPath(),toHTML().getBytes(Charsets.UTF_8));
+                    Files.write(fileChooser.getSelectedFile().toPath(), toHTML().getBytes(Charsets.UTF_8));
                 } catch (IOException e1) {
                     throw new RuntimeException(e1);
                 }
@@ -100,7 +110,7 @@ public class MarkdownReader extends JPanel {
         savePDF.addActionListener(e -> {
             JFileChooser fileChooser = new JFileChooser();
             fileChooser.setDialogTitle("Save as PDF");
-            if(fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+            if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
                 PdfConverterExtension.exportToPdf(fileChooser.getSelectedFile().toString(), toHTML(), "", OPTIONS);
             }
         });
@@ -119,10 +129,43 @@ public class MarkdownReader extends JPanel {
         add(toolBar, BorderLayout.NORTH);
     }
 
+    /**
+     * Custom "scroll to reference"
+     *
+     * @param var1
+     */
+    private void scrollToReference(String var1) {
+        Document var2 = content.getDocument();
+        if (var2 instanceof HTMLDocument) {
+            HTMLDocument html = (HTMLDocument) var2;
+
+            Element element;
+            ElementIterator iterator = new ElementIterator(html);
+            while ((element = iterator.next()) != null) {
+                AttributeSet attributes = element.getAttributes();
+                String attribute = (String) attributes.getAttribute(HTML.Attribute.ID);
+                if (attribute != null && attribute.equals(var1)) {
+                    try {
+                        int pos = element.getStartOffset();
+                        Rectangle rectangle = content.modelToView(pos);
+                        if (rectangle != null) {
+                            Rectangle var9 = content.getVisibleRect();
+                            rectangle.height = var9.height;
+                            content.scrollRectToVisible(rectangle);
+                            content.setCaretPosition(pos);
+                        }
+                    } catch (BadLocationException var10) {
+                        UIManager.getLookAndFeel().provideErrorFeedback(content);
+                    }
+                }
+            }
+        }
+    }
+
     private String toHTML() {
         String html = content.getText();
         StringBuilder stylesheet = new StringBuilder();
-        for(String rule : CSS_RULES) {
+        for (String rule : CSS_RULES) {
             stylesheet.append(rule).append(" ");
         }
         html = "<html><head><style>" + stylesheet + "</style></head><body>" + html + "</body></html>";
@@ -130,7 +173,7 @@ public class MarkdownReader extends JPanel {
     }
 
     private void initializeStyleSheet(StyleSheet styleSheet) {
-        for(String rule : CSS_RULES) {
+        for (String rule : CSS_RULES) {
             styleSheet.addRule(rule);
         }
     }

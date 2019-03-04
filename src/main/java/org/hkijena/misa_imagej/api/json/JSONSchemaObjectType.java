@@ -22,7 +22,7 @@ public enum JSONSchemaObjectType {
             case jsonBoolean:
                 return UIUtils.getIconFromResources("checkbox.png");
             case jsonNumber:
-                return UIUtils.getIconFromResources("pi.png");
+                return UIUtils.getIconFromResources("number.png");
             default:
                 return null;
         }
