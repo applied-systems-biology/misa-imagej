@@ -105,7 +105,7 @@ public class MISAOutput {
 
     public Map<String, JSONSchemaObject> getAttachmentSchemas() {
         if(attachmentSchemas == null) {
-            
+
         }
         return attachmentSchemas;
     }
