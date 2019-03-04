@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.*;
 
 public class MISAOutput {
 
@@ -20,6 +21,8 @@ public class MISAOutput {
     private MISAModuleInstance moduleInstance;
     private MISAModuleInfo moduleInfo;
     private Path runtimeLogPath;
+    private List<MISAAttachmentDatabase> attachments = new ArrayList<>();
+    private Map<String, JSONSchemaObject> attachmentSchemas;
 
     public MISAOutput(Path rootPath) throws IOException {
         this.rootPath = rootPath;
@@ -80,10 +83,6 @@ public class MISAOutput {
         return Files.exists(rootPath.resolve("attachment-index.sqlite"));
     }
 
-    public static void main(String[] args) throws IOException {
-        MISAOutput output = new MISAOutput(Paths.get("/home/rgerst/tmp/glomeruli_full_quantified/"));
-    }
-
     public Path getRootPath() {
         return rootPath;
     }
@@ -98,5 +97,23 @@ public class MISAOutput {
 
     public Path getRuntimeLogPath() {
         return runtimeLogPath;
+    }
+
+    public List<MISAAttachmentDatabase> getAttachments() {
+        return Collections.unmodifiableList(attachments);
+    }
+
+    public Map<String, JSONSchemaObject> getAttachmentSchemas() {
+        if(attachmentSchemas == null) {
+            
+        }
+        return attachmentSchemas;
+    }
+
+    public MISAAttachmentDatabase createAttachmentDatabase() {
+        MISAAttachmentDatabase attachment = new MISAAttachmentDatabase(this);
+        attachments.add(attachment);
+        return attachment;
+
     }
 }
