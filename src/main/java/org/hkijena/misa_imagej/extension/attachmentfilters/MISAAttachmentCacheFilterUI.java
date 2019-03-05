@@ -4,7 +4,6 @@ import org.hkijena.misa_imagej.api.MISACache;
 import org.hkijena.misa_imagej.api.MISACacheIOType;
 import org.hkijena.misa_imagej.api.MISASample;
 import org.hkijena.misa_imagej.api.workbench.filters.MISAAttachmentFilter;
-import org.hkijena.misa_imagej.ui.components.renderers.MISASampleTableCellRender;
 import org.hkijena.misa_imagej.ui.workbench.MISAAttachmentFilterUI;
 import org.hkijena.misa_imagej.utils.ui.ColorIcon;
 

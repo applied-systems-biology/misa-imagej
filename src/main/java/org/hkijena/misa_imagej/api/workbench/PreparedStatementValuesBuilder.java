@@ -3,8 +3,6 @@ package org.hkijena.misa_imagej.api.workbench;
 import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.SQLFeatureNotSupportedException;
-import java.sql.Types;
 
 public class PreparedStatementValuesBuilder {
     private PreparedStatement preparedStatement;

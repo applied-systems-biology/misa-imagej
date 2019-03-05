@@ -5,7 +5,6 @@ import org.hkijena.misa_imagej.MISAImageJRegistryService;
 import org.hkijena.misa_imagej.api.workbench.filters.MISAAttachmentFilter;
 import org.hkijena.misa_imagej.api.workbench.filters.MISAAttachmentFilterChangedEvent;
 import org.hkijena.misa_imagej.utils.UIUtils;
-import org.scijava.util.Colors;
 
 import javax.swing.*;
 import java.awt.*;

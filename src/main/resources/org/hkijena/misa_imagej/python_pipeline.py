@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
-import platform
-import os
 import glob
 import json
+import os
+import platform
 import subprocess
 
 module_paths = []
