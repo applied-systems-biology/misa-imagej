@@ -2,6 +2,7 @@ package org.hkijena.misa_imagej;
 
 import org.hkijena.misa_imagej.api.registries.MISACacheRegistry;
 import org.hkijena.misa_imagej.api.registries.MISASerializableRegistry;
+import org.hkijena.misa_imagej.ui.registries.MISAAttachmentFilterUIRegistry;
 import org.hkijena.misa_imagej.ui.registries.MISADataSourceUIRegistry;
 import org.hkijena.misa_imagej.ui.registries.MISAOutputCacheUIRegistry;
 import org.scijava.InstantiableException;
@@ -32,12 +33,14 @@ public class MISAImageJRegistryService extends AbstractService implements MISAIm
     private MISAOutputCacheUIRegistry outputCacheUIRegistry;
     private MISACacheRegistry cacheRegistry;
     private MISASerializableRegistry serializableRegistry;
+    private MISAAttachmentFilterUIRegistry attachmentFilterUIRegistry;
 
     public MISAImageJRegistryService() {
         dataSourceUIRegistry = new MISADataSourceUIRegistry();
         outputCacheUIRegistry = new MISAOutputCacheUIRegistry();
         cacheRegistry = new MISACacheRegistry();
         serializableRegistry = new MISASerializableRegistry();
+        attachmentFilterUIRegistry = new MISAAttachmentFilterUIRegistry();
     }
 
     @Override
@@ -48,6 +51,11 @@ public class MISAImageJRegistryService extends AbstractService implements MISAIm
     @Override
     public MISAOutputCacheUIRegistry getOutputCacheUIRegistry() {
         return outputCacheUIRegistry;
+    }
+
+    @Override
+    public MISAAttachmentFilterUIRegistry getAttachmentFilterUIRegistry() {
+        return attachmentFilterUIRegistry;
     }
 
     @Override

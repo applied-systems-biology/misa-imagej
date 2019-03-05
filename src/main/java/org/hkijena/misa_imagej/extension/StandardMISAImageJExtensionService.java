@@ -2,6 +2,10 @@ package org.hkijena.misa_imagej.extension;
 
 import org.hkijena.misa_imagej.MISAImageJExtensionService;
 import org.hkijena.misa_imagej.MISAImageJRegistryService;
+import org.hkijena.misa_imagej.extension.attachmentfilters.MISAAttachmentSQLFilter;
+import org.hkijena.misa_imagej.extension.attachmentfilters.MISAAttachmentSQLFilterUI;
+import org.hkijena.misa_imagej.extension.attachmentfilters.MISAAttachmentSampleFilter;
+import org.hkijena.misa_imagej.extension.attachmentfilters.MISAAttachmentSampleFilterUI;
 import org.hkijena.misa_imagej.extension.attachments.MISALocatable;
 import org.hkijena.misa_imagej.extension.attachments.MISALocation;
 import org.hkijena.misa_imagej.extension.attachments.MISAOMEPlanesLocation;
@@ -10,6 +14,7 @@ import org.hkijena.misa_imagej.extension.caches.MISAFileCache;
 import org.hkijena.misa_imagej.extension.caches.MISAOMETiffCache;
 import org.hkijena.misa_imagej.extension.datasources.*;
 import org.hkijena.misa_imagej.extension.outputcaches.OMETiffOutputCacheUI;
+import org.hkijena.misa_imagej.utils.UIUtils;
 import org.scijava.plugin.Plugin;
 import org.scijava.service.AbstractService;
 
@@ -31,5 +36,10 @@ public class StandardMISAImageJExtensionService extends AbstractService implemen
         registryService.getDataSourceUIRegistry().register(MISAPipelineNodeDataSource.class, MISAPipelineNodeDataSourceUI.class);
 
         registryService.getOutputCacheUIRegistry().register(MISAOMETiffCache.class, OMETiffOutputCacheUI.class);
+
+        registryService.getAttachmentFilterUIRegistry().register(MISAAttachmentSampleFilter.class, MISAAttachmentSampleFilterUI.class,
+                "Filter by sample", UIUtils.getIconFromResources("sample.png"));
+        registryService.getAttachmentFilterUIRegistry().register(MISAAttachmentSQLFilter.class, MISAAttachmentSQLFilterUI.class,
+                "Filter by SQL", UIUtils.getIconFromResources("database.png"));
     }
 }

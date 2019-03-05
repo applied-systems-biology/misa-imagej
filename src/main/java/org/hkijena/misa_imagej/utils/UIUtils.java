@@ -163,6 +163,12 @@ public class UIUtils {
         component.setBorder(compound);
     }
 
+    public static void makeFlatWithoutMargin(AbstractButton component) {
+        component.setBackground(Color.WHITE);
+        component.setOpaque(false);
+        component.setBorder(null);
+    }
+
     public static void setToAskOnClose(JFrame window, String message, String title) {
         window.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         window.addWindowListener(new WindowAdapter() {

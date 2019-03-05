@@ -1,8 +1,10 @@
 package org.hkijena.misa_imagej.api.workbench;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.hkijena.misa_imagej.api.MISAModuleInstance;
+import org.hkijena.misa_imagej.api.MISARuntimeLog;
 import org.hkijena.misa_imagej.api.MISASample;
 import org.hkijena.misa_imagej.api.MISASamplePolicy;
 import org.hkijena.misa_imagej.api.json.JSONSchemaObject;
@@ -15,40 +17,56 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
+/**
+ * Represents a MISA++ output
+ */
 public class MISAOutput {
 
+    private final Gson gson = GsonUtils.getGson();
     private Path rootPath;
     private MISAModuleInstance moduleInstance;
     private MISAModuleInfo moduleInfo;
-    private Path runtimeLogPath;
+    private MISARuntimeLog runtimeLog;
     private List<MISAAttachmentDatabase> attachments = new ArrayList<>();
     private Map<String, JSONSchemaObject> attachmentSchemas;
+    private boolean loadedParameterJson = false;
 
     public MISAOutput(Path rootPath) throws IOException {
         this.rootPath = rootPath;
-        this.runtimeLogPath = rootPath.resolve("runtime-log.json");
         loadParameterSchema();
+        loadRuntimeLog();
         loadModuleInfo();
         loadParameters();
         loadFilesystem();
     }
 
     private void loadParameterSchema() throws IOException {
-        Gson gson = GsonUtils.getGson();
-        JSONSchemaObject schema = gson.fromJson(new String(Files.readAllBytes(getRootPath().resolve("parameter-schema.json"))), JSONSchemaObject.class);
-        schema.setId("parameters");
-        schema.update();
-        moduleInstance = new MISAModuleInstance(schema);
+        if(Files.exists(getRootPath().resolve("parameter-schema.json"))) {
+            JSONSchemaObject schema = GsonUtils.fromJsonFile(gson, getRootPath().resolve("parameter-schema.json"), JSONSchemaObject.class);
+            schema.setId("parameters");
+            schema.update();
+            moduleInstance = new MISAModuleInstance(schema);
+        }
+    }
+
+    private void loadRuntimeLog() throws IOException {
+        if(Files.exists(getRootPath().resolve("runtime-log.json"))) {
+            runtimeLog = GsonUtils.fromJsonFile(gson, getRootPath().resolve("runtime-log.json"), MISARuntimeLog.class);
+        }
     }
 
     private void loadModuleInfo() throws IOException {
-        Gson gson = GsonUtils.getGson();
-        moduleInfo = gson.fromJson(new String(Files.readAllBytes(getRootPath().resolve("misa-module-info.json"))), MISAModuleInfo.class);
+        if(Files.exists(getRootPath().resolve("misa-module-info.json"))) {
+            moduleInfo = GsonUtils.fromJsonFile(gson, getRootPath().resolve("misa-module-info.json"), MISAModuleInfo.class);
+        }
     }
 
     private void loadParameters() throws IOException {
-        moduleInstance.loadParameters(getRootPath().resolve("parameters.json"),
-                MISASamplePolicy.createMissingSamples);
+        if(Files.exists(getRootPath().resolve("parameters.json"))) {
+            moduleInstance.loadParameters(getRootPath().resolve("parameters.json"),
+                    MISASamplePolicy.createMissingSamples);
+            loadedParameterJson = true;
+        }
     }
 
     private void loadFilesystem() throws IOException {
@@ -95,17 +113,25 @@ public class MISAOutput {
         return moduleInfo;
     }
 
-    public Path getRuntimeLogPath() {
-        return runtimeLogPath;
-    }
-
     public List<MISAAttachmentDatabase> getAttachments() {
         return Collections.unmodifiableList(attachments);
     }
 
     public Map<String, JSONSchemaObject> getAttachmentSchemas() {
         if(attachmentSchemas == null) {
-
+            attachmentSchemas = new HashMap<>();
+            Path path = rootPath.resolve("attachments").resolve("serialization-schemas-full.json");
+            if(Files.exists(path)) {
+                try {
+                    Gson gson = GsonUtils.getGson();
+                    JsonObject jsonObject = GsonUtils.fromJsonFile(gson, path, JsonObject.class);
+                    for(Map.Entry<String, JsonElement> entry : jsonObject.entrySet()) {
+                        attachmentSchemas.put(entry.getKey(), gson.fromJson(entry.getValue(), JSONSchemaObject.class));
+                    }
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
         }
         return attachmentSchemas;
     }
@@ -114,6 +140,17 @@ public class MISAOutput {
         MISAAttachmentDatabase attachment = new MISAAttachmentDatabase(this);
         attachments.add(attachment);
         return attachment;
+    }
 
+    public boolean hasAttachmentSchemas() {
+        return attachmentSchemas != null;
+    }
+
+    public boolean hasLoadedParameters() {
+        return loadedParameterJson;
+    }
+
+    public MISARuntimeLog getRuntimeLog() {
+        return runtimeLog;
     }
 }
