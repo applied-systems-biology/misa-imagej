@@ -9,6 +9,9 @@ import org.hkijena.misa_imagej.utils.UIUtils;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 public class MISAAttachmentBrowserUI extends JPanel {
 
@@ -38,12 +41,18 @@ public class MISAAttachmentBrowserUI extends JPanel {
 
         JButton addFilterButton = new JButton("Add filter", UIUtils.getIconFromResources("filter.png"));
         JPopupMenu addFilterMenu = UIUtils.addPopupMenuToComponent(addFilterButton);
+        List<JMenuItem> itemList = new ArrayList<>();
         for(Class<? extends MISAAttachmentFilter> filterClass : MISAImageJRegistryService.getInstance().getAttachmentFilterUIRegistry().getFilterTypes()) {
             JMenuItem item = MISAImageJRegistryService.getInstance().getAttachmentFilterUIRegistry().createMenuItem(filterClass, attachmentDatabase);
+            itemList.add(item);
+        }
+        itemList.sort(Comparator.comparing(JMenuItem::getText));
+        for(JMenuItem item : itemList) {
             addFilterMenu.add(item);
         }
 
         toolBar.add(addFilterButton);
+        toolBar.add(Box.createHorizontalStrut(150));
 
         panel.add(toolBar, BorderLayout.NORTH);
         filterList = new JPanel();

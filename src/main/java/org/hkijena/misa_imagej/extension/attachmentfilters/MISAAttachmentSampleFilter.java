@@ -1,6 +1,5 @@
 package org.hkijena.misa_imagej.extension.attachmentfilters;
 
-import com.google.common.eventbus.EventBus;
 import org.hkijena.misa_imagej.api.MISASample;
 import org.hkijena.misa_imagej.api.workbench.MISAAttachmentDatabase;
 import org.hkijena.misa_imagej.api.workbench.PreparedStatementValuesBuilder;

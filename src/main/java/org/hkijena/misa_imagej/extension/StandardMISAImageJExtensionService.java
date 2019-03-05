@@ -11,6 +11,7 @@ import org.hkijena.misa_imagej.extension.caches.MISAFileCache;
 import org.hkijena.misa_imagej.extension.caches.MISAOMETiffCache;
 import org.hkijena.misa_imagej.extension.datasources.*;
 import org.hkijena.misa_imagej.extension.outputcaches.OMETiffOutputCacheUI;
+import org.hkijena.misa_imagej.ui.workbench.MISAAttachmentFilterUI;
 import org.hkijena.misa_imagej.utils.UIUtils;
 import org.scijava.plugin.Plugin;
 import org.scijava.service.AbstractService;
@@ -40,6 +41,8 @@ public class StandardMISAImageJExtensionService extends AbstractService implemen
                 "Filter by data", UIUtils.getIconFromResources("database.png"));
         registryService.getAttachmentFilterUIRegistry().register(MISAAttachmentTypeFilter.class, MISAAttachmentTypeFilterUI.class,
                 "Filter by object type", UIUtils.getIconFromResources("object.png"));
+        registryService.getAttachmentFilterUIRegistry().register(MISAAttachmentRootTypeFilter.class, MISAAttachmentRootTypeFilterUI.class,
+                "Filter only direct attachments", UIUtils.getIconFromResources("object.png"));
         registryService.getAttachmentFilterUIRegistry().register(MISAAttachmentSQLFilter.class, MISAAttachmentSQLFilterUI.class,
                 "Filter by SQL", UIUtils.getIconFromResources("cog.png"));
 
