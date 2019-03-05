@@ -27,7 +27,7 @@ public class MISAAttachmentBrowserUI extends JPanel {
 
     private void initialize() {
         setLayout(new BorderLayout());
-        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, initializeFilterPanel(), new JPanel());
+        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, initializeFilterPanel(), initializeContentPanel());
         add(splitPane, BorderLayout.CENTER);
     }
 
@@ -51,6 +51,14 @@ public class MISAAttachmentBrowserUI extends JPanel {
         filterList.setLayout(new BoxLayout(filterList, BoxLayout.PAGE_AXIS));
         panel.add(new JScrollPane(filterList), BorderLayout.CENTER);
 
+        return panel;
+    }
+
+    private JPanel initializeContentPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        JButton test = new JButton("Test");
+        panel.add(test, BorderLayout.CENTER);
+        test.addActionListener(e -> test.setText("" + attachmentDatabase.getDatasetCount()));
         return panel;
     }
 

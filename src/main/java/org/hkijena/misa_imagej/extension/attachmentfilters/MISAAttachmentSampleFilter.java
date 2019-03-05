@@ -18,6 +18,7 @@ public class MISAAttachmentSampleFilter implements MISAAttachmentFilter {
 
     public MISAAttachmentSampleFilter(MISAAttachmentDatabase database) {
         this.database = database;
+        samples.addAll(database.getMisaOutput().getModuleInstance().getSamples().values());
     }
 
     public Collection<MISASample> getSamples() {
@@ -38,12 +39,15 @@ public class MISAAttachmentSampleFilter implements MISAAttachmentFilter {
     public String toSQLStatement() {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("(");
+        boolean first = true;
         for(MISASample sample : samples) {
-            if(stringBuilder.length() > 0)
+            if(!first) {
                 stringBuilder.append(" or ");
+            }
             stringBuilder.append(" sample is ?");
+            first = false;
         }
-        stringBuilder.append(")");
+        stringBuilder.append(" )");
         return stringBuilder.toString();
     }
 
@@ -62,5 +66,9 @@ public class MISAAttachmentSampleFilter implements MISAAttachmentFilter {
     @Override
     public MISAAttachmentDatabase getDatabase() {
         return database;
+    }
+
+    public boolean isSampleSelected(MISASample sample) {
+        return samples.contains(sample);
     }
 }

@@ -9,7 +9,7 @@ import org.hkijena.misa_imagej.api.workbench.filters.MISAAttachmentFilterChanged
 public class MISAAttachmentSQLFilter implements MISAAttachmentFilter {
 
     private MISAAttachmentDatabase database;
-    private String sql;
+    private String sql = "true";
     private EventBus eventBus = new EventBus();
 
     public MISAAttachmentSQLFilter(MISAAttachmentDatabase database) {

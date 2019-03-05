@@ -3,9 +3,7 @@ package org.hkijena.misa_imagej.api.workbench;
 import com.google.common.eventbus.EventBus;
 import org.hkijena.misa_imagej.api.workbench.filters.MISAAttachmentFilter;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -53,6 +51,45 @@ public class MISAAttachmentDatabase {
     public void removeFilter(MISAAttachmentFilter filter) {
         filters.remove(filter);
         getEventBus().post(new RemovedFilterEvent(this, filter));
+    }
+
+    public ResultSet query(String selectionStatement) {
+        StringBuilder template = new StringBuilder();
+        template.append("select ").append(selectionStatement).append(" from attachments");
+        if(!filters.isEmpty()) {
+            template.append(" where");
+            boolean first = true;
+            for(MISAAttachmentFilter filter : filters) {
+                if(!first) {
+                    template.append(" and ");
+                }
+                else {
+                    template.append(" ");
+                    first = false;
+                }
+                template.append(filter.toSQLStatement());
+            }
+        }
+
+        try {
+            PreparedStatement statement = databaseConnection.prepareStatement(template.toString());
+            PreparedStatementValuesBuilder builder = new PreparedStatementValuesBuilder(statement);
+            for(MISAAttachmentFilter filter : filters) {
+                filter.setSQLStatementVariables(builder);
+            }
+            return statement.executeQuery();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public int getDatasetCount() {
+        ResultSet resultSet = query("count()");
+        try {
+            return resultSet.getInt(1);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static class AddedFilterEvent {
