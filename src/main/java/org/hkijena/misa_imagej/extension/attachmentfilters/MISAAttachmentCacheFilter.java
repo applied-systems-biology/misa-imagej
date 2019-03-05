@@ -13,15 +13,12 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-public class MISAAttachmentCacheFilter implements MISAAttachmentFilter {
+public class MISAAttachmentCacheFilter extends MISAAttachmentFilter {
 
-    private MISAAttachmentDatabase database;
-    private EventBus eventBus = new EventBus();
-    private boolean enabled = true;
     private Set<String> caches = new HashSet<>();
 
     public MISAAttachmentCacheFilter(MISAAttachmentDatabase database) {
-        this.database = database;
+        super(database);
         MISASample sample = database.getMisaOutput().getModuleInstance().getSamples().values().stream().findFirst().get();
         for(MISACache cache : sample.getImportedCaches()) {
             String cacheName = "imported/" + cache.getRelativePath();
@@ -48,11 +45,6 @@ public class MISAAttachmentCacheFilter implements MISAAttachmentFilter {
     }
 
     @Override
-    public MISAAttachmentDatabase getDatabase() {
-        return database;
-    }
-
-    @Override
     public String toSQLStatement() {
         if(caches.isEmpty())
             return "false";
@@ -75,21 +67,5 @@ public class MISAAttachmentCacheFilter implements MISAAttachmentFilter {
         for(String cache : caches) {
             builder.addString(cache + "%");
         }
-    }
-
-    @Override
-    public EventBus getEventBus() {
-        return eventBus;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    @Override
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-        getEventBus().post(new MISAAttachmentFilterChangedEvent(this));
     }
 }

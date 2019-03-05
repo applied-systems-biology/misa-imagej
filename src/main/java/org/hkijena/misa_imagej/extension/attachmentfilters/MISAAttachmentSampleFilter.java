@@ -12,15 +12,12 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-public class MISAAttachmentSampleFilter implements MISAAttachmentFilter {
+public class MISAAttachmentSampleFilter extends MISAAttachmentFilter {
 
-    private MISAAttachmentDatabase database;
-    private EventBus eventBus = new EventBus();
     private Set<MISASample> samples = new HashSet<>();
-    private boolean enabled = true;
 
     public MISAAttachmentSampleFilter(MISAAttachmentDatabase database) {
-        this.database = database;
+        super(database);
         samples.addAll(database.getMisaOutput().getModuleInstance().getSamples().values());
     }
 
@@ -61,26 +58,5 @@ public class MISAAttachmentSampleFilter implements MISAAttachmentFilter {
         for(MISASample sample : samples) {
             builder.addString(sample.getName());
         }
-    }
-
-    @Override
-    public EventBus getEventBus() {
-        return eventBus;
-    }
-
-    @Override
-    public MISAAttachmentDatabase getDatabase() {
-        return database;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    @Override
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-        getEventBus().post(new MISAAttachmentFilterChangedEvent(this));
     }
 }

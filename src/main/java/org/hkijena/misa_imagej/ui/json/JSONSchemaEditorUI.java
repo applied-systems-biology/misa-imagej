@@ -167,7 +167,7 @@ public class JSONSchemaEditorUI extends JPanel {
             // Create a toolbar with view options
             JToolBar toolBar = new JToolBar();
 
-            enableObjectsButton = new JToggleButton("Objects", UIUtils.getIconFromResources("group.png"), true);
+            enableObjectsButton = new JToggleButton("Objects", UIUtils.getIconFromResources("object.png"), true);
             enableObjectsButton.setToolTipText("If enabled, object parameters are shown in the editor.");
             enableObjectsButton.addActionListener(actionEvent -> updateEditor());
             toolBar.add(enableObjectsButton);

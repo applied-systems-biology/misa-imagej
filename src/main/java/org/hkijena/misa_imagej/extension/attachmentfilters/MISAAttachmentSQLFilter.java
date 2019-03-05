@@ -6,20 +6,12 @@ import org.hkijena.misa_imagej.api.workbench.PreparedStatementValuesBuilder;
 import org.hkijena.misa_imagej.api.workbench.filters.MISAAttachmentFilter;
 import org.hkijena.misa_imagej.api.workbench.filters.MISAAttachmentFilterChangedEvent;
 
-public class MISAAttachmentSQLFilter implements MISAAttachmentFilter {
+public class MISAAttachmentSQLFilter extends MISAAttachmentFilter {
 
-    private MISAAttachmentDatabase database;
     private String sql = "true";
-    private EventBus eventBus = new EventBus();
-    private boolean enabled = true;
 
     public MISAAttachmentSQLFilter(MISAAttachmentDatabase database) {
-        this.database = database;
-    }
-
-    @Override
-    public MISAAttachmentDatabase getDatabase() {
-        return database;
+        super(database);
     }
 
     @Override
@@ -34,22 +26,6 @@ public class MISAAttachmentSQLFilter implements MISAAttachmentFilter {
 
     public void setSql(String sql) {
         this.sql = sql;
-        getEventBus().post(new MISAAttachmentFilterChangedEvent(this));
-    }
-
-    @Override
-    public EventBus getEventBus() {
-        return eventBus;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    @Override
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
         getEventBus().post(new MISAAttachmentFilterChangedEvent(this));
     }
 }

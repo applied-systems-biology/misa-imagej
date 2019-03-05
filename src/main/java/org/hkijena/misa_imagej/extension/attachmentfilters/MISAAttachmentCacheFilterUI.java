@@ -105,10 +105,13 @@ public class MISAAttachmentCacheFilterUI extends MISAAttachmentFilterUI {
                 else {
                     setBackground(new Color(255,255,255));
                 }
+
+                setToolTipText("Data of type " + cache.getCacheTypeName());
             }
             else {
                 setText(null);
                 setIcon(null);
+                setToolTipText(null);
             }
             return this;
         }

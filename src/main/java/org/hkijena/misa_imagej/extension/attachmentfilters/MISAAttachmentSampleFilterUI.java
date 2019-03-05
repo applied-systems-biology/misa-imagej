@@ -37,6 +37,8 @@ public class MISAAttachmentSampleFilterUI extends MISAAttachmentFilterUI {
         selectionTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
         selectionTable.setDefaultRenderer(MISASample.class, new MISASampleTableCellRender());
         selectionTable.getColumnModel().getColumn(0).setMaxWidth(20);
+        selectionTable.setShowGrid(false);
+        selectionTable.setOpaque(false);
 
         getContentPane().setLayout(new BorderLayout());
         getContentPane().add(selectionTable, BorderLayout.CENTER);

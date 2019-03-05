@@ -38,6 +38,8 @@ public class StandardMISAImageJExtensionService extends AbstractService implemen
                 "Filter by sample", UIUtils.getIconFromResources("sample.png"));
         registryService.getAttachmentFilterUIRegistry().register(MISAAttachmentCacheFilter.class, MISAAttachmentCacheFilterUI.class,
                 "Filter by data", UIUtils.getIconFromResources("database.png"));
+        registryService.getAttachmentFilterUIRegistry().register(MISAAttachmentTypeFilter.class, MISAAttachmentTypeFilterUI.class,
+                "Filter by object type", UIUtils.getIconFromResources("object.png"));
         registryService.getAttachmentFilterUIRegistry().register(MISAAttachmentSQLFilter.class, MISAAttachmentSQLFilterUI.class,
                 "Filter by SQL", UIUtils.getIconFromResources("cog.png"));
 

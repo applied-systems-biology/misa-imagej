@@ -10,41 +10,58 @@ import java.sql.SQLException;
  * A class that builds a SQL query to filter attachments
  * If the query changes, a {@link MISAAttachmentFilterChangedEvent} is triggered
  */
-public interface MISAAttachmentFilter {
+public abstract class MISAAttachmentFilter {
+
+    private MISAAttachmentDatabase database;
+    private EventBus eventBus = new EventBus();
+    boolean enabled = true;
+
+    protected MISAAttachmentFilter(MISAAttachmentDatabase database) {
+        this.database = database;
+    }
 
     /**
      * Returns the database
      * @return
      */
-    MISAAttachmentDatabase getDatabase();
+    public MISAAttachmentDatabase getDatabase() {
+        return database;
+    }
 
     /**
      * Used to build a prepared statement
      * @return
      */
-    String toSQLStatement();
+    public abstract String toSQLStatement();
 
     /**
      * Adds the missing variables one after another
      * @param builder
      */
-    void setSQLStatementVariables(PreparedStatementValuesBuilder builder) throws SQLException;
+    public abstract void setSQLStatementVariables(PreparedStatementValuesBuilder builder) throws SQLException;
 
     /**
      * Gets the event bus
      * @return
      */
-    EventBus getEventBus();
+    public EventBus getEventBus() {
+        return eventBus;
+    }
 
     /**
      * Returns true if the filter is enabled
      * @return
      */
-    boolean isEnabled();
+    public boolean isEnabled() {
+        return enabled;
+    }
 
     /**
      * Enables or disables the filter
      * @param enabled
      */
-    void setEnabled(boolean enabled);
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+        getEventBus().post(new MISAAttachmentFilterChangedEvent(this));
+    }
 }

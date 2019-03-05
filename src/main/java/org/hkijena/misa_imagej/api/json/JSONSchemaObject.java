@@ -11,7 +11,9 @@ import org.hkijena.misa_imagej.api.MISAValidityReport;
 import org.hkijena.misa_imagej.utils.GsonUtils;
 
 import javax.swing.tree.DefaultMutableTreeNode;
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 
 /**
  * Deserialized JSON Schema entry that allows editing and exporting to the final JSON
@@ -28,9 +30,6 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
 
     @SerializedName("type")
     private JSONSchemaObjectType type;
-
-    @SerializedName("title")
-    private String title = null;
 
 //    @SerializedName("description")
 //    private String description = null;
@@ -105,7 +104,6 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
     public Object clone() {
         JSONSchemaObject obj = new JSONSchemaObject();
         obj.type = getType();
-        obj.setTitle(getTitle());
 //        obj.setDescription(getDescription());
         obj.documentationTitle = this.documentationTitle;
         obj.documentationDescription = this.documentationDescription;
@@ -208,7 +206,7 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
     }
 
     public String getName() {
-        return (getTitle() == null || getTitle().isEmpty()) ? getId() : getTitle();
+        return (getDocumentationTitle() == null || getDocumentationTitle().isEmpty()) ? getId() : getDocumentationTitle();
     }
 
     @Override
@@ -400,14 +398,6 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
         return type;
     }
 
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
 //    public String getDescription() {
 //        return description;
 //    }
@@ -502,6 +492,15 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
     public void setDocumentationDescription(String documentationDescription) {
         this.documentationDescription = documentationDescription;
     }
+
+    /**
+     * Automatically generates a color from the name
+     * @return
+     */
+    public Color toColor() {
+        float h = Math.abs(getName().hashCode() % 256) / 255.0f;
+        return Color.getHSBColor(h, 0.8f, 0.8f);
+    }
     
     public String getTooltip() {
         StringBuilder tooltip = new StringBuilder();
@@ -509,10 +508,10 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
         if(this.hasDocumentationDescription()) {
             tooltip.append(this.getDocumentationDescription());
             tooltip.append("<br/><br/>");
-            tooltip.append("<i>").append("(").append(this.getName()).append(")").append("</i>");
+            tooltip.append("<i>").append("(").append(this.getId()).append(")").append("</i>");
         }
         else {
-            tooltip.append("(").append(this.getName()).append(")");
+            tooltip.append("(").append(this.getId()).append(")");
         }
         tooltip.append("</html>");
         return tooltip.toString();

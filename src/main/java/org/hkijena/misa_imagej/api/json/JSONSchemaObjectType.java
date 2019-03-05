@@ -16,7 +16,7 @@ public enum JSONSchemaObjectType {
     public Icon getIcon() {
         switch (this) {
             case jsonObject:
-                return UIUtils.getIconFromResources("group.png");
+                return UIUtils.getIconFromResources("object.png");
             case jsonString:
                 return UIUtils.getIconFromResources("text.png");
             case jsonBoolean:

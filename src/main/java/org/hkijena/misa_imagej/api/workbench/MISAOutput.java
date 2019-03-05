@@ -143,7 +143,7 @@ public class MISAOutput {
     }
 
     public boolean hasAttachmentSchemas() {
-        return attachmentSchemas != null;
+        return getAttachmentSchemas() != null;
     }
 
     public boolean hasLoadedParameters() {
