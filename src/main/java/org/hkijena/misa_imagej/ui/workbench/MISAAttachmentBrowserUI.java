@@ -5,7 +5,6 @@ import org.hkijena.misa_imagej.MISAImageJRegistryService;
 import org.hkijena.misa_imagej.api.workbench.MISAAttachmentDatabase;
 import org.hkijena.misa_imagej.api.workbench.MISAOutput;
 import org.hkijena.misa_imagej.api.workbench.filters.MISAAttachmentFilter;
-import org.hkijena.misa_imagej.ui.workbench.filters.MISAAttachmentFilterUI;
 import org.hkijena.misa_imagej.utils.UIUtils;
 
 import javax.swing.*;

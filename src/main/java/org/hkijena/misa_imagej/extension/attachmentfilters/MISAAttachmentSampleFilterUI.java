@@ -3,17 +3,12 @@ package org.hkijena.misa_imagej.extension.attachmentfilters;
 import org.hkijena.misa_imagej.api.MISASample;
 import org.hkijena.misa_imagej.api.workbench.filters.MISAAttachmentFilter;
 import org.hkijena.misa_imagej.ui.components.renderers.MISASampleTableCellRender;
-import org.hkijena.misa_imagej.ui.workbench.filters.MISAAttachmentFilterUI;
+import org.hkijena.misa_imagej.ui.workbench.MISAAttachmentFilterUI;
 
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableColumn;
 import java.awt.*;
-import java.util.Vector;
 
 public class MISAAttachmentSampleFilterUI extends MISAAttachmentFilterUI {
     public MISAAttachmentSampleFilterUI(MISAAttachmentFilter filter) {
@@ -32,13 +27,10 @@ public class MISAAttachmentSampleFilterUI extends MISAAttachmentFilterUI {
                 return super.getColumnClass(columnIndex);
             }
         };
-//        DefaultTableColumnModel columnModel = new DefaultTableColumnModel();
-//        columnModel.addColumn(new TableColumn(0));
-//        columnModel.addColumn(new TableColumn(1, 0, new DefaultTableCellRenderer(), new DefaultCellEditor(new JCheckBox())));
 
         model.setColumnCount(2);
         for(MISASample sample : getFilter().getDatabase().getMisaOutput().getModuleInstance().getSamples().values()) {
-            model.addRow(new Object[]{ getNativeFilter().isSampleSelected(sample), sample });
+            model.addRow(new Object[]{ getNativeFilter().getSamples().contains(sample), sample });
         }
 
         JTable selectionTable = new JTable(model);
@@ -54,7 +46,7 @@ public class MISAAttachmentSampleFilterUI extends MISAAttachmentFilterUI {
                 for(int i = e.getFirstRow(); i <= e.getLastRow(); ++i) {
                     MISASample sample = (MISASample)model.getValueAt(i, 1);
                     boolean isChecked = (boolean)model.getValueAt(i, 0);
-                    if(isChecked != getNativeFilter().isSampleSelected(sample)) {
+                    if(isChecked != getNativeFilter().getSamples().contains(sample)) {
                         if(isChecked) {
                             getNativeFilter().addSample(sample);
                         }

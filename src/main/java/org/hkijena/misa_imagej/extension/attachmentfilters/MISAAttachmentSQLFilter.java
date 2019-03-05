@@ -11,6 +11,7 @@ public class MISAAttachmentSQLFilter implements MISAAttachmentFilter {
     private MISAAttachmentDatabase database;
     private String sql = "true";
     private EventBus eventBus = new EventBus();
+    private boolean enabled = true;
 
     public MISAAttachmentSQLFilter(MISAAttachmentDatabase database) {
         this.database = database;
@@ -39,5 +40,16 @@ public class MISAAttachmentSQLFilter implements MISAAttachmentFilter {
     @Override
     public EventBus getEventBus() {
         return eventBus;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+        getEventBus().post(new MISAAttachmentFilterChangedEvent(this));
     }
 }

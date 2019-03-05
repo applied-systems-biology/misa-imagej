@@ -2,10 +2,7 @@ package org.hkijena.misa_imagej.extension;
 
 import org.hkijena.misa_imagej.MISAImageJExtensionService;
 import org.hkijena.misa_imagej.MISAImageJRegistryService;
-import org.hkijena.misa_imagej.extension.attachmentfilters.MISAAttachmentSQLFilter;
-import org.hkijena.misa_imagej.extension.attachmentfilters.MISAAttachmentSQLFilterUI;
-import org.hkijena.misa_imagej.extension.attachmentfilters.MISAAttachmentSampleFilter;
-import org.hkijena.misa_imagej.extension.attachmentfilters.MISAAttachmentSampleFilterUI;
+import org.hkijena.misa_imagej.extension.attachmentfilters.*;
 import org.hkijena.misa_imagej.extension.attachments.MISALocatable;
 import org.hkijena.misa_imagej.extension.attachments.MISALocation;
 import org.hkijena.misa_imagej.extension.attachments.MISAOMEPlanesLocation;
@@ -39,7 +36,10 @@ public class StandardMISAImageJExtensionService extends AbstractService implemen
 
         registryService.getAttachmentFilterUIRegistry().register(MISAAttachmentSampleFilter.class, MISAAttachmentSampleFilterUI.class,
                 "Filter by sample", UIUtils.getIconFromResources("sample.png"));
+        registryService.getAttachmentFilterUIRegistry().register(MISAAttachmentCacheFilter.class, MISAAttachmentCacheFilterUI.class,
+                "Filter by data", UIUtils.getIconFromResources("database.png"));
         registryService.getAttachmentFilterUIRegistry().register(MISAAttachmentSQLFilter.class, MISAAttachmentSQLFilterUI.class,
-                "Filter by SQL", UIUtils.getIconFromResources("database.png"));
+                "Filter by SQL", UIUtils.getIconFromResources("cog.png"));
+
     }
 }

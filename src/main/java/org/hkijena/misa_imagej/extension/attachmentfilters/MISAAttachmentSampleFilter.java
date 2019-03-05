@@ -15,6 +15,7 @@ public class MISAAttachmentSampleFilter implements MISAAttachmentFilter {
     private MISAAttachmentDatabase database;
     private EventBus eventBus = new EventBus();
     private Set<MISASample> samples = new HashSet<>();
+    private boolean enabled = true;
 
     public MISAAttachmentSampleFilter(MISAAttachmentDatabase database) {
         this.database = database;
@@ -37,6 +38,8 @@ public class MISAAttachmentSampleFilter implements MISAAttachmentFilter {
 
     @Override
     public String toSQLStatement() {
+        if(samples.isEmpty())
+            return "false";
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("(");
         boolean first = true;
@@ -68,7 +71,14 @@ public class MISAAttachmentSampleFilter implements MISAAttachmentFilter {
         return database;
     }
 
-    public boolean isSampleSelected(MISASample sample) {
-        return samples.contains(sample);
+    @Override
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+        getEventBus().post(new MISAAttachmentFilterChangedEvent(this));
     }
 }

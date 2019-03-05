@@ -30,5 +30,21 @@ public interface MISAAttachmentFilter {
      */
     void setSQLStatementVariables(PreparedStatementValuesBuilder builder) throws SQLException;
 
+    /**
+     * Gets the event bus
+     * @return
+     */
     EventBus getEventBus();
+
+    /**
+     * Returns true if the filter is enabled
+     * @return
+     */
+    boolean isEnabled();
+
+    /**
+     * Enables or disables the filter
+     * @param enabled
+     */
+    void setEnabled(boolean enabled);
 }

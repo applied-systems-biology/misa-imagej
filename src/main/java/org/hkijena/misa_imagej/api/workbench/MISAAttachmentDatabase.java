@@ -7,6 +7,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class MISAAttachmentDatabase {
 
@@ -56,10 +57,13 @@ public class MISAAttachmentDatabase {
     public ResultSet query(String selectionStatement) {
         StringBuilder template = new StringBuilder();
         template.append("select ").append(selectionStatement).append(" from attachments");
-        if(!filters.isEmpty()) {
+
+        List<MISAAttachmentFilter> enabledFilters = filters.stream().filter(MISAAttachmentFilter::isEnabled).collect(Collectors.toList());
+
+        if(!enabledFilters.isEmpty()) {
             template.append(" where");
             boolean first = true;
-            for(MISAAttachmentFilter filter : filters) {
+            for(MISAAttachmentFilter filter : enabledFilters) {
                 if(!first) {
                     template.append(" and ");
                 }
@@ -74,7 +78,7 @@ public class MISAAttachmentDatabase {
         try {
             PreparedStatement statement = databaseConnection.prepareStatement(template.toString());
             PreparedStatementValuesBuilder builder = new PreparedStatementValuesBuilder(statement);
-            for(MISAAttachmentFilter filter : filters) {
+            for(MISAAttachmentFilter filter : enabledFilters) {
                 filter.setSQLStatementVariables(builder);
             }
             return statement.executeQuery();
