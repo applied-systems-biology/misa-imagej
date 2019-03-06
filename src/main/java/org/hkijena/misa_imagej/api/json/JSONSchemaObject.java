@@ -478,7 +478,7 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
         if (documentationTitle != null && !documentationTitle.isEmpty())
             return documentationTitle;
         else
-            return getName();
+            return getId();
     }
 
     public void setDocumentationTitle(String documentationTitle) {

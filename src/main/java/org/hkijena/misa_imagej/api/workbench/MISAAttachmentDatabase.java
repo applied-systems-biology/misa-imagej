@@ -54,7 +54,7 @@ public class MISAAttachmentDatabase {
         getEventBus().post(new RemovedFilterEvent(this, filter));
     }
 
-    private String createQueryStatementTemplate(String selectionStatement) {
+    private String createQueryStatementTemplate(String selectionStatement, String postStatement) {
         StringBuilder template = new StringBuilder();
         template.append("select ").append(selectionStatement).append(" from attachments");
 
@@ -75,15 +75,17 @@ public class MISAAttachmentDatabase {
             }
         }
 
+        template.append(" ").append(postStatement);
+
         return template.toString();
     }
 
-    public PreparedStatement createQueryStatement(String selectionStatement) {
+    public PreparedStatement createQueryStatement(String selectionStatement, String postStatement) {
 
         List<MISAAttachmentFilter> enabledFilters = filters.stream().filter(MISAAttachmentFilter::isEnabled).collect(Collectors.toList());
 
         try {
-            PreparedStatement statement = databaseConnection.prepareStatement(createQueryStatementTemplate(selectionStatement));
+            PreparedStatement statement = databaseConnection.prepareStatement(createQueryStatementTemplate(selectionStatement, postStatement));
             PreparedStatementValuesBuilder builder = new PreparedStatementValuesBuilder(statement);
             for(MISAAttachmentFilter filter : enabledFilters) {
                 filter.setSQLStatementVariables(builder);
@@ -94,9 +96,9 @@ public class MISAAttachmentDatabase {
         }
     }
 
-    public ResultSet query(String selectionStatement) {
+    public ResultSet query(String selectionStatement, String postStatement) {
         try {
-            return createQueryStatement(selectionStatement).executeQuery();
+            return createQueryStatement(selectionStatement, postStatement).executeQuery();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -107,7 +109,7 @@ public class MISAAttachmentDatabase {
      * @param selectionStatement
      * @return
      */
-    public String getQuerySQL(String selectionStatement) {
+    public String getQuerySQL(String selectionStatement, String postStatement) {
         StringBuilder sql = new StringBuilder();
         sql.append("select ").append(selectionStatement).append(" from attachments");
 
@@ -128,11 +130,13 @@ public class MISAAttachmentDatabase {
             }
         }
 
+        sql.append(" ").append(postStatement);
+
         return sql.toString();
     }
 
     public int getDatasetCount() {
-        ResultSet resultSet = query("count()");
+        ResultSet resultSet = query("count()", "");
         try {
             return resultSet.getInt(1);
         } catch (SQLException e) {

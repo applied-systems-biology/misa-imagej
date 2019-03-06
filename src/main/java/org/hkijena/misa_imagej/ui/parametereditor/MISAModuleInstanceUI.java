@@ -136,6 +136,9 @@ public class MISAModuleInstanceUI extends JFrame {
                             MISAWorkbenchUI ui = new MISAWorkbenchUI();
                             ui.setVisible(true);
                             ui.open(dialog.getExportedPath());
+                            ui.pack();
+                            ui.setSize(new Dimension(800,600));
+                            ui.setExtendedState(ui.getExtendedState() | JFrame.MAXIMIZED_BOTH);
                         }
                     }
                     else if(processUI.getStatus() == CancelableProcessUI.Status.Failed ||

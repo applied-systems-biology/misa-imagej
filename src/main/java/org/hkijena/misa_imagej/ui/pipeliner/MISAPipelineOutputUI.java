@@ -53,6 +53,7 @@ public class MISAPipelineOutputUI extends JFrame {
                 ui.pack();
                 ui.setSize(800, 600);
                 ui.setVisible(true);
+                ui.setExtendedState(ui.getExtendedState() | JFrame.MAXIMIZED_BOTH);
             });
 
             Path checkPath = exportDirectory.resolve(node.getId()).resolve("exported").resolve("runtime-log.json");

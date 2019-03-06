@@ -99,6 +99,7 @@ public class MISAModuleRepositoryUI extends JFrame {
         launcherPipeliner.addActionListener(actionEvent -> {
             MISAPipelinerUI pipelinerUI = new MISAPipelinerUI();
             pipelinerUI.setVisible(true);
+            pipelinerUI.setExtendedState(pipelinerUI.getExtendedState() | JFrame.MAXIMIZED_BOTH);
         });
         toolBar.add(launcherPipeliner);
 
@@ -108,6 +109,7 @@ public class MISAModuleRepositoryUI extends JFrame {
             workbench.pack();
             workbench.setSize(new Dimension(800,600));
             workbench.setVisible(true);
+            workbench.setExtendedState(workbench.getExtendedState() | JFrame.MAXIMIZED_BOTH);
         });
         toolBar.add(launchAnalyzer);
 
@@ -118,6 +120,7 @@ public class MISAModuleRepositoryUI extends JFrame {
             runtimeLogUI.pack();
             runtimeLogUI.setSize(new Dimension(800,600));
             runtimeLogUI.setVisible(true);
+            runtimeLogUI.setExtendedState(runtimeLogUI.getExtendedState() | JFrame.MAXIMIZED_BOTH);
         });
         toolBar.add(launchRuntimeLogUI);
 

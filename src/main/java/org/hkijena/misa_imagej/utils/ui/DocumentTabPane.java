@@ -33,15 +33,32 @@ public class DocumentTabPane extends JTabbedPane {
      * @param closeMode
      * @return The tab component
      */
-    public DocumentTab addTab(String title, Icon icon, Component component, CloseMode closeMode) {
+    public DocumentTab addTab(String title, Icon icon, Component component, CloseMode closeMode, boolean allowRename) {
         // Create tab panel
         JPanel tabPanel = new JPanel();
         tabPanel.setBorder(BorderFactory.createEmptyBorder(4,0,4,0));
         tabPanel.setOpaque(false);
         tabPanel.setLayout(new BoxLayout(tabPanel, BoxLayout.LINE_AXIS));
-        tabPanel.add(new JLabel(title, icon, JLabel.LEFT));
+        JLabel titleLabel = new JLabel(title, icon, JLabel.LEFT);
+        tabPanel.add(titleLabel);
+        tabPanel.add(Box.createHorizontalGlue());
+
+        if(allowRename) {
+            JButton renameButton = new JButton(UIUtils.getIconFromResources("label.png"));
+            renameButton.setToolTipText("Rename tab");
+            UIUtils.makeFlatWithoutMargin(renameButton);
+            renameButton.addActionListener(e -> {
+                String newName = JOptionPane.showInputDialog(this, "Rename tab '" + titleLabel.getText() + "' to ...", titleLabel.getText());
+                if(newName != null && !newName.isEmpty()) {
+                    titleLabel.setText(newName);
+                }
+            });
+            tabPanel.add(Box.createHorizontalStrut(8));
+            tabPanel.add(renameButton);
+        }
         if(closeMode != CloseMode.withoutCloseButton) {
             JButton closeButton = new JButton(UIUtils.getIconFromResources("remove.png"));
+            closeButton.setToolTipText("Close tab");
             closeButton.setBorder(null);
             closeButton.setBackground(Color.WHITE);
             closeButton.setOpaque(false);
@@ -61,6 +78,10 @@ public class DocumentTabPane extends JTabbedPane {
         DocumentTab tab = new DocumentTab(title, icon, tabPanel, component);
         addTab(tab);
         return tab;
+    }
+
+    public DocumentTab addTab(String title, Icon icon, Component component, CloseMode closeMode) {
+        return addTab(title, icon, component, closeMode, false);
     }
 
     /**

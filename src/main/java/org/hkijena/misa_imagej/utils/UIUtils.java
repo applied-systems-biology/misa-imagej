@@ -135,13 +135,25 @@ public class UIUtils {
         });
     }
 
-    public static JPopupMenu addPopupMenuToComponent(Component target) {
+    public static JPopupMenu addPopupMenuToComponent(AbstractButton target) {
         JPopupMenu popupMenu = new JPopupMenu();
         target.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent mouseEvent) {
                 super.mouseClicked(mouseEvent);
                 popupMenu.show(mouseEvent.getComponent(), mouseEvent.getX(), mouseEvent.getY());
+            }
+        });
+        target.addActionListener(e -> {
+
+            if(MouseInfo.getPointerInfo().getLocation().x >= target.getLocationOnScreen().x
+                    && MouseInfo.getPointerInfo().getLocation().x <= target.getLocationOnScreen().x + target.getWidth()
+                    && MouseInfo.getPointerInfo().getLocation().y >= target.getLocationOnScreen().y
+                    && MouseInfo.getPointerInfo().getLocation().y <= target.getLocationOnScreen().y + target.getHeight()) {
+
+            }
+            else {
+                popupMenu.show(target, 0, target.getHeight());
             }
         });
         return popupMenu;

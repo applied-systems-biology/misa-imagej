@@ -147,7 +147,7 @@ public class MISAWorkbenchUI extends JFrame{
         }
         else {
             MISAAttachmentBrowserUI browserUI = new MISAAttachmentBrowserUI(misaOutput);
-            documentTabPane.addTab("Attachment browser", UIUtils.getIconFromResources("graph.png"), browserUI, DocumentTabPane.CloseMode.withAskOnCloseButton);
+            documentTabPane.addTab("Attachment browser", UIUtils.getIconFromResources("graph.png"), browserUI, DocumentTabPane.CloseMode.withAskOnCloseButton, true);
             documentTabPane.setSelectedIndex(documentTabPane.getTabCount() - 1);
         }
     }
