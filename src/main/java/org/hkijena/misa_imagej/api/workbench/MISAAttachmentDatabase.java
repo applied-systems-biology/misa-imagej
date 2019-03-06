@@ -1,7 +1,9 @@
 package org.hkijena.misa_imagej.api.workbench;
 
 import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
 import org.hkijena.misa_imagej.api.workbench.filters.MISAAttachmentFilter;
+import org.hkijena.misa_imagej.api.workbench.filters.MISAAttachmentFilterChangedEvent;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -46,21 +48,23 @@ public class MISAAttachmentDatabase {
         if(!filters.contains(filter)) {
             filters.add(filter);
             getEventBus().post(new AddedFilterEvent(this, filter));
+            filter.getEventBus().register(this);
         }
     }
 
     public void removeFilter(MISAAttachmentFilter filter) {
         filters.remove(filter);
         getEventBus().post(new RemovedFilterEvent(this, filter));
+        filter.getEventBus().unregister(this);
     }
 
-    private String createQueryStatementTemplate(String selectionStatement, String postStatement) {
+    private String createQueryStatementTemplate(String selectionStatement, List<String> additionalFilters, String postStatement) {
         StringBuilder template = new StringBuilder();
         template.append("select ").append(selectionStatement).append(" from attachments");
 
         List<MISAAttachmentFilter> enabledFilters = filters.stream().filter(MISAAttachmentFilter::isEnabled).collect(Collectors.toList());
 
-        if(!enabledFilters.isEmpty()) {
+        if(!enabledFilters.isEmpty() || !additionalFilters.isEmpty()) {
             template.append(" where");
             boolean first = true;
             for(MISAAttachmentFilter filter : enabledFilters) {
@@ -73,6 +77,16 @@ public class MISAAttachmentDatabase {
                 }
                 template.append(filter.toSQLStatement());
             }
+            for(String filter : additionalFilters) {
+                if(!first) {
+                    template.append(" and ");
+                }
+                else {
+                    template.append(" ");
+                    first = false;
+                }
+                template.append(filter);
+            }
         }
 
         template.append(" ").append(postStatement);
@@ -80,12 +94,12 @@ public class MISAAttachmentDatabase {
         return template.toString();
     }
 
-    public PreparedStatement createQueryStatement(String selectionStatement, String postStatement) {
+    public PreparedStatement createQueryStatement(String selectionStatement, List<String> additionalFilters, String postStatement) {
 
         List<MISAAttachmentFilter> enabledFilters = filters.stream().filter(MISAAttachmentFilter::isEnabled).collect(Collectors.toList());
 
         try {
-            PreparedStatement statement = databaseConnection.prepareStatement(createQueryStatementTemplate(selectionStatement, postStatement));
+            PreparedStatement statement = databaseConnection.prepareStatement(createQueryStatementTemplate(selectionStatement, additionalFilters, postStatement));
             PreparedStatementValuesBuilder builder = new PreparedStatementValuesBuilder(statement);
             for(MISAAttachmentFilter filter : enabledFilters) {
                 filter.setSQLStatementVariables(builder);
@@ -96,9 +110,9 @@ public class MISAAttachmentDatabase {
         }
     }
 
-    public ResultSet query(String selectionStatement, String postStatement) {
+    public ResultSet query(String selectionStatement, List<String> additionalFilters, String postStatement) {
         try {
-            return createQueryStatement(selectionStatement, postStatement).executeQuery();
+            return createQueryStatement(selectionStatement, additionalFilters, postStatement).executeQuery();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -135,8 +149,13 @@ public class MISAAttachmentDatabase {
         return sql.toString();
     }
 
+    @Subscribe
+    public void handleFilterUpdateEvent(MISAAttachmentFilterChangedEvent event) {
+        getEventBus().post(new UpdatedFiltersEvent(this));
+    }
+
     public int getDatasetCount() {
-        ResultSet resultSet = query("count()", "");
+        ResultSet resultSet = query("count()", Collections.emptyList(), "");
         try {
             return resultSet.getInt(1);
         } catch (SQLException e) {
