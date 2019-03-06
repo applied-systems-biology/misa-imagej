@@ -29,6 +29,12 @@ public abstract class MISAAttachmentFilter {
     }
 
     /**
+     * Creates equivalent SQL query to the toSQLStatement and setSQLStatementVariables methods
+     * @return
+     */
+    public abstract String toSQLQuery();
+
+    /**
      * Used to build a prepared statement
      * @return
      */

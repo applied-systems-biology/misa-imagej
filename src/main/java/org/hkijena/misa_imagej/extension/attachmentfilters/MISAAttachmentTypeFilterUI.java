@@ -2,7 +2,6 @@ package org.hkijena.misa_imagej.extension.attachmentfilters;
 
 import org.hkijena.misa_imagej.api.json.JSONSchemaObject;
 import org.hkijena.misa_imagej.api.workbench.filters.MISAAttachmentFilter;
-import org.hkijena.misa_imagej.ui.workbench.MISAAttachmentFilterUI;
 import org.hkijena.misa_imagej.utils.UIUtils;
 import org.hkijena.misa_imagej.utils.ui.MonochromeColorIcon;
 
@@ -10,41 +9,23 @@ import javax.swing.*;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableModel;
 import java.awt.*;
 
-public class MISAAttachmentTypeFilterUI extends MISAAttachmentFilterUI {
+public class MISAAttachmentTypeFilterUI extends GenericTabularMISAAttachmentFilterUI {
+
+    private JTable selectionTable;
+
     public MISAAttachmentTypeFilterUI(MISAAttachmentFilter filter) {
         super(filter);
         initialize();
     }
 
     private void initialize() {
-        DefaultTableModel model = new DefaultTableModel() {
-            @Override
-            public Class<?> getColumnClass(int columnIndex) {
-                if(columnIndex == 0)
-                    return Boolean.class;
-                else if (columnIndex == 1)
-                    return JSONSchemaObject.class;
-                return super.getColumnClass(columnIndex);
-            }
-        };
 
-        model.setColumnCount(2);
-        for(JSONSchemaObject schema : getFilter().getDatabase().getMisaOutput().getAttachmentSchemas().values()) {
-            model.addRow(new Object[]{ getNativeFilter().getSerializationIds().contains(schema.getSerializationId()), schema });
-        }
+        getSelectionTable().setDefaultRenderer(JSONSchemaObject.class, new SerializationSchemaCellRenderer(this));
 
-        JTable selectionTable = new JTable(model);
-        selectionTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
-        selectionTable.setDefaultRenderer(JSONSchemaObject.class, new SerializationSchemaCellRenderer(this));
-        selectionTable.getColumnModel().getColumn(0).setMaxWidth(20);
-        selectionTable.setShowGrid(false);
-        selectionTable.setOpaque(false);
-
-        getContentPane().setLayout(new BorderLayout());
-        getContentPane().add(selectionTable, BorderLayout.CENTER);
-
+        TableModel model = getSelectionTable().getModel();
         model.addTableModelListener(e -> {
             if(e.getType() == TableModelEvent.UPDATE && e.getColumn() == 0) {
                 for(int i = e.getFirstRow(); i <= e.getLastRow(); ++i) {
@@ -61,6 +42,18 @@ public class MISAAttachmentTypeFilterUI extends MISAAttachmentFilterUI {
                 }
             }
         });
+    }
+
+    @Override
+    protected Class getTableContentClass() {
+        return JSONSchemaObject.class;
+    }
+
+    @Override
+    protected void initializeTableModel(DefaultTableModel model) {
+        for(JSONSchemaObject schema : getFilter().getDatabase().getMisaOutput().getAttachmentSchemas().values()) {
+            model.addRow(new Object[]{ getNativeFilter().getSerializationIds().contains(schema.getSerializationId()), schema });
+        }
     }
 
     private MISAAttachmentTypeFilter getNativeFilter() {

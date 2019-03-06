@@ -9,6 +9,8 @@ import org.hkijena.misa_imagej.utils.UIUtils;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -50,9 +52,18 @@ public class MISAAttachmentBrowserUI extends JPanel {
         for(JMenuItem item : itemList) {
             addFilterMenu.add(item);
         }
-
         toolBar.add(addFilterButton);
         toolBar.add(Box.createHorizontalStrut(150));
+        toolBar.add(Box.createHorizontalGlue());
+
+        JButton copySQLButton = new JButton(UIUtils.getIconFromResources("copy.png"));
+        copySQLButton.setToolTipText("Copy filters as SQL query");
+        copySQLButton.addActionListener(e -> {
+            StringSelection stringSelection = new StringSelection(attachmentDatabase.getQuerySQL("*"));
+            Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+            clipboard.setContents(stringSelection, null);
+        });
+        toolBar.add(copySQLButton);
 
         panel.add(toolBar, BorderLayout.NORTH);
         filterList = new JPanel();

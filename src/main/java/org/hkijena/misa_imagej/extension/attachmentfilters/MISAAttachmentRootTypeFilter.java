@@ -13,8 +13,13 @@ public class MISAAttachmentRootTypeFilter extends MISAAttachmentFilter {
     }
 
     @Override
+    public String toSQLQuery() {
+        return toSQLStatement();
+    }
+
+    @Override
     public String toSQLStatement() {
-        return "\"serialization-id\" is property";
+        return "\"serialization-id\" is property or property is '\"' || \"serialization-id\" || '\"'";
     }
 
     @Override

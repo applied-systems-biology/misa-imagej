@@ -6,6 +6,7 @@ import org.hkijena.misa_imagej.api.workbench.MISAAttachmentDatabase;
 import org.hkijena.misa_imagej.api.workbench.PreparedStatementValuesBuilder;
 import org.hkijena.misa_imagej.api.workbench.filters.MISAAttachmentFilter;
 import org.hkijena.misa_imagej.api.workbench.filters.MISAAttachmentFilterChangedEvent;
+import org.hkijena.misa_imagej.utils.SQLUtils;
 
 import java.sql.SQLException;
 import java.util.Collection;
@@ -55,6 +56,24 @@ public class MISAAttachmentCacheFilter extends MISAAttachmentFilter {
                 stringBuilder.append(" or ");
             }
             stringBuilder.append(" cache like ?");
+            first = false;
+        }
+        stringBuilder.append(" )");
+        return stringBuilder.toString();
+    }
+
+    @Override
+    public String toSQLQuery() {
+        if(caches.isEmpty())
+            return "false";
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("(");
+        boolean first = true;
+        for(String cache : caches) {
+            if(!first) {
+                stringBuilder.append(" or ");
+            }
+            stringBuilder.append(" cache like '").append(SQLUtils.escapeWildcardsForMySQL(cache)).append("%").append("'");
             first = false;
         }
         stringBuilder.append(" )");

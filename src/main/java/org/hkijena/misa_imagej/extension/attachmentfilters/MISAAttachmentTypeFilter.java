@@ -4,6 +4,7 @@ import org.hkijena.misa_imagej.api.workbench.MISAAttachmentDatabase;
 import org.hkijena.misa_imagej.api.workbench.PreparedStatementValuesBuilder;
 import org.hkijena.misa_imagej.api.workbench.filters.MISAAttachmentFilter;
 import org.hkijena.misa_imagej.api.workbench.filters.MISAAttachmentFilterChangedEvent;
+import org.hkijena.misa_imagej.utils.SQLUtils;
 
 import java.sql.SQLException;
 import java.util.Collection;
@@ -21,6 +22,24 @@ public class MISAAttachmentTypeFilter extends MISAAttachmentFilter {
         if(database.getMisaOutput().hasAttachmentSchemas()) {
             serializationIds.addAll(database.getMisaOutput().getAttachmentSchemas().keySet());
         }
+    }
+
+    @Override
+    public String toSQLQuery() {
+        if(serializationIds.isEmpty())
+            return "false";
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("(");
+        boolean first = true;
+        for(String id : serializationIds) {
+            if(!first) {
+                stringBuilder.append(" or ");
+            }
+            stringBuilder.append(" \"serialization-id\" is '").append(SQLUtils.escapeStringForMySQL(id)).append("'");
+            first = false;
+        }
+        stringBuilder.append(" )");
+        return stringBuilder.toString();
     }
 
     @Override

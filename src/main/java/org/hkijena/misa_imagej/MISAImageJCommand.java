@@ -58,6 +58,8 @@ public class MISAImageJCommand implements Command {
 	public void run() {
 	    MISAImageJRegistryService.instantiate(pluginService);
 		SwingUtilities.invokeLater(() -> {
+			ToolTipManager.sharedInstance().setDismissDelay(Integer.MAX_VALUE);
+			ToolTipManager.sharedInstance().setInitialDelay(1000);
 			MISAModuleRepositoryUI.getInstance(this).setVisible(true);
 		});
 	}

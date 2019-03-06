@@ -5,6 +5,7 @@ import org.hkijena.misa_imagej.api.workbench.MISAAttachmentDatabase;
 import org.hkijena.misa_imagej.api.workbench.PreparedStatementValuesBuilder;
 import org.hkijena.misa_imagej.api.workbench.filters.MISAAttachmentFilter;
 import org.hkijena.misa_imagej.api.workbench.filters.MISAAttachmentFilterChangedEvent;
+import org.hkijena.misa_imagej.utils.SQLUtils;
 
 import java.sql.SQLException;
 import java.util.Collection;
@@ -32,6 +33,24 @@ public class MISAAttachmentSampleFilter extends MISAAttachmentFilter {
     public void removeSample(MISASample sample) {
         samples.remove(sample);
         getEventBus().post(new MISAAttachmentFilterChangedEvent(this));
+    }
+
+    @Override
+    public String toSQLQuery() {
+        if(samples.isEmpty())
+            return "false";
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("(");
+        boolean first = true;
+        for(MISASample sample : samples) {
+            if(!first) {
+                stringBuilder.append(" or ");
+            }
+            stringBuilder.append(" sample is '").append(SQLUtils.escapeStringForMySQL(sample.getName())).append("'");
+            first = false;
+        }
+        stringBuilder.append(" )");
+        return stringBuilder.toString();
     }
 
     @Override

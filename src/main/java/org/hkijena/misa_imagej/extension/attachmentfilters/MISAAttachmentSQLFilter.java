@@ -14,6 +14,11 @@ public class MISAAttachmentSQLFilter extends MISAAttachmentFilter {
     }
 
     @Override
+    public String toSQLQuery() {
+        return toSQLStatement();
+    }
+
+    @Override
     public String toSQLStatement() {
         return sql;
     }

@@ -4,55 +4,25 @@ import org.hkijena.misa_imagej.api.MISACache;
 import org.hkijena.misa_imagej.api.MISACacheIOType;
 import org.hkijena.misa_imagej.api.MISASample;
 import org.hkijena.misa_imagej.api.workbench.filters.MISAAttachmentFilter;
-import org.hkijena.misa_imagej.ui.workbench.MISAAttachmentFilterUI;
 import org.hkijena.misa_imagej.utils.ui.ColorIcon;
 
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableModel;
 import java.awt.*;
 
-public class MISAAttachmentCacheFilterUI extends MISAAttachmentFilterUI {
+public class MISAAttachmentCacheFilterUI extends GenericTabularMISAAttachmentFilterUI {
+
     public MISAAttachmentCacheFilterUI(MISAAttachmentFilter filter) {
         super(filter);
         initialize();
     }
 
     private void initialize() {
-        DefaultTableModel model = new DefaultTableModel() {
-            @Override
-            public Class<?> getColumnClass(int columnIndex) {
-                if(columnIndex == 0)
-                    return Boolean.class;
-                else if (columnIndex == 1)
-                    return MISACache.class;
-                return super.getColumnClass(columnIndex);
-            }
-        };
-
-        model.setColumnCount(2);
-        MISASample sample = getFilter().getDatabase().getMisaOutput().getModuleInstance().getSamples().values().stream().findFirst().get();
-        for(MISACache cache : sample.getImportedCaches()) {
-            String cacheName = "imported/" + cache.getRelativePath();
-            model.addRow(new Object[]{ getNativeFilter().getCaches().contains(cacheName), cache });
-        }
-        for(MISACache cache : sample.getExportedCaches()) {
-            String cacheName = "exported/" + cache.getRelativePath();
-            model.addRow(new Object[]{ getNativeFilter().getCaches().contains(cacheName), cache });
-        }
-
-        JTable selectionTable = new JTable(model);
-        selectionTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
-        selectionTable.setDefaultRenderer(MISACache.class, new CacheCellRenderer());
-        selectionTable.getColumnModel().getColumn(0).setMaxWidth(20);
-        selectionTable.setShowGrid(false);
-        selectionTable.setOpaque(false);
-
-        getContentPane().setLayout(new BorderLayout());
-        getContentPane().add(selectionTable, BorderLayout.CENTER);
-
-        model.addTableModelListener(e -> {
+        TableModel model = getSelectionTable().getModel();
+       model.addTableModelListener(e -> {
             if(e.getType() == TableModelEvent.UPDATE && e.getColumn() == 0) {
                 for(int i = e.getFirstRow(); i <= e.getLastRow(); ++i) {
                     MISACache cache = (MISACache) model.getValueAt(i, 1);
@@ -73,6 +43,26 @@ public class MISAAttachmentCacheFilterUI extends MISAAttachmentFilterUI {
                 }
             }
         });
+
+       getSelectionTable().setDefaultRenderer(MISACache.class, new CacheCellRenderer());
+    }
+
+    @Override
+    protected Class getTableContentClass() {
+        return MISACache.class;
+    }
+
+    @Override
+    protected void initializeTableModel(DefaultTableModel model) {
+        MISASample sample = getFilter().getDatabase().getMisaOutput().getModuleInstance().getSamples().values().stream().findFirst().get();
+        for(MISACache cache : sample.getImportedCaches()) {
+            String cacheName = "imported/" + cache.getRelativePath();
+            model.addRow(new Object[]{ getNativeFilter().getCaches().contains(cacheName), cache });
+        }
+        for(MISACache cache : sample.getExportedCaches()) {
+            String cacheName = "exported/" + cache.getRelativePath();
+            model.addRow(new Object[]{ getNativeFilter().getCaches().contains(cacheName), cache });
+        }
     }
 
     public MISAAttachmentCacheFilter getNativeFilter() {

@@ -54,7 +54,7 @@ public class MISAAttachmentDatabase {
         getEventBus().post(new RemovedFilterEvent(this, filter));
     }
 
-    public ResultSet query(String selectionStatement) {
+    private String createQueryStatementTemplate(String selectionStatement) {
         StringBuilder template = new StringBuilder();
         template.append("select ").append(selectionStatement).append(" from attachments");
 
@@ -75,16 +75,60 @@ public class MISAAttachmentDatabase {
             }
         }
 
+        return template.toString();
+    }
+
+    public PreparedStatement createQueryStatement(String selectionStatement) {
+
+        List<MISAAttachmentFilter> enabledFilters = filters.stream().filter(MISAAttachmentFilter::isEnabled).collect(Collectors.toList());
+
         try {
-            PreparedStatement statement = databaseConnection.prepareStatement(template.toString());
+            PreparedStatement statement = databaseConnection.prepareStatement(createQueryStatementTemplate(selectionStatement));
             PreparedStatementValuesBuilder builder = new PreparedStatementValuesBuilder(statement);
             for(MISAAttachmentFilter filter : enabledFilters) {
                 filter.setSQLStatementVariables(builder);
             }
-            return statement.executeQuery();
+            return statement;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public ResultSet query(String selectionStatement) {
+        try {
+            return createQueryStatement(selectionStatement).executeQuery();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Returns the query as SQL
+     * @param selectionStatement
+     * @return
+     */
+    public String getQuerySQL(String selectionStatement) {
+        StringBuilder sql = new StringBuilder();
+        sql.append("select ").append(selectionStatement).append(" from attachments");
+
+        List<MISAAttachmentFilter> enabledFilters = filters.stream().filter(MISAAttachmentFilter::isEnabled).collect(Collectors.toList());
+
+        if(!enabledFilters.isEmpty()) {
+            sql.append(" where");
+            boolean first = true;
+            for(MISAAttachmentFilter filter : enabledFilters) {
+                if(!first) {
+                    sql.append(" and ");
+                }
+                else {
+                    sql.append(" ");
+                    first = false;
+                }
+                sql.append(filter.toSQLQuery());
+            }
+        }
+
+        return sql.toString();
     }
 
     public int getDatasetCount() {

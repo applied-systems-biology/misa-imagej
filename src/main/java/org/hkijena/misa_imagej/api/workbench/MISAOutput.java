@@ -126,7 +126,9 @@ public class MISAOutput {
                     Gson gson = GsonUtils.getGson();
                     JsonObject jsonObject = GsonUtils.fromJsonFile(gson, path, JsonObject.class);
                     for(Map.Entry<String, JsonElement> entry : jsonObject.entrySet()) {
-                        attachmentSchemas.put(entry.getKey(), gson.fromJson(entry.getValue(), JSONSchemaObject.class));
+                        JSONSchemaObject schemaObject = gson.fromJson(entry.getValue(), JSONSchemaObject.class);
+                        schemaObject.setId(entry.getKey());
+                        attachmentSchemas.put(entry.getKey(), schemaObject);
                     }
                 } catch (IOException e) {
                     throw new RuntimeException(e);

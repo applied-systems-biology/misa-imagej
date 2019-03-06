@@ -12,8 +12,8 @@ import org.hkijena.misa_imagej.utils.GsonUtils;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.awt.*;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 
 /**
  * Deserialized JSON Schema entry that allows editing and exporting to the final JSON
@@ -114,7 +114,7 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
         obj.setAdditionalProperties(getAdditionalProperties());
         obj.setSerializationId(getSerializationId());
         obj.setProperties(new HashMap<>());
-        for(Map.Entry<String, JSONSchemaObject> kv : getProperties().entrySet()) {
+        for (Map.Entry<String, JSONSchemaObject> kv : getProperties().entrySet()) {
             obj.getProperties().put(kv.getKey(), (JSONSchemaObject) kv.getValue().clone());
         }
         obj.setSerializationHierarchy(new ArrayList<>());
@@ -125,14 +125,14 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
 
     /**
      * Guaranteed way of returning additional properties (because this one might be null)
+     *
      * @return
      */
     public JSONSchemaObject getAdditionalPropertiesTemplate() {
         JSONSchemaObject obj;
-        if(getAdditionalProperties() != null) {
-            obj =  (JSONSchemaObject) getAdditionalProperties().clone();
-        }
-        else {
+        if (getAdditionalProperties() != null) {
+            obj = (JSONSchemaObject) getAdditionalProperties().clone();
+        } else {
             obj = createObject();
         }
         return obj;
@@ -140,6 +140,7 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
 
     /**
      * Instantiates the additional property stored in this object schema
+     *
      * @param name
      * @return
      */
@@ -166,12 +167,12 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
 
     public void update() {
         // Set the default value
-        if(getValue() == null) {
+        if (getValue() == null) {
             setValue(getDefaultValue());
         }
 
         // Update the map Ids & parent
-        for(Map.Entry<String, JSONSchemaObject> kv : getProperties().entrySet()) {
+        for (Map.Entry<String, JSONSchemaObject> kv : getProperties().entrySet()) {
             kv.getValue().setId(kv.getKey());
             kv.getValue().setParent(this);
             kv.getValue().update();
@@ -180,6 +181,7 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
 
     /**
      * Returns the max depth of this object and its properties
+     *
      * @return
      */
     public int getMaxDepth() {
@@ -187,7 +189,7 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
             return 0;
         else {
             int d = 0;
-            for(Map.Entry<String, JSONSchemaObject> kv : getProperties().entrySet()) {
+            for (Map.Entry<String, JSONSchemaObject> kv : getProperties().entrySet()) {
                 d = Math.max(d, kv.getValue().getMaxDepth() + 1);
             }
             return d;
@@ -196,10 +198,11 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
 
     /**
      * Returns the depth of this object
+     *
      * @return
      */
     public int getDepth() {
-        if(getParent() == null)
+        if (getParent() == null)
             return 0;
         else
             return getParent().getDepth() + 1;
@@ -220,9 +223,9 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
         ArrayList<JSONSchemaObject> objects = new ArrayList<>(getProperties().values());
         objects.sort(Comparator.comparingInt(JSONSchemaObject::getMaxDepth));
 
-       for(JSONSchemaObject obj : objects) {
-           nd.add(obj.toTreeNode());
-       }
+        for (JSONSchemaObject obj : objects) {
+            nd.add(obj.toTreeNode());
+        }
 
         return nd;
     }
@@ -232,12 +235,12 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
             case jsonString:
             case jsonNumber:
             case jsonBoolean:
-                if(getValue() instanceof String)
-                    return new JsonPrimitive((String)getValue());
-                else if(getValue() instanceof Number)
-                    return new JsonPrimitive((Number)getValue());
-                else if(getValue() instanceof Boolean)
-                    return new JsonPrimitive((Boolean)getValue());
+                if (getValue() instanceof String)
+                    return new JsonPrimitive((String) getValue());
+                else if (getValue() instanceof Number)
+                    return new JsonPrimitive((Number) getValue());
+                else if (getValue() instanceof Boolean)
+                    return new JsonPrimitive((Boolean) getValue());
                 else
                     return JsonNull.INSTANCE;
             case jsonArray: {
@@ -256,7 +259,7 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
     }
 
     public String getValuePath() {
-        if(getParent() == null)
+        if (getParent() == null)
             return "";
         else
             return getParent().getValuePath() + "/" + getId();
@@ -264,12 +267,13 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
 
     /**
      * Gets a sub-property from path
+     *
      * @param path
      * @return
      */
     public JSONSchemaObject getPropertyFromPath(String... path) {
         JSONSchemaObject result = this;
-        for(String v : path) {
+        for (String v : path) {
             result = result.getProperties().get(v);
         }
         return result;
@@ -277,8 +281,8 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
 
     public boolean hasPropertyFromPath(String... path) {
         JSONSchemaObject current = this;
-        for(String v : path) {
-            if(current.getProperties().containsKey(v))
+        for (String v : path) {
+            if (current.getProperties().containsKey(v))
                 current = current.getProperties().get(v);
             else {
                 return false;
@@ -288,7 +292,7 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
     }
 
     public JSONSchemaObject addProperty(String key, JSONSchemaObject property) {
-        JSONSchemaObject copy = (JSONSchemaObject)property.clone();
+        JSONSchemaObject copy = (JSONSchemaObject) property.clone();
         getProperties().put(key, copy);
         update();
         return copy;
@@ -296,8 +300,8 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
 
     public JSONSchemaObject ensurePropertyFromPath(String... path) {
         JSONSchemaObject current = this;
-        for(String v : path) {
-            if(current.getProperties().containsKey(v))
+        for (String v : path) {
+            if (current.getProperties().containsKey(v))
                 current = current.getProperties().get(v);
             else
                 current = current.addProperty(v, JSONSchemaObject.createObject());
@@ -307,7 +311,7 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
 
     private void flatten_(List<JSONSchemaObject> result) {
         result.add(this);
-        for(Map.Entry<String, JSONSchemaObject> kv : getProperties().entrySet()) {
+        for (Map.Entry<String, JSONSchemaObject> kv : getProperties().entrySet()) {
             kv.getValue().flatten_(result);
         }
     }
@@ -319,7 +323,7 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
     }
 
     public Object getValue() {
-        if(defaultValue != null && value == null)
+        if (defaultValue != null && value == null)
             value = defaultValue;
         return value;
     }
@@ -336,13 +340,13 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
     @Override
     public MISAValidityReport getValidityReport() {
         MISAValidityReport report = new MISAValidityReport();
-        if(hasValue())
+        if (hasValue())
             report.report(this, "Parameters", true, "");
         else
             report.report(this, "Parameters", false, "Value is not set");
 
-        if(getProperties() != null) {
-            for(JSONSchemaObject object : getProperties().values()) {
+        if (getProperties() != null) {
+            for (JSONSchemaObject object : getProperties().values()) {
                 report.merge(object.getValidityReport(), object.getId() == null ? "" : object.getId());
             }
         }
@@ -351,9 +355,9 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
     }
 
     public void setValueFromJson(JsonElement json) {
-        if(json.isJsonNull())
+        if (json.isJsonNull())
             return;
-        switch(getType()) {
+        switch (getType()) {
             case jsonBoolean:
                 setValue(json.getAsBoolean());
                 break;
@@ -367,7 +371,7 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
                 setValue(json.getAsJsonArray());
                 break;
             case jsonObject:
-                for(Map.Entry<String, JsonElement> kv : json.getAsJsonObject().entrySet()) {
+                for (Map.Entry<String, JsonElement> kv : json.getAsJsonObject().entrySet()) {
                     ensurePropertyFromPath(kv.getKey()).setValueFromJson(kv.getValue());
                 }
                 break;
@@ -471,7 +475,7 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
     }
 
     public String getDocumentationTitle() {
-        if(documentationTitle != null && !documentationTitle.isEmpty())
+        if (documentationTitle != null && !documentationTitle.isEmpty())
             return documentationTitle;
         else
             return getName();
@@ -495,22 +499,27 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
 
     /**
      * Automatically generates a color from the name
+     *
      * @return
      */
     public Color toColor() {
-        float h = Math.abs(getName().hashCode() % 256) / 255.0f;
-        return Color.getHSBColor(h, 0.8f, 0.8f);
+        if (getId() != null) {
+            float h = Math.abs(getId().hashCode() % 256) / 255.0f;
+            return Color.getHSBColor(h, 0.8f, 0.8f);
+        } else {
+            float h = Math.abs(getName().hashCode() % 256) / 255.0f;
+            return Color.getHSBColor(h, 0.8f, 0.8f);
+        }
     }
-    
+
     public String getTooltip() {
         StringBuilder tooltip = new StringBuilder();
         tooltip.append("<html>");
-        if(this.hasDocumentationDescription()) {
+        if (this.hasDocumentationDescription()) {
             tooltip.append(this.getDocumentationDescription());
             tooltip.append("<br/><br/>");
             tooltip.append("<i>").append("(").append(this.getId()).append(")").append("</i>");
-        }
-        else {
+        } else {
             tooltip.append("(").append(this.getId()).append(")");
         }
         tooltip.append("</html>");
