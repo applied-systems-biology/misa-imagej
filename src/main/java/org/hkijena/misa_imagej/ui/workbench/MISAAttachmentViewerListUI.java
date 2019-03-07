@@ -1,20 +1,24 @@
 package org.hkijena.misa_imagej.ui.workbench;
 
 import com.google.common.primitives.Ints;
+import org.hkijena.misa_imagej.api.MISAAttachment;
 import org.hkijena.misa_imagej.api.workbench.MISAAttachmentDatabase;
 import org.hkijena.misa_imagej.utils.UIUtils;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public class MISAAttachmentViewerListUI extends JPanel {
     private JScrollPane scrollPane;
     private JPanel listPanel;
+    private JLabel statsLabel;
 
     private MISAAttachmentDatabase database;
     private int[] databaseIds;
     private int lastDisplayedId;
+    private List<MISAAttachment> attachments = new ArrayList<>();
 
     public MISAAttachmentViewerListUI(MISAAttachmentDatabase database) {
         this.database = database;
@@ -23,6 +27,19 @@ public class MISAAttachmentViewerListUI extends JPanel {
 
     private void initialize() {
         setLayout(new BorderLayout());
+
+        JToolBar toolBar = new JToolBar();
+
+        JButton loadAllMissingDataButton = new JButton("Load all missing data", UIUtils.getIconFromResources("quickload.png"));
+        loadAllMissingDataButton.addActionListener(e -> loadAllMissingData());
+        toolBar.add(loadAllMissingDataButton);
+
+        toolBar.add(Box.createHorizontalGlue());
+        statsLabel = new JLabel();
+        toolBar.add(statsLabel);
+
+        add(toolBar, BorderLayout.NORTH);
+
         listPanel = new JPanel();
         listPanel.setLayout(new GridBagLayout());
 //        listPanel.setBorder(BorderFactory.createLineBorder(Color.RED));
@@ -41,12 +58,20 @@ public class MISAAttachmentViewerListUI extends JPanel {
         });
     }
 
+    private void loadAllMissingData() {
+        for(MISAAttachment attachment : attachments) {
+            attachment.loadAll();
+        }
+    }
+
     public void setDatabaseIds(List<Integer> databaseIds) {
         this.databaseIds = Ints.toArray(databaseIds);
         this.lastDisplayedId = -1;
+        this.attachments.clear();
         listPanel.removeAll();
         listPanel.revalidate();
         listPanel.repaint();
+        statsLabel.setText(databaseIds.size() + " objects");
         if(!databaseIds.isEmpty()) {
             addItem(0);
         }
@@ -68,7 +93,9 @@ public class MISAAttachmentViewerListUI extends JPanel {
     }
 
     private void addItem(int i) {
-        MISAAttachmentViewerUI viewer = new MISAAttachmentViewerUI(database.queryAttachmentAt(databaseIds[i]));
+        MISAAttachment attachment = database.queryAttachmentAt(databaseIds[i]);
+        attachments.add(attachment);
+        MISAAttachmentViewerUI viewer = new MISAAttachmentViewerUI(attachment);
         lastDisplayedId = i;
         viewer.setAlignmentY(Component.TOP_ALIGNMENT);
         listPanel.add(viewer, new GridBagConstraints() {

@@ -7,7 +7,10 @@ import com.google.gson.JsonPrimitive;
 import org.hkijena.misa_imagej.api.json.JSONSchemaObject;
 import org.hkijena.misa_imagej.api.workbench.MISAAttachmentDatabase;
 
+import java.awt.*;
 import java.util.*;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Wrapper around attached data that allows backtracking to its cache
@@ -19,6 +22,7 @@ public class MISAAttachment {
     boolean isLoaded;
     private EventBus eventBus = new EventBus();
     private List<Property> properties = new ArrayList<>();
+    private JSONSchemaObject schema = null;
 
     public MISAAttachment(MISAAttachmentDatabase database, int databaseIndex) {
         this.database = database;
@@ -33,17 +37,35 @@ public class MISAAttachment {
         return isLoaded;
     }
 
+    public String getDocumentationTitle() {
+        if(schema != null) {
+            return schema.getDocumentationTitle();
+        }
+        else {
+            return "Unknown";
+        }
+    }
+
+    public Color toColor() {
+        if(schema != null) {
+            return schema.toColor();
+        }
+        else {
+            return Color.GRAY;
+        }
+    }
+
     public void load() {
         if (!isLoaded) {
             JsonObject object = database.queryJsonDataAt(databaseIndex).getAsJsonObject();
-            JSONSchemaObject schema = null;
 
             if (object.has("misa:serialization-id")) {
                 String serializationId = object.get("misa:serialization-id").getAsString();
                 schema = database.getMisaOutput().getAttachmentSchemas().getOrDefault(serializationId, null);
             }
 
-            loadProperties(object, schema, null);
+            loadProperties(object, schema, "");
+            isLoaded = true;
         }
     }
 
@@ -52,13 +74,11 @@ public class MISAAttachment {
     }
 
     private void loadProperties(JsonObject object, JSONSchemaObject schema, String subPath) {
-        getEventBus().post(new MISAAttachment.DataLoadedEvent(this));
-
         Stack<JsonElement> elements = new Stack<>();
         Stack<String> paths = new Stack<>();
         Stack<JSONSchemaObject> schemas = new Stack<>();
         elements.push(object);
-        paths.push("");
+        paths.push(subPath);
         schemas.push(schema);
 
         while(!elements.isEmpty()) {
@@ -71,7 +91,8 @@ public class MISAAttachment {
             }
             else if(top.isJsonObject()) {
                 if(top.getAsJsonObject().has("misa-analyzer:database-index")) {
-
+                    int dbId = top.getAsJsonObject().get("misa-analyzer:database-index").getAsInt();
+                    properties.add(new LazyProperty(this, topPath, dbId));
                 }
                 else {
                     for(Map.Entry<String, JsonElement> entry : top.getAsJsonObject().entrySet()) {
@@ -80,7 +101,8 @@ public class MISAAttachment {
 
                         elements.push(entry.getValue());
                         paths.push(topPath + "/" + entry.getKey());
-                        if(schema.hasPropertyFromPath(entry.getKey())) {
+
+                        if(schema != null && schema.hasPropertyFromPath(entry.getKey())) {
                             schemas.push(schema.getPropertyFromPath(entry.getKey()));
                         }
                         else {
@@ -90,10 +112,24 @@ public class MISAAttachment {
                 }
             }
         }
+
+        getEventBus().post(new MISAAttachment.DataLoadedEvent(this));
     }
 
     public List<Property> getProperties() {
         return Collections.unmodifiableList(properties);
+    }
+
+    public List<Property> getUnloadedProperties() {
+        return properties.stream().filter(property -> !property.hasValue()).collect(Collectors.toList());
+    }
+
+    public void loadAll() {
+        load();
+        Optional<Property> property;
+        while((property = properties.stream().filter(p -> !p.hasValue()).findFirst()).isPresent()) {
+            property.get().loadValue();
+        }
     }
 
     public interface Property {
@@ -144,27 +180,25 @@ public class MISAAttachment {
         private boolean isLoaded;
         private JSONSchemaObject schema;
         private MISAAttachment parent;
-        private MISAAttachmentDatabase database;
         private int databaseIndex;
 
-        public LazyProperty(MISAAttachment parent, String path, MISAAttachmentDatabase database, int databaseIndex) {
+        public LazyProperty(MISAAttachment parent, String path, int databaseIndex) {
             this.path = path;
             this.parent = parent;
-            this.database = database;
             this.databaseIndex = databaseIndex;
         }
 
         public void loadValue() {
             if(!isLoaded) {
-                JsonObject object = database.queryJsonDataAt(databaseIndex).getAsJsonObject();
+                JsonObject object = parent.database.queryJsonDataAt(databaseIndex).getAsJsonObject();
 
                 if (object.has("misa:serialization-id")) {
                     String serializationId = object.get("misa:serialization-id").getAsString();
-                    this.schema = database.getMisaOutput().getAttachmentSchemas().getOrDefault(serializationId, null);
+                    this.schema = parent.database.getMisaOutput().getAttachmentSchemas().getOrDefault(serializationId, null);
                 }
 
-                parent.loadProperties(object, schema, path);
                 isLoaded = true;
+                parent.loadProperties(object, schema, path);
             }
         }
 
