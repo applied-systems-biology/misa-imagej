@@ -194,4 +194,9 @@ public class UIUtils {
         });
     }
 
+    public static Color stringToColor(String string, float s, float b) {
+        float h = Math.abs(string.hashCode() % 256) / 255.0f;
+        return Color.getHSBColor(h, s, b);
+    }
+
 }

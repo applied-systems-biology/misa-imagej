@@ -68,6 +68,19 @@ public class MISACache implements MISAValidatable {
     }
 
     /**
+     * Relative path including the IO mode
+     * @return
+     */
+    public String getFullRelativePath() {
+        if(getIOType() == MISACacheIOType.Imported)
+            return "imported/" + getRelativePath();
+        else if(getIOType() == MISACacheIOType.Exported)
+            return "exported/" + getRelativePath();
+        else
+            throw new UnsupportedOperationException();
+    }
+
+    /**
      * Returns the serialization ID of the pattern if available
      * Otherwise return null
      * @return

@@ -69,9 +69,13 @@ public class MISASample implements MISAValidatable {
     }
 
     public Color toColor() {
-        if(getName() == null)
+        return nameToColor(getName());
+    }
+
+    public static Color nameToColor(String name) {
+        if(name == null)
             return Color.WHITE;
-        float h = Math.abs(getName().hashCode() % 256) / 255.0f;
+        float h = Math.abs(name.hashCode() % 256) / 255.0f;
         return Color.getHSBColor(h, 0.8f, 0.8f);
     }
 
@@ -107,5 +111,32 @@ public class MISASample implements MISAValidatable {
      */
     public String getName() {
         return getModuleInstance().getSamples().inverse().get(this);
+    }
+
+    /**
+     * Finds the best matching cache to a path (imported/exported)/...
+     * @param fullCachePath
+     * @return
+     */
+    public MISACache findMatchingCache(String fullCachePath) {
+        MISACache matchingCache = null;
+        List<MISACache> cacheList;
+
+        if(fullCachePath.startsWith("imported/")) {
+            cacheList = getImportedCaches();
+        }
+        else {
+            cacheList = getExportedCaches();
+        }
+
+        for(MISACache cache : cacheList) {
+            if(fullCachePath.startsWith(cache.getFullRelativePath())) {
+                if(matchingCache == null || cache.getRelativePath().length() > matchingCache.getRelativePath().length()) {
+                    matchingCache = cache;
+                }
+            }
+        }
+
+        return matchingCache;
     }
 }

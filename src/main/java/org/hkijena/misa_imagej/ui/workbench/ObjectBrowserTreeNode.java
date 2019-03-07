@@ -1,22 +1,29 @@
 package org.hkijena.misa_imagej.ui.workbench;
 
-import com.google.common.base.Joiner;
+import org.hkijena.misa_imagej.api.MISACache;
+import org.hkijena.misa_imagej.api.MISASample;
 import org.hkijena.misa_imagej.api.workbench.MISAAttachmentDatabase;
 import org.hkijena.misa_imagej.utils.SQLUtils;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreeModel;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
 public class ObjectBrowserTreeNode extends DefaultMutableTreeNode {
 
+    public Role getRole() {
+        return role;
+    }
+
     public enum Role {
+        Root,
         SerializationNamespace,
         SerializationId,
+        CacheAndSubCache,
         Cache,
+        SubCache,
         Sample,
         Property
     }
@@ -25,9 +32,9 @@ public class ObjectBrowserTreeNode extends DefaultMutableTreeNode {
     private Role[] roleAssignment;
     private String[] knownValues;
     private boolean loaded = false;
+    private Role role = Role.Root;
 
     public ObjectBrowserTreeNode(MISAAttachmentDatabase database, Role[] roleAssignment, String[] knownValues) {
-        super("Root");
         this.database = database;
         this.roleAssignment = roleAssignment;
         this.knownValues = knownValues;
@@ -36,6 +43,7 @@ public class ObjectBrowserTreeNode extends DefaultMutableTreeNode {
         for(int i = knownValues.length - 1; i >= 0; --i) {
             if(knownValues[i] != null) {
                 setUserObject(knownValues[i]);
+                role = roleAssignment[i];
                 break;
             }
         }
@@ -56,6 +64,20 @@ public class ObjectBrowserTreeNode extends DefaultMutableTreeNode {
                 if(roleAssignment[childrenRoleIndex] == Role.SerializationNamespace) {
                     // Modify
                     childValue = childValue.substring(0, childValue.indexOf(":"));
+                }
+                else if(roleAssignment[childrenRoleIndex] == Role.Cache) {
+                    MISASample sample = database.getMisaOutput().getModuleInstance().getOrCreateAnySample();
+                    MISACache cache = sample.findMatchingCache(childValue);
+                    if(cache != null) {
+                        childValue = cache.getFullRelativePath();
+                    }
+                }
+                else if(roleAssignment[childrenRoleIndex] == Role.SubCache) {
+                    MISASample sample = database.getMisaOutput().getModuleInstance().getOrCreateAnySample();
+                    MISACache cache = sample.findMatchingCache(childValue);
+                    if(cache != null) {
+                        childValue = childValue.substring(cache.getFullRelativePath().length());
+                    }
                 }
 
                 if(knownChildren.contains(childValue))
@@ -90,7 +112,13 @@ public class ObjectBrowserTreeNode extends DefaultMutableTreeNode {
             case SerializationId:
                 sql.append("\"serialization-id\"");
                 break;
+            case CacheAndSubCache:
+                sql.append("cache");
+                break;
             case Cache:
+                sql.append("cache");
+                break;
+            case SubCache:
                 sql.append("cache");
                 break;
             case Sample:
@@ -105,19 +133,25 @@ public class ObjectBrowserTreeNode extends DefaultMutableTreeNode {
             if(knownValues[i] != null) {
                 switch (roleAssignment[i]) {
                     case SerializationNamespace:
-                        filters.add("\"serialization-id\" like '" + SQLUtils.escapeWildcardsForMySQL(knownValues[i]) + "%'" );
+                        filters.add("\"serialization-id\" like '" + SQLUtils.escapeWildcardsForSQLite(knownValues[i]) + "%' escape '\\'" );
                         break;
                     case SerializationId:
-                        filters.add("\"serialization-id\" is '" + SQLUtils.escapeStringForMySQL(knownValues[i]) + "'" );
+                        filters.add("\"serialization-id\" is '" + SQLUtils.escapeStringForSQLite(knownValues[i]) + "'" );
                         break;
                     case Cache:
-                        filters.add("cache is '" + SQLUtils.escapeStringForMySQL(knownValues[i]) + "'" );
+                        filters.add("cache like '" + SQLUtils.escapeWildcardsForSQLite(knownValues[i]) + "%' escape '\\'" );
+                        break;
+                    case SubCache:
+                        filters.add("cache like '%" + SQLUtils.escapeWildcardsForSQLite(knownValues[i]) + "' escape '\\'" );
+                        break;
+                    case CacheAndSubCache:
+                        filters.add("cache is '" + SQLUtils.escapeStringForSQLite(knownValues[i]) + "'" );
                         break;
                     case Sample:
-                        filters.add("sample is '" + SQLUtils.escapeStringForMySQL(knownValues[i]) + "'" );
+                        filters.add("sample is '" + SQLUtils.escapeStringForSQLite(knownValues[i]) + "'" );
                         break;
                     case Property:
-                        filters.add("property is '" + SQLUtils.escapeStringForMySQL(knownValues[i]) + "'" );
+                        filters.add("property is '" + SQLUtils.escapeStringForSQLite(knownValues[i]) + "'" );
                         break;
                 }
             }

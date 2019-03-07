@@ -6,7 +6,7 @@ public class SQLUtils {
 
     }
 
-    public static String escapeStringForMySQL(String s) {
+    public static String escapeStringForSQLite(String s) {
         return s.replace("\\", "\\\\")
                 .replace("\b","\\b")
                 .replace("\n","\\n")
@@ -18,8 +18,8 @@ public class SQLUtils {
                 .replace("\"", "\\\"");
     }
 
-    public static String escapeWildcardsForMySQL(String s) {
-        return escapeStringForMySQL(s)
+    public static String escapeWildcardsForSQLite(String s) {
+        return escapeStringForSQLite(s)
                 .replace("%", "\\%")
                 .replace("_","\\_");
     }

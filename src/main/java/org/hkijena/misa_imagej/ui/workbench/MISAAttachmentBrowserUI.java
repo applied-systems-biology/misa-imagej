@@ -10,7 +10,6 @@ import org.hkijena.misa_imagej.utils.UIUtils;
 import javax.swing.*;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeWillExpandListener;
-import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.ExpandVetoException;
 import java.awt.*;
@@ -131,6 +130,7 @@ public class MISAAttachmentBrowserUI extends JPanel {
         panel.add(toolBar, BorderLayout.NORTH);
 
         objectViewTree = new JTree();
+        objectViewTree.setCellRenderer(new ObjectBrowserTreeNodeCellRenderer(attachmentDatabase));
         objectViewTree.addTreeWillExpandListener(new TreeWillExpandListener() {
             @Override
             public void treeWillExpand(TreeExpansionEvent treeExpansionEvent) throws ExpandVetoException {
@@ -158,51 +158,23 @@ public class MISAAttachmentBrowserUI extends JPanel {
     }
 
     private void createObjectBrowserModelByCache() {
+        ObjectBrowserTreeNode node = new ObjectBrowserTreeNode(attachmentDatabase, new ObjectBrowserTreeNode.Role[]{
+                ObjectBrowserTreeNode.Role.Sample,
+                ObjectBrowserTreeNode.Role.Cache,
+                ObjectBrowserTreeNode.Role.SubCache,
+                ObjectBrowserTreeNode.Role.SerializationId,
+                ObjectBrowserTreeNode.Role.Property
+        }, new String[5]);
+        DefaultTreeModel model = new DefaultTreeModel(node);
+        objectViewTree.setModel(model);
+        node.loadDatabaseEntries(model);
     }
 
     private void createObjectBrowserModelByType() {
-//        ResultSet resultSet = attachmentDatabase.query("id, \"serialization-id\", \"property\", cache, sample", Collections.emptyList(),
-//                "order by \"serialization-id\" asc, cache asc, sample asc");
-//        DefaultMutableTreeNode rootNode = new DefaultMutableTreeNode("Root");
-//
-//        String[] lastCategories = new String[4];
-//        DefaultMutableTreeNode[] lastNodes = new DefaultMutableTreeNode[4];
-//
-//        try {
-//            while(resultSet.next()) {
-//                int id = resultSet.getInt(1);
-//                String serializationId = resultSet.getString(2);
-//                String property = resultSet.getString(3);
-//                String cache = resultSet.getString(4);
-//                String sample = resultSet.getString(5);
-//                String serializationNamespace = serializationId.substring(0, serializationId.indexOf(":"));
-//
-//                String[] categories = { serializationNamespace, serializationId, cache, sample };
-//
-//                for(int i = 0; i < 4; ++i) {
-//                    if(!categories[i].equals(lastCategories[i])) {
-//                        lastNodes[i] = new DefaultMutableTreeNode(categories[i]);
-//                        if(i == 0)
-//                            rootNode.add(lastNodes[i]);
-//                        else
-//                            lastNodes[i-1].add(lastNodes[i]);
-//                        lastCategories[i] = categories[i];
-//
-//                        for(int j = i + 1; j < 4; ++j) {
-//                            lastCategories[j] = null;
-//                        }
-//                    }
-//                }
-//            }
-//        } catch (SQLException e) {
-//            throw new RuntimeException(e);
-//        }
-//
-//        objectViewTree.setModel(new DefaultTreeModel(rootNode));
         ObjectBrowserTreeNode node = new ObjectBrowserTreeNode(attachmentDatabase, new ObjectBrowserTreeNode.Role[]{
                 ObjectBrowserTreeNode.Role.SerializationNamespace,
                 ObjectBrowserTreeNode.Role.SerializationId,
-                ObjectBrowserTreeNode.Role.Cache,
+                ObjectBrowserTreeNode.Role.CacheAndSubCache,
                 ObjectBrowserTreeNode.Role.Sample,
                 ObjectBrowserTreeNode.Role.Property
         }, new String[5]);

@@ -54,7 +54,7 @@ public class MISAAttachmentCacheFilterUI extends GenericTabularMISAAttachmentFil
 
     @Override
     protected void initializeTableModel(DefaultTableModel model) {
-        MISASample sample = getFilter().getDatabase().getMisaOutput().getModuleInstance().getSamples().values().stream().findFirst().get();
+        MISASample sample = getFilter().getDatabase().getMisaOutput().getModuleInstance().getOrCreateAnySample();
         for(MISACache cache : sample.getImportedCaches()) {
             String cacheName = "imported/" + cache.getRelativePath();
             model.addRow(new Object[]{ getNativeFilter().getCaches().contains(cacheName), cache });

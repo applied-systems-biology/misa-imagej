@@ -69,6 +69,12 @@ public class MISAModuleInstance implements MISAValidatable {
         return Maps.unmodifiableBiMap(samples);
     }
 
+    public MISASample getOrCreateAnySample() {
+        if(samples.isEmpty())
+            addSample("__OBJECT__");
+        return samples.values().stream().findFirst().get();
+    }
+
     public void addSample(String name) {
         if (samples.containsKey(name)) {
             int counter = 1;

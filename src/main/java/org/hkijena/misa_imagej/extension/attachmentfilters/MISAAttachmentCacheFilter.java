@@ -19,7 +19,7 @@ public class MISAAttachmentCacheFilter extends MISAAttachmentFilter {
 
     public MISAAttachmentCacheFilter(MISAAttachmentDatabase database) {
         super(database);
-        MISASample sample = database.getMisaOutput().getModuleInstance().getSamples().values().stream().findFirst().get();
+        MISASample sample = database.getMisaOutput().getModuleInstance().getOrCreateAnySample();
         for(MISACache cache : sample.getImportedCaches()) {
             String cacheName = "imported/" + cache.getRelativePath();
             caches.add(cacheName);
@@ -55,7 +55,7 @@ public class MISAAttachmentCacheFilter extends MISAAttachmentFilter {
             if(!first) {
                 stringBuilder.append(" or ");
             }
-            stringBuilder.append(" cache like ?");
+            stringBuilder.append(" cache like ? escape '\\'");
             first = false;
         }
         stringBuilder.append(" )");
@@ -73,7 +73,7 @@ public class MISAAttachmentCacheFilter extends MISAAttachmentFilter {
             if(!first) {
                 stringBuilder.append(" or ");
             }
-            stringBuilder.append(" cache like '").append(SQLUtils.escapeWildcardsForMySQL(cache)).append("%").append("'");
+            stringBuilder.append(" cache like ' escape '\\'").append(SQLUtils.escapeWildcardsForSQLite(cache)).append("%").append("'");
             first = false;
         }
         stringBuilder.append(" )");
