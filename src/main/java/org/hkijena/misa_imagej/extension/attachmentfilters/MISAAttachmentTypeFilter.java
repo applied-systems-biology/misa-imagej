@@ -35,7 +35,7 @@ public class MISAAttachmentTypeFilter extends MISAAttachmentFilter {
             if(!first) {
                 stringBuilder.append(" or ");
             }
-            stringBuilder.append(" \"serialization-id\" is '").append(SQLUtils.escapeStringForSQLite(id)).append("'");
+            stringBuilder.append(" \"serialization-id\" is ").append(SQLUtils.value(id));
             first = false;
         }
         stringBuilder.append(" )");

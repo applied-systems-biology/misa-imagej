@@ -61,14 +61,14 @@ public class MISAAttachmentViewerListUI extends JPanel {
 
     private void addItem() {
         if(databaseIds != null) {
-            if(lastDisplayedId < databaseIds.length - 2) {
+            if(lastDisplayedId < databaseIds.length - 1) {
                 addItem(lastDisplayedId + 1);
             }
         }
     }
 
     private void addItem(int i) {
-        MISAAttachmentViewerUI viewer = new MISAAttachmentViewerUI(database, databaseIds[i]);
+        MISAAttachmentViewerUI viewer = new MISAAttachmentViewerUI(database.queryAttachmentAt(databaseIds[i]));
         lastDisplayedId = i;
         viewer.setAlignmentY(Component.TOP_ALIGNMENT);
         listPanel.add(viewer, new GridBagConstraints() {

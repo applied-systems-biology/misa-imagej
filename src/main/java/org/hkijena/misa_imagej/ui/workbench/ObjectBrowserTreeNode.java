@@ -9,7 +9,10 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class ObjectBrowserTreeNode extends DefaultMutableTreeNode {
 
@@ -97,7 +100,7 @@ public class ObjectBrowserTreeNode extends DefaultMutableTreeNode {
         model.nodeStructureChanged(this);
     }
 
-    private List<String> getFilters() {
+    public List<String> getFilters() {
         List<String> filters = new ArrayList<>();
         for(int i = 0; i < roleAssignment.length; ++i) {
             if(knownValues[i] != null) {
@@ -106,7 +109,7 @@ public class ObjectBrowserTreeNode extends DefaultMutableTreeNode {
                         filters.add("\"serialization-id\" like '" + SQLUtils.escapeWildcardsForSQLite(knownValues[i]) + "%' escape '\\'" );
                         break;
                     case SerializationId:
-                        filters.add("\"serialization-id\" is '" + SQLUtils.escapeStringForSQLite(knownValues[i]) + "'" );
+                        filters.add("\"serialization-id\" is " + SQLUtils.value(knownValues[i]) );
                         break;
                     case Cache:
                         filters.add("cache like '" + SQLUtils.escapeWildcardsForSQLite(knownValues[i]) + "%' escape '\\'" );
@@ -115,13 +118,13 @@ public class ObjectBrowserTreeNode extends DefaultMutableTreeNode {
                         filters.add("cache like '%" + SQLUtils.escapeWildcardsForSQLite(knownValues[i]) + "' escape '\\'" );
                         break;
                     case CacheAndSubCache:
-                        filters.add("cache is '" + SQLUtils.escapeStringForSQLite(knownValues[i]) + "'" );
+                        filters.add("cache is " + SQLUtils.value(knownValues[i]) );
                         break;
                     case Sample:
-                        filters.add("sample is '" + SQLUtils.escapeStringForSQLite(knownValues[i]) + "'" );
+                        filters.add("sample is " + SQLUtils.value(knownValues[i]) );
                         break;
                     case Property:
-                        filters.add("property is '" + SQLUtils.escapeStringForSQLite(knownValues[i]) + "'" );
+                        filters.add("property is " + SQLUtils.value(knownValues[i]) );
                         break;
                 }
             }
@@ -170,10 +173,10 @@ public class ObjectBrowserTreeNode extends DefaultMutableTreeNode {
             while(resultSet.next()) {
                 ids.add(resultSet.getInt(1));
             }
+            resultSet.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-
         return ids;
     }
 

@@ -4,6 +4,7 @@ import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import org.hkijena.misa_imagej.api.MISAAttachment;
 import org.hkijena.misa_imagej.api.workbench.filters.MISAAttachmentFilter;
 import org.hkijena.misa_imagej.api.workbench.filters.MISAAttachmentFilterChangedEvent;
 import org.hkijena.misa_imagej.utils.GsonUtils;
@@ -126,13 +127,13 @@ public class MISAAttachmentDatabase {
      * @param selectionStatement
      * @return
      */
-    public String getQuerySQL(String selectionStatement, String postStatement) {
+    public String getQuerySQL(String selectionStatement, List<String> additionalFilters, String postStatement) {
         StringBuilder sql = new StringBuilder();
         sql.append("select ").append(selectionStatement).append(" from attachments");
 
         List<MISAAttachmentFilter> enabledFilters = filters.stream().filter(MISAAttachmentFilter::isEnabled).collect(Collectors.toList());
 
-        if(!enabledFilters.isEmpty()) {
+        if(!enabledFilters.isEmpty() || !additionalFilters.isEmpty()) {
             sql.append(" where");
             boolean first = true;
             for(MISAAttachmentFilter filter : enabledFilters) {
@@ -145,6 +146,16 @@ public class MISAAttachmentDatabase {
                 }
                 sql.append(filter.toSQLQuery());
             }
+            for(String filter : additionalFilters) {
+                if(!first) {
+                    sql.append(" and ");
+                }
+                else {
+                    sql.append(" ");
+                    first = false;
+                }
+                sql.append(filter);
+            }
         }
 
         sql.append(" ").append(postStatement);
@@ -153,6 +164,7 @@ public class MISAAttachmentDatabase {
     }
 
     public ResultSet queryAt(String selectionStatement, int id) {
+        assert id > 0;
         StringBuilder sql = new StringBuilder();
         sql.append("select ").append(selectionStatement).append(" from attachments").append(" where id is ?");
         try {
@@ -171,14 +183,26 @@ public class MISAAttachmentDatabase {
      * @return
      */
     public JsonElement queryJsonDataAt(int id) {
+        assert id > 0;
         ResultSet resultSet = queryAt("\"json-data\"", id);
         try {
+            assert resultSet.next();
             String json = resultSet.getString(1);
             Gson gson = GsonUtils.getGson();
             return gson.fromJson(json, JsonElement.class);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * Returns an attachment that queries data from given database ID
+     * @param id
+     * @return
+     */
+    public MISAAttachment queryAttachmentAt(int id) {
+        assert id > 0;
+        return new MISAAttachment(this, id);
     }
 
     @Subscribe
@@ -189,6 +213,7 @@ public class MISAAttachmentDatabase {
     public int getDatasetCount() {
         ResultSet resultSet = query("count()", Collections.emptyList(), "");
         try {
+            assert resultSet.next();
             return resultSet.getInt(1);
         } catch (SQLException e) {
             throw new RuntimeException(e);

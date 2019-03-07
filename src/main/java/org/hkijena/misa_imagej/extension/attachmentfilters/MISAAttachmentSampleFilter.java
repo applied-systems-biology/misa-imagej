@@ -46,7 +46,7 @@ public class MISAAttachmentSampleFilter extends MISAAttachmentFilter {
             if(!first) {
                 stringBuilder.append(" or ");
             }
-            stringBuilder.append(" sample is '").append(SQLUtils.escapeStringForSQLite(sample.getName())).append("'");
+            stringBuilder.append(" sample is ").append(SQLUtils.value(sample.getName()));
             first = false;
         }
         stringBuilder.append(" )");

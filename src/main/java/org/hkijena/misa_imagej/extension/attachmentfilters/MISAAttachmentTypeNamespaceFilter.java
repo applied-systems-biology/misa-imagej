@@ -36,7 +36,7 @@ public class MISAAttachmentTypeNamespaceFilter extends MISAAttachmentFilter {
             if(!first) {
                 stringBuilder.append(" or ");
             }
-            stringBuilder.append(" \"serialization-id\" like '").append(SQLUtils.escapeStringForSQLite(id)).append("%' escape '\\'");
+            stringBuilder.append(" \"serialization-id\" like '").append(SQLUtils.escapeWildcardsForSQLite(id)).append("%' escape '\\'");
             first = false;
         }
         stringBuilder.append(" )");

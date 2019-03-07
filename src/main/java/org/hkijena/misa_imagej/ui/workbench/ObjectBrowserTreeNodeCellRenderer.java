@@ -1,7 +1,6 @@
 package org.hkijena.misa_imagej.ui.workbench;
 
 import org.hkijena.misa_imagej.api.MISACache;
-import org.hkijena.misa_imagej.api.MISACacheIOType;
 import org.hkijena.misa_imagej.api.MISASample;
 import org.hkijena.misa_imagej.api.json.JSONSchemaObject;
 import org.hkijena.misa_imagej.api.workbench.MISAAttachmentDatabase;
@@ -12,7 +11,6 @@ import org.hkijena.misa_imagej.utils.ui.MonochromeColorIcon;
 import javax.swing.*;
 import javax.swing.tree.TreeCellRenderer;
 import java.awt.*;
-import java.util.List;
 
 public class ObjectBrowserTreeNodeCellRenderer extends JPanel implements TreeCellRenderer {
 

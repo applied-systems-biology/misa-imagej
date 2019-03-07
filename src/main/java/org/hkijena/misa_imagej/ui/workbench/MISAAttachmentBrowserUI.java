@@ -9,8 +9,6 @@ import org.hkijena.misa_imagej.utils.UIUtils;
 
 import javax.swing.*;
 import javax.swing.event.TreeExpansionEvent;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
 import javax.swing.event.TreeWillExpandListener;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.ExpandVetoException;
@@ -18,6 +16,7 @@ import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -76,7 +75,7 @@ public class MISAAttachmentBrowserUI extends JPanel {
         JButton copySQLButton = new JButton(UIUtils.getIconFromResources("copy.png"));
         copySQLButton.setToolTipText("Copy filters as SQL query");
         copySQLButton.addActionListener(e -> {
-            StringSelection stringSelection = new StringSelection(attachmentDatabase.getQuerySQL("*", ""));
+            StringSelection stringSelection = new StringSelection(attachmentDatabase.getQuerySQL("*", Collections.emptyList(), ""));
             Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
             clipboard.setContents(stringSelection, null);
         });
@@ -118,6 +117,19 @@ public class MISAAttachmentBrowserUI extends JPanel {
         JButton syncFilters = new JButton("Update", UIUtils.getIconFromResources("refresh.png"));
         syncFilters.addActionListener(e -> updateObjectBrowser());
         toolBar.add(syncFilters);
+
+        JButton copySql = new JButton(UIUtils.getIconFromResources("copy.png"));
+        copySql.setToolTipText("Copy as SQL query");
+        copySql.addActionListener(e-> {
+            if(objectViewTree.getSelectionPath() != null &&
+                    objectViewTree.getSelectionPath().getLastPathComponent() instanceof ObjectBrowserTreeNode) {
+                ObjectBrowserTreeNode node = (ObjectBrowserTreeNode) objectViewTree.getSelectionPath().getLastPathComponent();
+                StringSelection stringSelection = new StringSelection(attachmentDatabase.getQuerySQL("*", node.getFilters(), ""));
+                Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+                clipboard.setContents(stringSelection, null);
+            }
+        });
+        toolBar.add(copySql);
 
         toolBar.add(Box.createHorizontalGlue());
 
