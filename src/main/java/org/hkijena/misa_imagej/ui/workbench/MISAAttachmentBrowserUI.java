@@ -28,6 +28,7 @@ public class MISAAttachmentBrowserUI extends JPanel {
     private MISAAttachmentDatabase attachmentDatabase;
     private JPanel filterList;
     private JTree objectViewTree;
+    private ObjectBrowserTreeSnapshot objectBrowserTreeSnapshot;
 
     private JToggleButton toggleAutosyncFilters;
     private ButtonGroup viewToggle;
@@ -145,16 +146,19 @@ public class MISAAttachmentBrowserUI extends JPanel {
 
             }
         });
+        objectBrowserTreeSnapshot = new ObjectBrowserTreeSnapshot(objectViewTree);
         panel.add(new JScrollPane(objectViewTree), BorderLayout.CENTER);
 
         return panel;
     }
 
     private void updateObjectBrowser() {
+        objectBrowserTreeSnapshot.createSnapshot();
         if (viewToggle.getSelection().getActionCommand().equals(OBJECT_VIEW_CACHE))
             createObjectBrowserModelByCache();
         else
             createObjectBrowserModelByType();
+        objectBrowserTreeSnapshot.restoreSnapshot();
     }
 
     private void createObjectBrowserModelByCache() {
