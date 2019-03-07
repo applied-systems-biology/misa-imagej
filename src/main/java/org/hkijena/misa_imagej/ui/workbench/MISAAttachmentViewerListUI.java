@@ -54,7 +54,6 @@ public class MISAAttachmentViewerListUI extends JPanel {
 
     private void addItemIfNeeded() {
         JScrollBar scrollBar = scrollPane.getVerticalScrollBar();
-        System.out.println(scrollBar.getBlockIncrement());
         if(scrollBar.getMaximum() <= scrollBar.getVisibleAmount() || (scrollBar.getValue() + scrollBar.getVisibleAmount()) > (scrollBar.getMaximum() * 0.9)) {
             addItem();
         }

@@ -154,7 +154,7 @@ public class MISAAttachmentDatabase {
 
     public ResultSet queryAt(String selectionStatement, int id) {
         StringBuilder sql = new StringBuilder();
-        sql.append("select ").append(selectionStatement).append(" where id is ?").append(id);
+        sql.append("select ").append(selectionStatement).append(" from attachments").append(" where id is ?");
         try {
             PreparedStatement statement = databaseConnection.prepareStatement(sql.toString());
             PreparedStatementValuesBuilder builder = new PreparedStatementValuesBuilder(statement);
