@@ -9,6 +9,8 @@ import org.hkijena.misa_imagej.utils.UIUtils;
 
 import javax.swing.*;
 import javax.swing.event.TreeExpansionEvent;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
 import javax.swing.event.TreeWillExpandListener;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.ExpandVetoException;
@@ -29,6 +31,7 @@ public class MISAAttachmentBrowserUI extends JPanel {
     private JPanel filterList;
     private JTree objectViewTree;
     private ObjectBrowserTreeSnapshot objectBrowserTreeSnapshot;
+    private MISAAttachmentViewerListUI objectView;
 
     private JToggleButton toggleAutosyncFilters;
     private ButtonGroup viewToggle;
@@ -88,7 +91,8 @@ public class MISAAttachmentBrowserUI extends JPanel {
 
     private JPanel initializeContentPanel() {
         JPanel panel = new JPanel(new BorderLayout());
-        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, initializeBrowserPanel(), initializeViewerPanel());
+        objectView = new MISAAttachmentViewerListUI(attachmentDatabase);
+        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, initializeBrowserPanel(), objectView);
         panel.add(splitPane, BorderLayout.CENTER);
 
         return panel;
@@ -146,6 +150,12 @@ public class MISAAttachmentBrowserUI extends JPanel {
 
             }
         });
+        objectViewTree.addTreeSelectionListener(new TreeSelectionListener() {
+            @Override
+            public void valueChanged(TreeSelectionEvent e) {
+                updateObjectView();
+            }
+        });
         objectBrowserTreeSnapshot = new ObjectBrowserTreeSnapshot(objectViewTree);
         panel.add(new JScrollPane(objectViewTree), BorderLayout.CENTER);
 
@@ -187,11 +197,6 @@ public class MISAAttachmentBrowserUI extends JPanel {
         node.loadDatabaseEntries(model);
     }
 
-    private JPanel initializeViewerPanel() {
-        JPanel panel = new JPanel();
-        return panel;
-    }
-
     @Subscribe
     public void handleFilterAddedEvent(MISAAttachmentDatabase.AddedFilterEvent event) {
         recreateFilterList();
@@ -219,5 +224,13 @@ public class MISAAttachmentBrowserUI extends JPanel {
         filterList.add(Box.createVerticalGlue());
         this.revalidate();
         this.repaint();
+    }
+
+    private void updateObjectView() {
+        if(objectViewTree.getSelectionPath() != null && objectViewTree.getSelectionPath().getLastPathComponent() instanceof ObjectBrowserTreeNode) {
+            ObjectBrowserTreeNode node = (ObjectBrowserTreeNode)objectViewTree.getSelectionPath().getLastPathComponent();
+            List<Integer> ids = node.getSelectedDatabaseIndices();
+            objectView.setDatabaseIds(ids);
+        }
     }
 }

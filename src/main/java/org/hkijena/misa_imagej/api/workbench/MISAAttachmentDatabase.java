@@ -2,8 +2,11 @@ package org.hkijena.misa_imagej.api.workbench;
 
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import org.hkijena.misa_imagej.api.workbench.filters.MISAAttachmentFilter;
 import org.hkijena.misa_imagej.api.workbench.filters.MISAAttachmentFilterChangedEvent;
+import org.hkijena.misa_imagej.utils.GsonUtils;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -147,6 +150,35 @@ public class MISAAttachmentDatabase {
         sql.append(" ").append(postStatement);
 
         return sql.toString();
+    }
+
+    public ResultSet queryAt(String selectionStatement, int id) {
+        StringBuilder sql = new StringBuilder();
+        sql.append("select ").append(selectionStatement).append(" where id is ?").append(id);
+        try {
+            PreparedStatement statement = databaseConnection.prepareStatement(sql.toString());
+            PreparedStatementValuesBuilder builder = new PreparedStatementValuesBuilder(statement);
+            builder.addInt(id);
+            return statement.executeQuery();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Queries JSON data at a specified ID
+     * @param id
+     * @return
+     */
+    public JsonElement queryJsonDataAt(int id) {
+        ResultSet resultSet = queryAt("\"json-data\"", id);
+        try {
+            String json = resultSet.getString(1);
+            Gson gson = GsonUtils.getGson();
+            return gson.fromJson(json, JsonElement.class);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Subscribe

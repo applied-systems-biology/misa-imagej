@@ -97,9 +97,40 @@ public class ObjectBrowserTreeNode extends DefaultMutableTreeNode {
         model.nodeStructureChanged(this);
     }
 
+    private List<String> getFilters() {
+        List<String> filters = new ArrayList<>();
+        for(int i = 0; i < roleAssignment.length; ++i) {
+            if(knownValues[i] != null) {
+                switch (roleAssignment[i]) {
+                    case SerializationNamespace:
+                        filters.add("\"serialization-id\" like '" + SQLUtils.escapeWildcardsForSQLite(knownValues[i]) + "%' escape '\\'" );
+                        break;
+                    case SerializationId:
+                        filters.add("\"serialization-id\" is '" + SQLUtils.escapeStringForSQLite(knownValues[i]) + "'" );
+                        break;
+                    case Cache:
+                        filters.add("cache like '" + SQLUtils.escapeWildcardsForSQLite(knownValues[i]) + "%' escape '\\'" );
+                        break;
+                    case SubCache:
+                        filters.add("cache like '%" + SQLUtils.escapeWildcardsForSQLite(knownValues[i]) + "' escape '\\'" );
+                        break;
+                    case CacheAndSubCache:
+                        filters.add("cache is '" + SQLUtils.escapeStringForSQLite(knownValues[i]) + "'" );
+                        break;
+                    case Sample:
+                        filters.add("sample is '" + SQLUtils.escapeStringForSQLite(knownValues[i]) + "'" );
+                        break;
+                    case Property:
+                        filters.add("property is '" + SQLUtils.escapeStringForSQLite(knownValues[i]) + "'" );
+                        break;
+                }
+            }
+        }
+        return filters;
+    }
+
     public ResultSet getChildDatabaseEntries() {
         StringBuilder sql = new StringBuilder();
-        List<String> filters = new ArrayList<>();
 
         int childrenRoleIndex = getFirstUnknownValue();
 
@@ -129,35 +160,21 @@ public class ObjectBrowserTreeNode extends DefaultMutableTreeNode {
                 break;
         }
 
-        for(int i = 0; i < roleAssignment.length; ++i) {
-            if(knownValues[i] != null) {
-                switch (roleAssignment[i]) {
-                    case SerializationNamespace:
-                        filters.add("\"serialization-id\" like '" + SQLUtils.escapeWildcardsForSQLite(knownValues[i]) + "%' escape '\\'" );
-                        break;
-                    case SerializationId:
-                        filters.add("\"serialization-id\" is '" + SQLUtils.escapeStringForSQLite(knownValues[i]) + "'" );
-                        break;
-                    case Cache:
-                        filters.add("cache like '" + SQLUtils.escapeWildcardsForSQLite(knownValues[i]) + "%' escape '\\'" );
-                        break;
-                    case SubCache:
-                        filters.add("cache like '%" + SQLUtils.escapeWildcardsForSQLite(knownValues[i]) + "' escape '\\'" );
-                        break;
-                    case CacheAndSubCache:
-                        filters.add("cache is '" + SQLUtils.escapeStringForSQLite(knownValues[i]) + "'" );
-                        break;
-                    case Sample:
-                        filters.add("sample is '" + SQLUtils.escapeStringForSQLite(knownValues[i]) + "'" );
-                        break;
-                    case Property:
-                        filters.add("property is '" + SQLUtils.escapeStringForSQLite(knownValues[i]) + "'" );
-                        break;
-                }
+        return database.query(sql.toString(), getFilters(), "");
+    }
+
+    public List<Integer> getSelectedDatabaseIndices() {
+        ResultSet resultSet = database.query("id", getFilters(), "");
+        List<Integer> ids = new ArrayList<>();
+        try {
+            while(resultSet.next()) {
+                ids.add(resultSet.getInt(1));
             }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
 
-        return database.query(sql.toString(), filters, "");
+        return ids;
     }
 
     private boolean hasUnknownValue() {
