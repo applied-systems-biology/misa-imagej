@@ -6,7 +6,6 @@ import org.hkijena.misa_imagej.utils.UIUtils;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
 import java.util.List;
 
 public class MISAAttachmentViewerListUI extends JPanel {
@@ -70,7 +69,7 @@ public class MISAAttachmentViewerListUI extends JPanel {
     }
 
     private void addItem(int i) {
-        MISAAttachmentViewer viewer = new MISAAttachmentViewer(database, databaseIds[i]);
+        MISAAttachmentViewerUI viewer = new MISAAttachmentViewerUI(database, databaseIds[i]);
         lastDisplayedId = i;
         viewer.setAlignmentY(Component.TOP_ALIGNMENT);
         listPanel.add(viewer, new GridBagConstraints() {

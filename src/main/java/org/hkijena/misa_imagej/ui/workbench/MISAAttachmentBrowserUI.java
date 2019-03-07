@@ -32,6 +32,7 @@ public class MISAAttachmentBrowserUI extends JPanel {
     private JTree objectViewTree;
     private ObjectBrowserTreeSnapshot objectBrowserTreeSnapshot;
     private MISAAttachmentViewerListUI objectView;
+    private MISAAttachmentTableBuilderUI objectTableBuilder;
 
     private JToggleButton toggleAutosyncFilters;
     private ButtonGroup viewToggle;
@@ -92,7 +93,13 @@ public class MISAAttachmentBrowserUI extends JPanel {
     private JPanel initializeContentPanel() {
         JPanel panel = new JPanel(new BorderLayout());
         objectView = new MISAAttachmentViewerListUI(attachmentDatabase);
-        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, initializeBrowserPanel(), objectView);
+        objectTableBuilder = new MISAAttachmentTableBuilderUI(attachmentDatabase);
+
+        JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.BOTTOM);
+        tabbedPane.addTab("Object list", UIUtils.getIconFromResources("object.png"), objectView);
+        tabbedPane.addTab("Table", UIUtils.getIconFromResources("table.png"), objectTableBuilder);
+
+        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, initializeBrowserPanel(), tabbedPane);
         panel.add(splitPane, BorderLayout.CENTER);
 
         return panel;
@@ -150,12 +157,7 @@ public class MISAAttachmentBrowserUI extends JPanel {
 
             }
         });
-        objectViewTree.addTreeSelectionListener(new TreeSelectionListener() {
-            @Override
-            public void valueChanged(TreeSelectionEvent e) {
-                updateObjectView();
-            }
-        });
+        objectViewTree.addTreeSelectionListener(e -> updateObjectView());
         objectBrowserTreeSnapshot = new ObjectBrowserTreeSnapshot(objectViewTree);
         panel.add(new JScrollPane(objectViewTree), BorderLayout.CENTER);
 
@@ -231,6 +233,7 @@ public class MISAAttachmentBrowserUI extends JPanel {
             ObjectBrowserTreeNode node = (ObjectBrowserTreeNode)objectViewTree.getSelectionPath().getLastPathComponent();
             List<Integer> ids = node.getSelectedDatabaseIndices();
             objectView.setDatabaseIds(ids);
+            objectTableBuilder.setDatabaseIds(ids);
         }
     }
 }

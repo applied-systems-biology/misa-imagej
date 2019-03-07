@@ -10,13 +10,13 @@ import java.awt.*;
 /**
  * Displays attachments from an attachment database
  */
-public class MISAAttachmentViewer extends JPanel {
+public class MISAAttachmentViewerUI extends JPanel {
 
     private MISAAttachmentDatabase database;
     private int databaseId;
     private JsonObject jsonObject;
 
-    public MISAAttachmentViewer(MISAAttachmentDatabase database, int databaseId) {
+    public MISAAttachmentViewerUI(MISAAttachmentDatabase database, int databaseId) {
         this.database = database;
         this.databaseId = databaseId;
         initialize();
