@@ -8,8 +8,7 @@ import org.hkijena.misa_imagej.utils.ui.MonochromeColorIcon;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.*;
 import java.util.List;
 
 /**
@@ -17,14 +16,17 @@ import java.util.List;
  */
 public class MISAAttachmentViewerUI extends JPanel {
 
+    private MISAAttachmentViewerListUI listUI;
     private MISAAttachment attachment;
     private JPanel headerPanel;
     private JPanel contentPanel;
+    private Set<JLabel> propertyLabels = new HashSet<>();
 
     private static final int COLUMN_LABEL = 0;
     private static final int COLUMN_CONTENT = 1;
 
-    public MISAAttachmentViewerUI(MISAAttachment attachment) {
+    public MISAAttachmentViewerUI(MISAAttachmentViewerListUI listUI, MISAAttachment attachment) {
+        this.listUI = listUI;
         this.attachment = attachment;
 
         if (!attachment.hasData())
@@ -53,7 +55,16 @@ public class MISAAttachmentViewerUI extends JPanel {
                 new MonochromeColorIcon(UIUtils.getIconFromResources("object-template.png"), attachment.toColor()),
                 JLabel.LEFT);
         headerPanel.add(titleLabel);
+
+        JTextField pathLabel = new JTextField();
+        pathLabel.setEditable(false);
+        pathLabel.setBorder(null);
+        pathLabel.setOpaque(false);
+        pathLabel.setText(attachment.getAttachmentFullPath());
+        headerPanel.add(Box.createHorizontalStrut(8));
+        headerPanel.add(pathLabel);
         headerPanel.add(Box.createHorizontalGlue());
+        headerPanel.add(Box.createHorizontalStrut(8));
 
         JButton loadAllLazy = new JButton(UIUtils.getIconFromResources("quickload.png"));
         UIUtils.makeFlatWithoutMargin(loadAllLazy);
@@ -73,11 +84,12 @@ public class MISAAttachmentViewerUI extends JPanel {
                 gridx = COLUMN_LABEL;
                 gridy = row;
                 anchor = GridBagConstraints.NORTHWEST;
-                fill = GridBagConstraints.HORIZONTAL;
+                fill = GridBagConstraints.NONE;
                 insets = UIUtils.UI_PADDING;
-                weightx = 0.4;
+//                weightx = 0.4;
             }
         });
+        propertyLabels.add(label);
     }
 
     private void insertComponent(Component ui, int row) {
@@ -88,7 +100,7 @@ public class MISAAttachmentViewerUI extends JPanel {
                 anchor = GridBagConstraints.EAST;
                 insets = UIUtils.UI_PADDING;
                 fill = GridBagConstraints.HORIZONTAL;
-                weightx = 0.6;
+                weightx = 1;
             }
         });
     }
@@ -117,6 +129,7 @@ public class MISAAttachmentViewerUI extends JPanel {
 
     public void refreshContents() {
         contentPanel.removeAll();
+        propertyLabels.clear();
 
         List<MISAAttachment.Property> properties = new ArrayList<>(attachment.getProperties());
         properties.sort(Comparator.comparing(MISAAttachment.Property::getPath));
@@ -128,6 +141,11 @@ public class MISAAttachmentViewerUI extends JPanel {
         SwingUtilities.invokeLater(() -> {
             revalidate();
             repaint();
+            listUI.synchronizeViewerLabelProperties();
         });
+    }
+
+    public Set<JLabel> getPropertyLabels() {
+        return Collections.unmodifiableSet(propertyLabels);
     }
 }

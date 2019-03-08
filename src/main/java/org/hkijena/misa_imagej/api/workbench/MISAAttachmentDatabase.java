@@ -5,6 +5,8 @@ import com.google.common.eventbus.Subscribe;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import org.hkijena.misa_imagej.api.MISAAttachment;
+import org.hkijena.misa_imagej.api.MISACache;
+import org.hkijena.misa_imagej.api.MISASample;
 import org.hkijena.misa_imagej.api.workbench.filters.MISAAttachmentFilter;
 import org.hkijena.misa_imagej.api.workbench.filters.MISAAttachmentFilterChangedEvent;
 import org.hkijena.misa_imagej.utils.GsonUtils;
@@ -202,7 +204,14 @@ public class MISAAttachmentDatabase {
      */
     public MISAAttachment queryAttachmentAt(int id) {
         assert id > 0;
-        return new MISAAttachment(this, id);
+        ResultSet resultSet = queryAt("sample, cache, property", id);
+        try {
+            assert resultSet.next();
+            String path = resultSet.getString(1) + "/" + resultSet.getString(2) + "/" + resultSet.getString(3);
+            return new MISAAttachment(this, id, path);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Subscribe

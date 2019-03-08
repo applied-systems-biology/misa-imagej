@@ -23,10 +23,12 @@ public class MISAAttachment {
     private EventBus eventBus = new EventBus();
     private List<Property> properties = new ArrayList<>();
     private JSONSchemaObject schema = null;
+    private String attachmentFullPath;
 
-    public MISAAttachment(MISAAttachmentDatabase database, int databaseIndex) {
+    public MISAAttachment(MISAAttachmentDatabase database, int databaseIndex, String attachmentFullPath) {
         this.database = database;
         this.databaseIndex = databaseIndex;
+        this.attachmentFullPath = attachmentFullPath;
     }
 
     public MISAAttachmentDatabase getDatabase() {
@@ -130,6 +132,10 @@ public class MISAAttachment {
         while((property = properties.stream().filter(p -> !p.hasValue()).findFirst()).isPresent()) {
             property.get().loadValue();
         }
+    }
+
+    public String getAttachmentFullPath() {
+        return attachmentFullPath;
     }
 
     public interface Property {

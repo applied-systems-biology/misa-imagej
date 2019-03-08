@@ -1,5 +1,6 @@
 package org.hkijena.misa_imagej.ui.workbench;
 
+import com.google.common.eventbus.Subscribe;
 import com.google.common.primitives.Ints;
 import org.hkijena.misa_imagej.api.MISAAttachment;
 import org.hkijena.misa_imagej.api.workbench.MISAAttachmentDatabase;
@@ -8,7 +9,9 @@ import org.hkijena.misa_imagej.utils.UIUtils;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class MISAAttachmentViewerListUI extends JPanel {
     private JScrollPane scrollPane;
@@ -95,7 +98,7 @@ public class MISAAttachmentViewerListUI extends JPanel {
     private void addItem(int i) {
         MISAAttachment attachment = database.queryAttachmentAt(databaseIds[i]);
         attachments.add(attachment);
-        MISAAttachmentViewerUI viewer = new MISAAttachmentViewerUI(attachment);
+        MISAAttachmentViewerUI viewer = new MISAAttachmentViewerUI(this, attachment);
         lastDisplayedId = i;
         viewer.setAlignmentY(Component.TOP_ALIGNMENT);
         listPanel.add(viewer, new GridBagConstraints() {
@@ -112,5 +115,28 @@ public class MISAAttachmentViewerListUI extends JPanel {
         repaint();
 
         SwingUtilities.invokeLater(() -> addItemIfNeeded());
+    }
+
+    public void synchronizeViewerLabelProperties() {
+        int preferredWidth = 0;
+        for(int i = 0; i < listPanel.getComponentCount(); ++i) {
+            if(listPanel.getComponent(i) instanceof MISAAttachmentViewerUI) {
+                for(Component component : ((MISAAttachmentViewerUI) listPanel.getComponent(i)).getPropertyLabels()) {
+                    preferredWidth = Math.max(preferredWidth, component.getPreferredSize().width);
+                }
+            }
+        }
+        System.out.println(preferredWidth);
+        for(int i = 0; i < listPanel.getComponentCount(); ++i) {
+            if (listPanel.getComponent(i) instanceof MISAAttachmentViewerUI) {
+                for(Component component : ((MISAAttachmentViewerUI) listPanel.getComponent(i)).getPropertyLabels()) {
+                    component.setPreferredSize(new Dimension(preferredWidth, component.getPreferredSize().height));
+                }
+            }
+        }
+        SwingUtilities.invokeLater(() -> {
+            listPanel.revalidate();
+            listPanel.repaint();
+        });
     }
 }

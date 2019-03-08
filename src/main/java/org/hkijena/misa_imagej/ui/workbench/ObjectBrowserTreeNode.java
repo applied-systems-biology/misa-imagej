@@ -106,7 +106,7 @@ public class ObjectBrowserTreeNode extends DefaultMutableTreeNode {
             if(knownValues[i] != null) {
                 switch (roleAssignment[i]) {
                     case SerializationNamespace:
-                        filters.add("\"serialization-id\" like '" + SQLUtils.escapeWildcardsForSQLite(knownValues[i]) + "%' escape '\\'" );
+                        filters.add("\"serialization-id\" like '" + SQLUtils.escapeWildcardsForSQLite(knownValues[i]) + ":%' escape '\\'" );
                         break;
                     case SerializationId:
                         filters.add("\"serialization-id\" is " + SQLUtils.value(knownValues[i]) );
