@@ -36,6 +36,10 @@ public class MISAAttachmentViewerListUI extends JPanel {
         loadAllMissingDataButton.addActionListener(e -> loadAllMissingData());
         toolBar.add(loadAllMissingDataButton);
 
+        JButton unloadButton = new JButton("Unload all data", UIUtils.getIconFromResources("eye-slash.png"));
+        unloadButton.addActionListener(e -> reloadData());
+        toolBar.add(unloadButton);
+
         toolBar.add(Box.createHorizontalGlue());
         statsLabel = new JLabel();
         toolBar.add(statsLabel);
@@ -60,20 +64,28 @@ public class MISAAttachmentViewerListUI extends JPanel {
     }
 
     private void loadAllMissingData() {
-        for(MISAAttachment attachment : attachments) {
-            attachment.loadAll();
-        }
+        MISAAttachmentExpanderDialogUI dialog = new MISAAttachmentExpanderDialogUI(attachments);
+        dialog.setModal(true);
+        dialog.pack();
+        dialog.setSize(400,300);
+        dialog.setLocationRelativeTo(SwingUtilities.getWindowAncestor(this));
+        dialog.startOperation();
+        dialog.setVisible(true);
     }
 
     public void setDatabaseIds(List<Integer> databaseIds) {
         this.databaseIds = Ints.toArray(databaseIds);
+        reloadData();
+    }
+
+    private void reloadData() {
         this.lastDisplayedId = -1;
         this.attachments.clear();
         listPanel.removeAll();
         listPanel.revalidate();
         listPanel.repaint();
-        statsLabel.setText(databaseIds.size() + " objects");
-        if(!databaseIds.isEmpty()) {
+        statsLabel.setText(databaseIds.length + " objects");
+        if(databaseIds.length > 0) {
             addItem(0);
         }
     }

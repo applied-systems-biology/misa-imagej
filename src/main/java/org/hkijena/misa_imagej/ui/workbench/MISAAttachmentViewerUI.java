@@ -70,13 +70,23 @@ public class MISAAttachmentViewerUI extends JPanel {
         JButton loadAllLazy = new JButton(UIUtils.getIconFromResources("quickload.png"));
         UIUtils.makeFlatWithoutMargin(loadAllLazy);
         loadAllLazy.setToolTipText("Load all missing data");
-        loadAllLazy.addActionListener(e -> attachment.loadAll());
+        loadAllLazy.addActionListener(e -> loadMissingData());
         headerPanel.add(loadAllLazy);
 
         add(headerPanel, BorderLayout.NORTH);
         contentPanel = new JPanel();
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
         add(contentPanel, BorderLayout.CENTER);
+    }
+
+    private void loadMissingData() {
+        MISAAttachmentExpanderDialogUI dialog = new MISAAttachmentExpanderDialogUI(attachment);
+        dialog.setModal(true);
+        dialog.pack();
+        dialog.setSize(400,300);
+        dialog.setLocationRelativeTo(SwingUtilities.getWindowAncestor(this));
+        dialog.startOperation();
+        dialog.setVisible(true);
     }
 
     private void insertLabelFor(String propertyName, Icon icon, JPanel row) {

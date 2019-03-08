@@ -25,6 +25,8 @@ public class MISAAttachment {
     private JSONSchemaObject schema = null;
     private String attachmentFullPath;
 
+    private List<Property> transactionBackupProperties;
+
     public MISAAttachment(MISAAttachmentDatabase database, int databaseIndex, String attachmentFullPath) {
         this.database = database;
         this.databaseIndex = databaseIndex;
@@ -115,7 +117,8 @@ public class MISAAttachment {
             }
         }
 
-        getEventBus().post(new MISAAttachment.DataLoadedEvent(this));
+        if(!isWithinLoadAllIteration())
+            getEventBus().post(new MISAAttachment.DataLoadedEvent(this));
     }
 
     public List<Property> getProperties() {
@@ -136,6 +139,43 @@ public class MISAAttachment {
 
     public String getAttachmentFullPath() {
         return attachmentFullPath;
+    }
+
+    public boolean isWithinLoadAllIteration() {
+        return transactionBackupProperties != null;
+    }
+
+    public boolean doLoadAllIteration() {
+        if(isWithinLoadAllIteration()) {
+            Optional<Property> property =  properties.stream().filter(p -> !p.hasValue()).findFirst();
+            if(!property.isPresent())
+                return false;
+            else
+                property.get().loadValue();
+            return true;
+        }
+        return false;
+    }
+
+    public void startLoadAllIteration() {
+        if(!isWithinLoadAllIteration()) {
+            load();
+            transactionBackupProperties = properties;
+            properties = new ArrayList<>(properties); // Backup the current property list
+        }
+    }
+
+    public void stopLoadAllIteration(boolean canceled) {
+        if(isWithinLoadAllIteration()) {
+            if(canceled) {
+                properties = transactionBackupProperties;
+                transactionBackupProperties = null;
+            }
+            else {
+                transactionBackupProperties = null;
+                getEventBus().post(new MISAAttachment.DataLoadedEvent(this));
+            }
+        }
     }
 
     public interface Property {
