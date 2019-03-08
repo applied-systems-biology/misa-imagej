@@ -6,14 +6,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class MISAAttachmentTableCacheAndSubCacheColumn implements MISAAttachmentTableColumn {
-    @Override
-    public String getSelectionStatement() {
-        return "cache";
-    }
 
     @Override
-    public Object getValue(ResultSet resultSet, int columnIndex, JsonObject json) throws SQLException {
-        return resultSet.getString(columnIndex + 1);
+    public Object getValue(int id, String sample, String cache, String property, String serializationId, JsonObject json) throws SQLException {
+        return cache;
     }
-
 }

@@ -17,15 +17,9 @@ public class MISAAttachmentTableSubCacheColumn implements MISAAttachmentTableCol
     }
 
     @Override
-    public String getSelectionStatement() {
-        return "cache";
-    }
-
-    @Override
-    public Object getValue(ResultSet resultSet, int columnIndex, JsonObject json) throws SQLException {
-        String value = resultSet.getString(columnIndex + 1);
-        MISASample sample = database.getMisaOutput().getModuleInstance().getOrCreateAnySample();
-        MISACache cache = sample.findMatchingCache(value);
-        return value.substring(cache.getFullRelativePath().length());
+    public Object getValue(int id, String sampleName, String cacheAndSubCache, String property, String serializationId, JsonObject json) throws SQLException {
+        MISASample sample = database.getMisaOutput().getModuleInstance().getSample(sampleName);
+        MISACache cache = sample.findMatchingCache(cacheAndSubCache);
+        return cacheAndSubCache.substring(cache.getFullRelativePath().length());
     }
 }

@@ -17,7 +17,7 @@ public class StandardMISAImageJExtensionService extends AbstractService implemen
 
     @Override
     public void register(MISAImageJRegistryService registryService) {
-        registryService.getCacheRegistry().register("misa_ome:descriptions/ome-tiff", MISAOMETiffCache.class);
+        registryService.getCacheRegistry().register("misa-ome:descriptions/ome-tiff", MISAOMETiffCache.class);
         registryService.getCacheRegistry().register("misa:descriptions/file", MISAFileCache.class);
         registryService.getCacheRegistry().register("misa:descriptions/exported-attachments", MISAExportedAttachmentsCache.class);
 

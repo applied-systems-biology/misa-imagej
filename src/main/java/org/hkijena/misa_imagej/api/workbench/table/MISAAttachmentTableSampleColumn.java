@@ -7,12 +7,7 @@ import java.sql.SQLException;
 
 public class MISAAttachmentTableSampleColumn implements MISAAttachmentTableColumn {
     @Override
-    public String getSelectionStatement() {
-        return "sample";
-    }
-
-    @Override
-    public Object getValue(ResultSet resultSet, int columnIndex, JsonObject json) throws SQLException {
-        return resultSet.getString(columnIndex);
+    public Object getValue(int id, String sample, String cache, String property, String serializationId, JsonObject json) throws SQLException {
+        return sample;
     }
 }

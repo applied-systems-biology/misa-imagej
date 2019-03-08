@@ -6,6 +6,5 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public interface MISAAttachmentTableColumn {
-    String getSelectionStatement();
-    Object getValue(ResultSet resultSet, int columnIndex, JsonObject json) throws SQLException;
+    Object getValue(int id, String sample, String cache, String property, String serializationId, JsonObject json) throws SQLException;
 }
