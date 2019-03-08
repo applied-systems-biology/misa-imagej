@@ -111,7 +111,7 @@ public class MISAAttachmentExpanderDialogUI extends JDialog {
         }
         worker = new Worker(attachments);
         worker.getEventBus().register(this);
-        worker.run();
+        worker.execute();
     }
 
     @Subscribe
@@ -159,12 +159,22 @@ public class MISAAttachmentExpanderDialogUI extends JDialog {
 
         @Override
         protected Object doInBackground() throws Exception {
+            int globalTotal = 0;
+
             for(MISAAttachment attachment : attachments) {
-                int progress = 0;
+                int iteration = 0;
                 while(!isCancelled() && attachment.doLoadAllIteration()) {
-                    SwingUtilities.invokeLater(() -> eventBus.post(
-                            new ProgressEvent(progress, attachment.getUnloadedProperties().size())));
+                    if(iteration % 100 == 0) {
+                        final int unloaded = attachment.getUnloadedProperties().size();
+                        final int progress = attachment.getProperties().size() - unloaded + globalTotal;
+                        final int total = attachment.getProperties().size() + globalTotal;
+                        SwingUtilities.invokeLater(() -> {
+                            eventBus.post(new ProgressEvent(progress, total));
+                        });
+                    }
+                    ++iteration;
                 }
+                globalTotal += attachment.getProperties().size();
             }
             return null;
         }

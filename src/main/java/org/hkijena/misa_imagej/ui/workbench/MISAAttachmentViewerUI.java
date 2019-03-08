@@ -144,6 +144,7 @@ public class MISAAttachmentViewerUI extends JPanel {
         } else {
             insertLabelFor(property.getPath(), UIUtils.getIconFromResources("object.png"), row);
             JButton loadButton = new JButton("Load missing data", UIUtils.getIconFromResources("database.png"));
+            UIUtils.makeFlat(loadButton);
             loadButton.addActionListener(e -> property.loadValue());
             insertComponent(loadButton, row);
         }
