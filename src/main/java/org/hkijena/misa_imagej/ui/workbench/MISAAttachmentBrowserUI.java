@@ -95,6 +95,7 @@ public class MISAAttachmentBrowserUI extends JPanel {
         objectTableBuilder = new MISAAttachmentTableBuilderUI(attachmentDatabase);
 
         JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.BOTTOM);
+        tabbedPane.setBorder(BorderFactory.createEmptyBorder(-4,0,0,0)); // Make the toolbar align nicely
         tabbedPane.addTab("Object list", UIUtils.getIconFromResources("object.png"), objectView);
         tabbedPane.addTab("Table", UIUtils.getIconFromResources("table.png"), objectTableBuilder);
 
