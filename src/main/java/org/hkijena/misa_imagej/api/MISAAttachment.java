@@ -194,6 +194,24 @@ public class MISAAttachment {
             this.databaseIndex = databaseIndex;
         }
 
+        public String getDocumentationTitle() {
+            if(schema != null) {
+                return schema.getDocumentationTitle();
+            }
+            else {
+                return "Unknown";
+            }
+        }
+
+        public Color toColor() {
+            if(schema != null) {
+                return schema.toColor();
+            }
+            else {
+                return Color.GRAY;
+            }
+        }
+
         public void loadValue() {
             if(!isLoaded) {
                 JsonObject object = parent.database.queryJsonDataAt(databaseIndex).getAsJsonObject();

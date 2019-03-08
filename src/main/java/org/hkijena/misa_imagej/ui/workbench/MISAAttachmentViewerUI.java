@@ -5,6 +5,7 @@ import com.google.gson.JsonPrimitive;
 import org.hkijena.misa_imagej.api.MISAAttachment;
 import org.hkijena.misa_imagej.utils.UIUtils;
 import org.hkijena.misa_imagej.utils.ui.MonochromeColorIcon;
+import org.hkijena.misa_imagej.utils.ui.ReadOnlyToggleButtonModel;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -80,7 +81,7 @@ public class MISAAttachmentViewerUI extends JPanel {
     }
 
     private void insertLabelFor(String propertyName, Icon icon, JPanel row) {
-        JLabel label = new JLabel(propertyName.substring(1), icon, JLabel.LEFT);
+        JLabel label = new JLabel(propertyName != null ? propertyName.substring(1) : null, icon, JLabel.LEFT);
         propertyLabels.add(label);
         row.add(label, BorderLayout.WEST);
     }
@@ -100,11 +101,36 @@ public class MISAAttachmentViewerUI extends JPanel {
 
                 if (primitive.isString()) {
                     insertLabelFor(property.getPath(), UIUtils.getIconFromResources("text.png"), row);
+                    if(primitive.getAsString().contains("\n")) {
+                        JTextArea textArea = new JTextArea(primitive.getAsString());
+                        textArea.setEditable(false);
+                        JScrollPane scrollPane = new JScrollPane(textArea);
+                        scrollPane.setPreferredSize(new Dimension(100,200));
+                        insertComponent(scrollPane, row);
+                    }
+                    else {
+                        JTextField component = new JTextField(primitive.getAsString());
+                        component.setEditable(false);
+                        insertComponent(component, row);
+                    }
                 } else if (primitive.isBoolean()) {
-
+                    JCheckBox component = new JCheckBox(property.getPath().substring(1));
+                    component.setModel(new ReadOnlyToggleButtonModel(primitive.getAsBoolean()));
+                    insertLabelFor(null, null, row);
+                    insertComponent(component, row);
                 } else if (primitive.isNumber()) {
                     insertLabelFor(property.getPath(), UIUtils.getIconFromResources("number.png"), row);
+                    JTextField component = new JTextField(primitive.getAsNumber() + "");
+                    component.setEditable(false);
+                    insertComponent(component, row);
                 }
+            }
+            else if(property instanceof MISAAttachment.LazyProperty) {
+                insertLabelFor(property.getPath(), UIUtils.getIconFromResources("object.png"), row);
+                JLabel component = new JLabel(((MISAAttachment.LazyProperty) property).getDocumentationTitle(),
+                        new MonochromeColorIcon(UIUtils.getIconFromResources("object-template.png"), ((MISAAttachment.LazyProperty) property).toColor()),
+                        JLabel.LEFT);
+                insertComponent(component, row);
             }
         } else {
             insertLabelFor(property.getPath(), UIUtils.getIconFromResources("object.png"), row);

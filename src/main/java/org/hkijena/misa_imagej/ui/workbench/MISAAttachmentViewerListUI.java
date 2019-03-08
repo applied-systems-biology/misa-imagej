@@ -5,9 +5,12 @@ import com.google.common.primitives.Ints;
 import org.hkijena.misa_imagej.api.MISAAttachment;
 import org.hkijena.misa_imagej.api.workbench.MISAAttachmentDatabase;
 import org.hkijena.misa_imagej.utils.UIUtils;
+import org.jdesktop.swingx.JXPanel;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -52,11 +55,7 @@ public class MISAAttachmentViewerListUI extends JPanel {
 
         scrollPane = new JScrollPane(internalPanel);
         add(scrollPane, BorderLayout.CENTER);
-
         scrollPane.getVerticalScrollBar().addAdjustmentListener(e -> {
-
-//            System.out.println(scrollPane.getVerticalScrollBar().getValue() + " / " + scrollPane.getVerticalScrollBar().getMaximum()
-//                    + " <- " + scrollPane.getVerticalScrollBar().getVisibleAmount() );
             addItemIfNeeded();
         });
     }
