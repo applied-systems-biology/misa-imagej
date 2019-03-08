@@ -6,6 +6,7 @@ import org.hkijena.misa_imagej.api.MISAAttachment;
 import org.hkijena.misa_imagej.api.workbench.MISAAttachmentDatabase;
 import org.hkijena.misa_imagej.utils.UIUtils;
 import org.jdesktop.swingx.JXPanel;
+import org.jdesktop.swingx.ScrollableSizeHint;
 
 import javax.swing.*;
 import java.awt.*;
@@ -18,7 +19,7 @@ import java.util.Set;
 
 public class MISAAttachmentViewerListUI extends JPanel {
     private JScrollPane scrollPane;
-    private JPanel listPanel;
+    private JXPanel listPanel;
     private JLabel statsLabel;
 
     private MISAAttachmentDatabase database;
@@ -46,7 +47,9 @@ public class MISAAttachmentViewerListUI extends JPanel {
 
         add(toolBar, BorderLayout.NORTH);
 
-        listPanel = new JPanel();
+        listPanel = new JXPanel();
+        listPanel.setScrollableWidthHint(ScrollableSizeHint.FIT);
+        listPanel.setScrollableHeightHint(ScrollableSizeHint.VERTICAL_STRETCH);
         listPanel.setLayout(new GridBagLayout());
 //        listPanel.setBorder(BorderFactory.createLineBorder(Color.RED));
 
@@ -54,6 +57,7 @@ public class MISAAttachmentViewerListUI extends JPanel {
         internalPanel.add(listPanel, BorderLayout.NORTH);
 
         scrollPane = new JScrollPane(internalPanel);
+        scrollPane.setViewportView(listPanel);
         add(scrollPane, BorderLayout.CENTER);
         scrollPane.getVerticalScrollBar().addAdjustmentListener(e -> {
             addItemIfNeeded();
