@@ -170,6 +170,10 @@ public class MISAAttachment {
             if(canceled) {
                 properties = transactionBackupProperties;
                 transactionBackupProperties = null;
+
+                for(Property property : properties) {
+                    property.cancelLoadValue();
+                }
             }
             else {
                 transactionBackupProperties = null;
@@ -182,6 +186,7 @@ public class MISAAttachment {
         String getPath();
         JSONSchemaObject getSchema();
         void loadValue();
+        void cancelLoadValue();
         boolean hasValue();
     }
 
@@ -217,6 +222,11 @@ public class MISAAttachment {
 
         @Override
         public void loadValue() {
+
+        }
+
+        @Override
+        public void cancelLoadValue() {
 
         }
     }
@@ -264,6 +274,11 @@ public class MISAAttachment {
                 isLoaded = true;
                 parent.loadProperties(object, schema, path);
             }
+        }
+
+        @Override
+        public void cancelLoadValue() {
+            isLoaded = false;
         }
 
         @Override
