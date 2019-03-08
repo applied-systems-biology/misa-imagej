@@ -30,7 +30,7 @@ public class MISAAttachmentTable {
     private void updateSqlSelectionString() {
         StringBuilder sqlSelection = new StringBuilder();
         for(int i = 0; i < columns.size(); ++i) {
-            
+
         }
     }
 }
