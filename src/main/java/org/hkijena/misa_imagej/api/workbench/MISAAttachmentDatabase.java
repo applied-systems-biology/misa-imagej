@@ -5,8 +5,6 @@ import com.google.common.eventbus.Subscribe;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import org.hkijena.misa_imagej.api.MISAAttachment;
-import org.hkijena.misa_imagej.api.MISACache;
-import org.hkijena.misa_imagej.api.MISASample;
 import org.hkijena.misa_imagej.api.workbench.filters.MISAAttachmentFilter;
 import org.hkijena.misa_imagej.api.workbench.filters.MISAAttachmentFilterChangedEvent;
 import org.hkijena.misa_imagej.utils.GsonUtils;

@@ -8,10 +8,9 @@ import org.hkijena.misa_imagej.utils.ui.MonochromeColorIcon;
 import org.hkijena.misa_imagej.utils.ui.ReadOnlyToggleButtonModel;
 
 import javax.swing.*;
-import javax.swing.border.Border;
 import java.awt.*;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 
 /**
  * Displays attachments from an attachment database

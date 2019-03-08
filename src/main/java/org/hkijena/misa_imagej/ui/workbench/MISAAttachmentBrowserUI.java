@@ -10,14 +10,11 @@ import org.hkijena.misa_imagej.utils.UIUtils;
 import javax.swing.*;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeWillExpandListener;
-import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.ExpandVetoException;
+import javax.swing.tree.*;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
+import java.util.*;
 import java.util.List;
 
 public class MISAAttachmentBrowserUI extends JPanel {
@@ -154,6 +151,7 @@ public class MISAAttachmentBrowserUI extends JPanel {
         panel.add(toolBar, BorderLayout.NORTH);
 
         objectViewTree = new JTree();
+        objectViewTree.getSelectionModel().setSelectionMode(TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
         objectViewTree.setCellRenderer(new ObjectBrowserTreeNodeCellRenderer(attachmentDatabase));
         objectViewTree.addTreeWillExpandListener(new TreeWillExpandListener() {
             @Override
@@ -241,11 +239,25 @@ public class MISAAttachmentBrowserUI extends JPanel {
     }
 
     private void updateObjectView() {
-        if(objectViewTree.getSelectionPath() != null && objectViewTree.getSelectionPath().getLastPathComponent() instanceof ObjectBrowserTreeNode) {
-            ObjectBrowserTreeNode node = (ObjectBrowserTreeNode)objectViewTree.getSelectionPath().getLastPathComponent();
-            List<Integer> ids = node.getSelectedDatabaseIndices();
-            objectView.setDatabaseIds(ids);
-            objectTableBuilder.setDatabaseIds(ids);
+        if(objectViewTree.getSelectionCount() == 1) {
+            if(objectViewTree.getSelectionPath() != null && objectViewTree.getSelectionPath().getLastPathComponent() instanceof ObjectBrowserTreeNode) {
+                ObjectBrowserTreeNode node = (ObjectBrowserTreeNode)objectViewTree.getSelectionPath().getLastPathComponent();
+                List<Integer> ids = node.getSelectedDatabaseIndices();
+                objectView.setDatabaseIds(ids);
+                objectTableBuilder.setDatabaseIds(ids);
+            }
         }
+        else if(objectViewTree.getSelectionPaths() != null) {
+            Set<Integer> ids = new HashSet<>();
+            for(TreePath selection : objectViewTree.getSelectionPaths()) {
+                if(selection.getLastPathComponent() instanceof ObjectBrowserTreeNode) {
+                    ObjectBrowserTreeNode node = (ObjectBrowserTreeNode)selection.getLastPathComponent();
+                    ids.addAll(node.getSelectedDatabaseIndices());
+                }
+            }
+            objectView.setDatabaseIds(new ArrayList<>(ids));
+            objectTableBuilder.setDatabaseIds(new ArrayList<>(ids));
+        }
+
     }
 }

@@ -1,6 +1,5 @@
 package org.hkijena.misa_imagej.ui.workbench;
 
-import com.google.common.eventbus.Subscribe;
 import com.google.common.primitives.Ints;
 import org.hkijena.misa_imagej.api.MISAAttachment;
 import org.hkijena.misa_imagej.api.workbench.MISAAttachmentDatabase;
@@ -10,12 +9,8 @@ import org.jdesktop.swingx.ScrollableSizeHint;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class MISAAttachmentViewerListUI extends JPanel {
     private JScrollPane scrollPane;
@@ -49,7 +44,7 @@ public class MISAAttachmentViewerListUI extends JPanel {
 
         listPanel = new JXPanel();
         listPanel.setScrollableWidthHint(ScrollableSizeHint.FIT);
-        listPanel.setScrollableHeightHint(ScrollableSizeHint.VERTICAL_STRETCH);
+        listPanel.setScrollableHeightHint(ScrollableSizeHint.NONE);
         listPanel.setLayout(new GridBagLayout());
 //        listPanel.setBorder(BorderFactory.createLineBorder(Color.RED));
 
@@ -129,7 +124,6 @@ public class MISAAttachmentViewerListUI extends JPanel {
                 }
             }
         }
-        System.out.println(preferredWidth);
         for(int i = 0; i < listPanel.getComponentCount(); ++i) {
             if (listPanel.getComponent(i) instanceof MISAAttachmentViewerUI) {
                 for(JLabel component : ((MISAAttachmentViewerUI) listPanel.getComponent(i)).getPropertyLabels()) {
