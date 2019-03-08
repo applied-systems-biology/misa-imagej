@@ -129,14 +129,16 @@ public class MISAAttachmentViewerListUI extends JPanel {
         System.out.println(preferredWidth);
         for(int i = 0; i < listPanel.getComponentCount(); ++i) {
             if (listPanel.getComponent(i) instanceof MISAAttachmentViewerUI) {
-                for(Component component : ((MISAAttachmentViewerUI) listPanel.getComponent(i)).getPropertyLabels()) {
+                for(JLabel component : ((MISAAttachmentViewerUI) listPanel.getComponent(i)).getPropertyLabels()) {
                     component.setPreferredSize(new Dimension(preferredWidth, component.getPreferredSize().height));
+                    component.setToolTipText(preferredWidth + "");
+                    SwingUtilities.invokeLater(() -> {
+                        component.revalidate();
+                        component.repaint();
+                    });
                 }
             }
         }
-        SwingUtilities.invokeLater(() -> {
-            listPanel.revalidate();
-            listPanel.repaint();
-        });
+
     }
 }

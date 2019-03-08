@@ -7,6 +7,7 @@ import org.hkijena.misa_imagej.utils.UIUtils;
 import org.hkijena.misa_imagej.utils.ui.MonochromeColorIcon;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
@@ -73,39 +74,25 @@ public class MISAAttachmentViewerUI extends JPanel {
         headerPanel.add(loadAllLazy);
 
         add(headerPanel, BorderLayout.NORTH);
-        contentPanel = new JPanel(new GridBagLayout());
+        contentPanel = new JPanel();
+        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
         add(contentPanel, BorderLayout.CENTER);
     }
 
-    private void insertLabelFor(String propertyName, Icon icon, int row) {
+    private void insertLabelFor(String propertyName, Icon icon, JPanel row) {
         JLabel label = new JLabel(propertyName.substring(1), icon, JLabel.LEFT);
-        contentPanel.add(label, new GridBagConstraints() {
-            {
-                gridx = COLUMN_LABEL;
-                gridy = row;
-                anchor = GridBagConstraints.NORTHWEST;
-                fill = GridBagConstraints.NONE;
-                insets = UIUtils.UI_PADDING;
-//                weightx = 0.4;
-            }
-        });
         propertyLabels.add(label);
+        row.add(label, BorderLayout.WEST);
     }
 
-    private void insertComponent(Component ui, int row) {
-        contentPanel.add(ui, new GridBagConstraints() {
-            {
-                gridx = COLUMN_CONTENT;
-                gridy = row;
-                anchor = GridBagConstraints.EAST;
-                insets = UIUtils.UI_PADDING;
-                fill = GridBagConstraints.HORIZONTAL;
-                weightx = 1;
-            }
-        });
+    private void insertComponent(Component ui, JPanel row) {
+        row.add(ui, BorderLayout.CENTER);
     }
 
-    private void insertDisplayFor(MISAAttachment.Property property, int row) {
+    private void insertDisplayFor(MISAAttachment.Property property) {
+
+        JPanel row = new JPanel(new BorderLayout(4,4));
+        row.setBorder(BorderFactory.createEmptyBorder(4,4,4,4));
 
         if (property.hasValue()) {
             if (property instanceof MISAAttachment.MemoryProperty) {
@@ -125,6 +112,8 @@ public class MISAAttachmentViewerUI extends JPanel {
             loadButton.addActionListener(e -> property.loadValue());
             insertComponent(loadButton, row);
         }
+
+        contentPanel.add(row);
     }
 
     public void refreshContents() {
@@ -135,7 +124,7 @@ public class MISAAttachmentViewerUI extends JPanel {
         properties.sort(Comparator.comparing(MISAAttachment.Property::getPath));
 
         for (int i = 0; i < properties.size(); ++i) {
-            insertDisplayFor(properties.get(i), i);
+            insertDisplayFor(properties.get(i));
         }
 
         SwingUtilities.invokeLater(() -> {
