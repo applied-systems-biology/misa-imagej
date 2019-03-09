@@ -1,5 +1,6 @@
 package org.hkijena.misa_imagej.api.workbench;
 
+import com.google.common.base.Joiner;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import com.google.gson.Gson;
@@ -11,6 +12,7 @@ import org.hkijena.misa_imagej.utils.GsonUtils;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -161,6 +163,23 @@ public class MISAAttachmentDatabase {
         sql.append(" ").append(postStatement);
 
         return sql.toString();
+    }
+
+    public ResultSet queryAt(String selectionStatement, int[] ids) {
+        StringBuilder sql = new StringBuilder();
+        sql.append("select ").append(selectionStatement).append(" from attachments").append(" where id in (");
+        for(int i = 0; i < ids.length; ++i) {
+            if(i != 0)
+                sql.append(",");
+            sql.append(ids[i]);
+        }
+        sql.append(")");
+        try {
+            PreparedStatement statement = databaseConnection.prepareStatement(sql.toString());
+            return statement.executeQuery();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public ResultSet queryAt(String selectionStatement, int id) {

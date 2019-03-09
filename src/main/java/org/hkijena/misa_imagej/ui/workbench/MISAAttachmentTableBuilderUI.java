@@ -1,9 +1,13 @@
 package org.hkijena.misa_imagej.ui.workbench;
 
 import com.google.common.base.Joiner;
+import com.google.common.primitives.Ints;
 import org.hkijena.misa_imagej.api.json.JSONSchemaObject;
 import org.hkijena.misa_imagej.api.workbench.MISAAttachmentDatabase;
 import org.hkijena.misa_imagej.api.workbench.MISAOutput;
+import org.hkijena.misa_imagej.api.workbench.table.MISAAttachmentTable;
+import org.hkijena.misa_imagej.api.workbench.table.MISAAttachmentTableSampleColumn;
+import org.hkijena.misa_imagej.api.workbench.table.MISAAttachmentTableTypeColumn;
 import org.hkijena.misa_imagej.utils.UIUtils;
 import org.hkijena.misa_imagej.utils.ui.MonochromeColorIcon;
 
@@ -11,12 +15,14 @@ import javax.swing.*;
 import java.awt.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class MISAAttachmentTableBuilderUI extends JPanel {
     private MISAAttachmentDatabase database;
     private List<Integer> databaseIds;
+    private MISAAttachmentTableUI tableUI;
 
     private JComboBox<String> objectSelection;
     private JToggleButton toggleAutosyncFilters;
@@ -44,17 +50,29 @@ public class MISAAttachmentTableBuilderUI extends JPanel {
 
         objectSelection = new JComboBox<>();
         objectSelection.setRenderer(new ObjectTypeComboBoxRenderer(database.getMisaOutput()));
+        objectSelection.addItemListener(e -> updateTable());
         toolBar.add(objectSelection);
 
         add(toolBar, BorderLayout.NORTH);
+
+        tableUI = new MISAAttachmentTableUI();
+        add(tableUI, BorderLayout.CENTER);
     }
 
     private void updateTable() {
+        if(objectSelection.getSelectedItem() != null) {
+            MISAAttachmentTable attachmentTable = new MISAAttachmentTable(database, databaseIds,
+                    objectSelection.getSelectedItem().toString());
+            attachmentTable.addColumn(new MISAAttachmentTableSampleColumn());
+            attachmentTable.addColumn(new MISAAttachmentTableTypeColumn());
+            tableUI.setTable(attachmentTable);
+        }
     }
 
     public void setDatabaseIds(List<Integer> databaseIds) {
         this.databaseIds = databaseIds;
         updateObjectSelection();
+        updateTable();
     }
 
     private void updateObjectSelection() {

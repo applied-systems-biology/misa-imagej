@@ -1,13 +1,12 @@
 package org.hkijena.misa_imagej.api.workbench.table;
 
-import com.google.gson.JsonObject;
+import org.hkijena.misa_imagej.api.MISAAttachment;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class MISAAttachmentTableSampleColumn implements MISAAttachmentTableColumn {
     @Override
-    public Object getValue(int id, String sample, String cache, String property, String serializationId, JsonObject json) throws SQLException {
+    public Object getValue(int id, String sample, String cache, String property, String serializationId, MISAAttachment attachment) throws SQLException {
         return sample;
     }
 }

@@ -1,11 +1,10 @@
 package org.hkijena.misa_imagej.api.workbench.table;
 
-import com.google.gson.JsonObject;
+import org.hkijena.misa_imagej.api.MISAAttachment;
 import org.hkijena.misa_imagej.api.MISACache;
 import org.hkijena.misa_imagej.api.MISASample;
 import org.hkijena.misa_imagej.api.workbench.MISAAttachmentDatabase;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class MISAAttachmentTableSubCacheColumn implements MISAAttachmentTableColumn {
@@ -17,7 +16,7 @@ public class MISAAttachmentTableSubCacheColumn implements MISAAttachmentTableCol
     }
 
     @Override
-    public Object getValue(int id, String sampleName, String cacheAndSubCache, String property, String serializationId, JsonObject json) throws SQLException {
+    public Object getValue(int id, String sampleName, String cacheAndSubCache, String property, String serializationId, MISAAttachment attachment) throws SQLException {
         MISASample sample = database.getMisaOutput().getModuleInstance().getSample(sampleName);
         MISACache cache = sample.findMatchingCache(cacheAndSubCache);
         return cacheAndSubCache.substring(cache.getFullRelativePath().length());

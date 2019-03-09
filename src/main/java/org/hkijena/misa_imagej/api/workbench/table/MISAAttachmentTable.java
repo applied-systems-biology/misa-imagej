@@ -1,35 +1,56 @@
 package org.hkijena.misa_imagej.api.workbench.table;
 
+import com.google.common.base.Joiner;
 import com.google.common.eventbus.EventBus;
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
+import org.hkijena.misa_imagej.api.MISAAttachment;
 import org.hkijena.misa_imagej.api.workbench.MISAAttachmentDatabase;
 import org.hkijena.misa_imagej.utils.GsonUtils;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class MISAAttachmentTable {
     private MISAAttachmentDatabase database;
-    private int[] databaseIds;
+    private List<Integer> databaseIds;
+    private String serializationId;
     private List<MISAAttachmentTableColumn> columns = new ArrayList<>();
     private EventBus eventBus = new EventBus();
 
-    public MISAAttachmentTable(MISAAttachmentDatabase database, int[] databaseIds) {
+    public MISAAttachmentTable(MISAAttachmentDatabase database, List<Integer> databaseIds, String serializationId) {
         this.database = database;
         this.databaseIds = databaseIds;
+        this.serializationId = serializationId;
     }
 
     public void addColumn(MISAAttachmentTableColumn column) {
         columns.add(column);
-        eventBus.post(new ColumnsChangedEvent(this));
+        getEventBus().post(new ColumnsChangedEvent(this));
     }
 
     public void removeColumn(MISAAttachmentTableColumn column) {
         columns.remove(column);
-        eventBus.post(new ColumnsChangedEvent(this));
+        getEventBus().post(new ColumnsChangedEvent(this));
+    }
+
+    public EventBus getEventBus() {
+        return eventBus;
+    }
+
+    public Iterator createIterator() {
+        return new Iterator(this, columns,
+                database.query("id, sample, cache, property, \"serialization-id\"", Arrays.asList(
+                        "id in (" + Joiner.on(',').join(databaseIds) + ")",
+                        "\"serialization-id\" is '" + serializationId + "'"
+                ), ""));
+    }
+
+    public List<MISAAttachmentTableColumn> getColumns() {
+        return Collections.unmodifiableList(columns);
     }
 
     public static class ColumnsChangedEvent {
@@ -45,29 +66,37 @@ public class MISAAttachmentTable {
     }
 
     public static class Iterator {
+        private MISAAttachmentTable table;
         private List<MISAAttachmentTableColumn> columns;
         private ResultSet resultSet;
         private Object[] rowBuffer;
         private Gson gson = GsonUtils.getGson();
+        private int currentRow;
 
-        public Iterator(List<MISAAttachmentTableColumn> columns, ResultSet resultSet) {
+        public Iterator(MISAAttachmentTable table, List<MISAAttachmentTableColumn> columns, ResultSet resultSet) {
+            this.table = table;
             this.columns = columns;
             this.resultSet = resultSet;
             this.rowBuffer = new Object[columns.size()];
+            this.currentRow = 0;
         }
 
         public Object[] nextRow() throws SQLException  {
             if(!resultSet.next())
                 return null;
-            JsonObject jsonObject = gson.fromJson(resultSet.getString("json-data"), JsonObject.class);
+            ++currentRow;
+
+            MISAAttachment attachment = table.database.queryAttachmentAt(currentRow);
+
             for(int i = 0; i < columns.size(); ++i) {
                 rowBuffer[i] = columns.get(i).getValue(resultSet.getInt(1),
                         resultSet.getString("sample"),
                         resultSet.getString("cache"),
                         resultSet.getString("property"),
                         resultSet.getString("serialization-id"),
-                        jsonObject);
+                        attachment);
             }
+
             return rowBuffer;
         }
     }
