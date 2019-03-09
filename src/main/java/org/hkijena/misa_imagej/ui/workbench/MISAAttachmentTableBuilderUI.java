@@ -1,7 +1,6 @@
 package org.hkijena.misa_imagej.ui.workbench;
 
 import com.google.common.base.Joiner;
-import com.google.common.primitives.Ints;
 import org.hkijena.misa_imagej.api.json.JSONSchemaObject;
 import org.hkijena.misa_imagej.api.workbench.MISAAttachmentDatabase;
 import org.hkijena.misa_imagej.api.workbench.MISAOutput;
@@ -15,7 +14,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -25,7 +23,7 @@ public class MISAAttachmentTableBuilderUI extends JPanel {
     private MISAAttachmentTableUI tableUI;
 
     private JComboBox<String> objectSelection;
-    private JToggleButton toggleAutosyncFilters;
+    private JToggleButton toggleAutoUpdate;
 
     public MISAAttachmentTableBuilderUI(MISAAttachmentDatabase database) {
         this.database = database;
@@ -37,10 +35,10 @@ public class MISAAttachmentTableBuilderUI extends JPanel {
 
         JToolBar toolBar = new JToolBar();
 
-        toggleAutosyncFilters = new JToggleButton(UIUtils.getIconFromResources("cog.png"));
-        toggleAutosyncFilters.setSelected(true);
-        toggleAutosyncFilters.setToolTipText("Automatically update object browser");
-        toolBar.add(toggleAutosyncFilters);
+        toggleAutoUpdate = new JToggleButton(UIUtils.getIconFromResources("cog.png"));
+        toggleAutoUpdate.setSelected(true);
+        toggleAutoUpdate.setToolTipText("Automatically update table");
+        toolBar.add(toggleAutoUpdate);
 
         JButton syncFilters = new JButton("Update", UIUtils.getIconFromResources("refresh.png"));
         syncFilters.addActionListener(e -> updateTable());
@@ -71,8 +69,10 @@ public class MISAAttachmentTableBuilderUI extends JPanel {
 
     public void setDatabaseIds(List<Integer> databaseIds) {
         this.databaseIds = databaseIds;
-        updateObjectSelection();
-        updateTable();
+        if(toggleAutoUpdate.isSelected()) {
+            updateObjectSelection();
+            updateTable();
+        }
     }
 
     private void updateObjectSelection() {

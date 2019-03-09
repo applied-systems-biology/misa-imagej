@@ -8,6 +8,7 @@ import org.hkijena.misa_imagej.api.workbench.MISAOutput;
 import org.hkijena.misa_imagej.extension.datasources.MISAFolderLinkDataSource;
 import org.hkijena.misa_imagej.ui.components.CancelableProcessUI;
 import org.hkijena.misa_imagej.ui.components.MarkdownReader;
+import org.hkijena.misa_imagej.ui.components.MemoryStatusUI;
 import org.hkijena.misa_imagej.ui.perfanalysis.MISARuntimeLogUI;
 import org.hkijena.misa_imagej.utils.UIUtils;
 import org.hkijena.misa_imagej.utils.ui.DocumentTabPane;
@@ -156,6 +157,9 @@ public class MISAWorkbenchUI extends JFrame{
         JXStatusBar statusBar = new JXStatusBar();
         statusLabel = new JLabel("Ready");
         statusBar.add(statusLabel);
+        statusBar.add(Box.createHorizontalGlue(), new JXStatusBar.Constraint(JXStatusBar.Constraint.ResizeBehavior.FILL));
+        statusBar.add(new MemoryStatusUI());
+
         add(statusBar, BorderLayout.SOUTH);
     }
 

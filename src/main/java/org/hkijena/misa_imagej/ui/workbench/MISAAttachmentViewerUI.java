@@ -23,9 +23,6 @@ public class MISAAttachmentViewerUI extends JPanel {
     private JPanel contentPanel;
     private Set<JLabel> propertyLabels = new HashSet<>();
 
-    private static final int COLUMN_LABEL = 0;
-    private static final int COLUMN_CONTENT = 1;
-
     public MISAAttachmentViewerUI(MISAAttachmentViewerListUI listUI, MISAAttachment attachment) {
         this.listUI = listUI;
         this.attachment = attachment;

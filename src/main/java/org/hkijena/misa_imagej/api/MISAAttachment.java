@@ -77,13 +77,13 @@ public class MISAAttachment {
         return eventBus;
     }
 
-    private void loadProperties(JsonObject object, JSONSchemaObject schema, String subPath) {
+    private void loadProperties(JsonObject rootObject, JSONSchemaObject rootSchema, String subPath) {
         Stack<JsonElement> elements = new Stack<>();
         Stack<String> paths = new Stack<>();
         Stack<JSONSchemaObject> schemas = new Stack<>();
-        elements.push(object);
+        elements.push(rootObject);
         paths.push(subPath);
-        schemas.push(schema);
+        schemas.push(rootSchema);
 
         while(!elements.isEmpty()) {
             JsonElement top = elements.pop();
@@ -106,12 +106,24 @@ public class MISAAttachment {
                         elements.push(entry.getValue());
                         paths.push(topPath + "/" + entry.getKey());
 
-                        if(schema != null && schema.hasPropertyFromPath(entry.getKey())) {
-                            schemas.push(schema.getPropertyFromPath(entry.getKey()));
+                        if(topSchema != null && topSchema.hasPropertyFromPath(entry.getKey())) {
+                            schemas.push(topSchema.getPropertyFromPath(entry.getKey()));
                         }
                         else {
                             schemas.push(null);
                         }
+                    }
+                }
+            }
+            else if(top.isJsonArray()) {
+                for(int i = 0; i < top.getAsJsonArray().size(); ++i) {
+                    elements.push(top.getAsJsonArray().get(i));
+                    paths.push(topPath + "/[" + i + "]");
+                    if(topSchema != null && topSchema.getAdditionalItems() != null) {
+                        schemas.push(topSchema.getAdditionalItems());
+                    }
+                    else {
+                        schemas.push(null);
                     }
                 }
             }
