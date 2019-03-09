@@ -1,11 +1,13 @@
 package org.hkijena.misa_imagej.api;
 
 import com.google.common.eventbus.EventBus;
+import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import org.hkijena.misa_imagej.api.json.JSONSchemaObject;
 import org.hkijena.misa_imagej.api.workbench.MISAAttachmentDatabase;
+import org.hkijena.misa_imagej.utils.GsonUtils;
 
 import java.awt.*;
 import java.util.List;
@@ -57,6 +59,57 @@ public class MISAAttachment {
         else {
             return Color.GRAY;
         }
+    }
+
+    /**
+     * Gets the full JSON object
+     * @return
+     */
+    public JsonObject getFullJson() {
+        JsonObject result = database.queryJsonDataAt(databaseIndex).getAsJsonObject();
+
+        // Explore other data
+        Stack<JsonElement> stack = new Stack<>();
+        stack.push(result);
+
+        while(!stack.isEmpty()) {
+            JsonElement current = stack.pop();
+            if(current.isJsonObject()) {
+                JsonObject currentObject = current.getAsJsonObject();
+                for(String key : new HashSet<>(current.getAsJsonObject().keySet())) {
+                    if(currentObject.get(key).isJsonObject() && currentObject.getAsJsonObject(key).has("misa-analyzer:database-index")) {
+                        int dbIndex = currentObject.getAsJsonObject(key).getAsJsonPrimitive("misa-analyzer:database-index").getAsInt();
+                        JsonElement newObject = database.queryJsonDataAt(dbIndex);
+                        currentObject.remove(key);
+                        currentObject.add(key, newObject);
+
+                        if(newObject.isJsonObject())
+                            stack.push(newObject.getAsJsonObject());
+                    }
+                    else {
+                        stack.push(currentObject.get(key));
+                    }
+                }
+            }
+            else if(current.isJsonArray()) {
+                for(int i = 0; i < current.getAsJsonArray().size(); ++i) {
+                    JsonElement item = current.getAsJsonArray().get(i);
+                    if(item.isJsonObject() && item.getAsJsonObject().has("misa-analyzer:database-index")) {
+                        int dbIndex = item.getAsJsonObject().getAsJsonPrimitive("misa-analyzer:database-index").getAsInt();
+                        JsonElement newObject = database.queryJsonDataAt(dbIndex);
+                        current.getAsJsonArray().set(i, newObject);
+
+                        if(newObject.isJsonObject())
+                            stack.push(newObject.getAsJsonObject());
+                    }
+                    else {
+                        stack.push(current.getAsJsonArray().get(i));
+                    }
+                }
+            }
+        }
+
+        return result;
     }
 
     public void load() {

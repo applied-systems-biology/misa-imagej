@@ -40,6 +40,10 @@ public class MISAAttachmentViewerListUI extends JPanel {
         unloadButton.addActionListener(e -> reloadData());
         toolBar.add(unloadButton);
 
+        JButton exportButton = new JButton("Export", UIUtils.getIconFromResources("save.png"));
+        exportButton.addActionListener(e -> exportData());
+        toolBar.add(exportButton);
+
         toolBar.add(Box.createHorizontalGlue());
         statsLabel = new JLabel();
         toolBar.add(statsLabel);
@@ -61,6 +65,22 @@ public class MISAAttachmentViewerListUI extends JPanel {
         scrollPane.getVerticalScrollBar().addAdjustmentListener(e -> {
             addItemIfNeeded();
         });
+    }
+
+    private void exportData() {
+        if(databaseIds != null && databaseIds.length > 0) {
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setDialogTitle("Export as *.json");
+            if(fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+                MISAAttachmentSaverDialogUI dialog = new MISAAttachmentSaverDialogUI(fileChooser.getSelectedFile().toPath(), database, databaseIds);
+                dialog.setModal(true);
+                dialog.pack();
+                dialog.setSize(400,300);
+                dialog.setLocationRelativeTo(SwingUtilities.getWindowAncestor(this));
+                dialog.startOperation();
+                dialog.setVisible(true);
+            }
+        }
     }
 
     private void loadAllMissingData() {

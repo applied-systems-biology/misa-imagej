@@ -3,12 +3,14 @@ package org.hkijena.misa_imagej.ui.workbench;
 import com.google.common.eventbus.Subscribe;
 import com.google.gson.JsonPrimitive;
 import org.hkijena.misa_imagej.api.MISAAttachment;
+import org.hkijena.misa_imagej.utils.GsonUtils;
 import org.hkijena.misa_imagej.utils.UIUtils;
 import org.hkijena.misa_imagej.utils.ui.MonochromeColorIcon;
 import org.hkijena.misa_imagej.utils.ui.ReadOnlyToggleButtonModel;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
 import java.util.List;
 import java.util.*;
 
@@ -64,6 +66,12 @@ public class MISAAttachmentViewerUI extends JPanel {
         headerPanel.add(Box.createHorizontalGlue());
         headerPanel.add(Box.createHorizontalStrut(8));
 
+        JButton exportButton = new JButton(UIUtils.getIconFromResources("save.png"));
+        UIUtils.makeFlatWithoutMargin(exportButton);
+        exportButton.setToolTipText("Export as *.json");
+        exportButton.addActionListener(e -> exportToJson());
+        headerPanel.add(exportButton);
+
         JButton loadAllLazy = new JButton(UIUtils.getIconFromResources("quickload.png"));
         UIUtils.makeFlatWithoutMargin(loadAllLazy);
         loadAllLazy.setToolTipText("Load all missing data");
@@ -74,6 +82,20 @@ public class MISAAttachmentViewerUI extends JPanel {
         contentPanel = new JPanel();
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
         add(contentPanel, BorderLayout.CENTER);
+    }
+
+    private void exportToJson() {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Export object as *.json");
+        if(fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+            MISAAttachmentSaverDialogUI dialog = new MISAAttachmentSaverDialogUI(fileChooser.getSelectedFile().toPath(), attachment);
+            dialog.setModal(true);
+            dialog.pack();
+            dialog.setSize(400,300);
+            dialog.setLocationRelativeTo(SwingUtilities.getWindowAncestor(this));
+            dialog.startOperation();
+            dialog.setVisible(true);
+        }
     }
 
     private void loadMissingData() {
