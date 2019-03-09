@@ -78,6 +78,7 @@ public class MISAAttachmentSaverDialogUI extends JDialog {
         buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.LINE_AXIS));
 
         buttonPanel.add(Box.createHorizontalGlue());
+        buttonPanel.add(Box.createVerticalStrut(4));
 
         cancelButton = new JButton("Cancel", UIUtils.getIconFromResources("remove.png"));
         cancelButton.addActionListener(e -> cancelOperation());

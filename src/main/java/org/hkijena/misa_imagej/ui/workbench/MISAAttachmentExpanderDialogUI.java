@@ -59,6 +59,7 @@ public class MISAAttachmentExpanderDialogUI extends JDialog {
         JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.LINE_AXIS));
 
+        buttonPanel.add(Box.createVerticalStrut(4));
         buttonPanel.add(Box.createHorizontalGlue());
 
         cancelButton = new JButton("Cancel", UIUtils.getIconFromResources("remove.png"));
