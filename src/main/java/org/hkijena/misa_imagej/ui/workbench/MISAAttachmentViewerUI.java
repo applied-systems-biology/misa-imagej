@@ -72,6 +72,8 @@ public class MISAAttachmentViewerUI extends JPanel {
         exportButton.addActionListener(e -> exportToJson());
         headerPanel.add(exportButton);
 
+        headerPanel.add(Box.createHorizontalStrut(4));
+
         JButton loadAllLazy = new JButton(UIUtils.getIconFromResources("quickload.png"));
         UIUtils.makeFlatWithoutMargin(loadAllLazy);
         loadAllLazy.setToolTipText("Load all missing data");
