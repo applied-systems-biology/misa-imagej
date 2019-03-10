@@ -26,6 +26,7 @@ public class MISAAttachmentTableUI extends JPanel {
     private void initialize() {
         setLayout(new BorderLayout());
         jTable = new JTable();
+        jTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
         scrollPane = new JScrollPane(jTable);
         add(scrollPane, BorderLayout.CENTER);
 
@@ -82,7 +83,7 @@ public class MISAAttachmentTableUI extends JPanel {
             currentRow = table.createIterator();
             DefaultTableModel model = new DefaultTableModel();
             for(MISAAttachmentTableColumn column : table.getColumns()) {
-                model.addColumn(column.toString());
+                model.addColumn(column.getName());
             }
             jTable.setModel(model);
 

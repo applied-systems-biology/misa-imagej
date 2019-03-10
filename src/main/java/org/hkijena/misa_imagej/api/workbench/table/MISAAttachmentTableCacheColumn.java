@@ -9,16 +9,15 @@ import java.sql.SQLException;
 
 public class MISAAttachmentTableCacheColumn implements MISAAttachmentTableColumn {
 
-    private MISAAttachmentDatabase database;
-
-    public MISAAttachmentTableCacheColumn(MISAAttachmentDatabase database) {
-        this.database = database;
+    @Override
+    public Object getValue(MISAAttachmentTable table, int id, String sampleName, String cacheAndSubCache, String property, String serializationId, MISAAttachment attachment) throws SQLException {
+        MISASample sample = table.getDatabase().getMisaOutput().getModuleInstance().getSample(sampleName);
+        MISACache cache = sample.findMatchingCache(cacheAndSubCache);
+        return cache.getFullRelativePath();
     }
 
     @Override
-    public Object getValue(int id, String sampleName, String cacheAndSubCache, String property, String serializationId, MISAAttachment attachment) throws SQLException {
-        MISASample sample = database.getMisaOutput().getModuleInstance().getSample(sampleName);
-        MISACache cache = sample.findMatchingCache(cacheAndSubCache);
-        return cache.getFullRelativePath();
+    public String getName() {
+        return "Data";
     }
 }

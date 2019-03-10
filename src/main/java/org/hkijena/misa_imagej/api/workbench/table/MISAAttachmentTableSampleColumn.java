@@ -6,7 +6,12 @@ import java.sql.SQLException;
 
 public class MISAAttachmentTableSampleColumn implements MISAAttachmentTableColumn {
     @Override
-    public Object getValue(int id, String sample, String cache, String property, String serializationId, MISAAttachment attachment) throws SQLException {
+    public Object getValue(MISAAttachmentTable table, int id, String sample, String cache, String property, String serializationId, MISAAttachment attachment) throws SQLException {
         return sample;
+    }
+
+    @Override
+    public String getName() {
+        return "Sample";
     }
 }

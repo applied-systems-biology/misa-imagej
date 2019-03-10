@@ -4,9 +4,7 @@ import com.google.common.base.Joiner;
 import org.hkijena.misa_imagej.api.json.JSONSchemaObject;
 import org.hkijena.misa_imagej.api.workbench.MISAAttachmentDatabase;
 import org.hkijena.misa_imagej.api.workbench.MISAOutput;
-import org.hkijena.misa_imagej.api.workbench.table.MISAAttachmentTable;
-import org.hkijena.misa_imagej.api.workbench.table.MISAAttachmentTableSampleColumn;
-import org.hkijena.misa_imagej.api.workbench.table.MISAAttachmentTableTypeColumn;
+import org.hkijena.misa_imagej.api.workbench.table.*;
 import org.hkijena.misa_imagej.utils.UIUtils;
 import org.hkijena.misa_imagej.utils.ui.MonochromeColorIcon;
 
@@ -20,6 +18,7 @@ import java.util.List;
 public class MISAAttachmentTableBuilderUI extends JPanel {
     private MISAAttachmentDatabase database;
     private List<Integer> databaseIds;
+    private MISAAttachmentTable attachmentTable;
     private MISAAttachmentTableUI tableUI;
 
     private JComboBox<String> objectSelection;
@@ -51,18 +50,49 @@ public class MISAAttachmentTableBuilderUI extends JPanel {
         objectSelection.addItemListener(e -> updateTable());
         toolBar.add(objectSelection);
 
+        JButton editColumnsButton = new JButton("Edit columns ...", UIUtils.getIconFromResources("edit.png"));
+        editColumnsButton.addActionListener(e -> editColumns());
+        toolBar.add(editColumnsButton);
+
         add(toolBar, BorderLayout.NORTH);
 
         tableUI = new MISAAttachmentTableUI();
         add(tableUI, BorderLayout.CENTER);
     }
 
+    private void editColumns() {
+        if(attachmentTable != null) {
+            MISAAttachmentTableColumnEditor editor = new MISAAttachmentTableColumnEditor(attachmentTable);
+            editor.pack();
+            editor.setSize(800,600);
+            editor.setLocationRelativeTo(SwingUtilities.getWindowAncestor(this));
+            editor.setModal(true);
+            editor.setVisible(true);
+        }
+    }
+
     private void updateTable() {
         if(objectSelection.getSelectedItem() != null) {
-            MISAAttachmentTable attachmentTable = new MISAAttachmentTable(database, databaseIds,
+            List<MISAAttachmentTableColumn> backup = null;
+            if(attachmentTable != null && attachmentTable.getSerializationId().equals(objectSelection.getSelectedItem())) {
+                backup = attachmentTable.getColumns();
+            }
+            attachmentTable = new MISAAttachmentTable(database, databaseIds,
                     objectSelection.getSelectedItem().toString());
-            attachmentTable.addColumn(new MISAAttachmentTableSampleColumn());
-            attachmentTable.addColumn(new MISAAttachmentTableTypeColumn());
+            if(backup == null) {
+                attachmentTable.addColumn(new MISAAttachmentTableSampleColumn());
+                attachmentTable.addColumn(new MISAAttachmentTableCacheColumn());
+                attachmentTable.addColumn(new MISAAttachmentTableSubCacheColumn());
+                attachmentTable.addColumn(new MISAAttachmentTablePropertyColumn());
+
+                // TODO: Add all direct properties
+            }
+            else {
+                for(MISAAttachmentTableColumn column : backup) {
+                    attachmentTable.addColumn(column);
+                }
+            }
+
             tableUI.setTable(attachmentTable);
         }
     }

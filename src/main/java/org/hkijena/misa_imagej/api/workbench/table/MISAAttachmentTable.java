@@ -45,12 +45,20 @@ public class MISAAttachmentTable {
         return new Iterator(this, columns,
                 database.query("id, sample, cache, property, \"serialization-id\"", Arrays.asList(
                         "id in (" + Joiner.on(',').join(databaseIds) + ")",
-                        "\"serialization-id\" is '" + serializationId + "'"
+                        "\"serialization-id\" is '" + getSerializationId() + "'"
                 ), ""));
     }
 
     public List<MISAAttachmentTableColumn> getColumns() {
         return Collections.unmodifiableList(columns);
+    }
+
+    public MISAAttachmentDatabase getDatabase() {
+        return database;
+    }
+
+    public String getSerializationId() {
+        return serializationId;
     }
 
     public static class ColumnsChangedEvent {
@@ -89,12 +97,12 @@ public class MISAAttachmentTable {
             MISAAttachment attachment = table.database.queryAttachmentAt(currentRow);
 
             for(int i = 0; i < columns.size(); ++i) {
-                rowBuffer[i] = columns.get(i).getValue(resultSet.getInt(1),
+                rowBuffer[i] = columns.get(i).getValue(table,
+                        resultSet.getInt(1),
                         resultSet.getString("sample"),
                         resultSet.getString("cache"),
                         resultSet.getString("property"),
-                        resultSet.getString("serialization-id"),
-                        attachment);
+                        resultSet.getString("serialization-id"), attachment);
             }
 
             return rowBuffer;

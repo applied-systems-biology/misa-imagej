@@ -61,6 +61,24 @@ public class MISAAttachment {
         }
     }
 
+    public Property getProperty(String path) {
+        Optional<Property> property = properties.stream().filter(e -> e.getPath().equals(path)).findFirst();
+        if(property.isPresent()) {
+            return property.get();
+        }
+        else {
+            startLoadAllIteration();
+            while(doLoadAllIteration()) {
+                property = properties.stream().filter(e -> e.getPath().equals(path)).findFirst();
+                if(property.isPresent())
+                    break;
+            }
+            stopLoadAllIteration(true);
+
+            return property.orElse(null);
+        }
+    }
+
     /**
      * Gets the full JSON object
      * @return
