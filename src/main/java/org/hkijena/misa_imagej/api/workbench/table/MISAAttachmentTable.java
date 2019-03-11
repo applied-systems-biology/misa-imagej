@@ -9,10 +9,7 @@ import org.hkijena.misa_imagej.utils.GsonUtils;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class MISAAttachmentTable {
     private MISAAttachmentDatabase database;
@@ -29,6 +26,8 @@ public class MISAAttachmentTable {
 
     public void addColumn(MISAAttachmentTableColumn column) {
         columns.add(column);
+        columns.sort(Comparator.comparing(c -> c instanceof MISAAttachmentTableJsonValueColumn)
+                .thenComparing(c -> ((MISAAttachmentTableColumn)c).getName()));
         getEventBus().post(new ColumnsChangedEvent(this));
     }
 

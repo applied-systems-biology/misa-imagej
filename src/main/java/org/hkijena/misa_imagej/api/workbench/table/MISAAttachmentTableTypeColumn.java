@@ -12,6 +12,6 @@ public class MISAAttachmentTableTypeColumn implements MISAAttachmentTableColumn 
 
     @Override
     public String getName() {
-        return "Type";
+        return "Object type";
     }
 }

@@ -96,8 +96,8 @@ public class MISAAttachmentBrowserUI extends JPanel {
 
         JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.BOTTOM);
         tabbedPane.setBorder(BorderFactory.createEmptyBorder(-4,0,0,0)); // Make the toolbar align nicely
-        tabbedPane.addTab("Object list", UIUtils.getIconFromResources("object.png"), objectView);
         tabbedPane.addTab("Table", UIUtils.getIconFromResources("table.png"), objectTableBuilder);
+        tabbedPane.addTab("Object list", UIUtils.getIconFromResources("object.png"), objectView);
 
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, initializeBrowserPanel(), tabbedPane);
         panel.add(splitPane, BorderLayout.CENTER);
@@ -150,7 +150,8 @@ public class MISAAttachmentBrowserUI extends JPanel {
         viewAsObjectsToggle.addActionListener(e -> updateObjectBrowser());
         viewToggle.add(viewAsObjectsToggle);
         toolBar.add(viewAsObjectsToggle);
-        viewAsObjectsToggle.setSelected(true);
+
+        viewAsCachesToggle.setSelected(true);
 
         panel.add(toolBar, BorderLayout.NORTH);
 

@@ -16,7 +16,7 @@ public class MISAAttachmentTableUI extends JPanel {
 
     private MISAAttachmentTable table;
     private MISAAttachmentTable.Iterator currentRow;
-    private JTable jTable;
+    private JXTable jTable;
     private JScrollPane scrollPane;
 
     public MISAAttachmentTableUI() {
@@ -25,8 +25,8 @@ public class MISAAttachmentTableUI extends JPanel {
 
     private void initialize() {
         setLayout(new BorderLayout());
-        jTable = new JTable();
-        jTable.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
+        jTable = new JXTable();
+        jTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
         scrollPane = new JScrollPane(jTable);
         add(scrollPane, BorderLayout.CENTER);
 
@@ -65,6 +65,7 @@ public class MISAAttachmentTableUI extends JPanel {
                     ((DefaultTableModel) jTable.getModel()).addRow(values);
                     revalidate();
                     repaint();
+                    jTable.packAll();
 
                     SwingUtilities.invokeLater(() -> addRowIfNeeded());
                 } catch (SQLException e) {
