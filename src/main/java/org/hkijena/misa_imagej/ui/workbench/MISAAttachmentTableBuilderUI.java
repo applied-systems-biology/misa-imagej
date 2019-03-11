@@ -157,16 +157,25 @@ public class MISAAttachmentTableBuilderUI extends JPanel {
     }
 
     private void updateObjectSelection() {
+        Object previousSelection = objectSelection.getSelectedItem();
+
         DefaultComboBoxModel<String> objectTypes = new DefaultComboBoxModel<>();
         ResultSet resultSet = database.query("distinct \"serialization-id\"",
                 Arrays.asList("id in (" + Joiner.on(',').join(databaseIds) + ")"), "");
         try {
             while(resultSet.next()) {
-                objectTypes.addElement(resultSet.getString(1));
+                String item = resultSet.getString(1);
+                objectTypes.addElement(item);
+
+                if(item.equals(previousSelection)) {
+                    objectTypes.setSelectedItem(item);
+                }
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+
+
         objectSelection.setModel(objectTypes);
     }
 

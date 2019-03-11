@@ -69,6 +69,8 @@ public class MISAAttachment {
                     if (property.get().getPath().equals(path)) {
                         return property.get();
                     } else if (property.get() instanceof LazyProperty) {
+                        if(property.get().hasValue())
+                            break;
                         property.get().loadValue();
                     }
                 } else {
