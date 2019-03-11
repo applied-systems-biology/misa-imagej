@@ -3,7 +3,6 @@ package org.hkijena.misa_imagej.api.workbench.table;
 import org.hkijena.misa_imagej.api.MISAAttachment;
 import org.hkijena.misa_imagej.api.MISACache;
 import org.hkijena.misa_imagej.api.MISASample;
-import org.hkijena.misa_imagej.api.workbench.MISAAttachmentDatabase;
 
 import java.sql.SQLException;
 

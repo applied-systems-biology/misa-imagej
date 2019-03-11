@@ -3,14 +3,12 @@ package org.hkijena.misa_imagej.ui.workbench;
 import com.google.common.eventbus.Subscribe;
 import com.google.gson.JsonPrimitive;
 import org.hkijena.misa_imagej.api.MISAAttachment;
-import org.hkijena.misa_imagej.utils.GsonUtils;
 import org.hkijena.misa_imagej.utils.UIUtils;
 import org.hkijena.misa_imagej.utils.ui.MonochromeColorIcon;
 import org.hkijena.misa_imagej.utils.ui.ReadOnlyToggleButtonModel;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.IOException;
 import java.util.List;
 import java.util.*;
 

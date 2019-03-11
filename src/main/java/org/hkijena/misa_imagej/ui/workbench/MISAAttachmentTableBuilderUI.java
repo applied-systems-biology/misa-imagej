@@ -6,6 +6,7 @@ import org.hkijena.misa_imagej.api.workbench.MISAAttachmentDatabase;
 import org.hkijena.misa_imagej.api.workbench.MISAOutput;
 import org.hkijena.misa_imagej.api.workbench.table.*;
 import org.hkijena.misa_imagej.utils.UIUtils;
+import org.hkijena.misa_imagej.utils.ui.DocumentTabPane;
 import org.hkijena.misa_imagej.utils.ui.MonochromeColorIcon;
 
 import javax.swing.*;
@@ -16,6 +17,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class MISAAttachmentTableBuilderUI extends JPanel {
+    private DocumentTabPane workbenchDocuments;
     private MISAAttachmentDatabase database;
     private List<Integer> databaseIds;
     private MISAAttachmentTable attachmentTable;
@@ -24,7 +26,8 @@ public class MISAAttachmentTableBuilderUI extends JPanel {
     private JComboBox<String> objectSelection;
     private JToggleButton toggleAutoUpdate;
 
-    public MISAAttachmentTableBuilderUI(MISAAttachmentDatabase database) {
+    public MISAAttachmentTableBuilderUI(DocumentTabPane workbenchDocuments, MISAAttachmentDatabase database) {
+        this.workbenchDocuments = workbenchDocuments;
         this.database = database;
         initialize();
     }
@@ -57,6 +60,10 @@ public class MISAAttachmentTableBuilderUI extends JPanel {
         }
         toolBar.add(exportButton);
 
+        JButton sendToAnalyzer = new JButton("Analyze", UIUtils.getIconFromResources("graph.png"));
+        sendToAnalyzer.addActionListener(e -> sendTableToAnalyzer());
+        toolBar.add(sendToAnalyzer);
+
         toolBar.add(Box.createHorizontalGlue());
 
         objectSelection = new JComboBox<>();
@@ -72,6 +79,23 @@ public class MISAAttachmentTableBuilderUI extends JPanel {
 
         tableUI = new MISAAttachmentTableUI();
         add(tableUI, BorderLayout.CENTER);
+    }
+
+    private void sendTableToAnalyzer() {
+        MISAAttachmentTableToModelExporterUI dialog = new MISAAttachmentTableToModelExporterUI(tableUI.getTable());
+        dialog.setModal(true);
+        dialog.pack();
+        dialog.setSize(400,300);
+        dialog.setLocationRelativeTo(SwingUtilities.getWindowAncestor(this));
+        dialog.startOperation();
+        dialog.setVisible(true);
+        if(dialog.getModel() != null) {
+            workbenchDocuments.addTab("Table analyzer",
+                    UIUtils.getIconFromResources("table.png"),
+                    new MISATableAnalyzerUI(dialog.getModel()),
+                    DocumentTabPane.CloseMode.withAskOnCloseButton, true);
+            workbenchDocuments.setSelectedIndex(workbenchDocuments.getTabCount() - 1);
+        }
     }
 
     private void exportTable(MISAAttachmentTableExporterUI.FileType type) {

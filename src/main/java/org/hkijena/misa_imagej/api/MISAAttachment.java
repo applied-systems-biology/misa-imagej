@@ -1,13 +1,11 @@
 package org.hkijena.misa_imagej.api;
 
 import com.google.common.eventbus.EventBus;
-import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import org.hkijena.misa_imagej.api.json.JSONSchemaObject;
 import org.hkijena.misa_imagej.api.workbench.MISAAttachmentDatabase;
-import org.hkijena.misa_imagej.utils.GsonUtils;
 
 import java.awt.*;
 import java.util.List;

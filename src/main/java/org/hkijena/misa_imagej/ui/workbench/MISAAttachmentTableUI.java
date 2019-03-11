@@ -8,8 +8,6 @@ import org.jdesktop.swingx.JXTable;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.AdjustmentEvent;
-import java.awt.event.AdjustmentListener;
 import java.sql.SQLException;
 
 public class MISAAttachmentTableUI extends JPanel {

@@ -1,7 +1,6 @@
 package org.hkijena.misa_imagej.ui.workbench;
 
 import org.hkijena.misa_imagej.api.json.JSONSchemaObject;
-import org.hkijena.misa_imagej.api.json.JSONSchemaObjectType;
 import org.hkijena.misa_imagej.api.workbench.table.*;
 import org.hkijena.misa_imagej.utils.UIUtils;
 
@@ -9,12 +8,12 @@ import javax.swing.*;
 import java.awt.*;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.List;
 
 public class MISAAttachmentTableColumnEditor extends JDialog {
 

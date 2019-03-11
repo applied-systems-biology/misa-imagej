@@ -1,9 +1,7 @@
 package org.hkijena.misa_imagej.ui.workbench;
 
 import com.google.common.base.Charsets;
-import com.google.common.base.Converter;
 import com.google.common.base.Joiner;
-import com.google.common.collect.Iterables;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 import org.apache.poi.ss.usermodel.Cell;
@@ -20,9 +18,7 @@ import java.awt.event.WindowEvent;
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.lang.ref.WeakReference;
 import java.nio.file.Path;
-import java.sql.SQLException;
 
 public class MISAAttachmentTableExporterUI extends JDialog {
 
