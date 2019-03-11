@@ -233,6 +233,10 @@ public class MISAAttachmentTableExporterUI extends JDialog {
                 }
             }
 
+            for(int i = 0; i < table.getColumns().size(); ++i) {
+                sheet.autoSizeColumn(i);
+            }
+
             FileOutputStream stream = new FileOutputStream(exportPath.toFile());
             workbook.write(stream);
             workbook.close();
