@@ -43,6 +43,20 @@ public class MISAAttachmentTableBuilderUI extends JPanel {
         syncFilters.addActionListener(e -> updateTable());
         toolBar.add(syncFilters);
 
+        JButton exportButton = new JButton("Export", UIUtils.getIconFromResources("save.png"));
+        {
+            JPopupMenu exportPopup = UIUtils.addPopupMenuToComponent(exportButton);
+
+            JMenuItem exportAsCSV = new JMenuItem("as CSV", UIUtils.getIconFromResources("table.png"));
+            exportAsCSV.addActionListener(e -> exportTable(MISAAttachmentTableExporterUI.FileType.CSV));
+            exportPopup.add(exportAsCSV);
+
+            JMenuItem exportAsXLSX = new JMenuItem("as XLSX", UIUtils.getIconFromResources("table.png"));
+            exportAsXLSX.addActionListener(e -> exportTable(MISAAttachmentTableExporterUI.FileType.XLSX));
+            exportPopup.add(exportAsXLSX);
+        }
+        toolBar.add(exportButton);
+
         toolBar.add(Box.createHorizontalGlue());
 
         objectSelection = new JComboBox<>();
@@ -58,6 +72,20 @@ public class MISAAttachmentTableBuilderUI extends JPanel {
 
         tableUI = new MISAAttachmentTableUI();
         add(tableUI, BorderLayout.CENTER);
+    }
+
+    private void exportTable(MISAAttachmentTableExporterUI.FileType type) {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Export table");
+        if(fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+            MISAAttachmentTableExporterUI dialog = new MISAAttachmentTableExporterUI(fileChooser.getSelectedFile().toPath(), type, tableUI.getTable());
+            dialog.setModal(true);
+            dialog.pack();
+            dialog.setSize(400,300);
+            dialog.setLocationRelativeTo(SwingUtilities.getWindowAncestor(this));
+            dialog.startOperation();
+            dialog.setVisible(true);
+        }
     }
 
     private void editColumns() {

@@ -44,43 +44,83 @@ public class MISAAttachment {
     }
 
     public String getDocumentationTitle() {
-        if(schema != null) {
+        if (schema != null) {
             return schema.getDocumentationTitle();
-        }
-        else {
+        } else {
             return "Unknown";
         }
     }
 
     public Color toColor() {
-        if(schema != null) {
+        if (schema != null) {
             return schema.toColor();
-        }
-        else {
+        } else {
             return Color.GRAY;
         }
     }
 
     public Property getProperty(String path) {
         Optional<Property> property = properties.stream().filter(e -> e.getPath().equals(path)).findFirst();
-        if(property.isPresent()) {
+        if (property.isPresent()) {
             return property.get();
-        }
-        else {
-            startLoadAllIteration();
-            while(doLoadAllIteration()) {
-                property = properties.stream().filter(e -> e.getPath().equals(path)).findFirst();
-                if(property.isPresent())
-                    break;
-            }
-            stopLoadAllIteration(true);
+        } else {
 
-            return property.orElse(null);
+            do {
+                property = properties.stream().filter(e -> path.startsWith(e.getPath())).max(Comparator.comparing(property1 -> property1.getPath().length()));
+                if (property.isPresent()) {
+                    if (property.get().getPath().equals(path)) {
+                        return property.get();
+                    } else if (property.get() instanceof LazyProperty) {
+                        property.get().loadValue();
+                    }
+                } else {
+                    break;
+                }
+            }
+            while (true);
+
+            return null;
         }
     }
 
     /**
+     * Splits a database path into a path of strings
+     *
+     * @param path
+     * @return
+     */
+    private static List<String> segmentPath(String path) {
+        List<String> result = new ArrayList<>();
+        StringBuilder current = new StringBuilder();
+        boolean withinQuote = false;
+        boolean nextCharacterIsEscaped = false;
+        for (int i = 0; i < path.length(); ++i) {
+            char c = path.charAt(i);
+            if (nextCharacterIsEscaped) {
+                current.append(c);
+                nextCharacterIsEscaped = false;
+            } else if (c == '\\') {
+                nextCharacterIsEscaped = true;
+            } else if (c == '\"') {
+                withinQuote = !withinQuote;
+            } else if (c == '/' && withinQuote) {
+                current.append(c);
+            } else if (c == '/') {
+                result.add(current.toString());
+                current.setLength(0);
+            } else {
+                current.append(c);
+            }
+        }
+        if (current.length() > 0) {
+            result.add(current.toString());
+        }
+        return result;
+    }
+
+    /**
      * Gets the full JSON object
+     *
      * @return
      */
     public JsonObject getFullJson() {
@@ -90,37 +130,34 @@ public class MISAAttachment {
         Stack<JsonElement> stack = new Stack<>();
         stack.push(result);
 
-        while(!stack.isEmpty()) {
+        while (!stack.isEmpty()) {
             JsonElement current = stack.pop();
-            if(current.isJsonObject()) {
+            if (current.isJsonObject()) {
                 JsonObject currentObject = current.getAsJsonObject();
-                for(String key : new HashSet<>(current.getAsJsonObject().keySet())) {
-                    if(currentObject.get(key).isJsonObject() && currentObject.getAsJsonObject(key).has("misa-analyzer:database-index")) {
+                for (String key : new HashSet<>(current.getAsJsonObject().keySet())) {
+                    if (currentObject.get(key).isJsonObject() && currentObject.getAsJsonObject(key).has("misa-analyzer:database-index")) {
                         int dbIndex = currentObject.getAsJsonObject(key).getAsJsonPrimitive("misa-analyzer:database-index").getAsInt();
                         JsonElement newObject = database.queryJsonDataAt(dbIndex);
                         currentObject.remove(key);
                         currentObject.add(key, newObject);
 
-                        if(newObject.isJsonObject())
+                        if (newObject.isJsonObject())
                             stack.push(newObject.getAsJsonObject());
-                    }
-                    else {
+                    } else {
                         stack.push(currentObject.get(key));
                     }
                 }
-            }
-            else if(current.isJsonArray()) {
-                for(int i = 0; i < current.getAsJsonArray().size(); ++i) {
+            } else if (current.isJsonArray()) {
+                for (int i = 0; i < current.getAsJsonArray().size(); ++i) {
                     JsonElement item = current.getAsJsonArray().get(i);
-                    if(item.isJsonObject() && item.getAsJsonObject().has("misa-analyzer:database-index")) {
+                    if (item.isJsonObject() && item.getAsJsonObject().has("misa-analyzer:database-index")) {
                         int dbIndex = item.getAsJsonObject().getAsJsonPrimitive("misa-analyzer:database-index").getAsInt();
                         JsonElement newObject = database.queryJsonDataAt(dbIndex);
                         current.getAsJsonArray().set(i, newObject);
 
-                        if(newObject.isJsonObject())
+                        if (newObject.isJsonObject())
                             stack.push(newObject.getAsJsonObject());
-                    }
-                    else {
+                    } else {
                         stack.push(current.getAsJsonArray().get(i));
                     }
                 }
@@ -156,51 +193,46 @@ public class MISAAttachment {
         paths.push(subPath);
         schemas.push(rootSchema);
 
-        while(!elements.isEmpty()) {
+        while (!elements.isEmpty()) {
             JsonElement top = elements.pop();
             String topPath = paths.pop();
             JSONSchemaObject topSchema = schemas.pop();
 
-            if(top.isJsonPrimitive()) {
+            if (top.isJsonPrimitive()) {
                 properties.add(new MemoryProperty(topPath, top.getAsJsonPrimitive(), topSchema));
-            }
-            else if(top.isJsonObject()) {
-                if(top.getAsJsonObject().has("misa-analyzer:database-index")) {
+            } else if (top.isJsonObject()) {
+                if (top.getAsJsonObject().has("misa-analyzer:database-index")) {
                     int dbId = top.getAsJsonObject().get("misa-analyzer:database-index").getAsInt();
                     properties.add(new LazyProperty(this, topPath, dbId));
-                }
-                else {
-                    for(Map.Entry<String, JsonElement> entry : top.getAsJsonObject().entrySet()) {
-                        if(entry.getKey().equals("misa:serialization-id") || entry.getKey().equals("misa:serialization-hierarchy"))
+                } else {
+                    for (Map.Entry<String, JsonElement> entry : top.getAsJsonObject().entrySet()) {
+                        if (entry.getKey().equals("misa:serialization-id") || entry.getKey().equals("misa:serialization-hierarchy"))
                             continue;
 
                         elements.push(entry.getValue());
                         paths.push(topPath + "/" + entry.getKey());
 
-                        if(topSchema != null && topSchema.hasPropertyFromPath(entry.getKey())) {
+                        if (topSchema != null && topSchema.hasPropertyFromPath(entry.getKey())) {
                             schemas.push(topSchema.getPropertyFromPath(entry.getKey()));
-                        }
-                        else {
+                        } else {
                             schemas.push(null);
                         }
                     }
                 }
-            }
-            else if(top.isJsonArray()) {
-                for(int i = 0; i < top.getAsJsonArray().size(); ++i) {
+            } else if (top.isJsonArray()) {
+                for (int i = 0; i < top.getAsJsonArray().size(); ++i) {
                     elements.push(top.getAsJsonArray().get(i));
                     paths.push(topPath + "/[" + i + "]");
-                    if(topSchema != null && topSchema.getAdditionalItems() != null) {
+                    if (topSchema != null && topSchema.getAdditionalItems() != null) {
                         schemas.push(topSchema.getAdditionalItems());
-                    }
-                    else {
+                    } else {
                         schemas.push(null);
                     }
                 }
             }
         }
 
-        if(!isWithinLoadAllIteration())
+        if (!isWithinLoadAllIteration())
             getEventBus().post(new MISAAttachment.DataLoadedEvent(this));
     }
 
@@ -215,7 +247,7 @@ public class MISAAttachment {
     public void loadAll() {
         load();
         Optional<Property> property;
-        while((property = properties.stream().filter(p -> !p.hasValue()).findFirst()).isPresent()) {
+        while ((property = properties.stream().filter(p -> !p.hasValue()).findFirst()).isPresent()) {
             property.get().loadValue();
         }
     }
@@ -229,9 +261,9 @@ public class MISAAttachment {
     }
 
     public boolean doLoadAllIteration() {
-        if(isWithinLoadAllIteration()) {
-            Optional<Property> property =  properties.stream().filter(p -> !p.hasValue()).findFirst();
-            if(!property.isPresent())
+        if (isWithinLoadAllIteration()) {
+            Optional<Property> property = properties.stream().filter(p -> !p.hasValue()).findFirst();
+            if (!property.isPresent())
                 return false;
             else
                 property.get().loadValue();
@@ -241,7 +273,7 @@ public class MISAAttachment {
     }
 
     public void startLoadAllIteration() {
-        if(!isWithinLoadAllIteration()) {
+        if (!isWithinLoadAllIteration()) {
             load();
             transactionBackupProperties = properties;
             properties = new ArrayList<>(properties); // Backup the current property list
@@ -249,16 +281,15 @@ public class MISAAttachment {
     }
 
     public void stopLoadAllIteration(boolean canceled) {
-        if(isWithinLoadAllIteration()) {
-            if(canceled) {
+        if (isWithinLoadAllIteration()) {
+            if (canceled) {
                 properties = transactionBackupProperties;
                 transactionBackupProperties = null;
 
-                for(Property property : properties) {
+                for (Property property : properties) {
                     property.cancelLoadValue();
                 }
-            }
-            else {
+            } else {
                 transactionBackupProperties = null;
                 getEventBus().post(new MISAAttachment.DataLoadedEvent(this));
             }
@@ -267,9 +298,13 @@ public class MISAAttachment {
 
     public interface Property {
         String getPath();
+
         JSONSchemaObject getSchema();
+
         void loadValue();
+
         void cancelLoadValue();
+
         boolean hasValue();
     }
 
@@ -328,25 +363,23 @@ public class MISAAttachment {
         }
 
         public String getDocumentationTitle() {
-            if(schema != null) {
+            if (schema != null) {
                 return schema.getDocumentationTitle();
-            }
-            else {
+            } else {
                 return "Unknown";
             }
         }
 
         public Color toColor() {
-            if(schema != null) {
+            if (schema != null) {
                 return schema.toColor();
-            }
-            else {
+            } else {
                 return Color.GRAY;
             }
         }
 
         public void loadValue() {
-            if(!isLoaded) {
+            if (!isLoaded) {
                 JsonObject object = parent.database.queryJsonDataAt(databaseIndex).getAsJsonObject();
 
                 if (object.has("misa:serialization-id")) {
@@ -382,6 +415,7 @@ public class MISAAttachment {
 
     public static class DataLoadedEvent {
         private MISAAttachment attachment;
+
         public DataLoadedEvent(MISAAttachment attachment) {
             this.attachment = attachment;
         }

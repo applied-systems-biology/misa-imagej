@@ -58,13 +58,13 @@ public class MISAAttachmentSaverDialogUI extends JDialog {
         setLayout(new BoxLayout(getContentPane(), BoxLayout.PAGE_AXIS));
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 
-        JTextArea warningLabel = new JTextArea();
-        warningLabel.setBorder(null);
-        warningLabel.setLineWrap(true);
-        warningLabel.setWrapStyleWord(true);
-        warningLabel.setEditable(false);
-        warningLabel.setText("Please wait until the process is finished. This operation can take some time if there is a lot of data.");
-        add(warningLabel);
+        JTextArea infoLabel = new JTextArea();
+        infoLabel.setBorder(null);
+        infoLabel.setLineWrap(true);
+        infoLabel.setWrapStyleWord(true);
+        infoLabel.setEditable(false);
+        infoLabel.setText("Please wait until the process is finished. This operation can take some time if there is a lot of data.");
+        add(infoLabel);
 
         add(Box.createVerticalGlue());
 

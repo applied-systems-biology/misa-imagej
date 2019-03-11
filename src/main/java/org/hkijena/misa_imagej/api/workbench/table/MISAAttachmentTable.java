@@ -95,6 +95,7 @@ public class MISAAttachmentTable {
 
             int id = resultSet.getInt(1);
             MISAAttachment attachment = table.database.queryAttachmentAt(id);
+            attachment.startLoadAllIteration();
 
             for(int i = 0; i < columns.size(); ++i) {
                 rowBuffer[i] = columns.get(i).getValue(table,
@@ -104,6 +105,8 @@ public class MISAAttachmentTable {
                         resultSet.getString("property"),
                         resultSet.getString("serialization-id"), attachment);
             }
+
+            attachment.stopLoadAllIteration(true);
 
             return rowBuffer;
         }
