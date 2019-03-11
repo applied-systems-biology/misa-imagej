@@ -209,13 +209,6 @@ public class MISAAttachmentTableExporterUI extends JDialog {
             long lastTime = System.currentTimeMillis();
 
             while((row = iterator.nextRow()) != null) {
-                ++processedRows;
-                if(System.currentTimeMillis() - lastTime > 1000) {
-                    int finalProgress = processedRows;
-                    SwingUtilities.invokeLater(() -> eventBus.post(new ProgressEvent(finalProgress)));
-                    lastTime = System.currentTimeMillis();
-                }
-
                 Row xlsxRow = sheet.createRow(processedRows + 1);
                 for(int i = 0; i < row.length; ++i) {
                     if(row[i] instanceof Number) {
@@ -230,6 +223,13 @@ public class MISAAttachmentTableExporterUI extends JDialog {
                         Cell cell = xlsxRow.createCell(i, CellType.STRING);
                         cell.setCellValue("" + row[i]);
                     }
+                }
+
+                ++processedRows;
+                if(System.currentTimeMillis() - lastTime > 1000) {
+                    int finalProgress = processedRows;
+                    SwingUtilities.invokeLater(() -> eventBus.post(new ProgressEvent(finalProgress)));
+                    lastTime = System.currentTimeMillis();
                 }
             }
 
