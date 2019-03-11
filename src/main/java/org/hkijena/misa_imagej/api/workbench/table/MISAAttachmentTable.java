@@ -94,11 +94,12 @@ public class MISAAttachmentTable {
                 return null;
             ++currentRow;
 
-            MISAAttachment attachment = table.database.queryAttachmentAt(currentRow);
+            int id = resultSet.getInt(1);
+            MISAAttachment attachment = table.database.queryAttachmentAt(id);
 
             for(int i = 0; i < columns.size(); ++i) {
                 rowBuffer[i] = columns.get(i).getValue(table,
-                        resultSet.getInt(1),
+                        id,
                         resultSet.getString("sample"),
                         resultSet.getString("cache"),
                         resultSet.getString("property"),

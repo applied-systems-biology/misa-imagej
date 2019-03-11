@@ -84,8 +84,7 @@ public class MISAAttachmentTableBuilderUI extends JPanel {
                 attachmentTable.addColumn(new MISAAttachmentTableCacheColumn());
                 attachmentTable.addColumn(new MISAAttachmentTableSubCacheColumn());
                 attachmentTable.addColumn(new MISAAttachmentTablePropertyColumn());
-
-                // TODO: Add all direct properties
+                MISAAttachmentTableJsonValueColumn.addColumnsToTable(attachmentTable, false);
             }
             else {
                 for(MISAAttachmentTableColumn column : backup) {
