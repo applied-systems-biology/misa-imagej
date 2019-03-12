@@ -2,6 +2,8 @@ package org.hkijena.misa_imagej.ui.workbench;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
+import com.google.common.primitives.Ints;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
@@ -17,6 +19,10 @@ import java.io.BufferedOutputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 
 public class MISATableAnalyzerUI extends JPanel {
     private DefaultTableModel tableModel;
@@ -36,23 +42,94 @@ public class MISATableAnalyzerUI extends JPanel {
         {
             JPopupMenu exportPopup = UIUtils.addPopupMenuToComponent(exportButton);
 
-            JMenuItem exportAsCSV = new JMenuItem("as CSV table (*.csv)", UIUtils.getIconFromResources("table.png"));
+            JMenuItem exportAsCSV = new JMenuItem("as CSV table (*.csv)", UIUtils.getIconFromResources("filetype-csv.png"));
             exportAsCSV.addActionListener(e -> exportTableAsCSV());
             exportPopup.add(exportAsCSV);
 
-            JMenuItem exportAsXLSX = new JMenuItem("as Excel table (*.xlsx)", UIUtils.getIconFromResources("table.png"));
+            JMenuItem exportAsXLSX = new JMenuItem("as Excel table (*.xlsx)", UIUtils.getIconFromResources("filetype-excel.png"));
             exportAsXLSX.addActionListener(e -> exportTableAsXLSX());
             exportPopup.add(exportAsXLSX);
         }
         toolBar.add(exportButton);
+        
+        toolBar.addSeparator();
+        
+        JButton removeRowButton = new JButton(UIUtils.getIconFromResources("remove-row.png"));
+        removeRowButton.setToolTipText("Remove selected rows");
+        removeRowButton.addActionListener(e -> removeSelectedRows());
+        toolBar.add(removeRowButton);
+        
+        JButton removeColumnButton = new JButton(UIUtils.getIconFromResources("remove-column.png"));
+        removeColumnButton.setToolTipText("Remove selected columns");
+        removeColumnButton.addActionListener(e -> removeSelectedColumns());
+        toolBar.add(removeColumnButton);
+
+        toolBar.addSeparator();
+
+        JButton autoSizeColumnButton = new JButton(UIUtils.getIconFromResources("column-autosize.png"));
+        autoSizeColumnButton.setToolTipText("Autosize selected columns");
+        autoSizeColumnButton.addActionListener(e -> autoSizeColumns());
+        toolBar.add(autoSizeColumnButton);
 
         add(toolBar, BorderLayout.NORTH);
 
         jxTable = new JXTable();
         jxTable.setModel(tableModel);
+        jxTable.setColumnSelectionAllowed(true);
+        jxTable.setRowSelectionAllowed(true);
         jxTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
         jxTable.packAll();
         add(new JScrollPane(jxTable), BorderLayout.CENTER);
+    }
+
+    private void autoSizeColumns() {
+        if(jxTable.getSelectedColumns() == null || jxTable.getSelectedColumns().length == 0)
+            jxTable.packAll();
+        else
+            jxTable.packSelected();
+    }
+
+    private void removeSelectedColumns() {
+        if(jxTable.getSelectedColumns() != null) {
+            int[] newColumnIndices = new int[tableModel.getColumnCount()];
+            int newColumnCount = 0;
+            for(int i = 0; i < tableModel.getColumnCount(); ++i) {
+                if (!Ints.contains(jxTable.getSelectedColumns(), i)) {
+                    newColumnIndices[newColumnCount] = jxTable.convertColumnIndexToModel(i);
+                    ++newColumnCount;
+                }
+            }
+
+            DefaultTableModel newModel = new DefaultTableModel();
+            for(int i = 0; i < newColumnCount; ++i) {
+                newModel.addColumn(tableModel.getColumnName(newColumnIndices[i]));
+            }
+
+            Object[] rowBuffer = new Object[newColumnCount];
+            for(int i = 0; i < tableModel.getRowCount(); ++i) {
+                for(int j = 0; j < newColumnCount; ++j) {
+                    rowBuffer[j] = tableModel.getValueAt(i, newColumnIndices[j]);
+                }
+                newModel.addRow(rowBuffer);
+            }
+
+            tableModel = newModel;
+            jxTable.setModel(tableModel);
+        }
+    }
+
+    private void removeSelectedRows() {
+        if(jxTable.getSelectedRows() != null) {
+            int[] rows = new int[jxTable.getSelectedRows().length];
+            for(int i = 0; i < jxTable.getSelectedRows().length; ++i) {
+                rows[i] = jxTable.convertRowIndexToModel(jxTable.getSelectedRows()[i]);
+            }
+            Arrays.sort(rows);
+
+            for(int i = 0; i < rows.length; ++i) {
+                tableModel.removeRow(rows[i] - i);
+            }
+        }
     }
 
     private void exportTableAsXLSX() {

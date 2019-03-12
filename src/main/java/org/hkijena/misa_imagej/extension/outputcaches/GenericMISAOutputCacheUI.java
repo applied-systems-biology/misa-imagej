@@ -27,6 +27,9 @@ public class GenericMISAOutputCacheUI extends MISAOutputCacheUI {
 
     protected void initialize() {
 
+        if(getFilesystemPath() == null)
+            return;
+
         AbstractButton openFolderButton = createButton("Open folder", UIUtils.getIconFromResources("open.png"));
         openFolderButton.addActionListener(e -> {
             if(Desktop.isDesktopSupported()) {

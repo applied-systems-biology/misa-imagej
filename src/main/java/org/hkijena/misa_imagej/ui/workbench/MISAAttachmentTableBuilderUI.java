@@ -50,11 +50,11 @@ public class MISAAttachmentTableBuilderUI extends JPanel {
         {
             JPopupMenu exportPopup = UIUtils.addPopupMenuToComponent(exportButton);
 
-            JMenuItem exportAsCSV = new JMenuItem("as CSV table (*.csv)", UIUtils.getIconFromResources("table.png"));
+            JMenuItem exportAsCSV = new JMenuItem("as CSV table (*.csv)", UIUtils.getIconFromResources("filetype-csv.png"));
             exportAsCSV.addActionListener(e -> exportTable(MISAAttachmentTableExporterUI.FileType.CSV));
             exportPopup.add(exportAsCSV);
 
-            JMenuItem exportAsXLSX = new JMenuItem("as Excel table (*.xlsx)", UIUtils.getIconFromResources("table.png"));
+            JMenuItem exportAsXLSX = new JMenuItem("as Excel table (*.xlsx)", UIUtils.getIconFromResources("filetype-excel.png"));
             exportAsXLSX.addActionListener(e -> exportTable(MISAAttachmentTableExporterUI.FileType.XLSX));
             exportPopup.add(exportAsXLSX);
         }

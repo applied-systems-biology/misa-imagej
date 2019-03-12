@@ -78,7 +78,10 @@ public class MarkdownReader extends JPanel {
 
         JToolBar toolBar = new JToolBar();
 
-        JButton saveMarkdown = new JButton("Save as Markdown", UIUtils.getIconFromResources("save.png"));
+        JButton exportButton = new JButton("Export", UIUtils.getIconFromResources("save.png"));
+        JPopupMenu exportMenu = UIUtils.addPopupMenuToComponent(exportButton);
+
+        JMenuItem saveMarkdown = new JMenuItem("as Markdown (*.md)", UIUtils.getIconFromResources("filetype-markdown.png"));
         saveMarkdown.addActionListener(e -> {
             JFileChooser fileChooser = new JFileChooser();
             fileChooser.setDialogTitle("Save as Markdown");
@@ -90,9 +93,9 @@ public class MarkdownReader extends JPanel {
                 }
             }
         });
-        toolBar.add(saveMarkdown);
+        exportMenu.add(saveMarkdown);
 
-        JButton saveHTML = new JButton("Save as HTML", UIUtils.getIconFromResources("save.png"));
+        JMenuItem saveHTML = new JMenuItem("as HTML (*.html)", UIUtils.getIconFromResources("filetype-html.png"));
         saveHTML.addActionListener(e -> {
             JFileChooser fileChooser = new JFileChooser();
             fileChooser.setDialogTitle("Save as HTML");
@@ -104,9 +107,9 @@ public class MarkdownReader extends JPanel {
                 }
             }
         });
-        toolBar.add(saveHTML);
+        exportMenu.add(saveHTML);
 
-        JButton savePDF = new JButton("Save as PDF", UIUtils.getIconFromResources("save.png"));
+        JMenuItem savePDF = new JMenuItem("as PDF (*.pdf)", UIUtils.getIconFromResources("filetype-pdf.png"));
         savePDF.addActionListener(e -> {
             JFileChooser fileChooser = new JFileChooser();
             fileChooser.setDialogTitle("Save as PDF");
@@ -114,7 +117,9 @@ public class MarkdownReader extends JPanel {
                 PdfConverterExtension.exportToPdf(fileChooser.getSelectedFile().toString(), toHTML(), "", OPTIONS);
             }
         });
-        toolBar.add(savePDF);
+        exportMenu.add(savePDF);
+
+        toolBar.add(exportButton);
 
 //        JButton printButton = new JButton("Print", UIUtils.getIconFromResources("print.png"));
 //        printButton.addActionListener(e -> {

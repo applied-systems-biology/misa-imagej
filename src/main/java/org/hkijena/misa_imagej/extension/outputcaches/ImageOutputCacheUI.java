@@ -15,6 +15,9 @@ public class ImageOutputCacheUI extends GenericMISAOutputCacheUI {
     @Override
     protected void initialize() {
 
+        if(getFilesystemPath() == null)
+            return;
+
         AbstractButton renameCurrentImageButton = createButton("Set current image name", UIUtils.getIconFromResources("imagej.png"));
         renameCurrentImageButton.addActionListener(e -> renameCurrentImage());
 

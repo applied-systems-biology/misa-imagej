@@ -29,6 +29,7 @@ public class MISAOutput {
     private MISARuntimeLog runtimeLog;
     private List<MISAAttachmentDatabase> attachments = new ArrayList<>();
     private Map<String, JSONSchemaObject> attachmentSchemas;
+    private JsonObject parameters;
     private boolean loadedParameterJson = false;
 
     public MISAOutput(Path rootPath) throws IOException {
@@ -65,6 +66,8 @@ public class MISAOutput {
         if(Files.exists(getRootPath().resolve("parameters.json"))) {
             moduleInstance.loadParameters(getRootPath().resolve("parameters.json"),
                     MISASamplePolicy.createMissingSamples);
+            parameters = GsonUtils.fromJsonFile(GsonUtils.getGson(),
+                    getRootPath().resolve("parameters.json"), JsonObject.class);
             loadedParameterJson = true;
         }
     }
@@ -154,5 +157,9 @@ public class MISAOutput {
 
     public MISARuntimeLog getRuntimeLog() {
         return runtimeLog;
+    }
+
+    public JsonObject getParameters() {
+        return parameters;
     }
 }

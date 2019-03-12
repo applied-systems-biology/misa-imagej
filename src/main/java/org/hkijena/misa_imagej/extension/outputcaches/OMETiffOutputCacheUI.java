@@ -18,6 +18,10 @@ public class OMETiffOutputCacheUI extends ImageOutputCacheUI {
 
     @Override
     protected void initialize() {
+
+        if(getFilesystemPath() == null)
+            return;
+
         AbstractButton importBioformatsButton = createButton("Bioformats import", UIUtils.getIconFromResources("bioformats.png"));
         importBioformatsButton.addActionListener(e -> importBioformats());
 
