@@ -1,10 +1,13 @@
-package org.hkijena.misa_imagej.ui.workbench;
+package org.hkijena.misa_imagej.ui.workbench.tablebuilder;
 
 import com.google.common.base.Joiner;
 import org.hkijena.misa_imagej.api.json.JSONSchemaObject;
 import org.hkijena.misa_imagej.api.workbench.MISAAttachmentDatabase;
 import org.hkijena.misa_imagej.api.workbench.MISAOutput;
 import org.hkijena.misa_imagej.api.workbench.table.*;
+import org.hkijena.misa_imagej.ui.workbench.MISAAttachmentTableUI;
+import org.hkijena.misa_imagej.ui.workbench.MISAWorkbenchUI;
+import org.hkijena.misa_imagej.ui.workbench.tableanalyzer.MISATableAnalyzerUI;
 import org.hkijena.misa_imagej.utils.UIUtils;
 import org.hkijena.misa_imagej.utils.ui.DocumentTabPane;
 import org.hkijena.misa_imagej.utils.ui.MonochromeColorIcon;
@@ -17,7 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class MISAAttachmentTableBuilderUI extends JPanel {
-    private DocumentTabPane workbenchDocuments;
+    private MISAWorkbenchUI workbench;
     private MISAAttachmentDatabase database;
     private List<Integer> databaseIds;
     private MISAAttachmentTable attachmentTable;
@@ -26,8 +29,8 @@ public class MISAAttachmentTableBuilderUI extends JPanel {
     private JComboBox<String> objectSelection;
     private JToggleButton toggleAutoUpdate;
 
-    public MISAAttachmentTableBuilderUI(DocumentTabPane workbenchDocuments, MISAAttachmentDatabase database) {
-        this.workbenchDocuments = workbenchDocuments;
+    public MISAAttachmentTableBuilderUI(MISAWorkbenchUI workbench, MISAAttachmentDatabase database) {
+        this.workbench = workbench;
         this.database = database;
         initialize();
     }
@@ -90,11 +93,11 @@ public class MISAAttachmentTableBuilderUI extends JPanel {
         dialog.startOperation();
         dialog.setVisible(true);
         if(dialog.getModel() != null) {
-            workbenchDocuments.addTab("Table analyzer",
+            workbench.addTab("Table analyzer",
                     UIUtils.getIconFromResources("table.png"),
-                    new MISATableAnalyzerUI(dialog.getModel()),
+                    new MISATableAnalyzerUI(workbench, dialog.getModel()),
                     DocumentTabPane.CloseMode.withAskOnCloseButton, true);
-            workbenchDocuments.setSelectedIndex(workbenchDocuments.getTabCount() - 1);
+            workbench.setSelectedTab(workbench.getTabCount() - 1);
         }
     }
 

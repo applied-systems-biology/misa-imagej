@@ -1,4 +1,4 @@
-package org.hkijena.misa_imagej.ui.workbench;
+package org.hkijena.misa_imagej.ui.workbench.tablebuilder;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Joiner;
@@ -109,7 +109,7 @@ public class MISAAttachmentTableExporterUI extends JDialog {
         isDone = true;
     }
 
-    enum FileType {
+    public enum FileType {
         CSV,
         XLSX
     }

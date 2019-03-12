@@ -1,4 +1,4 @@
-package org.hkijena.misa_imagej.ui.workbench;
+package org.hkijena.misa_imagej.ui.workbench.tablebuilder;
 
 import org.hkijena.misa_imagej.api.json.JSONSchemaObject;
 import org.hkijena.misa_imagej.api.workbench.table.*;

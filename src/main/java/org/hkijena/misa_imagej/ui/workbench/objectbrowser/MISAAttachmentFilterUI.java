@@ -1,4 +1,4 @@
-package org.hkijena.misa_imagej.ui.workbench;
+package org.hkijena.misa_imagej.ui.workbench.objectbrowser;
 
 import com.google.common.eventbus.Subscribe;
 import org.hkijena.misa_imagej.MISAImageJRegistryService;

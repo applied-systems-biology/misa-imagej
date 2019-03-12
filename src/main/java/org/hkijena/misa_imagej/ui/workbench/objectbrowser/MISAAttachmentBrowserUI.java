@@ -1,10 +1,12 @@
-package org.hkijena.misa_imagej.ui.workbench;
+package org.hkijena.misa_imagej.ui.workbench.objectbrowser;
 
 import com.google.common.eventbus.Subscribe;
 import org.hkijena.misa_imagej.MISAImageJRegistryService;
 import org.hkijena.misa_imagej.api.workbench.MISAAttachmentDatabase;
 import org.hkijena.misa_imagej.api.workbench.MISAOutput;
 import org.hkijena.misa_imagej.api.workbench.filters.MISAAttachmentFilter;
+import org.hkijena.misa_imagej.ui.workbench.MISAWorkbenchUI;
+import org.hkijena.misa_imagej.ui.workbench.tablebuilder.MISAAttachmentTableBuilderUI;
 import org.hkijena.misa_imagej.utils.UIUtils;
 import org.hkijena.misa_imagej.utils.ui.DocumentTabPane;
 
@@ -26,8 +28,7 @@ public class MISAAttachmentBrowserUI extends JPanel {
     public static final String OBJECT_VIEW_CACHE = "CACHE";
     public static final String OBJECT_VIEW_TYPES = "TYPES";
 
-    private DocumentTabPane workbenchDocuments;
-    private MISAOutput misaOutput;
+    private MISAWorkbenchUI workbench;
     private MISAAttachmentDatabase attachmentDatabase;
     private JPanel filterList;
     private JTree objectViewTree;
@@ -38,10 +39,9 @@ public class MISAAttachmentBrowserUI extends JPanel {
     private JToggleButton toggleAutosyncFilters;
     private ButtonGroup viewToggle;
 
-    public MISAAttachmentBrowserUI(DocumentTabPane workbenchDocuments, MISAOutput misaOutput) {
-        this.workbenchDocuments = workbenchDocuments;
-        this.misaOutput = misaOutput;
-        this.attachmentDatabase = misaOutput.createAttachmentDatabase();
+    public MISAAttachmentBrowserUI(MISAWorkbenchUI workbench) {
+        this.workbench = workbench;
+        this.attachmentDatabase = workbench.getMisaOutput().createAttachmentDatabase();
         initialize();
 
         attachmentDatabase.getEventBus().register(this);
@@ -95,7 +95,7 @@ public class MISAAttachmentBrowserUI extends JPanel {
     private JPanel initializeContentPanel() {
         JPanel panel = new JPanel(new BorderLayout());
         objectView = new MISAAttachmentViewerListUI(attachmentDatabase);
-        objectTableBuilder = new MISAAttachmentTableBuilderUI(workbenchDocuments, attachmentDatabase);
+        objectTableBuilder = new MISAAttachmentTableBuilderUI(workbench, attachmentDatabase);
 
         JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.BOTTOM);
         tabbedPane.setBorder(BorderFactory.createEmptyBorder(-4,0,0,0)); // Make the toolbar align nicely

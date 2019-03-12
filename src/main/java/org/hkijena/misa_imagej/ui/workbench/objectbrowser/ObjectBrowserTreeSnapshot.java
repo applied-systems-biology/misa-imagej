@@ -1,4 +1,4 @@
-package org.hkijena.misa_imagej.ui.workbench;
+package org.hkijena.misa_imagej.ui.workbench.objectbrowser;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;

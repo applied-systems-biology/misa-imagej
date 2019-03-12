@@ -1,4 +1,4 @@
-package org.hkijena.misa_imagej.ui.workbench;
+package org.hkijena.misa_imagej.ui.workbench.objectbrowser;
 
 import com.google.common.primitives.Ints;
 import org.hkijena.misa_imagej.api.MISAAttachment;

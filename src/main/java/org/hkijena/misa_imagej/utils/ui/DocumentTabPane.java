@@ -4,6 +4,7 @@ import org.hkijena.misa_imagej.utils.UIUtils;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,6 +24,7 @@ public class DocumentTabPane extends JTabbedPane {
 
     public DocumentTabPane() {
         super(JTabbedPane.TOP);
+        setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
     }
 
     /**

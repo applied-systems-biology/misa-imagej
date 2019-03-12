@@ -5,6 +5,7 @@ import org.hkijena.misa_imagej.api.registries.MISASerializableRegistry;
 import org.hkijena.misa_imagej.ui.registries.MISAAttachmentFilterUIRegistry;
 import org.hkijena.misa_imagej.ui.registries.MISADataSourceUIRegistry;
 import org.hkijena.misa_imagej.ui.registries.MISAOutputCacheUIRegistry;
+import org.hkijena.misa_imagej.ui.registries.MISATableAnalyzerUIOperationRegistry;
 import org.scijava.InstantiableException;
 import org.scijava.plugin.Plugin;
 import org.scijava.plugin.PluginInfo;
@@ -34,6 +35,7 @@ public class MISAImageJRegistryService extends AbstractService implements MISAIm
     private MISACacheRegistry cacheRegistry;
     private MISASerializableRegistry serializableRegistry;
     private MISAAttachmentFilterUIRegistry attachmentFilterUIRegistry;
+    private MISATableAnalyzerUIOperationRegistry tableAnalyzerUIOperationRegistry;
 
     public MISAImageJRegistryService() {
         dataSourceUIRegistry = new MISADataSourceUIRegistry();
@@ -41,6 +43,7 @@ public class MISAImageJRegistryService extends AbstractService implements MISAIm
         cacheRegistry = new MISACacheRegistry();
         serializableRegistry = new MISASerializableRegistry();
         attachmentFilterUIRegistry = new MISAAttachmentFilterUIRegistry();
+        tableAnalyzerUIOperationRegistry = new MISATableAnalyzerUIOperationRegistry();
     }
 
     @Override
@@ -66,6 +69,11 @@ public class MISAImageJRegistryService extends AbstractService implements MISAIm
     @Override
     public MISASerializableRegistry getSerializableRegistry() {
         return serializableRegistry;
+    }
+
+    @Override
+    public MISATableAnalyzerUIOperationRegistry getTableAnalyzerUIOperationRegistry() {
+        return tableAnalyzerUIOperationRegistry;
     }
 
     private void discover(PluginService pluginService) {

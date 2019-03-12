@@ -2,7 +2,7 @@ package org.hkijena.misa_imagej.ui.registries;
 
 import org.hkijena.misa_imagej.api.workbench.MISAAttachmentDatabase;
 import org.hkijena.misa_imagej.api.workbench.filters.MISAAttachmentFilter;
-import org.hkijena.misa_imagej.ui.workbench.MISAAttachmentFilterUI;
+import org.hkijena.misa_imagej.ui.workbench.objectbrowser.MISAAttachmentFilterUI;
 
 import javax.swing.*;
 import java.lang.reflect.InvocationTargetException;

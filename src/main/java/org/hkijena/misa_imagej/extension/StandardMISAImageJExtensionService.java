@@ -8,6 +8,12 @@ import org.hkijena.misa_imagej.extension.caches.MISAFileCache;
 import org.hkijena.misa_imagej.extension.caches.MISAOMETiffCache;
 import org.hkijena.misa_imagej.extension.datasources.*;
 import org.hkijena.misa_imagej.extension.outputcaches.OMETiffOutputCacheUI;
+import org.hkijena.misa_imagej.extension.tableanalyzer.MISATableAnalyzerCountVectorOperation;
+import org.hkijena.misa_imagej.extension.tableanalyzer.MISATableAnalyzerSumVectorOperation;
+import org.hkijena.misa_imagej.extension.tableanalyzer.MISATableAnalyzerToNumericBooleanOperation;
+import org.hkijena.misa_imagej.extension.tableanalyzer.MISATableAnalyzerToNumericOperation;
+import org.hkijena.misa_imagej.ui.registries.MISATableAnalyzerUIOperationRegistry;
+import org.hkijena.misa_imagej.ui.workbench.tableanalyzer.MISATableVectorOperationUI;
 import org.hkijena.misa_imagej.utils.UIUtils;
 import org.scijava.plugin.Plugin;
 import org.scijava.service.AbstractService;
@@ -41,6 +47,27 @@ public class StandardMISAImageJExtensionService extends AbstractService implemen
                 "Filter only direct attachments", UIUtils.getIconFromResources("object.png"));
         registryService.getAttachmentFilterUIRegistry().register(MISAAttachmentSQLFilter.class, MISAAttachmentSQLFilterUI.class,
                 "Filter by SQL", UIUtils.getIconFromResources("cog.png"));
+
+        registryService.getTableAnalyzerUIOperationRegistry().register(MISATableAnalyzerSumVectorOperation.class,
+                MISATableVectorOperationUI.class,
+                "Summarize",
+                "Summarizes all entries",
+                UIUtils.getIconFromResources("add.png"));
+        registryService.getTableAnalyzerUIOperationRegistry().register(MISATableAnalyzerToNumericOperation.class,
+                MISATableVectorOperationUI.class,
+                "Convert to numbers",
+                "Ensures that all items are numbers. Non-numeric values are set to zero.",
+                UIUtils.getIconFromResources("cog.png"));
+        registryService.getTableAnalyzerUIOperationRegistry().register(MISATableAnalyzerToNumericBooleanOperation.class,
+                MISATableVectorOperationUI.class,
+                "Convert to boolean",
+                "Ensures that all items are numeric boolean values. Defaults to outputting zero if the value is not valid.",
+                UIUtils.getIconFromResources("cog.png"));
+        registryService.getTableAnalyzerUIOperationRegistry().register(MISATableAnalyzerCountVectorOperation.class,
+                MISATableVectorOperationUI.class,
+                "Count",
+                "Replaces the items by their number of occurrences within the list of items.",
+                UIUtils.getIconFromResources("cog.png"));
 
     }
 }
