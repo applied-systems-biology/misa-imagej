@@ -2,7 +2,7 @@ package org.hkijena.misa_imagej.extension.tableanalyzer;
 
 import org.hkijena.misa_imagej.ui.workbench.tableanalyzer.MISATableVectorOperation;
 
-public class MISATableAnalyzerSumVectorOperation implements MISATableVectorOperation {
+public class MISATableAnalyzerAverageOfVectorOperation implements MISATableVectorOperation {
     @Override
     public Object[] process(Object[] input) {
         double sum = 0;
@@ -14,7 +14,7 @@ public class MISATableAnalyzerSumVectorOperation implements MISATableVectorOpera
                 sum += Double.parseDouble("" + object);
             }
         }
-        return new Object[] { sum };
+        return new Object[] { sum / input.length };
     }
 
     @Override

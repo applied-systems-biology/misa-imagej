@@ -16,6 +16,8 @@ import org.hkijena.misa_imagej.utils.ui.DocumentTabPane;
 import org.jdesktop.swingx.JXTable;
 
 import javax.swing.*;
+import javax.swing.event.CellEditorListener;
+import javax.swing.event.ChangeEvent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
@@ -30,6 +32,8 @@ public class MISATableAnalyzerUI extends JPanel {
     private MISAWorkbenchUI workbench;
     private DefaultTableModel tableModel;
     private JXTable jxTable;
+    private Stack<DefaultTableModel> undoBuffer = new Stack<>();
+    private static final int MAX_UNDO = 10;
 
     public MISATableAnalyzerUI(MISAWorkbenchUI workbench, DefaultTableModel tableModel) {
         this.workbench = workbench;
@@ -59,6 +63,12 @@ public class MISATableAnalyzerUI extends JPanel {
         JButton cloneDataButton = new JButton("Clone", UIUtils.getIconFromResources("table.png"));
         cloneDataButton.addActionListener(e -> cloneDataToNewTab());
         toolBar.add(cloneDataButton);
+
+        toolBar.addSeparator();
+
+        JButton undoButton = new JButton("Undo", UIUtils.getIconFromResources("undo.png"));
+        undoButton.addActionListener(e -> undo());
+        toolBar.add(undoButton);
 
         toolBar.addSeparator();
 
@@ -127,7 +137,7 @@ public class MISATableAnalyzerUI extends JPanel {
 
         toolBar.add(Box.createHorizontalGlue());
 
-        JButton processCellsButton = new JButton("Process selected cells", UIUtils.getIconFromResources("cog.png"));
+        JButton processCellsButton = new JButton("Convert selected cells", UIUtils.getIconFromResources("inplace-function.png"));
         toolBar.add(processCellsButton);
 
         add(toolBar, BorderLayout.NORTH);
@@ -141,6 +151,14 @@ public class MISATableAnalyzerUI extends JPanel {
         add(new JScrollPane(jxTable), BorderLayout.CENTER);
 
         initializeColumnProcessMenu(UIUtils.addPopupMenuToComponent(processCellsButton));
+    }
+
+    private void undo() {
+        if(!undoBuffer.isEmpty()) {
+            tableModel = undoBuffer.pop();
+            jxTable.setModel(tableModel);
+            jxTable.packAll();
+        }
     }
 
     private void selectEquivalent() {
@@ -208,6 +226,14 @@ public class MISATableAnalyzerUI extends JPanel {
     }
 
     private void cloneDataToNewTab() {
+        workbench.addTab("Table analyzer",
+                UIUtils.getIconFromResources("table.png"),
+                new MISATableAnalyzerUI(workbench, cloneTableModel(tableModel)),
+                DocumentTabPane.CloseMode.withAskOnCloseButton, true);
+        workbench.setSelectedTab(workbench.getTabCount() - 1);
+    }
+
+    private static DefaultTableModel cloneTableModel(DefaultTableModel tableModel) {
         DefaultTableModel copy = new DefaultTableModel();
         copy.setColumnCount(tableModel.getColumnCount());
         {
@@ -224,12 +250,7 @@ public class MISATableAnalyzerUI extends JPanel {
             }
             copy.addRow(rowVector);
         }
-
-        workbench.addTab("Table analyzer",
-                UIUtils.getIconFromResources("table.png"),
-                new MISATableAnalyzerUI(workbench, copy),
-                DocumentTabPane.CloseMode.withAskOnCloseButton, true);
-        workbench.setSelectedTab(workbench.getTabCount() - 1);
+        return copy;
     }
 
     private void initializeColumnProcessMenu(JPopupMenu menu) {
@@ -243,6 +264,8 @@ public class MISATableAnalyzerUI extends JPanel {
                     JMenuItem item = new JMenuItem(entry.getName(), entry.getIcon());
                     item.setToolTipText(entry.getDescription());
                     item.addActionListener(e -> {
+
+                        createUndoSnapshot();
 
                         List<CellIndex> selectedCells = getSelectedCells();
                         assert cellCount == selectedCells.size();
@@ -288,6 +311,7 @@ public class MISATableAnalyzerUI extends JPanel {
         String name = JOptionPane.showInputDialog(this,
                 "Please provide a name for the new column", "Column " + (tableModel.getColumnCount() + 1));
         if (name != null && !name.isEmpty()) {
+            createUndoSnapshot();
             tableModel.addColumn(name);
             jxTable.packAll();
         }
@@ -302,6 +326,7 @@ public class MISATableAnalyzerUI extends JPanel {
         String name = JOptionPane.showInputDialog(this,
                 "Please provide a name for the new column", "Column " + (tableModel.getColumnCount() + 1));
         if (name != null && !name.isEmpty()) {
+            createUndoSnapshot();
             tableModel.addColumn(name);
             for(int i = 0; i < tableModel.getRowCount(); ++i) {
                 tableModel.setValueAt(tableModel.getValueAt(i, sourceColumn), i, tableModel.getColumnCount() - 1);
@@ -312,6 +337,7 @@ public class MISATableAnalyzerUI extends JPanel {
 
     private void renameColumn() {
         if (jxTable.getSelectedColumn() != -1) {
+            createUndoSnapshot();
             String oldName = tableModel.getColumnName(jxTable.convertColumnIndexToModel(jxTable.getSelectedColumn()));
             String name = JOptionPane.showInputDialog(this,
                     "Please enter a new name for the new column", oldName);
@@ -334,6 +360,7 @@ public class MISATableAnalyzerUI extends JPanel {
 
     private void removeSelectedColumns() {
         if (jxTable.getSelectedColumns() != null) {
+            createUndoSnapshot();
             int[] newColumnIndices = new int[tableModel.getColumnCount()];
             int newColumnCount = 0;
             for (int i = 0; i < tableModel.getColumnCount(); ++i) {
@@ -364,6 +391,7 @@ public class MISATableAnalyzerUI extends JPanel {
 
     private void removeSelectedRows() {
         if (jxTable.getSelectedRows() != null) {
+            createUndoSnapshot();
             int[] rows = new int[jxTable.getSelectedRows().length];
             for (int i = 0; i < jxTable.getSelectedRows().length; ++i) {
                 rows[i] = jxTable.convertRowIndexToModel(jxTable.getSelectedRows()[i]);
@@ -387,6 +415,13 @@ public class MISATableAnalyzerUI extends JPanel {
             vector.add(tableModel.getColumnName(i));
         }
         return vector;
+    }
+
+    private void createUndoSnapshot() {
+        if(undoBuffer.size() >= MAX_UNDO)
+            undoBuffer.remove(0);
+
+        undoBuffer.push(cloneTableModel(tableModel));
     }
 
     private void exportTableAsXLSX() {
