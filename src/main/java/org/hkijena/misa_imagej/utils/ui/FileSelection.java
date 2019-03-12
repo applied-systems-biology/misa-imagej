@@ -7,12 +7,22 @@ import java.awt.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+/**
+ * Text field with a file selection
+ */
 public class FileSelection extends JPanel {
 
     private JFileChooser jFileChooser = new JFileChooser();
     private JTextField pathEdit;
+    private Mode mode;
 
     public FileSelection() {
+        this.mode = Mode.OPEN;
+        initialize();
+    }
+
+    public FileSelection(Mode mode) {
+        this.mode = mode;
         initialize();
     }
 
@@ -42,8 +52,15 @@ public class FileSelection extends JPanel {
         });
 
         selectButton.addActionListener(actionEvent -> {
-            if(getFileChooser().showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-                pathEdit.setText(getFileChooser().getSelectedFile().toString());
+            if(mode == Mode.OPEN) {
+                if(getFileChooser().showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+                    pathEdit.setText(getFileChooser().getSelectedFile().toString());
+                }
+            }
+            else {
+                if(getFileChooser().showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+                    pathEdit.setText(getFileChooser().getSelectedFile().toString());
+                }
             }
         });
     }
@@ -58,5 +75,10 @@ public class FileSelection extends JPanel {
 
     public JFileChooser getFileChooser() {
         return jFileChooser;
+    }
+
+    public enum Mode {
+        OPEN,
+        SAVE
     }
 }

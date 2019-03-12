@@ -19,17 +19,27 @@ public class PlotReader extends JPanel {
     private void initialize() {
         setLayout(new BorderLayout());
 
+        toolBar = new JToolBar();
+
         JButton exportButton = new JButton("Export", UIUtils.getIconFromResources("save.png"));
         exportButton.addActionListener(e -> exportPlot());
+        toolBar.add(exportButton);
 
-        JToolBar toolBar = new JToolBar();
         add(toolBar, BorderLayout.NORTH);
 
         chartPanel = new ChartPanel(null);
+        add(chartPanel, BorderLayout.CENTER);
     }
 
     private void exportPlot() {
-
+        if(chartPanel.getChart() != null) {
+            PlotExporterDialog dialog = new PlotExporterDialog(chartPanel.getChart());
+            dialog.pack();
+            dialog.setSize(400,300);
+            dialog.setLocationRelativeTo(SwingUtilities.getWindowAncestor(this));
+            dialog.setModal(true);
+            dialog.setVisible(true);
+        }
     }
 
     public JToolBar getToolBar() {

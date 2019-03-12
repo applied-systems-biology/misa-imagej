@@ -109,7 +109,7 @@ public class UIUtils {
         return label;
     }
 
-    public static void addFillerGridBagComponent(JComponent component, int row) {
+    public static void addFillerGridBagComponent(Container component, int row) {
         component.add(new JPanel(), new GridBagConstraints() {
             {
                 anchor = GridBagConstraints.PAGE_START;
@@ -122,7 +122,7 @@ public class UIUtils {
         });
     }
 
-    public static void addFillerGridBagComponent(JComponent component, int row, int column) {
+    public static void addFillerGridBagComponent(Container component, int row, int column) {
         component.add(new JPanel(), new GridBagConstraints() {
             {
                 anchor = GridBagConstraints.PAGE_START;

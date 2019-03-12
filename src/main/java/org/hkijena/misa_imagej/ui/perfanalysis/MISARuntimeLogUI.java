@@ -4,6 +4,7 @@ import com.google.common.base.CharMatcher;
 import com.google.common.eventbus.EventBus;
 import com.google.gson.Gson;
 import org.hkijena.misa_imagej.api.MISARuntimeLog;
+import org.hkijena.misa_imagej.ui.components.PlotReader;
 import org.hkijena.misa_imagej.utils.GsonUtils;
 import org.hkijena.misa_imagej.utils.UIUtils;
 import org.jfree.chart.ChartPanel;
@@ -33,7 +34,7 @@ import java.util.Map;
 public class MISARuntimeLogUI extends JPanel {
 
     private MISARuntimeLog runtimeLog;
-    private ChartPanel ganttChartPanel;
+    private PlotReader allocationPlotReader;
     private JTable summaryTable;
     private EventBus eventBus = new EventBus();
 
@@ -62,32 +63,19 @@ public class MISARuntimeLogUI extends JPanel {
         toolBar.add(openButton);
         add(toolBar, BorderLayout.NORTH);
 
-        JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.BOTTOM);
-        tabbedPane.addTab("Timeline", initializeGantt());
-        tabbedPane.addTab("Summary", initializeSummaryPanel());
-        add(tabbedPane, BorderLayout.CENTER);
-    }
-
-    private JPanel initializeGantt() {
-        JPanel result = new JPanel(new BorderLayout());
-
-        JToolBar toolBar = new JToolBar();
-        ganttWithBorderToggle = new JToggleButton("With border", UIUtils.getIconFromResources("border.png"));
+        allocationPlotReader = new PlotReader();
+        allocationPlotReader.getToolBar().add(Box.createHorizontalGlue());
+        ganttWithBorderToggle = new JToggleButton("Border around tasks", UIUtils.getIconFromResources("border.png"));
         ganttWithBorderToggle.addActionListener(actionEvent -> {
-            JFreeChart chart = ganttChartPanel.getChart();
-            ganttChartPanel.setChart(null);
-            ganttChartPanel.revalidate(); ganttChartPanel.repaint();
-            ganttChartPanel.setChart(chart);
-            ganttChartPanel.revalidate(); ganttChartPanel.repaint();
+            allocationPlotReader.redrawPlot();
         });
         ganttWithBorderToggle.setSelected(true);
-        toolBar.add(ganttWithBorderToggle);
-        result.add(toolBar, BorderLayout.NORTH);
+        allocationPlotReader.getToolBar().add(ganttWithBorderToggle);
 
-        ganttChartPanel = new ChartPanel(null);
-        result.add(ganttChartPanel, BorderLayout.CENTER);
-
-        return result;
+        JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.BOTTOM);
+        tabbedPane.addTab("Timeline", allocationPlotReader);
+        tabbedPane.addTab("Summary", initializeSummaryPanel());
+        add(tabbedPane, BorderLayout.CENTER);
     }
 
     private JPanel initializeSummaryPanel() {
@@ -137,9 +125,6 @@ public class MISARuntimeLogUI extends JPanel {
     }
 
     private void rebuildGanttChart() {
-        if (ganttChartPanel != null) {
-            this.remove(ganttChartPanel);
-        }
         if (runtimeLog == null)
             return;
 
@@ -209,9 +194,9 @@ public class MISARuntimeLogUI extends JPanel {
         JFreeChart chart = new JFreeChart(plot);
 
         // Setup panel
-        ganttChartPanel.setChart(chart);
-        ganttChartPanel.setMaximumDrawWidth(Integer.MAX_VALUE);
-        ganttChartPanel.setMaximumDrawHeight(Integer.MAX_VALUE);
+        allocationPlotReader.getChartPanel().setChart(chart);
+        allocationPlotReader.getChartPanel().setMaximumDrawWidth(Integer.MAX_VALUE);
+        allocationPlotReader.getChartPanel().setMaximumDrawHeight(Integer.MAX_VALUE);
         revalidate();
         repaint();
     }
