@@ -370,10 +370,23 @@ public class MISATableAnalyzerUI extends JPanel {
             }
             Arrays.sort(rows);
 
+            Vector dataVector = tableModel.getDataVector();
+
             for (int i = 0; i < rows.length; ++i) {
-                tableModel.removeRow(rows[i] - i);
+                dataVector.remove(rows[i] - i);
             }
+
+            tableModel.setDataVector(dataVector, getColumnIdentifiers());
+            jxTable.packAll();
         }
+    }
+
+    private Vector getColumnIdentifiers() {
+        Vector vector = new Vector(tableModel.getColumnCount());
+        for(int i = 0; i < tableModel.getColumnCount(); ++i) {
+            vector.add(tableModel.getColumnName(i));
+        }
+        return vector;
     }
 
     private void exportTableAsXLSX() {
