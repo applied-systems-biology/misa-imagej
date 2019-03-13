@@ -8,6 +8,7 @@ import org.hkijena.misa_imagej.extension.caches.MISAFileCache;
 import org.hkijena.misa_imagej.extension.caches.MISAOMETiffCache;
 import org.hkijena.misa_imagej.extension.datasources.*;
 import org.hkijena.misa_imagej.extension.outputcaches.OMETiffOutputCacheUI;
+import org.hkijena.misa_imagej.extension.plotbuilder.LineCategoryPlot;
 import org.hkijena.misa_imagej.extension.tableanalyzer.*;
 import org.hkijena.misa_imagej.ui.workbench.tableanalyzer.MISATableVectorOperationUI;
 import org.hkijena.misa_imagej.utils.UIUtils;
@@ -117,6 +118,10 @@ public class StandardMISAImageJExtensionService extends AbstractService implemen
                 "TO_FACTORS",
                 "Replaces each item with an ID that uniquely identifies the item.",
                 UIUtils.getIconFromResources("inplace-function.png"));
+
+        registryService.getPlotBuilderRegistry().register(LineCategoryPlot.class,
+                "Line Category Plot",
+                UIUtils.getIconFromResources("graph.png"));
 
     }
 }
