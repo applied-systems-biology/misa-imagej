@@ -1,6 +1,5 @@
 package org.hkijena.misa_imagej.ui.workbench.tableanalyzer;
 
-import com.google.common.base.Joiner;
 import org.hkijena.misa_imagej.MISAImageJRegistryService;
 import org.hkijena.misa_imagej.ui.registries.MISATableAnalyzerUIOperationRegistry;
 import org.hkijena.misa_imagej.utils.UIUtils;

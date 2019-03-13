@@ -19,12 +19,10 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.io.BufferedOutputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 
 public class MISATableAnalyzerUI extends JPanel {
     private MISAWorkbenchUI workbench;

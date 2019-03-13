@@ -9,7 +9,6 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.concurrent.ExecutionException;
 
 public class MISAAttachmentTableToModelExporterUI extends JDialog {
 

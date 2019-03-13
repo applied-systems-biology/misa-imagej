@@ -7,7 +7,6 @@ import org.hkijena.misa_imagej.api.MISARuntimeLog;
 import org.hkijena.misa_imagej.ui.components.PlotReader;
 import org.hkijena.misa_imagej.utils.GsonUtils;
 import org.hkijena.misa_imagej.utils.UIUtils;
-import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.axis.SymbolAxis;

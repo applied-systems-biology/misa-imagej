@@ -4,7 +4,6 @@ import org.hkijena.misa_imagej.utils.UIUtils;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
 import java.util.HashMap;
 import java.util.Map;
 

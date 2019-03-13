@@ -11,7 +11,6 @@ import org.hkijena.misa_imagej.ui.components.MarkdownReader;
 import org.hkijena.misa_imagej.ui.components.MemoryStatusUI;
 import org.hkijena.misa_imagej.ui.perfanalysis.MISARuntimeLogUI;
 import org.hkijena.misa_imagej.ui.workbench.objectbrowser.MISAAttachmentBrowserUI;
-import org.hkijena.misa_imagej.ui.workbench.tableanalyzer.MISATableAnalyzerUI;
 import org.hkijena.misa_imagej.utils.UIUtils;
 import org.hkijena.misa_imagej.utils.ui.DocumentTabPane;
 import org.jdesktop.swingx.JXStatusBar;

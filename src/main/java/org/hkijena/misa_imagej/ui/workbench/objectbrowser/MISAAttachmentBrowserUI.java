@@ -3,12 +3,10 @@ package org.hkijena.misa_imagej.ui.workbench.objectbrowser;
 import com.google.common.eventbus.Subscribe;
 import org.hkijena.misa_imagej.MISAImageJRegistryService;
 import org.hkijena.misa_imagej.api.workbench.MISAAttachmentDatabase;
-import org.hkijena.misa_imagej.api.workbench.MISAOutput;
 import org.hkijena.misa_imagej.api.workbench.filters.MISAAttachmentFilter;
 import org.hkijena.misa_imagej.ui.workbench.MISAWorkbenchUI;
 import org.hkijena.misa_imagej.ui.workbench.tablebuilder.MISAAttachmentTableBuilderUI;
 import org.hkijena.misa_imagej.utils.UIUtils;
-import org.hkijena.misa_imagej.utils.ui.DocumentTabPane;
 
 import javax.swing.*;
 import javax.swing.event.TreeExpansionEvent;
