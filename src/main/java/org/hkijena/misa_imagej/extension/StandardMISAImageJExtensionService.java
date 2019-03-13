@@ -44,11 +44,35 @@ public class StandardMISAImageJExtensionService extends AbstractService implemen
         registryService.getAttachmentFilterUIRegistry().register(MISAAttachmentSQLFilter.class, MISAAttachmentSQLFilterUI.class,
                 "Filter by SQL", UIUtils.getIconFromResources("cog.png"));
 
+        registryService.getTableAnalyzerUIOperationRegistry().register(StatisticsCountVectorOperation.class,
+                MISATableVectorOperationUI.class,
+                "Count",
+                "COUNT",
+                "Counts all entries",
+                UIUtils.getIconFromResources("statistics.png"));
         registryService.getTableAnalyzerUIOperationRegistry().register(StatisticsSumVectorOperation.class,
                 MISATableVectorOperationUI.class,
                 "Sum",
                 "SUM",
                 "Summarizes all entries",
+                UIUtils.getIconFromResources("statistics.png"));
+        registryService.getTableAnalyzerUIOperationRegistry().register(StatisticsMinVectorOperation.class,
+                MISATableVectorOperationUI.class,
+                "Minimum",
+                "MIN",
+                "Minimum value of entries",
+                UIUtils.getIconFromResources("statistics.png"));
+        registryService.getTableAnalyzerUIOperationRegistry().register(StatisticsMaxVectorOperation.class,
+                MISATableVectorOperationUI.class,
+                "Maximum",
+                "MAX",
+                "Maximum value of entries",
+                UIUtils.getIconFromResources("statistics.png"));
+        registryService.getTableAnalyzerUIOperationRegistry().register(StatisticsMedianVectorOperation.class,
+                MISATableVectorOperationUI.class,
+                "Median",
+                "MEDIAN",
+                "Median value of entries",
                 UIUtils.getIconFromResources("statistics.png"));
         registryService.getTableAnalyzerUIOperationRegistry().register(StatisticsAverageVectorOperation.class,
                 MISATableVectorOperationUI.class,

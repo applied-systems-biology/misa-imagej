@@ -32,8 +32,10 @@ public class MISATableAnalyzerUI extends JPanel {
     private JXTable jxTable;
     private Stack<DefaultTableModel> undoBuffer = new Stack<>();
     private static final int MAX_UNDO = 10;
+    private boolean isRebuildingSelection = false;
 
     private JButton convertSelectedCellsButton;
+    private JPopupMenu convertSelectedCellsMenu;
 
     public MISATableAnalyzerUI(MISAWorkbenchUI workbench, DefaultTableModel tableModel) {
         this.workbench = workbench;
@@ -142,6 +144,7 @@ public class MISATableAnalyzerUI extends JPanel {
         toolBar.add(collapseColumnsButton);
 
         convertSelectedCellsButton = new JButton("Convert selection", UIUtils.getIconFromResources("inplace-function.png"));
+        convertSelectedCellsMenu = UIUtils.addPopupMenuToComponent(convertSelectedCellsButton);
         toolBar.add(convertSelectedCellsButton);
 
         add(toolBar, BorderLayout.NORTH);
@@ -154,7 +157,7 @@ public class MISATableAnalyzerUI extends JPanel {
         jxTable.packAll();
         add(new JScrollPane(jxTable), BorderLayout.CENTER);
 
-        initializeColumnProcessMenu(UIUtils.addPopupMenuToComponent(convertSelectedCellsButton));
+        jxTable.getSelectionModel().addListSelectionListener(listSelectionEvent -> updateConvertMenu());
     }
 
     private void collapseColumns() {
@@ -182,6 +185,7 @@ public class MISATableAnalyzerUI extends JPanel {
 
     private void selectEquivalent() {
         if(jxTable.getSelectedRowCount() > 0 && jxTable.getSelectedColumnCount() > 0) {
+            isRebuildingSelection = true;
             List<Object[]> possibleValues = new ArrayList<>();
             int[] columns = jxTable.getSelectedColumns().clone();
             for(int i = 0; i < columns.length; ++i) {
@@ -220,12 +224,16 @@ public class MISATableAnalyzerUI extends JPanel {
                     jxTable.addRowSelectionInterval(jxTable.convertRowIndexToView(row), jxTable.convertRowIndexToView(row));
                 }
             }
+
+            isRebuildingSelection = false;
+            updateConvertMenu();
         }
     }
 
     private void invertSelection() {
         int[] cols = jxTable.getSelectedColumns().clone();
         int[] rows = jxTable.getSelectedRows().clone();
+        isRebuildingSelection = true;
         jxTable.clearSelection();
         for(int column : cols) {
             jxTable.addColumnSelectionInterval(column, column);
@@ -234,6 +242,8 @@ public class MISATableAnalyzerUI extends JPanel {
             if(!Ints.contains(rows, row))
                 jxTable.addRowSelectionInterval(row, row);
         }
+        isRebuildingSelection = false;
+        updateConvertMenu();
     }
 
     private void selectMissingColumns() {
@@ -272,44 +282,44 @@ public class MISATableAnalyzerUI extends JPanel {
         return copy;
     }
 
-    private void initializeColumnProcessMenu(JPopupMenu menu) {
-        jxTable.getSelectionModel().addListSelectionListener(listSelectionEvent -> {
-            menu.removeAll();
-            final int cellCount = jxTable.getSelectedColumnCount() * jxTable.getSelectedRowCount();
+    private void updateConvertMenu() {
+        if(isRebuildingSelection)
+            return;
+        convertSelectedCellsMenu.removeAll();
+        final int cellCount = jxTable.getSelectedColumnCount() * jxTable.getSelectedRowCount();
 
-            List<MISATableAnalyzerUIOperationRegistry.Entry> entries =
-                    new ArrayList<>( MISAImageJRegistryService.getInstance().getTableAnalyzerUIOperationRegistry().getEntries());
-            entries.sort(Comparator.comparing(MISATableAnalyzerUIOperationRegistry.Entry::getName));
+        List<MISATableAnalyzerUIOperationRegistry.Entry> entries =
+                new ArrayList<>( MISAImageJRegistryService.getInstance().getTableAnalyzerUIOperationRegistry().getEntries());
+        entries.sort(Comparator.comparing(MISATableAnalyzerUIOperationRegistry.Entry::getName));
 
-            for(MISATableAnalyzerUIOperationRegistry.Entry entry : entries) {
-                MISATableVectorOperation operation = entry.instantiateOperation();
-                if(operation.inputMatches(cellCount) && operation.getOutputCount(cellCount) == cellCount) {
-                    JMenuItem item = new JMenuItem(entry.getName(), entry.getIcon());
-                    item.setToolTipText(entry.getDescription());
-                    item.addActionListener(e -> {
+        for(MISATableAnalyzerUIOperationRegistry.Entry entry : entries) {
+            MISATableVectorOperation operation = entry.instantiateOperation();
+            if(operation.inputMatches(cellCount) && operation.getOutputCount(cellCount) == cellCount) {
+                JMenuItem item = new JMenuItem(entry.getName(), entry.getIcon());
+                item.setToolTipText(entry.getDescription());
+                item.addActionListener(e -> {
 
-                        createUndoSnapshot();
+                    createUndoSnapshot();
 
-                        List<CellIndex> selectedCells = getSelectedCells();
-                        assert cellCount == selectedCells.size();
+                    List<CellIndex> selectedCells = getSelectedCells();
+                    assert cellCount == selectedCells.size();
 
-                        Object[] buffer = new Object[cellCount];
-                        for(int i = 0; i < cellCount; ++i) {
-                            buffer[i] = tableModel.getValueAt(selectedCells.get(i).getRow(), selectedCells.get(i).getColumn());
-                        }
+                    Object[] buffer = new Object[cellCount];
+                    for(int i = 0; i < cellCount; ++i) {
+                        buffer[i] = tableModel.getValueAt(selectedCells.get(i).getRow(), selectedCells.get(i).getColumn());
+                    }
 
-                        buffer = operation.process(buffer);
+                    buffer = operation.process(buffer);
 
-                        for(int i = 0; i < cellCount; ++i) {
-                           tableModel.setValueAt(buffer[i], selectedCells.get(i).getRow(), selectedCells.get(i).getColumn());
-                        }
-                    });
-                    menu.add(item);
-                }
+                    for(int i = 0; i < cellCount; ++i) {
+                        tableModel.setValueAt(buffer[i], selectedCells.get(i).getRow(), selectedCells.get(i).getColumn());
+                    }
+                });
+                convertSelectedCellsMenu.add(item);
             }
+        }
 
-            convertSelectedCellsButton.setEnabled(menu.getComponentCount() > 0);
-        });
+        convertSelectedCellsButton.setEnabled(convertSelectedCellsMenu.getComponentCount() > 0);
     }
 
     /**
@@ -348,8 +358,10 @@ public class MISATableAnalyzerUI extends JPanel {
         if(sourceColumn == -1)
             return;
 
+        sourceColumn = jxTable.convertColumnIndexToModel(sourceColumn);
+
         String name = JOptionPane.showInputDialog(this,
-                "Please provide a name for the new column", "Column " + (tableModel.getColumnCount() + 1));
+                "Please provide a name for the new column", tableModel.getColumnName(sourceColumn));
         if (name != null && !name.isEmpty()) {
             createUndoSnapshot();
             tableModel.addColumn(name);
