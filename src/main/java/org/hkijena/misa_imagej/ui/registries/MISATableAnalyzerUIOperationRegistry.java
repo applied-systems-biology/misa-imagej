@@ -15,11 +15,13 @@ public class MISATableAnalyzerUIOperationRegistry {
     public void register(Class<? extends MISATableVectorOperation> operationClass,
                          Class<? extends MISATableVectorOperationUI> uiClass,
                          String name,
+                         String shortcut,
                          String description,
                          Icon icon) {
         entries.put(operationClass, new Entry(operationClass,
                 uiClass,
                 name,
+                shortcut,
                 description,
                 icon));
     }
@@ -36,17 +38,31 @@ public class MISATableAnalyzerUIOperationRegistry {
         return entries.values();
     }
 
+    public String getNameOf(MISATableVectorOperation operation) {
+        return entries.get(operation.getClass()).getName();
+    }
+
+    public String getShortcutOf(MISATableVectorOperation operation) {
+        return entries.get(operation.getClass()).getShortcut();
+    }
+
+    public Icon getIconOf(MISATableVectorOperation operation) {
+        return entries.get(operation.getClass()).getIcon();
+    }
+
     public static class Entry {
         private Class<? extends MISATableVectorOperation> operationClass;
         private Class<? extends MISATableVectorOperationUI> uiClass;
         private String name;
+        private String shortcut;
         private String description;
         private Icon icon;
 
-        public Entry(Class<? extends MISATableVectorOperation> operationClass, Class<? extends MISATableVectorOperationUI> uiClass, String name, String description, Icon icon) {
+        public Entry(Class<? extends MISATableVectorOperation> operationClass, Class<? extends MISATableVectorOperationUI> uiClass, String name, String shortcut, String description, Icon icon) {
             this.operationClass = operationClass;
             this.uiClass = uiClass;
             this.name = name;
+            this.shortcut = shortcut;
             this.description = description;
             this.icon = icon;
         }
@@ -77,6 +93,10 @@ public class MISATableAnalyzerUIOperationRegistry {
             } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
                 throw new RuntimeException(e);
             }
+        }
+
+        public String getShortcut() {
+            return shortcut;
         }
     }
 }

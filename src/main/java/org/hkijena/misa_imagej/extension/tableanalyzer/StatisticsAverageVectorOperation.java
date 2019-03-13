@@ -2,7 +2,7 @@ package org.hkijena.misa_imagej.extension.tableanalyzer;
 
 import org.hkijena.misa_imagej.ui.workbench.tableanalyzer.MISATableVectorOperation;
 
-public class MISATableAnalyzerAverageOfVectorOperation implements MISATableVectorOperation {
+public class StatisticsAverageVectorOperation implements MISATableVectorOperation {
     @Override
     public Object[] process(Object[] input) {
         double sum = 0;

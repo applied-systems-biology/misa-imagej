@@ -2,10 +2,19 @@ package org.hkijena.misa_imagej.extension.tableanalyzer;
 
 import org.hkijena.misa_imagej.ui.workbench.tableanalyzer.MISATableVectorOperation;
 
-public class MISATableAnalyzerCountValuesVectorOperation implements MISATableVectorOperation {
+public class StatisticsSumVectorOperation implements MISATableVectorOperation {
     @Override
     public Object[] process(Object[] input) {
-        return new Object[] { input.length };
+        double sum = 0;
+        for(Object object : input) {
+            if(object instanceof Number) {
+                sum += ((Number) object).doubleValue();
+            }
+            else {
+                sum += Double.parseDouble("" + object);
+            }
+        }
+        return new Object[] { sum };
     }
 
     @Override

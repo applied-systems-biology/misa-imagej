@@ -16,15 +16,13 @@ import org.hkijena.misa_imagej.utils.ui.DocumentTabPane;
 import org.jdesktop.swingx.JXTable;
 
 import javax.swing.*;
-import javax.swing.event.CellEditorListener;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.io.BufferedOutputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.*;
 import java.util.List;
 
@@ -34,6 +32,8 @@ public class MISATableAnalyzerUI extends JPanel {
     private JXTable jxTable;
     private Stack<DefaultTableModel> undoBuffer = new Stack<>();
     private static final int MAX_UNDO = 10;
+
+    private JButton convertSelectedCellsButton;
 
     public MISATableAnalyzerUI(MISAWorkbenchUI workbench, DefaultTableModel tableModel) {
         this.workbench = workbench;
@@ -137,8 +137,12 @@ public class MISATableAnalyzerUI extends JPanel {
 
         toolBar.add(Box.createHorizontalGlue());
 
-        JButton processCellsButton = new JButton("Convert selected cells", UIUtils.getIconFromResources("inplace-function.png"));
-        toolBar.add(processCellsButton);
+        JButton collapseColumnsButton = new JButton("Integrate columns", UIUtils.getIconFromResources("statistics.png"));
+        collapseColumnsButton.addActionListener(e -> collapseColumns());
+        toolBar.add(collapseColumnsButton);
+
+        convertSelectedCellsButton = new JButton("Convert selection", UIUtils.getIconFromResources("inplace-function.png"));
+        toolBar.add(convertSelectedCellsButton);
 
         add(toolBar, BorderLayout.NORTH);
 
@@ -150,7 +154,22 @@ public class MISATableAnalyzerUI extends JPanel {
         jxTable.packAll();
         add(new JScrollPane(jxTable), BorderLayout.CENTER);
 
-        initializeColumnProcessMenu(UIUtils.addPopupMenuToComponent(processCellsButton));
+        initializeColumnProcessMenu(UIUtils.addPopupMenuToComponent(convertSelectedCellsButton));
+    }
+
+    private void collapseColumns() {
+        MISACollapseTableColumnsDialogUI dialog = new MISACollapseTableColumnsDialogUI(tableModel);
+        dialog.pack();
+        dialog.setSize(800,600);
+        dialog.setLocationRelativeTo(SwingUtilities.getWindowAncestor(this));
+        dialog.setModal(true);
+        dialog.setVisible(true);
+        if(dialog.getResultTableModel() != null) {
+            createUndoSnapshot();
+            tableModel = dialog.getResultTableModel();
+            jxTable.setModel(tableModel);
+            jxTable.packAll();
+        }
     }
 
     private void undo() {
@@ -258,7 +277,11 @@ public class MISATableAnalyzerUI extends JPanel {
             menu.removeAll();
             final int cellCount = jxTable.getSelectedColumnCount() * jxTable.getSelectedRowCount();
 
-            for(MISATableAnalyzerUIOperationRegistry.Entry entry : MISAImageJRegistryService.getInstance().getTableAnalyzerUIOperationRegistry().getEntries()) {
+            List<MISATableAnalyzerUIOperationRegistry.Entry> entries =
+                    new ArrayList<>( MISAImageJRegistryService.getInstance().getTableAnalyzerUIOperationRegistry().getEntries());
+            entries.sort(Comparator.comparing(MISATableAnalyzerUIOperationRegistry.Entry::getName));
+
+            for(MISATableAnalyzerUIOperationRegistry.Entry entry : entries) {
                 MISATableVectorOperation operation = entry.instantiateOperation();
                 if(operation.inputMatches(cellCount) && operation.getOutputCount(cellCount) == cellCount) {
                     JMenuItem item = new JMenuItem(entry.getName(), entry.getIcon());
@@ -284,6 +307,8 @@ public class MISATableAnalyzerUI extends JPanel {
                     menu.add(item);
                 }
             }
+
+            convertSelectedCellsButton.setEnabled(menu.getComponentCount() > 0);
         });
     }
 
@@ -451,6 +476,15 @@ public class MISATableAnalyzerUI extends JPanel {
                     }
                 }
             }
+
+            try {
+                FileOutputStream stream = new FileOutputStream(fileChooser.getSelectedFile());
+                workbook.write(stream);
+                workbook.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
         }
     }
 
@@ -460,6 +494,14 @@ public class MISATableAnalyzerUI extends JPanel {
         if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
             try (BufferedOutputStream writer = new BufferedOutputStream(new FileOutputStream(fileChooser.getSelectedFile()))) {
                 String[] rowBuffer = new String[tableModel.getColumnCount()];
+
+                for(int column = 0; column < tableModel.getColumnCount(); ++column) {
+                    rowBuffer[column] = tableModel.getColumnName(column);
+                }
+
+                writer.write(Joiner.on(',').join(rowBuffer).getBytes(Charsets.UTF_8));
+                writer.write("\n".getBytes(Charsets.UTF_8));
+
                 for (int row = 0; row < tableModel.getRowCount(); ++row) {
                     for (int column = 0; column < tableModel.getColumnCount(); ++column) {
                         if (tableModel.getValueAt(row, column) instanceof Boolean) {

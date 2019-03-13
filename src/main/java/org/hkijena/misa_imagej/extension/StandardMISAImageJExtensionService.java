@@ -44,41 +44,54 @@ public class StandardMISAImageJExtensionService extends AbstractService implemen
         registryService.getAttachmentFilterUIRegistry().register(MISAAttachmentSQLFilter.class, MISAAttachmentSQLFilterUI.class,
                 "Filter by SQL", UIUtils.getIconFromResources("cog.png"));
 
-        registryService.getTableAnalyzerUIOperationRegistry().register(MISATableAnalyzerSumOfVectorOperation.class,
+        registryService.getTableAnalyzerUIOperationRegistry().register(StatisticsSumVectorOperation.class,
                 MISATableVectorOperationUI.class,
                 "Sum",
+                "SUM",
                 "Summarizes all entries",
                 UIUtils.getIconFromResources("statistics.png"));
-        registryService.getTableAnalyzerUIOperationRegistry().register(MISATableAnalyzerAverageOfVectorOperation.class,
+        registryService.getTableAnalyzerUIOperationRegistry().register(StatisticsAverageVectorOperation.class,
                 MISATableVectorOperationUI.class,
                 "Average",
+                "AVG",
                 "Average of entries",
                 UIUtils.getIconFromResources("statistics.png"));
-        registryService.getTableAnalyzerUIOperationRegistry().register(MISATableAnalyzerVarianceOfVectorOperation.class,
+        registryService.getTableAnalyzerUIOperationRegistry().register(StatisticsVarianceVectorOperation.class,
                 MISATableVectorOperationUI.class,
                 "Variance",
+                "VAR",
                 "Variance of entries",
                 UIUtils.getIconFromResources("statistics.png"));
-        registryService.getTableAnalyzerUIOperationRegistry().register(MISATableAnalyzerCountVectorOperation.class,
+        registryService.getTableAnalyzerUIOperationRegistry().register(ConvertToOccurrencesVectorOperation.class,
                 MISATableVectorOperationUI.class,
                 "Number of entries",
+                "COUNT",
                 "Returns the number of items",
                 UIUtils.getIconFromResources("statistics.png"));
 
-        registryService.getTableAnalyzerUIOperationRegistry().register(MISATableAnalyzerToNumericOperation.class,
+        registryService.getTableAnalyzerUIOperationRegistry().register(ConvertToNumericVectorOperation.class,
                 MISATableVectorOperationUI.class,
                 "Convert to numbers",
+                "TO_NUMBERS",
                 "Ensures that all items are numbers. Non-numeric values are set to zero.",
                 UIUtils.getIconFromResources("inplace-function.png"));
-        registryService.getTableAnalyzerUIOperationRegistry().register(MISATableAnalyzerToNumericBooleanOperation.class,
+        registryService.getTableAnalyzerUIOperationRegistry().register(ConvertToNumericBooleanVectorOperation.class,
                 MISATableVectorOperationUI.class,
-                "Convert to boolean",
+                "Convert to numeric boolean",
+                "TO_NUMERIC_BOOLEAN",
                 "Ensures that all items are numeric boolean values. Defaults to outputting zero if the value is not valid.",
                 UIUtils.getIconFromResources("inplace-function.png"));
-        registryService.getTableAnalyzerUIOperationRegistry().register(MISATableAnalyzerCountVectorOperation.class,
+        registryService.getTableAnalyzerUIOperationRegistry().register(ConvertToOccurrencesVectorOperation.class,
                 MISATableVectorOperationUI.class,
                 "Convert to number of occurrences",
+                "TO_OCCURENCES",
                 "Replaces the items by their number of occurrences within the list of items.",
+                UIUtils.getIconFromResources("inplace-function.png"));
+        registryService.getTableAnalyzerUIOperationRegistry().register(ConvertToNumericFactorOperation.class,
+                MISATableVectorOperationUI.class,
+                "Convert to numeric factors",
+                "TO_FACTORS",
+                "Replaces each item with an ID that uniquely identifies the item.",
                 UIUtils.getIconFromResources("inplace-function.png"));
 
     }

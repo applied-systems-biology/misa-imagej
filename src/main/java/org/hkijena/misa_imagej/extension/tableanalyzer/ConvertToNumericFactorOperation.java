@@ -5,17 +5,16 @@ import org.hkijena.misa_imagej.ui.workbench.tableanalyzer.MISATableVectorOperati
 import java.util.HashMap;
 import java.util.Map;
 
-public class MISATableAnalyzerCountVectorOperation implements MISATableVectorOperation {
+public class ConvertToNumericFactorOperation implements MISATableVectorOperation {
     @Override
     public Object[] process(Object[] input) {
-        Map<Object, Integer> counts = new HashMap<>();
+        Map<Object, Integer> factors = new HashMap<>();
         for(Object object : input) {
-            int count = counts.getOrDefault(object, 0);
-            ++count;
-            counts.put(object, count);
+            if(!factors.containsKey(object))
+                factors.put(object, factors.size());
         }
         for(int i = 0; i < input.length; ++i) {
-            input[i] = counts.get(input[i]);
+            input[i] = factors.get(input[i]);
         }
         return input;
     }
