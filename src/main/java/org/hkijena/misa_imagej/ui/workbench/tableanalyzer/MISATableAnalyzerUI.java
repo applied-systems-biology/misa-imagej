@@ -11,6 +11,8 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.hkijena.misa_imagej.MISAImageJRegistryService;
 import org.hkijena.misa_imagej.ui.registries.MISATableAnalyzerUIOperationRegistry;
 import org.hkijena.misa_imagej.ui.workbench.MISAWorkbenchUI;
+import org.hkijena.misa_imagej.ui.workbench.plotbuilder.MISAPlotBuilderUI;
+import org.hkijena.misa_imagej.utils.TableUtils;
 import org.hkijena.misa_imagej.utils.UIUtils;
 import org.hkijena.misa_imagej.utils.ui.DocumentTabPane;
 import org.jdesktop.swingx.JXTable;
@@ -145,6 +147,10 @@ public class MISATableAnalyzerUI extends JPanel {
         convertSelectedCellsMenu = UIUtils.addPopupMenuToComponent(convertSelectedCellsButton);
         toolBar.add(convertSelectedCellsButton);
 
+        JButton createPlotButton = new JButton("Create plot", UIUtils.getIconFromResources("graph.png"));
+        createPlotButton.addActionListener(e -> createNewPlot());
+        toolBar.add(createPlotButton);
+
         add(toolBar, BorderLayout.NORTH);
 
         jxTable = new JXTable();
@@ -156,6 +162,14 @@ public class MISATableAnalyzerUI extends JPanel {
         add(new JScrollPane(jxTable), BorderLayout.CENTER);
 
         jxTable.getSelectionModel().addListSelectionListener(listSelectionEvent -> updateConvertMenu());
+    }
+
+    private void createNewPlot() {
+        workbench.addTab("Plot",
+                UIUtils.getIconFromResources("graph.png"),
+                new MISAPlotBuilderUI(workbench, TableUtils.cloneTableModel(tableModel)),
+                DocumentTabPane.CloseMode.withAskOnCloseButton, true);
+        workbench.setSelectedTab(workbench.getTabCount() - 1);
     }
 
     private void collapseColumns() {
@@ -253,31 +267,11 @@ public class MISATableAnalyzerUI extends JPanel {
     }
 
     private void cloneDataToNewTab() {
-        workbench.addTab("Table analyzer",
+        workbench.addTab("Table",
                 UIUtils.getIconFromResources("table.png"),
-                new MISATableAnalyzerUI(workbench, cloneTableModel(tableModel)),
+                new MISATableAnalyzerUI(workbench, TableUtils.cloneTableModel(tableModel)),
                 DocumentTabPane.CloseMode.withAskOnCloseButton, true);
         workbench.setSelectedTab(workbench.getTabCount() - 1);
-    }
-
-    private static DefaultTableModel cloneTableModel(DefaultTableModel tableModel) {
-        DefaultTableModel copy = new DefaultTableModel();
-        copy.setColumnCount(tableModel.getColumnCount());
-        {
-            Object[] identifiers = new Object[tableModel.getColumnCount()];
-            for (int i = 0; i < tableModel.getColumnCount(); ++i) {
-                identifiers[i] = tableModel.getColumnName(i);
-            }
-            copy.setColumnIdentifiers(identifiers);
-        }
-        for(int row = 0; row < tableModel.getRowCount(); ++row) {
-            Vector<Object> rowVector = new Vector<>(tableModel.getColumnCount());
-            for(int column = 0; column < tableModel.getColumnCount(); ++column) {
-                rowVector.add(tableModel.getValueAt(row, column));
-            }
-            copy.addRow(rowVector);
-        }
-        return copy;
     }
 
     private void updateConvertMenu() {
@@ -456,7 +450,7 @@ public class MISATableAnalyzerUI extends JPanel {
         if(undoBuffer.size() >= MAX_UNDO)
             undoBuffer.remove(0);
 
-        undoBuffer.push(cloneTableModel(tableModel));
+        undoBuffer.push(TableUtils.cloneTableModel(tableModel));
     }
 
     private void exportTableAsXLSX() {

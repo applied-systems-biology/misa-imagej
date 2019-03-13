@@ -93,7 +93,7 @@ public class MISAAttachmentTableBuilderUI extends JPanel {
         dialog.startOperation();
         dialog.setVisible(true);
         if(dialog.getModel() != null) {
-            workbench.addTab("Table analyzer",
+            workbench.addTab("Table",
                     UIUtils.getIconFromResources("table.png"),
                     new MISATableAnalyzerUI(workbench, dialog.getModel()),
                     DocumentTabPane.CloseMode.withAskOnCloseButton, true);
