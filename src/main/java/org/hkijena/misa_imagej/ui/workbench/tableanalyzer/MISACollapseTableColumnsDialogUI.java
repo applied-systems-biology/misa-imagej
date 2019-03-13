@@ -106,6 +106,7 @@ public class MISACollapseTableColumnsDialogUI extends JDialog {
 
         int[] rowCategoryAssignments = new int[tableModel.getRowCount()];
         List<String> categoryNames = new ArrayList<>();
+        List<List<Object>> categoryValues = new ArrayList<>();
         StringBuilder currentCategoryName = new StringBuilder();
 
         for(int row = 0; row < tableModel.getRowCount(); ++row) {
@@ -122,6 +123,12 @@ public class MISACollapseTableColumnsDialogUI extends JDialog {
             if(categoryIndex == -1) {
                 categoryNames.add(currentCategoryName.toString());
                 categoryIndex = categoryNames.size() - 1;
+
+                List<Object> values = new ArrayList<>();
+                for(int column : categorySourceColumns) {
+                    values.add(tableModel.getValueAt(row, column));
+                }
+                categoryValues.add(values);
             }
 
             rowCategoryAssignments[row] = categoryIndex;
@@ -130,7 +137,9 @@ public class MISACollapseTableColumnsDialogUI extends JDialog {
         DefaultTableModel result = new DefaultTableModel();
 
         // Create columns
-        result.addColumn("Category");
+        for(int column : categorySourceColumns) {
+            result.addColumn(tableModel.getColumnName(column));
+        }
         for(int columnIndex = 0; columnIndex < tableModel.getColumnCount(); ++columnIndex) {
             Object columnRole = columnOperations.get(columnIndex).getSelectedItem();
             if(columnRole instanceof MISATableVectorOperation) {
@@ -145,7 +154,7 @@ public class MISACollapseTableColumnsDialogUI extends JDialog {
         Vector<Object> resultRowBuffer = new Vector<>();
         for(int category = 0; category < categoryNames.size(); ++category) {
             resultRowBuffer.clear();
-            resultRowBuffer.add(categoryNames.get(category));
+            resultRowBuffer.addAll(categoryValues.get(category));
             for(int columnIndex = 0; columnIndex < tableModel.getColumnCount(); ++columnIndex) {
                 Object columnRole = columnOperations.get(columnIndex).getSelectedItem();
                 if(columnRole instanceof MISATableVectorOperation) {
