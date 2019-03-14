@@ -8,8 +8,6 @@ import org.hkijena.misa_imagej.ui.workbench.plotbuilder.MISAPlotSeriesGenerator;
 import org.hkijena.misa_imagej.utils.StringUtils;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.renderer.category.BarRenderer;
-import org.jfree.chart.renderer.category.StandardBarPainter;
 import org.jfree.chart.renderer.xy.StandardXYBarPainter;
 import org.jfree.chart.renderer.xy.XYBarRenderer;
 import org.jfree.data.statistics.HistogramDataset;

@@ -1,16 +1,17 @@
 package org.hkijena.misa_imagej.extension.plotbuilder;
 
-import org.hkijena.misa_imagej.ui.workbench.plotbuilder.*;
+import org.hkijena.misa_imagej.ui.workbench.plotbuilder.MISANumericPlotSeriesColumn;
+import org.hkijena.misa_imagej.ui.workbench.plotbuilder.MISAPlot;
+import org.hkijena.misa_imagej.ui.workbench.plotbuilder.MISAPlotSeries;
+import org.hkijena.misa_imagej.ui.workbench.plotbuilder.MISAPlotSeriesGenerator;
 import org.hkijena.misa_imagej.utils.StringUtils;
 import org.jfree.chart.JFreeChart;
-import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
 import javax.swing.table.DefaultTableModel;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 public abstract class XYPlot extends MISAPlot {

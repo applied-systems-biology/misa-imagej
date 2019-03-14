@@ -7,7 +7,6 @@ import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import java.awt.*;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class DefaultMISAPlotSettingsUI extends MISAPlotSettingsUI {

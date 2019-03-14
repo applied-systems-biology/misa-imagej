@@ -2,7 +2,6 @@ package org.hkijena.misa_imagej.extension.plotbuilder;
 
 import org.hkijena.misa_imagej.ui.workbench.plotbuilder.*;
 import org.jfree.chart.JFreeChart;
-import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.general.DefaultPieDataset;
 
 import javax.swing.table.DefaultTableModel;
