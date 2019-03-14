@@ -7,10 +7,7 @@ import org.hkijena.misa_imagej.utils.ui.DocumentChangeListener;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import java.awt.*;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class MISAPlotSeriesUI extends JPanel {
     private static final Color BORDER_COLOR = new Color(128, 128, 128);
@@ -97,6 +94,21 @@ public class MISAPlotSeriesUI extends JPanel {
                     }
                 });
             }
+            else if(Number.class.isAssignableFrom(series.getParameterType(key))) {
+                JSpinner spinner = new JSpinner(new SpinnerNumberModel());
+                spinner.setValue(series.getParameterValue(key));
+                spinner.addChangeListener(e -> series.setParameterValue(key, spinner.getValue()));
+                content.add(spinner, new GridBagConstraints() {
+                    {
+                        gridx = 1;
+                        gridy = finalRow;
+                        anchor = GridBagConstraints.WEST;
+                        insets = UIUtils.UI_PADDING;
+                        fill = GridBagConstraints.HORIZONTAL;
+                        weightx = 1;
+                    }
+                });
+            }
             else {
                 continue;
             }
@@ -113,9 +125,11 @@ public class MISAPlotSeriesUI extends JPanel {
         for (Map.Entry<String, MISAPlotSeriesColumn> entry : series.getColumns().entrySet()) {
             JLabel label = new JLabel(entry.getKey());
             JComboBox<Integer> column = new JComboBox<>();
-            column.setRenderer(new Renderer(plot));
+            column.setRenderer(new Renderer(entry.getValue(), plot));
 
-            column.addItem(-1);
+            for(int i = 0; i < entry.getValue().getGenerators().size(); ++i) {
+                column.addItem(-(i + 1));
+            }
             for (int i = 0; i < plot.getTableModel().getColumnCount(); ++i) {
                 column.addItem(i);
             }
@@ -154,15 +168,19 @@ public class MISAPlotSeriesUI extends JPanel {
             ++row;
         }
 
-        revalidate();
-        repaint();
+        SwingUtilities.invokeLater(() -> {
+            revalidate();
+            repaint();
+        });
     }
 
     public static class Renderer extends JLabel implements ListCellRenderer<Integer> {
 
+        private MISAPlotSeriesColumn column;
         private MISAPlot plot;
 
-        public Renderer(MISAPlot plot) {
+        public Renderer(MISAPlotSeriesColumn column, MISAPlot plot) {
+            this.column = column;
             this.plot = plot;
             setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
         }
@@ -173,7 +191,8 @@ public class MISAPlotSeriesUI extends JPanel {
                 setText(plot.getTableModel().getColumnName(value));
                 setIcon(UIUtils.getIconFromResources("select-column.png"));
             } else {
-                setText("Generate");
+                MISAPlotSeriesGenerator generator = (MISAPlotSeriesGenerator) column.getGenerators().get(-value - 1);
+                setText(generator.getName());
                 setIcon(UIUtils.getIconFromResources("cog.png"));
             }
             return this;

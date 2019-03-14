@@ -1,9 +1,6 @@
 package org.hkijena.misa_imagej.extension.plotbuilder;
 
-import org.hkijena.misa_imagej.ui.workbench.plotbuilder.MISANumericPlotSeriesColumn;
-import org.hkijena.misa_imagej.ui.workbench.plotbuilder.MISAPlot;
-import org.hkijena.misa_imagej.ui.workbench.plotbuilder.MISAPlotSeries;
-import org.hkijena.misa_imagej.ui.workbench.plotbuilder.MISAStringPlotSeriesColumn;
+import org.hkijena.misa_imagej.ui.workbench.plotbuilder.*;
 import org.jfree.chart.JFreeChart;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.general.DefaultPieDataset;
@@ -33,8 +30,10 @@ public abstract class PiePlot extends MISAPlot {
     @Override
     protected MISAPlotSeries createSeries() {
         MISAPlotSeries series = new MISAPlotSeries();
-        series.addColumn("Category", new MISAStringPlotSeriesColumn(getTableModel(), x -> "Category " + x));
-        series.addColumn("Amount", new MISANumericPlotSeriesColumn(getTableModel(), x -> 1.0));
+        series.addColumn("Category", new MISAStringPlotSeriesColumn(getTableModel(),
+                new MISAPlotSeriesGenerator<>("No category", x -> "No category")));
+        series.addColumn("Amount", new MISANumericPlotSeriesColumn(getTableModel(),
+                new MISAPlotSeriesGenerator<>("Zero", x -> 0.0)));
         return series;
     }
 

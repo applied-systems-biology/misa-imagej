@@ -196,6 +196,7 @@ public class MISARuntimeLogUI extends JPanel {
         allocationPlotReader.getChartPanel().setChart(chart);
         allocationPlotReader.getChartPanel().setMaximumDrawWidth(Integer.MAX_VALUE);
         allocationPlotReader.getChartPanel().setMaximumDrawHeight(Integer.MAX_VALUE);
+
         revalidate();
         repaint();
     }

@@ -7,8 +7,9 @@ import java.util.function.Function;
 
 public class MISAStringPlotSeriesColumn extends MISAPlotSeriesColumn<String> {
 
-    public MISAStringPlotSeriesColumn(DefaultTableModel tableModel, Function<Integer, String> generatorFunction) {
-        super(tableModel, generatorFunction);
+    @SafeVarargs
+    public MISAStringPlotSeriesColumn(DefaultTableModel tableModel, MISAPlotSeriesGenerator<String> defaultGenerator, MISAPlotSeriesGenerator<String>... additionalGenerators) {
+        super(tableModel, defaultGenerator, additionalGenerators);
     }
 
     @Override

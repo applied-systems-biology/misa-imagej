@@ -4,25 +4,30 @@ import com.google.common.eventbus.EventBus;
 
 import javax.swing.table.DefaultTableModel;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import java.util.function.Function;
 
 public abstract class MISAPlotSeriesColumn<T> {
     private DefaultTableModel tableModel;
-    private Function<Integer, T> generatorFunction;
+    private List<MISAPlotSeriesGenerator<T>> generators;
     private int columnIndex = -1;
     private EventBus eventBus = new EventBus();
 
-    public MISAPlotSeriesColumn(DefaultTableModel tableModel, Function<Integer, T> generatorFunction) {
+    @SafeVarargs
+    public MISAPlotSeriesColumn(DefaultTableModel tableModel, MISAPlotSeriesGenerator<T> defaultGenerator, MISAPlotSeriesGenerator<T>... additionalGenerators) {
         this.tableModel = tableModel;
-        this.generatorFunction = generatorFunction;
+        this.generators = new ArrayList<>();
+        this.generators.add(defaultGenerator);
+        this.generators.addAll(Arrays.asList(additionalGenerators));
     }
 
     public List<T> getValues() {
         if(columnIndex < 0) {
+            MISAPlotSeriesGenerator<T> generator = generators.get(-columnIndex - 1);
             List<T> result = new ArrayList<>(tableModel.getRowCount());
             for(int row = 0; row < tableModel.getRowCount(); ++row) {
-                result.add(generatorFunction.apply(row));
+                result.add(generator.getGeneratorFunction().apply(row));
             }
             return result;
         }
@@ -48,6 +53,10 @@ public abstract class MISAPlotSeriesColumn<T> {
 
     public EventBus getEventBus() {
         return eventBus;
+    }
+
+    public List<MISAPlotSeriesGenerator<T>> getGenerators() {
+        return Collections.unmodifiableList(generators);
     }
 
     public static class DataChangedEvent {

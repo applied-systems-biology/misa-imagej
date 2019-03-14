@@ -140,6 +140,8 @@ public class MISAPlotBuilderUI extends JPanel {
         if(currentPlot != null) {
             // Rebuild the chart
             plotReader.getChartPanel().setChart(currentPlot.createPlot());
+            plotReader.getChartPanel().setMaximumDrawWidth(Integer.MAX_VALUE);
+            plotReader.getChartPanel().setMaximumDrawHeight(Integer.MAX_VALUE);
         }
     }
 
@@ -147,6 +149,11 @@ public class MISAPlotBuilderUI extends JPanel {
     public void handlePlotChangedEvent(MISAPlot.PlotChangedEvent event) {
         if(toggleAutoUpdate.isSelected())
             updatePlot();
+    }
+
+    @Subscribe
+    public void handlePlotChangedSeriesListEvent(MISAPlot.PlotSeriesListChangedEvent event) {
+        updatePlotSettings();
     }
 
     private void openTable() {
@@ -179,7 +186,7 @@ public class MISAPlotBuilderUI extends JPanel {
                 setBackground(new Color(255,255,255));
             }
 
-            if(list.getSelectedValue() == value) {
+            if(cellHasFocus) {
                 setBorder(null);
             }
             else {

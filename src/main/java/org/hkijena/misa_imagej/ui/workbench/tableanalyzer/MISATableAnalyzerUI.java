@@ -308,10 +308,14 @@ public class MISATableAnalyzerUI extends JPanel {
                     }
 
                     buffer = operation.process(buffer);
+                    Vector tableData = tableModel.getDataVector();
 
                     for(int i = 0; i < cellCount; ++i) {
-                        tableModel.setValueAt(buffer[i], selectedCells.get(i).getRow(), selectedCells.get(i).getColumn());
+                        ((Vector)tableData.get(selectedCells.get(i).getRow())).set(selectedCells.get(i).getColumn(), buffer[i]);
                     }
+
+                    tableModel.setDataVector(tableData, getColumnIdentifiers());
+                    jxTable.packAll();
                 });
                 convertSelectedCellsMenu.add(item);
             }

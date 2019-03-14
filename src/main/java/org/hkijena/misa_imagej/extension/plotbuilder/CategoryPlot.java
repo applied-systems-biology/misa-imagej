@@ -1,9 +1,6 @@
 package org.hkijena.misa_imagej.extension.plotbuilder;
 
-import org.hkijena.misa_imagej.ui.workbench.plotbuilder.MISANumericPlotSeriesColumn;
-import org.hkijena.misa_imagej.ui.workbench.plotbuilder.MISAPlot;
-import org.hkijena.misa_imagej.ui.workbench.plotbuilder.MISAPlotSeries;
-import org.hkijena.misa_imagej.ui.workbench.plotbuilder.MISAStringPlotSeriesColumn;
+import org.hkijena.misa_imagej.ui.workbench.plotbuilder.*;
 import org.jfree.chart.JFreeChart;
 import org.jfree.data.category.DefaultCategoryDataset;
 
@@ -34,9 +31,12 @@ public abstract class CategoryPlot extends MISAPlot {
     @Override
     protected MISAPlotSeries createSeries() {
         MISAPlotSeries series = new MISAPlotSeries();
-        series.addColumn("X Axis", new MISAStringPlotSeriesColumn(getTableModel(), x -> "x" + x));
-        series.addColumn("Category", new MISAStringPlotSeriesColumn(getTableModel(), x -> "No category"));
-        series.addColumn("Value", new MISANumericPlotSeriesColumn(getTableModel(), x -> (double)x));
+        series.addColumn("X", new MISAStringPlotSeriesColumn(getTableModel(),
+                new MISAPlotSeriesGenerator<>("Automatically generated", x -> "x" + x)));
+        series.addColumn("Category", new MISAStringPlotSeriesColumn(getTableModel(),
+                new MISAPlotSeriesGenerator<>("No category", x -> "No category")));
+        series.addColumn("Value", new MISANumericPlotSeriesColumn(getTableModel(),
+                new MISAPlotSeriesGenerator<>("Row index", x -> (double)x)));
         return series;
     }
 
@@ -47,9 +47,9 @@ public abstract class CategoryPlot extends MISAPlot {
     protected void updateDataset() {
         dataset.clear();
         MISAPlotSeries series = getSeries().get(0);
-        List<String> xvalues = ((MISAStringPlotSeriesColumn)series.getColumns().get("X Axis")).getValues();
-        List<String> categories = ((MISAStringPlotSeriesColumn)series.getColumns().get("Category")).getValues();
-        List<Double> values = ((MISANumericPlotSeriesColumn)series.getColumns().get("Value")).getValues();
+        List<String> xvalues = series.getAsStringColumn("X").getValues();
+        List<String> categories = series.getAsStringColumn("Category").getValues();
+        List<Double> values = series.getAsNumericColumn("Value").getValues();
         for(int i = 0; i < xvalues.size(); ++i) {
             dataset.addValue(values.get(i), categories.get(i), xvalues.get(i));
         }

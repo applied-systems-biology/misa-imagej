@@ -1,17 +1,17 @@
 package org.hkijena.misa_imagej.extension.plotbuilder;
 
-import org.hkijena.misa_imagej.ui.workbench.plotbuilder.MISANumericPlotSeriesColumn;
-import org.hkijena.misa_imagej.ui.workbench.plotbuilder.MISAPlot;
-import org.hkijena.misa_imagej.ui.workbench.plotbuilder.MISAPlotSeries;
-import org.hkijena.misa_imagej.ui.workbench.plotbuilder.MISAStringPlotSeriesColumn;
+import org.hkijena.misa_imagej.ui.workbench.plotbuilder.*;
+import org.hkijena.misa_imagej.utils.StringUtils;
 import org.jfree.chart.JFreeChart;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
 import javax.swing.table.DefaultTableModel;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public abstract class XYPlot extends MISAPlot {
 
@@ -38,8 +38,10 @@ public abstract class XYPlot extends MISAPlot {
     protected MISAPlotSeries createSeries() {
         MISAPlotSeries series = new MISAPlotSeries();
         series.addParameter("Name", "Series");
-        series.addColumn("X", new MISANumericPlotSeriesColumn(getTableModel(), x -> (double)x));
-        series.addColumn("Y", new MISANumericPlotSeriesColumn(getTableModel(), x -> (double)x));
+        series.addColumn("X", new MISANumericPlotSeriesColumn(getTableModel(),
+                new MISAPlotSeriesGenerator<>("Row number", x -> (double)x)));
+        series.addColumn("Y", new MISANumericPlotSeriesColumn(getTableModel(),
+                new MISAPlotSeriesGenerator<>("Row number", x -> (double)x)));
         return series;
     }
 
@@ -47,14 +49,18 @@ public abstract class XYPlot extends MISAPlot {
 
     protected void updateDataset() {
         dataset.removeAllSeries();
+        Set<String> existingSeries = new HashSet<>();
         for(MISAPlotSeries seriesEntry : series) {
-            XYSeries chartSeries = new XYSeries((String)seriesEntry.getParameterValue("Name"), true);
+            String name = StringUtils.makeUniqueString(seriesEntry.getParameterValue("Name").toString(), existingSeries);
+            XYSeries chartSeries = new XYSeries(name, true);
+
             List<Double> xValues = ((MISANumericPlotSeriesColumn)seriesEntry.getColumns().get("X")).getValues();
             List<Double> yValues = ((MISANumericPlotSeriesColumn)seriesEntry.getColumns().get("Y")).getValues();
             for(int i = 0; i < xValues.size(); ++i) {
                 chartSeries.add(xValues.get(i), yValues.get(i));
             }
             dataset.addSeries(chartSeries);
+            existingSeries.add(name);
         }
     }
 

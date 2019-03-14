@@ -140,6 +140,9 @@ public class StandardMISAImageJExtensionService extends AbstractService implemen
         registryService.getPlotBuilderRegistry().register(ScatterXYPlot.class,
                 "XY Scatter Plot",
                 UIUtils.getIconFromResources("scatter-chart.png"));
+        registryService.getPlotBuilderRegistry().register(HistogramPlot.class,
+                "Histogram Plot",
+                UIUtils.getIconFromResources("bar-chart.png"));
 
     }
 }

@@ -56,6 +56,14 @@ public class MISAPlotSeries {
         return parameters.keySet().stream().sorted().collect(Collectors.toList());
     }
 
+    public MISANumericPlotSeriesColumn getAsNumericColumn(String name) {
+        return (MISANumericPlotSeriesColumn)columns.get(name);
+    }
+
+    public MISAStringPlotSeriesColumn getAsStringColumn(String name) {
+        return (MISAStringPlotSeriesColumn)columns.get(name);
+    }
+
     public static class DataChangedEvent {
         private MISAPlotSeries series;
 

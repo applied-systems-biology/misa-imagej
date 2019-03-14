@@ -17,7 +17,6 @@ public class BarCategoryPlot extends CategoryPlot {
     @Override
     protected JFreeChart createPlotFromDataset(DefaultCategoryDataset dataset) {
         JFreeChart chart = ChartFactory.createBarChart(getTitle(), getCategoryAxisLabel(), getValueAxisLabel(), dataset);
-        chart.setTitle(getTitle());
         ((BarRenderer)chart.getCategoryPlot().getRenderer()).setBarPainter(new StandardBarPainter());
         return chart;
     }
