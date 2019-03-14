@@ -96,7 +96,7 @@ public class MISAPlotBuilderUI extends JPanel {
         seriesPanel.add(new JScrollPane(plotSeriesListPanel), BorderLayout.CENTER);
         tabbedPane.addTab("Data", UIUtils.getIconFromResources("table.png"), seriesPanel);
 
-        plotSettingsPanel = new JPanel(new GridBagLayout());
+        plotSettingsPanel = new JPanel(new BorderLayout());
         tabbedPane.addTab("Settings", UIUtils.getIconFromResources("wrench.png"), plotSettingsPanel);
 
         panel.add(tabbedPane, BorderLayout.CENTER);
@@ -122,6 +122,10 @@ public class MISAPlotBuilderUI extends JPanel {
         if(currentPlot != null) {
             // Update the settings
             plotSettingsPanel.removeAll();
+            plotSettingsPanel.add(MISAImageJRegistryService.getInstance().
+                    getPlotBuilderRegistry().createSettingsUIFor(currentPlot), BorderLayout.NORTH);
+            plotSettingsPanel.revalidate();
+            plotSettingsPanel.repaint();
 
             // Update the series list
             plotSeriesEditorToolBar.setVisible(currentPlot.canAddSeries());

@@ -13,7 +13,7 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 import java.awt.*;
 
-public class MISAAttachmentCacheFilterUI extends GenericTabularMISAAttachmentFilterUI {
+public class MISAAttachmentCacheFilterUI extends DefaultTabularMISAAttachmentFilterUI {
 
     public MISAAttachmentCacheFilterUI(MISAAttachmentFilter filter) {
         super(filter);

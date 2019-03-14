@@ -11,12 +11,12 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.io.IOException;
 
-public class GenericMISAOutputCacheUI extends MISAOutputCacheUI {
+public class DefaultMISAOutputCacheUI extends MISAOutputCacheUI {
 
     private JButton firstButton;
     private JPopupMenu additionalActionsMenu;
 
-    public GenericMISAOutputCacheUI(MISAOutput misaOutput, MISACache cache) {
+    public DefaultMISAOutputCacheUI(MISAOutput misaOutput, MISACache cache) {
         super(misaOutput, cache);
 
         setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));

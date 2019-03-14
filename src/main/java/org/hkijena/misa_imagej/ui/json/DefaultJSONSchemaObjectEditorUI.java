@@ -12,9 +12,9 @@ import java.util.Comparator;
  * Editor that can edit any JSON schema
  * This is used as fallback if the parameter is not serializeable or has no editor assigned to it
  */
-public class GenericJSONSchemaObjectEditorUI extends JSONSchemaObjectEditorUI {
+public class DefaultJSONSchemaObjectEditorUI extends JSONSchemaObjectEditorUI {
 
-    public GenericJSONSchemaObjectEditorUI(JSONSchemaObject object) {
+    public DefaultJSONSchemaObjectEditorUI(JSONSchemaObject object) {
         super(object);
     }
 

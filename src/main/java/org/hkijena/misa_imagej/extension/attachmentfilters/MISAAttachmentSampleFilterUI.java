@@ -9,7 +9,7 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
-public class MISAAttachmentSampleFilterUI extends GenericTabularMISAAttachmentFilterUI {
+public class MISAAttachmentSampleFilterUI extends DefaultTabularMISAAttachmentFilterUI {
 
     private JTable selectionTable;
 

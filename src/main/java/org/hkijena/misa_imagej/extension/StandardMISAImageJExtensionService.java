@@ -120,27 +120,35 @@ public class StandardMISAImageJExtensionService extends AbstractService implemen
                 UIUtils.getIconFromResources("inplace-function.png"));
 
         registryService.getPlotBuilderRegistry().register(LineCategoryPlot.class,
+                CategoryPlotSettingsUI.class,
                 "Line Plot",
                 UIUtils.getIconFromResources("line-chart.png"));
         registryService.getPlotBuilderRegistry().register(BarCategoryPlot.class,
+                CategoryPlotSettingsUI.class,
                 "Bar Plot",
                 UIUtils.getIconFromResources("bar-chart.png"));
         registryService.getPlotBuilderRegistry().register(StackedBarCategoryPlot.class,
+                CategoryPlotSettingsUI.class,
                 "Stacked Bar Plot",
                 UIUtils.getIconFromResources("bar-chart.png"));
         registryService.getPlotBuilderRegistry().register(Pie2DPlot.class,
+                PiePlotSettingsUI.class,
                 "2D Pie Plot",
                 UIUtils.getIconFromResources("pie-chart.png"));
         registryService.getPlotBuilderRegistry().register(Pie3DPlot.class,
+                PiePlotSettingsUI.class,
                 "3D Pie Plot",
                 UIUtils.getIconFromResources("pie-chart.png"));
         registryService.getPlotBuilderRegistry().register(LineXYPlot.class,
+                XYPlotSettingsUI.class,
                 "XY Line Plot",
                 UIUtils.getIconFromResources("line-chart.png"));
         registryService.getPlotBuilderRegistry().register(ScatterXYPlot.class,
+                XYPlotSettingsUI.class,
                 "XY Scatter Plot",
                 UIUtils.getIconFromResources("scatter-chart.png"));
         registryService.getPlotBuilderRegistry().register(HistogramPlot.class,
+                HistogramPlotSettingsUI.class,
                 "Histogram Plot",
                 UIUtils.getIconFromResources("bar-chart.png"));
 

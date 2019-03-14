@@ -45,7 +45,7 @@ public class JSONSchemaEditorRegistry {
                 }
             }
         }
-        return new GenericJSONSchemaObjectEditorUI(schemaObject);
+        return new DefaultJSONSchemaObjectEditorUI(schemaObject);
     }
 
     /**

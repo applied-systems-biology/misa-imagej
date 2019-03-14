@@ -9,11 +9,11 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import java.awt.*;
 
-public abstract class GenericTabularMISAAttachmentFilterUI extends MISAAttachmentFilterUI {
+public abstract class DefaultTabularMISAAttachmentFilterUI extends MISAAttachmentFilterUI {
 
     private JTable selectionTable;
 
-    public GenericTabularMISAAttachmentFilterUI(MISAAttachmentFilter filter) {
+    public DefaultTabularMISAAttachmentFilterUI(MISAAttachmentFilter filter) {
         super(filter);
         initialize();
     }

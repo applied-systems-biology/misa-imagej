@@ -12,7 +12,7 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 import java.awt.*;
 
-public class MISAAttachmentTypeFilterUI extends GenericTabularMISAAttachmentFilterUI {
+public class MISAAttachmentTypeFilterUI extends DefaultTabularMISAAttachmentFilterUI {
 
     private JTable selectionTable;
 

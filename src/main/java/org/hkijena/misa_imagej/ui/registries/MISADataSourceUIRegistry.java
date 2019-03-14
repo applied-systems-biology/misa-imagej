@@ -1,7 +1,7 @@
 package org.hkijena.misa_imagej.ui.registries;
 
 import org.hkijena.misa_imagej.api.MISADataSource;
-import org.hkijena.misa_imagej.ui.datasources.GenericMISADataSourceUI;
+import org.hkijena.misa_imagej.ui.datasources.DefaultMISADataSourceUI;
 import org.hkijena.misa_imagej.ui.datasources.MISADataSourceUI;
 
 import java.util.HashMap;
@@ -35,7 +35,7 @@ public class MISADataSourceUIRegistry {
     public MISADataSourceUI getEditorFor(MISADataSource source) {
         Class<? extends MISADataSourceUI> result = registeredCacheEditors.getOrDefault(source.getClass(), null);
         if(result == null)
-            return new GenericMISADataSourceUI(source);
+            return new DefaultMISADataSourceUI(source);
         else {
             try {
                 return result.getConstructor(MISADataSource.class).newInstance(source);

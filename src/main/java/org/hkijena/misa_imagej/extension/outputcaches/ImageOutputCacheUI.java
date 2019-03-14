@@ -7,7 +7,7 @@ import org.hkijena.misa_imagej.utils.UIUtils;
 
 import javax.swing.*;
 
-public class ImageOutputCacheUI extends GenericMISAOutputCacheUI {
+public class ImageOutputCacheUI extends DefaultMISAOutputCacheUI {
     public ImageOutputCacheUI(MISAOutput misaOutput, MISACache cache) {
         super(misaOutput, cache);
     }

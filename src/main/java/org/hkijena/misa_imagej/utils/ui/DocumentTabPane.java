@@ -1,11 +1,13 @@
 package org.hkijena.misa_imagej.utils.ui;
 
+import org.hkijena.misa_imagej.utils.StringUtils;
 import org.hkijena.misa_imagej.utils.UIUtils;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class DocumentTabPane extends JTabbedPane {
 
@@ -15,6 +17,8 @@ public class DocumentTabPane extends JTabbedPane {
         withoutCloseButton,
         withDisabledCloseButton
     }
+
+    private List<DocumentTab> tabs = new ArrayList<>();
 
     /**
      * Contains tabs that can be closed, but opened again
@@ -35,6 +39,9 @@ public class DocumentTabPane extends JTabbedPane {
      * @return The tab component
      */
     public DocumentTab addTab(String title, Icon icon, Component component, CloseMode closeMode, boolean allowRename) {
+
+        title = StringUtils.makeUniqueString(title, tabs.stream().map(documentTab -> documentTab.getTitle()).collect(Collectors.toList()));
+
         // Create tab panel
         JPanel tabPanel = new JPanel();
         tabPanel.setBorder(BorderFactory.createEmptyBorder(4,0,4,0));
@@ -43,6 +50,8 @@ public class DocumentTabPane extends JTabbedPane {
         JLabel titleLabel = new JLabel(title, icon, JLabel.LEFT);
         tabPanel.add(titleLabel);
         tabPanel.add(Box.createHorizontalGlue());
+
+        DocumentTab tab = new DocumentTab(title, icon, tabPanel, component);
 
         if(allowRename) {
             JButton renameButton = new JButton(UIUtils.getIconFromResources("label.png"));
@@ -71,12 +80,12 @@ public class DocumentTabPane extends JTabbedPane {
                     return;
                 }
                 remove(component);
+                tabs.remove(tab);
             });
             tabPanel.add(Box.createHorizontalStrut(8));
             tabPanel.add(closeButton);
         }
 
-        DocumentTab tab = new DocumentTab(title, icon, tabPanel, component);
         addTab(tab);
         return tab;
     }
@@ -119,6 +128,7 @@ public class DocumentTabPane extends JTabbedPane {
     private void addTab(DocumentTab tab) {
         addTab(tab.getTitle(), tab.getIcon(), tab.getContent());
         setTabComponentAt(getTabCount() - 1, tab.getTabComponent());
+        tabs.add(tab);
     }
 
     public static class DocumentTab {

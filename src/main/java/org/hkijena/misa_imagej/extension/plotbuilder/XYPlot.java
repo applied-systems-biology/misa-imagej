@@ -15,8 +15,8 @@ import java.util.Set;
 
 public abstract class XYPlot extends MISAPlot {
 
-    private String xAxisLabel;
-    private String yAxisLabel;
+    private String xAxisLabel = "X";
+    private String yAxisLabel = "Y";
     private XYSeriesCollection dataset = new XYSeriesCollection();
 
     public XYPlot(DefaultTableModel tableModel) {

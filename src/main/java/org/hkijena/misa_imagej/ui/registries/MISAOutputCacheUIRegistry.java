@@ -2,7 +2,7 @@ package org.hkijena.misa_imagej.ui.registries;
 
 import org.hkijena.misa_imagej.api.MISACache;
 import org.hkijena.misa_imagej.api.workbench.MISAOutput;
-import org.hkijena.misa_imagej.extension.outputcaches.GenericMISAOutputCacheUI;
+import org.hkijena.misa_imagej.extension.outputcaches.DefaultMISAOutputCacheUI;
 import org.hkijena.misa_imagej.ui.workbench.MISAOutputCacheUI;
 
 import java.util.HashMap;
@@ -31,7 +31,7 @@ public class MISAOutputCacheUIRegistry {
     public MISAOutputCacheUI getEditorFor(MISAOutput misaOutput, MISACache cache) {
         Class<? extends MISAOutputCacheUI> result = registeredCacheEditors.getOrDefault(cache.getClass(), null);
         if(result == null)
-            return new GenericMISAOutputCacheUI(misaOutput, cache);
+            return new DefaultMISAOutputCacheUI(misaOutput, cache);
         else {
             try {
                 return result.getConstructor(MISAOutput.class, MISACache.class).newInstance(misaOutput, cache);

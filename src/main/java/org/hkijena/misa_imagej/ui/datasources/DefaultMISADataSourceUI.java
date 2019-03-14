@@ -4,9 +4,9 @@ import org.hkijena.misa_imagej.api.MISADataSource;
 
 import java.awt.*;
 
-public class GenericMISADataSourceUI extends MISADataSourceUI {
+public class DefaultMISADataSourceUI extends MISADataSourceUI {
 
-    public GenericMISADataSourceUI(MISADataSource dataSource) {
+    public DefaultMISADataSourceUI(MISADataSource dataSource) {
         super(dataSource);
     }
 

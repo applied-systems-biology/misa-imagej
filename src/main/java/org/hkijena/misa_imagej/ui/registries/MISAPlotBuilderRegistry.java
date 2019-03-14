@@ -1,6 +1,7 @@
 package org.hkijena.misa_imagej.ui.registries;
 
 import org.hkijena.misa_imagej.ui.workbench.plotbuilder.MISAPlot;
+import org.hkijena.misa_imagej.ui.workbench.plotbuilder.MISAPlotSettingsUI;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -11,8 +12,8 @@ public class MISAPlotBuilderRegistry {
 
     private Map<Class<? extends MISAPlot>, Entry> entries = new HashMap<>();
 
-    public void register(Class<? extends MISAPlot> plotType, String name, Icon icon) {
-        entries.put(plotType, new Entry(plotType, name, icon));
+    public void register(Class<? extends MISAPlot> plotType, Class<? extends MISAPlotSettingsUI> settingsType, String name, Icon icon) {
+        entries.put(plotType, new Entry(plotType, settingsType, name, icon));
     }
 
     public Collection<Entry> getEntries() {
@@ -39,13 +40,23 @@ public class MISAPlotBuilderRegistry {
         return plots;
     }
 
+    public MISAPlotSettingsUI createSettingsUIFor(MISAPlot plot) {
+        try {
+            return entries.get(plot.getClass()).getSettingsType().getConstructor(MISAPlot.class).newInstance(plot);
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public static class Entry {
         private Class<? extends MISAPlot> plotType;
+        private Class<? extends MISAPlotSettingsUI> settingsType;
         private String name;
         private Icon icon;
 
-        public Entry(Class<? extends MISAPlot> plotType, String name, Icon icon) {
+        public Entry(Class<? extends MISAPlot> plotType, Class<? extends MISAPlotSettingsUI> settingsType, String name, Icon icon) {
             this.plotType = plotType;
+            this.settingsType = settingsType;
             this.name = name;
             this.icon = icon;
         }
@@ -60,6 +71,10 @@ public class MISAPlotBuilderRegistry {
 
         public Icon getIcon() {
             return icon;
+        }
+
+        public Class<? extends MISAPlotSettingsUI> getSettingsType() {
+            return settingsType;
         }
     }
 }
