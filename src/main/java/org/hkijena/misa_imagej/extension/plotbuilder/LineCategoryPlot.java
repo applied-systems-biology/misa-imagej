@@ -1,43 +1,21 @@
 package org.hkijena.misa_imagej.extension.plotbuilder;
 
-import org.hkijena.misa_imagej.ui.workbench.plotbuilder.MISANumericPlotSeries;
-import org.hkijena.misa_imagej.ui.workbench.plotbuilder.MISAPlot;
-import org.hkijena.misa_imagej.ui.workbench.plotbuilder.MISAPlotSeries;
-import org.hkijena.misa_imagej.ui.workbench.plotbuilder.MISAStringPlotSeries;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.JFreeChart;
 import org.jfree.data.category.DefaultCategoryDataset;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import javax.swing.table.DefaultTableModel;
 
-public class LineCategoryPlot implements MISAPlot {
-
-    private static final Map<String, Class<? extends MISAPlotSeries>> DESCRIPTION = createDescription();
-
-    @Override
-    public int getDefaultSeriesCount() {
-        return 1;
+public class LineCategoryPlot extends CategoryPlot {
+    public LineCategoryPlot(DefaultTableModel tableModel) {
+        super(tableModel);
+        setTitle("Line category plot");
     }
 
     @Override
-    public int getMinSeriesCount() {
-        return 1;
-    }
-
-    @Override
-    public int getMaxSeriesCount() {
-        return 1;
-    }
-
-    @Override
-    public Map<String, Class<? extends MISAPlotSeries>> getSeriesDescription() {
-        return Collections.unmodifiableMap(DESCRIPTION);
-    }
-
-    private static Map<String, Class<? extends MISAPlotSeries>> createDescription() {
-        Map<String, Class<? extends MISAPlotSeries>> result = new HashMap<>();
-        result.put("Category", MISAStringPlotSeries.class);
-        result.put("Value", MISANumericPlotSeries.class);
-        return result;
+    protected JFreeChart createPlotFromDataset(DefaultCategoryDataset dataset) {
+        JFreeChart chart = ChartFactory.createLineChart(getTitle(), getCategoryAxisLabel(), getValueAxisLabel(), dataset);
+        chart.setTitle(getTitle());
+        return chart;
     }
 }

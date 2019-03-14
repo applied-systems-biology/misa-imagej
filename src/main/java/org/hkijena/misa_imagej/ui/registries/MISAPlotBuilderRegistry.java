@@ -3,6 +3,7 @@ package org.hkijena.misa_imagej.ui.registries;
 import org.hkijena.misa_imagej.ui.workbench.plotbuilder.MISAPlot;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
@@ -26,11 +27,11 @@ public class MISAPlotBuilderRegistry {
         return entries.get(plot.getClass()).getIcon();
     }
 
-    public List<MISAPlot> createAllPlots() {
+    public List<MISAPlot> createAllPlots(DefaultTableModel tableModel) {
         List<MISAPlot> plots = new ArrayList<>();
         for(Entry entry : entries.values()) {
             try {
-                plots.add(entry.getPlotType().getConstructor().newInstance());
+                plots.add(entry.getPlotType().getConstructor(DefaultTableModel.class).newInstance(tableModel));
             } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
                 throw new RuntimeException(e);
             }

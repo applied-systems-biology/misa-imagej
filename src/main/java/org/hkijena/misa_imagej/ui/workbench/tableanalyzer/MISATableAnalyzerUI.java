@@ -89,6 +89,10 @@ public class MISATableAnalyzerUI extends JPanel {
         copyColumnButton.addActionListener(e -> copyColumn());
         addColumnMenu.add(copyColumnButton);
 
+        JMenuItem addNewCombinedColumnButton = new JMenuItem("Combine selected columns", UIUtils.getIconFromResources("statistics.png"));
+        addNewCombinedColumnButton.addActionListener(e -> addNewCombinedColumn());
+        addColumnMenu.add(addNewCombinedColumnButton);
+
         toolBar.add(addColumnButton);
 
         JButton removeRowButton = new JButton(UIUtils.getIconFromResources("remove-row.png"));
@@ -163,6 +167,8 @@ public class MISATableAnalyzerUI extends JPanel {
 
         jxTable.getSelectionModel().addListSelectionListener(listSelectionEvent -> updateConvertMenu());
     }
+
+
 
     private void createNewPlot() {
         workbench.addTab("Plot",
@@ -360,6 +366,45 @@ public class MISATableAnalyzerUI extends JPanel {
             for(int i = 0; i < tableModel.getRowCount(); ++i) {
                 tableModel.setValueAt(tableModel.getValueAt(i, sourceColumn), i, tableModel.getColumnCount() - 1);
             }
+            jxTable.packAll();
+        }
+    }
+
+    private void addNewCombinedColumn() {
+        if(jxTable.getSelectedColumns() != null && jxTable.getSelectedColumns().length > 0) {
+            int[] sourceColumns = jxTable.getSelectedColumns();
+            for(int i = 0; i < sourceColumns.length; ++i) {
+                sourceColumns[i] = jxTable.convertColumnIndexToModel(sourceColumns[i]);
+            }
+
+            StringBuilder generatedName = new StringBuilder();
+            for(int i = 0; i < sourceColumns.length; ++i) {
+                if(i > 0)
+                    generatedName.append(", ");
+                generatedName.append(tableModel.getColumnName(sourceColumns[i]));
+            }
+
+            String name = JOptionPane.showInputDialog(this,
+                    "Please provide a name for the new column", generatedName.toString());
+            if (name != null && !name.isEmpty()) {
+                createUndoSnapshot();
+                tableModel.addColumn(name);
+
+                StringBuilder valueBuffer = new StringBuilder();
+                for(int row = 0; row < tableModel.getRowCount(); ++row) {
+                    valueBuffer.setLength(0);
+                    for(int i = 0; i < sourceColumns.length; ++i) {
+                        if (i > 0)
+                            valueBuffer.append(", ");
+                        valueBuffer.append(tableModel.getColumnName(sourceColumns[i]));
+                        valueBuffer.append("=");
+                        valueBuffer.append(tableModel.getValueAt(row, sourceColumns[i]));
+                    }
+
+                    tableModel.setValueAt(valueBuffer.toString(), row, tableModel.getColumnCount() - 1);
+                }
+            }
+
             jxTable.packAll();
         }
     }

@@ -8,7 +8,7 @@ import org.hkijena.misa_imagej.extension.caches.MISAFileCache;
 import org.hkijena.misa_imagej.extension.caches.MISAOMETiffCache;
 import org.hkijena.misa_imagej.extension.datasources.*;
 import org.hkijena.misa_imagej.extension.outputcaches.OMETiffOutputCacheUI;
-import org.hkijena.misa_imagej.extension.plotbuilder.LineCategoryPlot;
+import org.hkijena.misa_imagej.extension.plotbuilder.*;
 import org.hkijena.misa_imagej.extension.tableanalyzer.*;
 import org.hkijena.misa_imagej.ui.workbench.tableanalyzer.MISATableVectorOperationUI;
 import org.hkijena.misa_imagej.utils.UIUtils;
@@ -120,8 +120,26 @@ public class StandardMISAImageJExtensionService extends AbstractService implemen
                 UIUtils.getIconFromResources("inplace-function.png"));
 
         registryService.getPlotBuilderRegistry().register(LineCategoryPlot.class,
-                "Line Category Plot",
-                UIUtils.getIconFromResources("graph.png"));
+                "Line Plot",
+                UIUtils.getIconFromResources("line-chart.png"));
+        registryService.getPlotBuilderRegistry().register(BarCategoryPlot.class,
+                "Bar Plot",
+                UIUtils.getIconFromResources("bar-chart.png"));
+        registryService.getPlotBuilderRegistry().register(StackedBarCategoryPlot.class,
+                "Stacked Bar Plot",
+                UIUtils.getIconFromResources("bar-chart.png"));
+        registryService.getPlotBuilderRegistry().register(Pie2DPlot.class,
+                "2D Pie Plot",
+                UIUtils.getIconFromResources("pie-chart.png"));
+        registryService.getPlotBuilderRegistry().register(Pie3DPlot.class,
+                "3D Pie Plot",
+                UIUtils.getIconFromResources("pie-chart.png"));
+        registryService.getPlotBuilderRegistry().register(LineXYPlot.class,
+                "XY Line Plot",
+                UIUtils.getIconFromResources("line-chart.png"));
+        registryService.getPlotBuilderRegistry().register(ScatterXYPlot.class,
+                "XY Scatter Plot",
+                UIUtils.getIconFromResources("scatter-chart.png"));
 
     }
 }

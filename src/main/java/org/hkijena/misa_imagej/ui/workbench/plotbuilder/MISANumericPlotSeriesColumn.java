@@ -3,14 +3,16 @@ package org.hkijena.misa_imagej.ui.workbench.plotbuilder;
 import javax.swing.table.DefaultTableModel;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
-public class MISANumericPlotSeries extends MISAPlotSeries<Double> {
-    public MISANumericPlotSeries(DefaultTableModel tableModel, int columnIndex) {
-        super(tableModel, columnIndex);
+public class MISANumericPlotSeriesColumn extends MISAPlotSeriesColumn<Double> {
+
+    public MISANumericPlotSeriesColumn(DefaultTableModel tableModel, Function<Integer, Double> generatorFunction) {
+        super(tableModel, generatorFunction);
     }
 
     @Override
-    List<Double> getValues() {
+    protected List<Double> getValuesFromTable() {
         List<Double> result = new ArrayList<>(getTableModel().getRowCount());
         for(int row = 0; row < getTableModel().getRowCount(); ++row) {
             Object value = getTableModel().getValueAt(row, getColumnIndex());
@@ -25,14 +27,6 @@ public class MISANumericPlotSeries extends MISAPlotSeries<Double> {
                     result.add(0.0);
                 }
             }
-        }
-        return result;
-    }
-
-    public static List<Double> getGeneratedValues(int rows) {
-        List<Double> result = new ArrayList<>(rows);
-        for(int row = 0; row < rows; ++row) {
-            result.add((double) row);
         }
         return result;
     }

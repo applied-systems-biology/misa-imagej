@@ -1,24 +1,70 @@
 package org.hkijena.misa_imagej.ui.workbench.plotbuilder;
 
-import javax.swing.table.DefaultTableModel;
-import java.util.List;
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
 
-public abstract class MISAPlotSeries<T> {
-    private DefaultTableModel tableModel;
-    private int columnIndex;
+import java.util.*;
+import java.util.stream.Collectors;
 
-    public MISAPlotSeries(DefaultTableModel tableModel, int columnIndex) {
-        this.tableModel = tableModel;
-        this.columnIndex = columnIndex;
+public class MISAPlotSeries {
+    private Map<String, MISAPlotSeriesColumn> columns = new HashMap<>();
+    private Map<String, Object> parameters = new HashMap<>();
+    private Map<String, Class> parameterTypes = new HashMap<>();
+    private EventBus eventBus = new EventBus();
+
+    public MISAPlotSeries() {
+
     }
 
-    abstract List<T> getValues();
-
-    public DefaultTableModel getTableModel() {
-        return tableModel;
+    public void addColumn(String name, MISAPlotSeriesColumn column) {
+        columns.put(name, column);
+        column.getEventBus().register(this);
     }
 
-    public int getColumnIndex() {
-        return columnIndex;
+    @Subscribe
+    public void handleColumnDataChangedEvent(MISAPlotSeriesColumn.DataChangedEvent event) {
+        eventBus.post(new DataChangedEvent(this));
+    }
+
+    public Map<String, MISAPlotSeriesColumn> getColumns() {
+        return Collections.unmodifiableMap(columns);
+    }
+
+    public EventBus getEventBus() {
+        return eventBus;
+    }
+
+    public void addParameter(String key, Object defaultValue) {
+        parameters.put(key, Objects.requireNonNull(defaultValue));
+        parameterTypes.put(key, defaultValue.getClass());
+    }
+
+    public Class getParameterType(String key) {
+        return parameterTypes.get(key);
+    }
+
+    public Object getParameterValue(String key) {
+        return parameters.get(key);
+    }
+
+    public void setParameterValue(String key, Object value) {
+        parameters.put(key, Objects.requireNonNull(value));
+        getEventBus().post(new DataChangedEvent(this));
+    }
+
+    public List<String> getParameterNames() {
+        return parameters.keySet().stream().sorted().collect(Collectors.toList());
+    }
+
+    public static class DataChangedEvent {
+        private MISAPlotSeries series;
+
+        public DataChangedEvent(MISAPlotSeries series) {
+            this.series = series;
+        }
+
+        public MISAPlotSeries getSeries() {
+            return series;
+        }
     }
 }
