@@ -147,6 +147,7 @@ public class MISAMergeTableColumnsDialogUI extends JDialog {
                 }
             }
             targetModel.setDataVector(data, TableUtils.getColumnIdentifiers(targetModel));
+            tableAnalyzerUI.autoSizeColumns();
 
             setVisible(false);
         }
