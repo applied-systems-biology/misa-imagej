@@ -11,6 +11,7 @@ import org.hkijena.misa_imagej.ui.components.MarkdownReader;
 import org.hkijena.misa_imagej.ui.components.MemoryStatusUI;
 import org.hkijena.misa_imagej.ui.perfanalysis.MISARuntimeLogUI;
 import org.hkijena.misa_imagej.ui.workbench.objectbrowser.MISAAttachmentBrowserUI;
+import org.hkijena.misa_imagej.ui.workbench.tableanalyzer.MISATableImporterDialog;
 import org.hkijena.misa_imagej.utils.UIUtils;
 import org.hkijena.misa_imagej.utils.ui.DocumentTabPane;
 import org.jdesktop.swingx.JXStatusBar;
@@ -70,19 +71,24 @@ public class MISAWorkbenchUI extends JFrame{
         JButton openButton = new JButton("Open ...", UIUtils.getIconFromResources("open.png"));
         openButton.addActionListener(actionEvent -> open());
         toolBar.add(openButton);
+
+        JButton importTableButton = new JButton("Import table", UIUtils.getIconFromResources("table.png"));
+        importTableButton.addActionListener(e -> importTable());
+        toolBar.add(importTableButton);
+
         toolBar.addSeparator();
 
         JButton openDataBrowserButton = new JButton("Browse data", UIUtils.getIconFromResources("database.png"));
         openDataBrowserButton.addActionListener(e -> documentTabPane.selectSingletonTab("DATA_BROWSER"));
         toolBar.add(openDataBrowserButton);
 
+        JButton createAttachmentBrowserButton = new JButton("Browse quantification results", UIUtils.getIconFromResources("graph.png"));
+        createAttachmentBrowserButton.addActionListener(e -> openAttachmentBrowserTab());
+        toolBar.add(createAttachmentBrowserButton);
+
         JButton openRuntimeLogButton = new JButton("Analyze runtime",  UIUtils.getIconFromResources("clock.png"));
         openRuntimeLogButton.addActionListener(e -> documentTabPane.selectSingletonTab("RUNTIME_LOG"));
         toolBar.add(openRuntimeLogButton);
-
-        JButton createAttachmentBrowserButton = new JButton("Analyze quantification results", UIUtils.getIconFromResources("graph.png"));
-        createAttachmentBrowserButton.addActionListener(e -> openAttachmentBrowserTab());
-        toolBar.add(createAttachmentBrowserButton);
 
         toolBar.add(Box.createHorizontalGlue());
 
@@ -91,6 +97,15 @@ public class MISAWorkbenchUI extends JFrame{
         toolBar.add(helpButton);
 
         add(toolBar, BorderLayout.NORTH);
+    }
+
+    private void importTable() {
+        MISATableImporterDialog dialog = new MISATableImporterDialog(this);
+        dialog.pack();
+        dialog.setSize(400,300);
+        dialog.setLocationRelativeTo(SwingUtilities.getWindowAncestor(this));
+        dialog.setModal(true);
+        dialog.setVisible(true);
     }
 
     private void openAttachmentBrowserTab() {
@@ -199,6 +214,7 @@ public class MISAWorkbenchUI extends JFrame{
 
     public void addTab(String title, ImageIcon icon, Component component, DocumentTabPane.CloseMode closeMode, boolean allowRename) {
         documentTabPane.addTab(title, icon, component, closeMode, allowRename);
+        documentTabPane.setSelectedIndex(documentTabPane.getTabCount() - 1);
     }
 
     public int getTabCount() {

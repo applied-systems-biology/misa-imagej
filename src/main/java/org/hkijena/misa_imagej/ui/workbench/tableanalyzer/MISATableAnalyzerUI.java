@@ -75,7 +75,16 @@ public class MISATableAnalyzerUI extends JPanel {
         toolBar.addSeparator();
 
         JButton addRowButton = new JButton("Add row", UIUtils.getIconFromResources("add-row.png"));
-        addRowButton.addActionListener(e -> addRow());
+        JPopupMenu addRowMenu = UIUtils.addPopupMenuToComponent(addRowButton);
+
+        JMenuItem addNewRowButton = new JMenuItem("Add empty row", UIUtils.getIconFromResources("add.png"));
+        addNewRowButton.addActionListener(e -> addRow());
+        addRowMenu.add(addNewRowButton);
+
+        JMenuItem mergeRowsButton = new JMenuItem("Add rows from other table", UIUtils.getIconFromResources("table.png"));
+        mergeRowsButton.addActionListener(e -> mergeRows());
+        addRowMenu.add(mergeRowsButton);
+
         toolBar.add(addRowButton);
 
         JButton addColumnButton = new JButton("Add column", (UIUtils.getIconFromResources("add-column.png")));
@@ -92,6 +101,10 @@ public class MISATableAnalyzerUI extends JPanel {
         JMenuItem addNewCombinedColumnButton = new JMenuItem("Combine selected columns", UIUtils.getIconFromResources("statistics.png"));
         addNewCombinedColumnButton.addActionListener(e -> addNewCombinedColumn());
         addColumnMenu.add(addNewCombinedColumnButton);
+
+        JMenuItem mergeColumnsButton = new JMenuItem("Add column from other table", UIUtils.getIconFromResources("table.png"));
+        mergeColumnsButton.addActionListener(e -> mergeColumns());
+        addColumnMenu.add(mergeColumnsButton);
 
         toolBar.add(addColumnButton);
 
@@ -168,6 +181,23 @@ public class MISATableAnalyzerUI extends JPanel {
         jxTable.getSelectionModel().addListSelectionListener(listSelectionEvent -> updateConvertMenu());
     }
 
+    private void mergeColumns() {
+        MISAMergeTableColumnsDialogUI dialog = new MISAMergeTableColumnsDialogUI(this);
+        dialog.pack();
+        dialog.setSize(800,600);
+        dialog.setLocationRelativeTo(SwingUtilities.getWindowAncestor(this));
+        dialog.setModal(true);
+        dialog.setVisible(true);
+    }
+
+    private void mergeRows() {
+        MISAMergeTableRowsDialogUI dialog = new MISAMergeTableRowsDialogUI(this);
+        dialog.pack();
+        dialog.setSize(800,600);
+        dialog.setLocationRelativeTo(SwingUtilities.getWindowAncestor(this));
+        dialog.setModal(true);
+        dialog.setVisible(true);
+    }
 
 
     private void createNewPlot() {
