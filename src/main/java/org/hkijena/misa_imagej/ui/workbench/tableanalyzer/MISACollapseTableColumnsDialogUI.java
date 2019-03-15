@@ -37,12 +37,12 @@ public class MISACollapseTableColumnsDialogUI extends JDialog {
 
             operationJComboBox.addItem(null);
             operationJComboBox.addItem(new CategorizeColumnRole());
-            List<MISATableAnalyzerUIOperationRegistry.Entry> entries =
-                    new ArrayList<>( MISAImageJRegistryService.getInstance().getTableAnalyzerUIOperationRegistry().getEntries());
-            entries.sort(Comparator.comparing(MISATableAnalyzerUIOperationRegistry.Entry::getName));
+            List<MISATableAnalyzerUIOperationRegistry.VectorOperationEntry> entries =
+                    new ArrayList<>( MISAImageJRegistryService.getInstance().getTableAnalyzerUIOperationRegistry().getVectorOperationEntries());
+            entries.sort(Comparator.comparing(MISATableAnalyzerUIOperationRegistry.VectorOperationEntry::getName));
 
-            for(MISATableAnalyzerUIOperationRegistry.Entry entry : entries) {
-                MISATableVectorOperation operation = entry.instantiateOperation();
+            for(MISATableAnalyzerUIOperationRegistry.VectorOperationEntry vectorOperationEntry : entries) {
+                MISATableVectorOperation operation = vectorOperationEntry.instantiateOperation();
                 if(operation.inputMatches(tableModel.getRowCount()) && operation.getOutputCount(tableModel.getRowCount()) == 1) {
                     operationJComboBox.addItem(operation);
                 }

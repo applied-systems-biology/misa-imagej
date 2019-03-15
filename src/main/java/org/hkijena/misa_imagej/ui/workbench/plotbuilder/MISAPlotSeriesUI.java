@@ -65,6 +65,7 @@ public class MISAPlotSeriesUI extends JPanel {
 
     private void toggleEnableDisable() {
         series.setEnabled(!series.isEnabled());
+        updateEnableDisableToggleButton();
     }
 
     @Subscribe
@@ -190,10 +191,10 @@ public class MISAPlotSeriesUI extends JPanel {
     private void updateEnableDisableToggleButton() {
         if (series.isEnabled()) {
             enableToggleButton.setIcon(UIUtils.getIconFromResources("eye.png"));
-            enableToggleButton.setToolTipText("Disable filter");
+            enableToggleButton.setToolTipText("Disable series");
         } else {
             enableToggleButton.setIcon(UIUtils.getIconFromResources("eye-slash.png"));
-            enableToggleButton.setToolTipText("Enable filter");
+            enableToggleButton.setToolTipText("Enable series");
         }
 
     }

@@ -11,7 +11,7 @@ public class MISAPlotSeries {
     private Map<String, Object> parameters = new HashMap<>();
     private Map<String, Class> parameterTypes = new HashMap<>();
     private EventBus eventBus = new EventBus();
-    private boolean enabled;
+    private boolean enabled = true;
 
     public MISAPlotSeries() {
 

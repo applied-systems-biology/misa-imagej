@@ -156,6 +156,10 @@ public class MISATableAnalyzerUI extends JPanel {
 
         toolBar.add(Box.createHorizontalGlue());
 
+        JButton splitColumnsButton = new JButton("Split columns", UIUtils.getIconFromResources("split.png"));
+        splitColumnsButton.addActionListener(e -> splitColumns());
+        toolBar.add(splitColumnsButton);
+
         JButton collapseColumnsButton = new JButton("Integrate columns", UIUtils.getIconFromResources("statistics.png"));
         collapseColumnsButton.addActionListener(e -> collapseColumns());
         toolBar.add(collapseColumnsButton);
@@ -179,6 +183,21 @@ public class MISATableAnalyzerUI extends JPanel {
         add(new JScrollPane(jxTable), BorderLayout.CENTER);
 
         jxTable.getSelectionModel().addListSelectionListener(listSelectionEvent -> updateConvertMenu());
+    }
+
+    private void splitColumns() {
+        MISASplitColumnDialogUI dialog = new MISASplitColumnDialogUI(tableModel);
+        dialog.pack();
+        dialog.setSize(800,600);
+        dialog.setLocationRelativeTo(SwingUtilities.getWindowAncestor(this));
+        dialog.setModal(true);
+        dialog.setVisible(true);
+        if(dialog.getResultTableModel() != null) {
+            createUndoSnapshot();
+            tableModel = dialog.getResultTableModel();
+            jxTable.setModel(tableModel);
+            jxTable.packAll();
+        }
     }
 
     private void mergeColumns() {
@@ -317,15 +336,15 @@ public class MISATableAnalyzerUI extends JPanel {
         convertSelectedCellsMenu.removeAll();
         final int cellCount = jxTable.getSelectedColumnCount() * jxTable.getSelectedRowCount();
 
-        List<MISATableAnalyzerUIOperationRegistry.Entry> entries =
-                new ArrayList<>( MISAImageJRegistryService.getInstance().getTableAnalyzerUIOperationRegistry().getEntries());
-        entries.sort(Comparator.comparing(MISATableAnalyzerUIOperationRegistry.Entry::getName));
+        List<MISATableAnalyzerUIOperationRegistry.VectorOperationEntry> entries =
+                new ArrayList<>( MISAImageJRegistryService.getInstance().getTableAnalyzerUIOperationRegistry().getVectorOperationEntries());
+        entries.sort(Comparator.comparing(MISATableAnalyzerUIOperationRegistry.VectorOperationEntry::getName));
 
-        for(MISATableAnalyzerUIOperationRegistry.Entry entry : entries) {
-            MISATableVectorOperation operation = entry.instantiateOperation();
+        for(MISATableAnalyzerUIOperationRegistry.VectorOperationEntry vectorOperationEntry : entries) {
+            MISATableVectorOperation operation = vectorOperationEntry.instantiateOperation();
             if(operation.inputMatches(cellCount) && operation.getOutputCount(cellCount) == cellCount) {
-                JMenuItem item = new JMenuItem(entry.getName(), entry.getIcon());
-                item.setToolTipText(entry.getDescription());
+                JMenuItem item = new JMenuItem(vectorOperationEntry.getName(), vectorOperationEntry.getIcon());
+                item.setToolTipText(vectorOperationEntry.getDescription());
                 item.addActionListener(e -> {
 
                     createUndoSnapshot();
