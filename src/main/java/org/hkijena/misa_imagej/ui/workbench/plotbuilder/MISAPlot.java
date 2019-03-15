@@ -13,11 +13,11 @@ public abstract class MISAPlot {
 
     protected List<MISAPlotSeries> series = new ArrayList<>();
     private EventBus eventBus = new EventBus();
-    private DefaultTableModel tableModel;
+    private List<MISAPlotSeriesData> seriesDataList;
     private String title = "Plot";
 
-    public MISAPlot(DefaultTableModel tableModel) {
-        this.tableModel = tableModel;
+    protected MISAPlot(List<MISAPlotSeriesData> seriesDataList) {
+        this.seriesDataList = seriesDataList;
     }
 
     public boolean canRemoveSeries() {
@@ -59,10 +59,6 @@ public abstract class MISAPlot {
         return eventBus;
     }
 
-    public DefaultTableModel getTableModel() {
-        return tableModel;
-    }
-
     public String getTitle() {
         return title;
     }
@@ -74,6 +70,10 @@ public abstract class MISAPlot {
 
     public List<MISAPlotSeries> getSeries() {
         return Collections.unmodifiableList(series);
+    }
+
+    public List<MISAPlotSeriesData> getSeriesDataList() {
+        return seriesDataList;
     }
 
     public static class PlotChangedEvent {

@@ -28,11 +28,19 @@ public class TableUtils {
         return copy;
     }
 
-    public static  Vector getColumnIdentifiers(DefaultTableModel tableModel) {
-        Vector vector = new Vector(tableModel.getColumnCount());
+    public static Vector<String> getColumnIdentifiers(DefaultTableModel tableModel) {
+        Vector<String> vector = new Vector<>(tableModel.getColumnCount());
         for(int i = 0; i < tableModel.getColumnCount(); ++i) {
             vector.add(tableModel.getColumnName(i));
         }
         return vector;
+    }
+
+    public static void addNameToColumnIdentifiers(DefaultTableModel tableModel, String name) {
+        Vector<String> identifiers = getColumnIdentifiers(tableModel);
+        for(int i = 0; i < identifiers.size(); ++i) {
+            identifiers.set(i, name + "." + identifiers.get(i));
+        }
+        tableModel.setColumnIdentifiers(identifiers);
     }
 }

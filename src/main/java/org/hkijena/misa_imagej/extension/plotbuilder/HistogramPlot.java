@@ -1,10 +1,7 @@
 package org.hkijena.misa_imagej.extension.plotbuilder;
 
 import com.google.common.primitives.Doubles;
-import org.hkijena.misa_imagej.ui.workbench.plotbuilder.MISANumericPlotSeriesColumn;
-import org.hkijena.misa_imagej.ui.workbench.plotbuilder.MISAPlot;
-import org.hkijena.misa_imagej.ui.workbench.plotbuilder.MISAPlotSeries;
-import org.hkijena.misa_imagej.ui.workbench.plotbuilder.MISAPlotSeriesGenerator;
+import org.hkijena.misa_imagej.ui.workbench.plotbuilder.*;
 import org.hkijena.misa_imagej.utils.StringUtils;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
@@ -22,8 +19,8 @@ public class HistogramPlot extends MISAPlot {
     private String xAxisLabel = "Bin";
     private String yAxisLabel = "Number";
 
-    public HistogramPlot(DefaultTableModel tableModel) {
-        super(tableModel);
+    public HistogramPlot(List<MISAPlotSeriesData> seriesDataList) {
+        super(seriesDataList);
         setTitle("Histogram");
         addSeries();
     }
@@ -33,7 +30,7 @@ public class HistogramPlot extends MISAPlot {
         MISAPlotSeries series = new MISAPlotSeries();
         series.addParameter("Name", "Category");
         series.addParameter("Bins", 10);
-        series.addColumn("Values", new MISANumericPlotSeriesColumn(getTableModel(),
+        series.addColumn("Values", new MISANumericPlotSeriesColumn(getSeriesDataList(),
                 new MISAPlotSeriesGenerator<>("Zero", x -> 0.0)));
         return series;
     }
@@ -43,7 +40,8 @@ public class HistogramPlot extends MISAPlot {
         HistogramDataset dataset = new HistogramDataset();
         Set<String> existingNames = new HashSet<>();
         for(MISAPlotSeries seriesEntry : series) {
-            List<Double> values = seriesEntry.getAsNumericColumn("Values").getValues();
+            int rowCount = Math.max(1, seriesEntry.getMaximumRequiredRowCount());
+            List<Double> values = seriesEntry.getAsNumericColumn("Values").getValues(rowCount);
             String name = StringUtils.makeUniqueString((String)seriesEntry.getParameterValue("Name"), existingNames);
             dataset.addSeries(name, Doubles.toArray(values), (int)seriesEntry.getParameterValue("Bins"));
         }

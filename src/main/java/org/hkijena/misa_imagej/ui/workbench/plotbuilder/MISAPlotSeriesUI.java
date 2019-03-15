@@ -14,6 +14,7 @@ public class MISAPlotSeriesUI extends JPanel {
     private MISAPlot plot;
     private MISAPlotSeries series;
     private JButton removeButton;
+    private JButton enableToggleButton;
 
     public MISAPlotSeriesUI(MISAPlot plot, MISAPlotSeries series) {
         this.plot = plot;
@@ -21,7 +22,7 @@ public class MISAPlotSeriesUI extends JPanel {
         initialize();
 
         this.plot.getEventBus().register(this);
-        updateRemoveButton();
+        updateTitleBarButtons();
     }
 
     private void initialize() {
@@ -51,17 +52,29 @@ public class MISAPlotSeriesUI extends JPanel {
         UIUtils.makeFlatWithoutMargin(removeButton);
         titlePanel.add(removeButton);
 
+        enableToggleButton = new JButton();
+        UIUtils.makeFlatWithoutMargin(enableToggleButton);
+        enableToggleButton.addActionListener(e -> toggleEnableDisable());
+        titlePanel.add(Box.createHorizontalStrut(4));
+        titlePanel.add(enableToggleButton);
+        updateEnableDisableToggleButton();
+
         add(titlePanel, BorderLayout.NORTH);
         add(contentContainer, BorderLayout.CENTER);
     }
 
-    @Subscribe
-    public void handlePlotSeriesChangedEvent(MISAPlot.PlotSeriesListChangedEvent event) {
-        updateRemoveButton();
+    private void toggleEnableDisable() {
+        series.setEnabled(!series.isEnabled());
     }
 
-    private void updateRemoveButton() {
-        removeButton.setEnabled(plot.canAddSeries());
+    @Subscribe
+    public void handlePlotSeriesChangedEvent(MISAPlot.PlotSeriesListChangedEvent event) {
+        updateTitleBarButtons();
+    }
+
+    private void updateTitleBarButtons() {
+        removeButton.setEnabled(plot.canRemoveSeries());
+        enableToggleButton.setEnabled(plot.canRemoveSeries());
     }
 
     private void removeSeries() {
@@ -130,13 +143,13 @@ public class MISAPlotSeriesUI extends JPanel {
             for(int i = 0; i < entry.getValue().getGenerators().size(); ++i) {
                 column.addItem(-(i + 1));
             }
-            for (int i = 0; i < plot.getTableModel().getColumnCount(); ++i) {
+            for (int i = 0; i < plot.getSeriesDataList().size(); ++i) {
                 column.addItem(i);
             }
-            column.setSelectedItem(entry.getValue().getColumnIndex());
+            column.setSelectedItem(entry.getValue().getSeriesDataIndex());
             column.addItemListener(e -> {
                 if (column.getSelectedItem() instanceof Integer)
-                    entry.getValue().setColumnIndex((Integer) column.getSelectedItem());
+                    entry.getValue().setSeriesDataIndex((Integer) column.getSelectedItem());
             });
 
             if (entry.getValue() instanceof MISAStringPlotSeriesColumn) {
@@ -174,6 +187,17 @@ public class MISAPlotSeriesUI extends JPanel {
         });
     }
 
+    private void updateEnableDisableToggleButton() {
+        if (series.isEnabled()) {
+            enableToggleButton.setIcon(UIUtils.getIconFromResources("eye.png"));
+            enableToggleButton.setToolTipText("Disable filter");
+        } else {
+            enableToggleButton.setIcon(UIUtils.getIconFromResources("eye-slash.png"));
+            enableToggleButton.setToolTipText("Enable filter");
+        }
+
+    }
+
     public static class Renderer extends JLabel implements ListCellRenderer<Integer> {
 
         private MISAPlotSeriesColumn column;
@@ -188,7 +212,7 @@ public class MISAPlotSeriesUI extends JPanel {
         @Override
         public Component getListCellRendererComponent(JList<? extends Integer> list, Integer value, int index, boolean isSelected, boolean cellHasFocus) {
             if (value >= 0) {
-                setText(plot.getTableModel().getColumnName(value));
+                setText(plot.getSeriesDataList().get(value).getName());
                 setIcon(UIUtils.getIconFromResources("select-column.png"));
             } else {
                 MISAPlotSeriesGenerator generator = (MISAPlotSeriesGenerator) column.getGenerators().get(-value - 1);

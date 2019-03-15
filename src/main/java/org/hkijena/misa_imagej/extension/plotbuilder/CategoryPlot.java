@@ -13,10 +13,11 @@ public abstract class CategoryPlot extends MISAPlot {
     private String valueAxisLabel;
     private DefaultCategoryDataset dataset = new DefaultCategoryDataset();
 
-    public CategoryPlot(DefaultTableModel tableModel) {
-        super(tableModel);
+    protected CategoryPlot(List<MISAPlotSeriesData> seriesDataList) {
+        super(seriesDataList);
         addSeries();
     }
+
 
     @Override
     public boolean canRemoveSeries() {
@@ -31,11 +32,11 @@ public abstract class CategoryPlot extends MISAPlot {
     @Override
     protected MISAPlotSeries createSeries() {
         MISAPlotSeries series = new MISAPlotSeries();
-        series.addColumn("X", new MISAStringPlotSeriesColumn(getTableModel(),
+        series.addColumn("X", new MISAStringPlotSeriesColumn(getSeriesDataList(),
                 new MISAPlotSeriesGenerator<>("Automatically generated", x -> "x" + x)));
-        series.addColumn("Category", new MISAStringPlotSeriesColumn(getTableModel(),
+        series.addColumn("Category", new MISAStringPlotSeriesColumn(getSeriesDataList(),
                 new MISAPlotSeriesGenerator<>("No category", x -> "No category")));
-        series.addColumn("Value", new MISANumericPlotSeriesColumn(getTableModel(),
+        series.addColumn("Value", new MISANumericPlotSeriesColumn(getSeriesDataList(),
                 new MISAPlotSeriesGenerator<>("Row index", x -> (double)x)));
         return series;
     }
@@ -47,9 +48,10 @@ public abstract class CategoryPlot extends MISAPlot {
     protected void updateDataset() {
         dataset.clear();
         MISAPlotSeries series = getSeries().get(0);
-        List<String> xvalues = series.getAsStringColumn("X").getValues();
-        List<String> categories = series.getAsStringColumn("Category").getValues();
-        List<Double> values = series.getAsNumericColumn("Value").getValues();
+        int rowCount = series.getMaximumRequiredRowCount();
+        List<String> xvalues = series.getAsStringColumn("X").getValues(rowCount);
+        List<String> categories = series.getAsStringColumn("Category").getValues(rowCount);
+        List<Double> values = series.getAsNumericColumn("Value").getValues(rowCount);
         for(int i = 0; i < xvalues.size(); ++i) {
             dataset.addValue(values.get(i), categories.get(i), xvalues.get(i));
         }

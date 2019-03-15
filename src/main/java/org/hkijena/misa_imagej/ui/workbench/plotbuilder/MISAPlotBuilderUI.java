@@ -4,6 +4,7 @@ import com.google.common.eventbus.Subscribe;
 import org.hkijena.misa_imagej.MISAImageJRegistryService;
 import org.hkijena.misa_imagej.ui.components.PlotReader;
 import org.hkijena.misa_imagej.ui.workbench.MISAWorkbenchUI;
+import org.hkijena.misa_imagej.ui.workbench.tableanalyzer.MISAMergeTableColumnsDialogUI;
 import org.hkijena.misa_imagej.ui.workbench.tableanalyzer.MISATableAnalyzerUI;
 import org.hkijena.misa_imagej.utils.TableUtils;
 import org.hkijena.misa_imagej.utils.UIUtils;
@@ -14,11 +15,13 @@ import org.jdesktop.swingx.ScrollableSizeHint;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.ArrayList;
 
 public class MISAPlotBuilderUI extends JPanel {
 
     private MISAWorkbenchUI workbench;
-    private DefaultTableModel tableModel;
     private JToolBar plotSeriesEditorToolBar;
     private JXPanel plotSeriesListPanel;
     private JPanel plotSettingsPanel;
@@ -27,10 +30,23 @@ public class MISAPlotBuilderUI extends JPanel {
     private JToggleButton toggleAutoUpdate;
     private PlotReader plotReader;
 
-    public MISAPlotBuilderUI(MISAWorkbenchUI workbench, DefaultTableModel tableModel) {
+    private List<MISAPlotSeriesData> seriesDataList = new ArrayList<>();
+
+    public MISAPlotBuilderUI(MISAWorkbenchUI workbench) {
         this.workbench = workbench;
-        this.tableModel = tableModel;
         initialize();
+        updatePlotSettings();
+        updatePlot();
+    }
+
+    public void importFromTable(DefaultTableModel model, String name) {
+        for(int column = 0; column < model.getColumnCount(); ++column) {
+            MISAPlotSeriesData data = new MISAPlotSeriesData(name + "." + model.getColumnName(column));
+            for(int i = 0; i < model.getRowCount(); ++i) {
+                data.getData().add(model.getValueAt(i, column));
+            }
+            seriesDataList.add(data);
+        }
         updatePlotSettings();
         updatePlot();
     }
@@ -62,7 +78,7 @@ public class MISAPlotBuilderUI extends JPanel {
 
         JComboBox<MISAPlot> plotJComboBox = new JComboBox<>();
         plotJComboBox.setRenderer(new Renderer());
-        for(MISAPlot plot : MISAImageJRegistryService.getInstance().getPlotBuilderRegistry().createAllPlots(tableModel)) {
+        for(MISAPlot plot : MISAImageJRegistryService.getInstance().getPlotBuilderRegistry().createAllPlots(seriesDataList)) {
             plot.getEventBus().register(this);
             plotJComboBox.addItem(plot);
         }
@@ -72,7 +88,11 @@ public class MISAPlotBuilderUI extends JPanel {
         toolBar.add(Box.createHorizontalGlue());
         toolBar.add(Box.createHorizontalStrut(32));
 
-        JButton openTableButton = new JButton("Open table", UIUtils.getIconFromResources("table.png"));
+        JButton importTableButton = new JButton("Import data", UIUtils.getIconFromResources("import.png"));
+        importTableButton.addActionListener(e -> importTable());
+        toolBar.add(importTableButton);
+
+        JButton openTableButton = new JButton("Data as table", UIUtils.getIconFromResources("table.png"));
         openTableButton.addActionListener(e -> openTable());
         toolBar.add(openTableButton);
 
@@ -105,6 +125,22 @@ public class MISAPlotBuilderUI extends JPanel {
             currentPlot = (MISAPlot) plotJComboBox.getSelectedItem();
 
         return panel;
+    }
+
+    private void importTable() {
+        DefaultTableModel model = new DefaultTableModel();
+        MISAMergeTableColumnsDialogUI dialog = new MISAMergeTableColumnsDialogUI(workbench, model);
+        dialog.pack();
+        dialog.setSize(800,600);
+        dialog.setLocationRelativeTo(SwingUtilities.getWindowAncestor(this));
+        dialog.setModal(true);
+        dialog.setVisible(true);
+
+        if(model.getColumnCount() > 0) {
+            // Import series from the model
+            importFromTable(model, dialog.getMergedTab().getTitle());
+            updatePlotSettings();
+        }
     }
 
     private void addSeries() {
@@ -161,9 +197,28 @@ public class MISAPlotBuilderUI extends JPanel {
     }
 
     private void openTable() {
+        DefaultTableModel tableModel = new DefaultTableModel();
+        for(MISAPlotSeriesData data : seriesDataList) {
+            tableModel.addColumn(data.getName());
+        }
+        Object[] rowBuffer = new Object[seriesDataList.size()];
+        final int rowNumber = seriesDataList.stream().max(Comparator.comparing(MISAPlotSeriesData::getSize)).get().getSize();
+
+        for(int i = 0; i < rowNumber; ++i) {
+            for(int j = 0; j < seriesDataList.size(); ++j) {
+                if(i < seriesDataList.get(j).getSize()) {
+                    rowBuffer[j] = seriesDataList.get(j).getData().get(i);
+                }
+                else {
+                    rowBuffer[j] = null;
+                }
+            }
+            tableModel.addRow(rowBuffer);
+        }
+
         workbench.addTab("Table",
                 UIUtils.getIconFromResources("table.png"),
-                new MISATableAnalyzerUI(workbench, TableUtils.cloneTableModel(tableModel)),
+                new MISATableAnalyzerUI(workbench, tableModel),
                 DocumentTabPane.CloseMode.withAskOnCloseButton, true);
         workbench.setSelectedTab(workbench.getTabCount() - 1);
     }

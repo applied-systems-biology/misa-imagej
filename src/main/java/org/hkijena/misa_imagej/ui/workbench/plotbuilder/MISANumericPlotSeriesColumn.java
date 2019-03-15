@@ -5,17 +5,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MISANumericPlotSeriesColumn extends MISAPlotSeriesColumn<Double> {
-
     @SafeVarargs
-    public MISANumericPlotSeriesColumn(DefaultTableModel tableModel, MISAPlotSeriesGenerator<Double> defaultGenerator, MISAPlotSeriesGenerator<Double>... additionalGenerators) {
-        super(tableModel, defaultGenerator, additionalGenerators);
+    public MISANumericPlotSeriesColumn(List<MISAPlotSeriesData> seriesDataList, MISAPlotSeriesGenerator<Double> defaultGenerator, MISAPlotSeriesGenerator<Double>... additionalGenerators) {
+        super(seriesDataList, defaultGenerator, additionalGenerators);
     }
 
     @Override
     protected List<Double> getValuesFromTable() {
-        List<Double> result = new ArrayList<>(getTableModel().getRowCount());
-        for(int row = 0; row < getTableModel().getRowCount(); ++row) {
-            Object value = getTableModel().getValueAt(row, getColumnIndex());
+        List<Double> result = new ArrayList<>(getSeriesData().getSize());
+        for(Object value : getSeriesData().getData()) {
             if(value instanceof Number) {
                 result.add(((Number) value).doubleValue());
             }

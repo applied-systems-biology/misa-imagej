@@ -1,6 +1,7 @@
 package org.hkijena.misa_imagej.ui.workbench.tableanalyzer;
 
 import org.hkijena.misa_imagej.ui.components.renderers.DocumentTabListCellRenderer;
+import org.hkijena.misa_imagej.ui.workbench.MISAWorkbenchUI;
 import org.hkijena.misa_imagej.utils.TableUtils;
 import org.hkijena.misa_imagej.utils.UIUtils;
 import org.hkijena.misa_imagej.utils.ui.DocumentTabPane;
@@ -14,19 +15,38 @@ import java.util.Vector;
 
 public class MISAMergeTableColumnsDialogUI extends JDialog {
     private MISATableAnalyzerUI tableAnalyzerUI;
+    private DefaultTableModel tableModel;
     private JComboBox<DocumentTabPane.DocumentTab> tableSelection;
     private JXTable jxTable;
     private JTable columnSelection;
 
     public MISAMergeTableColumnsDialogUI(MISATableAnalyzerUI tableAnalyzerUI) {
         this.tableAnalyzerUI = tableAnalyzerUI;
-        initialize();
+        this.tableModel = tableAnalyzerUI.getTableModel();
 
         for(DocumentTabPane.DocumentTab tab : tableAnalyzerUI.getWorkbench().getTabs()) {
             if(tab.getContent() instanceof MISATableAnalyzerUI && tab.getContent() != tableAnalyzerUI) {
                 tableSelection.addItem(tab);
             }
         }
+    }
+
+    public MISAMergeTableColumnsDialogUI(MISAWorkbenchUI workbenchUI, DefaultTableModel tableModel) {
+        this.tableModel = tableModel;
+        initialize();
+
+        for(DocumentTabPane.DocumentTab tab : workbenchUI.getTabs()) {
+            if(tab.getContent() instanceof MISATableAnalyzerUI) {
+                tableSelection.addItem(tab);
+            }
+        }
+    }
+
+    public DocumentTabPane.DocumentTab getMergedTab() {
+        if(tableSelection.getSelectedItem() instanceof DocumentTabPane.DocumentTab)
+            return (DocumentTabPane.DocumentTab) tableSelection.getSelectedItem();
+        else
+            return null;
     }
 
     private void initialize() {
@@ -118,9 +138,10 @@ public class MISAMergeTableColumnsDialogUI extends JDialog {
 
     private void calculate() {
         if(tableSelection.getSelectedItem() != null) {
-            tableAnalyzerUI.createUndoSnapshot();
+            if(tableAnalyzerUI != null)
+                tableAnalyzerUI.createUndoSnapshot();
             DefaultTableModel sourceModel = ((MISATableAnalyzerUI)((DocumentTabPane.DocumentTab)tableSelection.getSelectedItem()).getContent()).getTableModel();
-            DefaultTableModel targetModel = tableAnalyzerUI.getTableModel();
+            DefaultTableModel targetModel = tableModel;
 
             final int targetColumnStartIndex = targetModel.getColumnCount();
 
@@ -147,7 +168,8 @@ public class MISAMergeTableColumnsDialogUI extends JDialog {
                 }
             }
             targetModel.setDataVector(data, TableUtils.getColumnIdentifiers(targetModel));
-            tableAnalyzerUI.autoSizeColumns();
+            if(tableAnalyzerUI != null)
+                tableAnalyzerUI.autoSizeColumns();
 
             setVisible(false);
         }

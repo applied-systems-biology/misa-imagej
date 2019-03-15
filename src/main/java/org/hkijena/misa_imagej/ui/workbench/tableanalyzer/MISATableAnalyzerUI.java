@@ -199,11 +199,12 @@ public class MISATableAnalyzerUI extends JPanel {
         dialog.setVisible(true);
     }
 
-
     private void createNewPlot() {
+        MISAPlotBuilderUI plotBuilderUI = new MISAPlotBuilderUI(workbench);
+        plotBuilderUI.importFromTable(tableModel, workbench.findTabNameFor(this));
         workbench.addTab("Plot",
                 UIUtils.getIconFromResources("graph.png"),
-                new MISAPlotBuilderUI(workbench, TableUtils.cloneTableModel(tableModel)),
+                plotBuilderUI,
                 DocumentTabPane.CloseMode.withAskOnCloseButton, true);
         workbench.setSelectedTab(workbench.getTabCount() - 1);
     }

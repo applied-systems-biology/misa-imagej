@@ -1,9 +1,6 @@
 package org.hkijena.misa_imagej.extension.plotbuilder;
 
-import org.hkijena.misa_imagej.ui.workbench.plotbuilder.MISANumericPlotSeriesColumn;
-import org.hkijena.misa_imagej.ui.workbench.plotbuilder.MISAPlot;
-import org.hkijena.misa_imagej.ui.workbench.plotbuilder.MISAPlotSeries;
-import org.hkijena.misa_imagej.ui.workbench.plotbuilder.MISAPlotSeriesGenerator;
+import org.hkijena.misa_imagej.ui.workbench.plotbuilder.*;
 import org.hkijena.misa_imagej.utils.StringUtils;
 import org.jfree.chart.JFreeChart;
 import org.jfree.data.xy.XYSeries;
@@ -20,8 +17,8 @@ public abstract class XYPlot extends MISAPlot {
     private String yAxisLabel = "Y";
     private XYSeriesCollection dataset = new XYSeriesCollection();
 
-    public XYPlot(DefaultTableModel tableModel) {
-        super(tableModel);
+    public XYPlot(List<MISAPlotSeriesData> seriesDataList) {
+        super(seriesDataList);
         addSeries();
     }
 
@@ -39,9 +36,9 @@ public abstract class XYPlot extends MISAPlot {
     protected MISAPlotSeries createSeries() {
         MISAPlotSeries series = new MISAPlotSeries();
         series.addParameter("Name", "Series");
-        series.addColumn("X", new MISANumericPlotSeriesColumn(getTableModel(),
+        series.addColumn("X", new MISANumericPlotSeriesColumn(getSeriesDataList(),
                 new MISAPlotSeriesGenerator<>("Row number", x -> (double)x)));
-        series.addColumn("Y", new MISANumericPlotSeriesColumn(getTableModel(),
+        series.addColumn("Y", new MISANumericPlotSeriesColumn(getSeriesDataList(),
                 new MISAPlotSeriesGenerator<>("Row number", x -> (double)x)));
         return series;
     }
@@ -55,8 +52,10 @@ public abstract class XYPlot extends MISAPlot {
             String name = StringUtils.makeUniqueString(seriesEntry.getParameterValue("Name").toString(), existingSeries);
             XYSeries chartSeries = new XYSeries(name, true);
 
-            List<Double> xValues = ((MISANumericPlotSeriesColumn)seriesEntry.getColumns().get("X")).getValues();
-            List<Double> yValues = ((MISANumericPlotSeriesColumn)seriesEntry.getColumns().get("Y")).getValues();
+            int rowCount = seriesEntry.getMaximumRequiredRowCount();
+
+            List<Double> xValues = ((MISANumericPlotSeriesColumn)seriesEntry.getColumns().get("X")).getValues(rowCount);
+            List<Double> yValues = ((MISANumericPlotSeriesColumn)seriesEntry.getColumns().get("Y")).getValues(rowCount);
             for(int i = 0; i < xValues.size(); ++i) {
                 chartSeries.add(xValues.get(i), yValues.get(i));
             }

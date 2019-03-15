@@ -64,6 +64,7 @@ public class DocumentTabPane extends JTabbedPane {
                 String newName = JOptionPane.showInputDialog(this, "Rename tab '" + titleLabel.getText() + "' to ...", titleLabel.getText());
                 if(newName != null && !newName.isEmpty()) {
                     titleLabel.setText(newName);
+                    tab.setTitle(newName);
                 }
             });
             tabPanel.add(Box.createHorizontalStrut(8));
@@ -161,6 +162,10 @@ public class DocumentTabPane extends JTabbedPane {
 
         public Component getContent() {
             return content;
+        }
+
+        public void setTitle(String title) {
+            this.title = title;
         }
     }
 

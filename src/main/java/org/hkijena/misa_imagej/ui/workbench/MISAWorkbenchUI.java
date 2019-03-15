@@ -228,4 +228,12 @@ public class MISAWorkbenchUI extends JFrame{
     public List<DocumentTabPane.DocumentTab> getTabs() {
         return documentTabPane.getTabs();
     }
+
+    public String findTabNameFor(Component component) {
+        for(DocumentTabPane.DocumentTab tab : getTabs()) {
+            if(tab.getContent() == component)
+                return tab.getTitle();
+        }
+        return "Document";
+    }
 }

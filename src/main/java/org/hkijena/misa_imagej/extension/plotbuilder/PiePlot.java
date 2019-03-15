@@ -11,8 +11,8 @@ public abstract class PiePlot extends MISAPlot {
 
     private DefaultPieDataset dataset = new DefaultPieDataset();
 
-    public PiePlot(DefaultTableModel tableModel) {
-        super(tableModel);
+    public PiePlot(List<MISAPlotSeriesData> seriesDataList) {
+        super(seriesDataList);
         addSeries();
     }
 
@@ -29,9 +29,9 @@ public abstract class PiePlot extends MISAPlot {
     @Override
     protected MISAPlotSeries createSeries() {
         MISAPlotSeries series = new MISAPlotSeries();
-        series.addColumn("Category", new MISAStringPlotSeriesColumn(getTableModel(),
+        series.addColumn("Category", new MISAStringPlotSeriesColumn(getSeriesDataList(),
                 new MISAPlotSeriesGenerator<>("No category", x -> "No category")));
-        series.addColumn("Amount", new MISANumericPlotSeriesColumn(getTableModel(),
+        series.addColumn("Amount", new MISANumericPlotSeriesColumn(getSeriesDataList(),
                 new MISAPlotSeriesGenerator<>("Zero", x -> 0.0)));
         return series;
     }
@@ -43,8 +43,9 @@ public abstract class PiePlot extends MISAPlot {
     protected void updateDataset() {
         dataset.clear();
         MISAPlotSeries series = getSeries().get(0);
-        List<String> categories = ((MISAStringPlotSeriesColumn)series.getColumns().get("Category")).getValues();
-        List<Double> values = ((MISANumericPlotSeriesColumn)series.getColumns().get("Amount")).getValues();
+        int rowCount = series.getMaximumRequiredRowCount();
+        List<String> categories = ((MISAStringPlotSeriesColumn)series.getColumns().get("Category")).getValues(rowCount);
+        List<Double> values = ((MISANumericPlotSeriesColumn)series.getColumns().get("Amount")).getValues(rowCount);
 
         for(int i = 0; i < categories.size(); ++i) {
             dataset.setValue(categories.get(i), 0);
