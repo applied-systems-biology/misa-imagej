@@ -49,6 +49,8 @@ public abstract class XYPlot extends MISAPlot {
         dataset.removeAllSeries();
         Set<String> existingSeries = new HashSet<>();
         for(MISAPlotSeries seriesEntry : series) {
+            if(!seriesEntry.isEnabled())
+                continue;
             String name = StringUtils.makeUniqueString(seriesEntry.getParameterValue("Name").toString(), existingSeries);
             XYSeries chartSeries = new XYSeries(name, true);
 

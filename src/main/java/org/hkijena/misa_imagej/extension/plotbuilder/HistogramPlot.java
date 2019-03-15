@@ -40,6 +40,8 @@ public class HistogramPlot extends MISAPlot {
         HistogramDataset dataset = new HistogramDataset();
         Set<String> existingNames = new HashSet<>();
         for(MISAPlotSeries seriesEntry : series) {
+            if(!seriesEntry.isEnabled())
+                continue;
             int rowCount = Math.max(1, seriesEntry.getMaximumRequiredRowCount());
             List<Double> values = seriesEntry.getAsNumericColumn("Values").getValues(rowCount);
             String name = StringUtils.makeUniqueString((String)seriesEntry.getParameterValue("Name"), existingNames);
