@@ -113,6 +113,7 @@ public class MISAMergeTableRowsDialogUI extends JDialog {
             }
 
             tableAnalyzerUI.autoSizeColumns();
+            setVisible(false);
         }
 
     }

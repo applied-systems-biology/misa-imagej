@@ -27,4 +27,12 @@ public class TableUtils {
         }
         return copy;
     }
+
+    public static  Vector getColumnIdentifiers(DefaultTableModel tableModel) {
+        Vector vector = new Vector(tableModel.getColumnCount());
+        for(int i = 0; i < tableModel.getColumnCount(); ++i) {
+            vector.add(tableModel.getColumnName(i));
+        }
+        return vector;
+    }
 }

@@ -11,8 +11,6 @@ import javax.swing.table.TableModel;
 
 public class MISAAttachmentSampleFilterUI extends DefaultTabularMISAAttachmentFilterUI {
 
-    private JTable selectionTable;
-
     public MISAAttachmentSampleFilterUI(MISAAttachmentFilter filter) {
         super(filter);
         initialize();

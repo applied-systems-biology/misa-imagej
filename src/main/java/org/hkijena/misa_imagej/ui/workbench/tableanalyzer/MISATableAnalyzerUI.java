@@ -344,7 +344,7 @@ public class MISATableAnalyzerUI extends JPanel {
                         ((Vector)tableData.get(selectedCells.get(i).getRow())).set(selectedCells.get(i).getColumn(), buffer[i]);
                     }
 
-                    tableModel.setDataVector(tableData, getColumnIdentifiers());
+                    tableModel.setDataVector(tableData, TableUtils.getColumnIdentifiers(tableModel));
                     jxTable.packAll();
                 });
                 convertSelectedCellsMenu.add(item);
@@ -512,17 +512,9 @@ public class MISATableAnalyzerUI extends JPanel {
                 dataVector.remove(rows[i] - i);
             }
 
-            tableModel.setDataVector(dataVector, getColumnIdentifiers());
+            tableModel.setDataVector(dataVector, TableUtils.getColumnIdentifiers(tableModel));
             jxTable.packAll();
         }
-    }
-
-    private Vector getColumnIdentifiers() {
-        Vector vector = new Vector(tableModel.getColumnCount());
-        for(int i = 0; i < tableModel.getColumnCount(); ++i) {
-            vector.add(tableModel.getColumnName(i));
-        }
-        return vector;
     }
 
     public void createUndoSnapshot() {
