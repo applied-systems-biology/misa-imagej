@@ -1,8 +1,5 @@
 package org.hkijena.misa_imagej.ui.workbench.tableanalyzer;
 
-import com.google.common.collect.HashMultiset;
-import com.google.common.collect.Multiset;
-import com.google.common.collect.Multisets;
 import org.hkijena.misa_imagej.ui.components.renderers.DocumentTabListCellRenderer;
 import org.hkijena.misa_imagej.utils.UIUtils;
 import org.hkijena.misa_imagej.utils.ui.DocumentTabPane;
@@ -11,8 +8,9 @@ import org.jdesktop.swingx.JXTable;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.util.*;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 
 public class MISAMergeTableRowsDialogUI extends JDialog {
     private MISATableAnalyzerUI tableAnalyzerUI;
