@@ -5,14 +5,11 @@ import org.hkijena.misa_imagej.utils.UIUtils;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 public class DocumentTabPane extends JTabbedPane {
-
     public enum CloseMode {
         withSilentCloseButton,
         withAskOnCloseButton,
@@ -30,6 +27,10 @@ public class DocumentTabPane extends JTabbedPane {
     public DocumentTabPane() {
         super(JTabbedPane.TOP);
         setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
+    }
+
+    public List<DocumentTab> getTabs() {
+        return Collections.unmodifiableList(tabs);
     }
 
     /**

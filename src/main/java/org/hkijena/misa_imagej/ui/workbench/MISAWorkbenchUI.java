@@ -224,4 +224,8 @@ public class MISAWorkbenchUI extends JFrame{
     public void setSelectedTab(int tabIndex) {
         documentTabPane.setSelectedIndex(tabIndex);
     }
+
+    public List<DocumentTabPane.DocumentTab> getTabs() {
+        return documentTabPane.getTabs();
+    }
 }

@@ -370,7 +370,7 @@ public class MISATableAnalyzerUI extends JPanel {
         return result;
     }
 
-    private void autoSizeColumns() {
+    public void autoSizeColumns() {
         jxTable.packAll();
     }
 
@@ -525,7 +525,7 @@ public class MISATableAnalyzerUI extends JPanel {
         return vector;
     }
 
-    private void createUndoSnapshot() {
+    public void createUndoSnapshot() {
         if(undoBuffer.size() >= MAX_UNDO)
             undoBuffer.remove(0);
 
@@ -607,6 +607,14 @@ public class MISATableAnalyzerUI extends JPanel {
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    public MISAWorkbenchUI getWorkbench() {
+        return workbench;
+    }
+
+    public DefaultTableModel getTableModel() {
+        return tableModel;
     }
 
     private static class CellIndex {
