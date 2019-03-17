@@ -5,7 +5,6 @@ import org.hkijena.misa_imagej.ui.workbench.plotbuilder.MISAPlotSeriesData;
 import org.hkijena.misa_imagej.ui.workbench.plotbuilder.MISAPlotSettingsUI;
 
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 

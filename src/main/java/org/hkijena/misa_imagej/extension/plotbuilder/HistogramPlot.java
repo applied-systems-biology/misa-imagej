@@ -9,7 +9,6 @@ import org.jfree.chart.renderer.xy.StandardXYBarPainter;
 import org.jfree.chart.renderer.xy.XYBarRenderer;
 import org.jfree.data.statistics.HistogramDataset;
 
-import javax.swing.table.DefaultTableModel;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;

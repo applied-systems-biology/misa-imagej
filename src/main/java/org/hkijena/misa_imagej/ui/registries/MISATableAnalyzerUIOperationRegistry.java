@@ -8,7 +8,6 @@ import org.hkijena.misa_imagej.ui.workbench.tableanalyzer.MISATableVectorOperati
 import javax.swing.*;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 

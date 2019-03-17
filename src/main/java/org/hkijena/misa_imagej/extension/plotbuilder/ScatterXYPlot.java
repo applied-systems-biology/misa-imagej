@@ -5,7 +5,6 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.data.xy.XYSeriesCollection;
 
-import javax.swing.table.DefaultTableModel;
 import java.util.List;
 
 public class ScatterXYPlot extends XYPlot {

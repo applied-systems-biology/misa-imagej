@@ -5,7 +5,6 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.data.general.DefaultPieDataset;
 
-import javax.swing.table.DefaultTableModel;
 import java.util.List;
 
 public class Pie3DPlot extends PiePlot {

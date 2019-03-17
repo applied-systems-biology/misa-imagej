@@ -1,14 +1,14 @@
 package org.hkijena.misa_imagej.ui.workbench.tableanalyzer;
 
-import org.hkijena.misa_imagej.MISAImageJRegistryService;
-import org.hkijena.misa_imagej.ui.registries.MISATableAnalyzerUIOperationRegistry;
 import org.hkijena.misa_imagej.utils.UIUtils;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MISASplitColumnDialogUI extends JDialog {
     private DefaultTableModel tableModel;

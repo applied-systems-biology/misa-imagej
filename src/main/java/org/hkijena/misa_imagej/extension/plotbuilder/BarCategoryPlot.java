@@ -6,9 +6,7 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.renderer.category.BarRenderer;
 import org.jfree.chart.renderer.category.StandardBarPainter;
 import org.jfree.data.category.DefaultCategoryDataset;
-import org.jfree.data.statistics.DefaultStatisticalCategoryDataset;
 
-import javax.swing.table.DefaultTableModel;
 import java.util.List;
 
 public class BarCategoryPlot extends CategoryPlot {

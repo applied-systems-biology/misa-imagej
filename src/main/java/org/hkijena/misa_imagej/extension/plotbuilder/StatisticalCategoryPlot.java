@@ -2,11 +2,8 @@ package org.hkijena.misa_imagej.extension.plotbuilder;
 
 import org.hkijena.misa_imagej.ui.workbench.plotbuilder.*;
 import org.jfree.chart.JFreeChart;
-import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.statistics.DefaultStatisticalCategoryDataset;
-import org.jfree.data.statistics.StatisticalCategoryDataset;
 
-import javax.swing.table.DefaultTableModel;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

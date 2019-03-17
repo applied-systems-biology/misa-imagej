@@ -2,7 +2,6 @@ package org.hkijena.misa_imagej.ui.workbench.plotbuilder;
 
 import com.google.common.eventbus.EventBus;
 
-import javax.swing.table.DefaultTableModel;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;

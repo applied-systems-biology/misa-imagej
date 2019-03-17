@@ -7,7 +7,6 @@ import org.hkijena.misa_imagej.ui.registries.MISAPlotBuilderRegistry;
 import org.hkijena.misa_imagej.ui.workbench.MISAWorkbenchUI;
 import org.hkijena.misa_imagej.ui.workbench.tableanalyzer.MISAMergeTableColumnsDialogUI;
 import org.hkijena.misa_imagej.ui.workbench.tableanalyzer.MISATableAnalyzerUI;
-import org.hkijena.misa_imagej.utils.TableUtils;
 import org.hkijena.misa_imagej.utils.UIUtils;
 import org.hkijena.misa_imagej.utils.ui.DocumentTabPane;
 import org.jdesktop.swingx.JXPanel;
@@ -16,9 +15,9 @@ import org.jdesktop.swingx.ScrollableSizeHint;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 public class MISAPlotBuilderUI extends JPanel {

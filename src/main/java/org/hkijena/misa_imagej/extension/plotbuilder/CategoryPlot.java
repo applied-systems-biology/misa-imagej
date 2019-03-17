@@ -4,7 +4,6 @@ import org.hkijena.misa_imagej.ui.workbench.plotbuilder.*;
 import org.jfree.chart.JFreeChart;
 import org.jfree.data.category.DefaultCategoryDataset;
 
-import javax.swing.table.DefaultTableModel;
 import java.util.List;
 
 public abstract class CategoryPlot extends MISAPlot {

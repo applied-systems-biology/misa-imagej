@@ -10,7 +10,6 @@ import org.hkijena.misa_imagej.extension.datasources.*;
 import org.hkijena.misa_imagej.extension.outputcaches.OMETiffOutputCacheUI;
 import org.hkijena.misa_imagej.extension.plotbuilder.*;
 import org.hkijena.misa_imagej.extension.tableanalyzer.*;
-import org.hkijena.misa_imagej.ui.workbench.tableanalyzer.MISATableVectorOperationUI;
 import org.hkijena.misa_imagej.utils.UIUtils;
 import org.scijava.plugin.Plugin;
 import org.scijava.service.AbstractService;

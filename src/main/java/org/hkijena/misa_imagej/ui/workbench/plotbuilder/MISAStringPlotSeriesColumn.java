@@ -1,6 +1,5 @@
 package org.hkijena.misa_imagej.ui.workbench.plotbuilder;
 
-import javax.swing.table.DefaultTableModel;
 import java.util.ArrayList;
 import java.util.List;
 

@@ -7,7 +7,6 @@ import org.jfree.chart.renderer.category.BarRenderer;
 import org.jfree.chart.renderer.category.StandardBarPainter;
 import org.jfree.data.category.DefaultCategoryDataset;
 
-import javax.swing.table.DefaultTableModel;
 import java.util.List;
 
 public class StackedBarCategoryPlot extends CategoryPlot {

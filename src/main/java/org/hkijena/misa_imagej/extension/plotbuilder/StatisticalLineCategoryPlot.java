@@ -4,11 +4,8 @@ import org.hkijena.misa_imagej.ui.workbench.plotbuilder.MISAPlotSeriesData;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.renderer.category.StatisticalLineAndShapeRenderer;
-import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.statistics.DefaultStatisticalCategoryDataset;
-import org.jfree.data.statistics.StatisticalCategoryDataset;
 
-import javax.swing.table.DefaultTableModel;
 import java.util.List;
 
 public class StatisticalLineCategoryPlot extends StatisticalCategoryPlot {
