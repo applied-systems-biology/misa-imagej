@@ -3,6 +3,7 @@ package org.hkijena.misa_imagej.ui.workbench.plotbuilder;
 import com.google.common.eventbus.Subscribe;
 import org.hkijena.misa_imagej.MISAImageJRegistryService;
 import org.hkijena.misa_imagej.ui.components.PlotReader;
+import org.hkijena.misa_imagej.ui.registries.MISAPlotBuilderRegistry;
 import org.hkijena.misa_imagej.ui.workbench.MISAWorkbenchUI;
 import org.hkijena.misa_imagej.ui.workbench.tableanalyzer.MISAMergeTableColumnsDialogUI;
 import org.hkijena.misa_imagej.ui.workbench.tableanalyzer.MISATableAnalyzerUI;
@@ -18,6 +19,7 @@ import java.awt.*;
 import java.util.Comparator;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 public class MISAPlotBuilderUI extends JPanel {
 
@@ -78,7 +80,8 @@ public class MISAPlotBuilderUI extends JPanel {
 
         JComboBox<MISAPlot> plotJComboBox = new JComboBox<>();
         plotJComboBox.setRenderer(new Renderer());
-        for(MISAPlot plot : MISAImageJRegistryService.getInstance().getPlotBuilderRegistry().createAllPlots(seriesDataList)) {
+        MISAPlotBuilderRegistry registry = MISAImageJRegistryService.getInstance().getPlotBuilderRegistry();
+        for(MISAPlot plot : registry.createAllPlots(seriesDataList).stream().sorted(Comparator.comparing(registry::getNameOf)).collect(Collectors.toList())) {
             plot.getEventBus().register(this);
             plotJComboBox.addItem(plot);
         }

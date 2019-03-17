@@ -3,21 +3,25 @@ package org.hkijena.misa_imagej.extension.plotbuilder;
 import org.hkijena.misa_imagej.ui.workbench.plotbuilder.*;
 import org.jfree.chart.JFreeChart;
 import org.jfree.data.category.DefaultCategoryDataset;
+import org.jfree.data.statistics.DefaultStatisticalCategoryDataset;
+import org.jfree.data.statistics.StatisticalCategoryDataset;
 
 import javax.swing.table.DefaultTableModel;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-public abstract class CategoryPlot extends MISAPlot {
+public abstract class StatisticalCategoryPlot extends MISAPlot {
 
     private String categoryAxisLabel;
     private String valueAxisLabel;
-    private DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+    private DefaultStatisticalCategoryDataset dataset = new DefaultStatisticalCategoryDataset();
 
-    protected CategoryPlot(List<MISAPlotSeriesData> seriesDataList) {
+    protected StatisticalCategoryPlot(List<MISAPlotSeriesData> seriesDataList) {
         super(seriesDataList);
         addSeries();
     }
-
 
     @Override
     public boolean canRemoveSeries() {
@@ -42,23 +46,50 @@ public abstract class CategoryPlot extends MISAPlot {
         return series;
     }
 
-    public DefaultCategoryDataset getDataset() {
+    public DefaultStatisticalCategoryDataset getDataset() {
         return dataset;
     }
 
     protected void updateDataset() {
         dataset.clear();
         MISAPlotSeries series = getSeries().get(0);
-        int rowCount = series.getMaximumRequiredRowCount();
+        int rowCount =  series.getAsNumericColumn("Value").getRequiredRowCount();
         List<String> xvalues = series.getAsStringColumn("X").getValues(rowCount);
         List<String> categories = series.getAsStringColumn("Category").getValues(rowCount);
         List<Double> values = series.getAsNumericColumn("Value").getValues(rowCount);
-        for(int i = 0; i < xvalues.size(); ++i) {
-            dataset.addValue(values.get(i), categories.get(i), xvalues.get(i));
+
+        Map<String, Map<String, List<Double>>> splitValues = new HashMap<>();
+
+        for(int i = 0; i < values.size(); ++i) {
+            String x = xvalues.get(i);
+            String category = categories.get(i);
+            double value = values.get(i);
+
+            if(!splitValues.containsKey(x))
+                splitValues.put(x, new HashMap<>());
+            if(!splitValues.get(x).containsKey(category))
+                splitValues.get(x).put(category, new ArrayList<>());
+
+            splitValues.get(x).get(category).add(value);
+        }
+
+        for(Map.Entry<String, Map<String, List<Double>>> xentry : splitValues.entrySet()) {
+            for(Map.Entry<String, List<Double>> categoryEntry : xentry.getValue().entrySet()) {
+                double sum = 0;
+                double sumSq = 0;
+                for(double v : categoryEntry.getValue()) {
+                    sum += v;
+                    sumSq += v * v;
+                }
+
+                double mean = sum / categoryEntry.getValue().size();
+                double var = (sumSq / categoryEntry.getValue().size()) - mean * mean;
+                dataset.add(mean, Math.sqrt(var), xentry.getKey(), categoryEntry.getKey());
+            }
         }
     }
 
-    protected abstract JFreeChart createPlotFromDataset(DefaultCategoryDataset dataset);
+    protected abstract JFreeChart createPlotFromDataset(DefaultStatisticalCategoryDataset dataset);
 
     @Override
     public final JFreeChart createPlot() {
