@@ -26,7 +26,7 @@ public class MISAAttachmentSaverDialogUI extends JDialog {
     private Path exportPath;
     private List<MISAAttachment> attachments;
     private MISAAttachmentDatabase database;
-    private int[] databaseIds;
+    private List<String> databaseFilters;
     private JButton cancelButton;
     private JProgressBar progressBar;
     private Worker worker;
@@ -45,10 +45,10 @@ public class MISAAttachmentSaverDialogUI extends JDialog {
         initialize();
     }
 
-    public MISAAttachmentSaverDialogUI(Path exportPath, MISAAttachmentDatabase database, int[] databaseIds) {
+    public MISAAttachmentSaverDialogUI(Path exportPath, MISAAttachmentDatabase database, List<String> databaseFilters) {
         this.database = database;
         this.exportPath = exportPath;
-        this.databaseIds = databaseIds;
+        this.databaseFilters = databaseFilters;
         initialize();
     }
 
@@ -70,7 +70,7 @@ public class MISAAttachmentSaverDialogUI extends JDialog {
 
         progressBar = new JProgressBar();
         progressBar.setStringPainted(true);
-        progressBar.setString("- / -");
+        progressBar.setIndeterminate(true);
         add(progressBar);
 
 
@@ -107,16 +107,15 @@ public class MISAAttachmentSaverDialogUI extends JDialog {
     }
 
     public void startOperation() {
-        worker = new Worker(exportPath, attachments, database, databaseIds);
+        worker = new Worker(exportPath, attachments, database, databaseFilters);
         worker.getEventBus().register(this);
         worker.execute();
     }
 
     @Subscribe
     public void handleProgressEvent(ProgressEvent event) {
-        progressBar.setMaximum(event.getMaximum());
         progressBar.setValue(event.getProgress());
-        progressBar.setString(event.getProgress() + " / " + event.getMaximum());
+        progressBar.setString(event.getProgress() + " objects written");
     }
 
     @Subscribe
@@ -133,40 +132,32 @@ public class MISAAttachmentSaverDialogUI extends JDialog {
 
         private List<MISAAttachment> attachments;
         private MISAAttachmentDatabase database;
-        private int[] databaseIds;
+        private List<String> databaseFilters;
 
-        private Worker(Path exportPath, List<MISAAttachment> attachments, MISAAttachmentDatabase database, int[] databaseIds) {
+        private Worker(Path exportPath, List<MISAAttachment> attachments, MISAAttachmentDatabase database, List<String> databaseFilters) {
             this.exportPath = exportPath;
             this.attachments = attachments;
             this.database = database;
-            this.databaseIds = databaseIds;
+            this.databaseFilters = databaseFilters;
         }
 
         @Override
         protected Object doInBackground() throws Exception {
             Gson gson = GsonUtils.getGson();
-
-            final int count = attachments != null ? attachments.size() : databaseIds.length;
-
-            SwingUtilities.invokeLater(() -> eventBus.post(new ProgressEvent(0, count)));
             try(JsonWriter writer = new JsonWriter(new FileWriter(exportPath.toFile()))) {
                 writer.setIndent("    ");
                 writer.setSerializeNulls(true);
                 writer.beginObject();
-
-                for(int i = 0; i < count; ++i) {
-
-                    MISAAttachment attachment;
-                    if(attachments != null)
-                        attachment = attachments.get(i);
-                    else
-                        attachment = database.queryAttachmentAt(databaseIds[i]);
-
+                int total = 0;
+                MISAAttachmentDatabase.Iterator iterator = database.createAttachmentIterator(databaseFilters);
+                MISAAttachment attachment;
+                while((attachment = iterator.nextAttachment()) != null) {
                     writer.name(attachment.getAttachmentFullPath());
                     gson.toJson(attachment.getFullJson(), JsonObject.class, writer);
                     // Update progress
-                    int finalI = i + 1;
-                    SwingUtilities.invokeLater(() -> eventBus.post(new ProgressEvent(finalI, count)));
+                    ++total;
+                    int finalTotal = total;
+                    SwingUtilities.invokeLater(() -> eventBus.post(new ProgressEvent(finalTotal)));
                 }
                 writer.endObject();
             }
@@ -187,19 +178,13 @@ public class MISAAttachmentSaverDialogUI extends JDialog {
 
     public static class ProgressEvent {
         private int progress;
-        private int maximum;
 
-        private ProgressEvent(int progress, int maximum) {
+        private ProgressEvent(int progress) {
             this.progress = progress;
-            this.maximum = maximum;
         }
 
         public int getProgress() {
             return progress;
-        }
-
-        public int getMaximum() {
-            return maximum;
         }
     }
 

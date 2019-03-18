@@ -22,7 +22,7 @@ import java.util.List;
 public class MISAAttachmentTableBuilderUI extends JPanel {
     private MISAWorkbenchUI workbench;
     private MISAAttachmentDatabase database;
-    private List<Integer> databaseIds;
+    private List<String> databaseFilters;
     private MISAAttachmentTable attachmentTable;
     private MISAAttachmentTableUI tableUI;
 
@@ -132,7 +132,7 @@ public class MISAAttachmentTableBuilderUI extends JPanel {
             if(attachmentTable != null && attachmentTable.getSerializationId().equals(objectSelection.getSelectedItem())) {
                 backup = attachmentTable.getColumns();
             }
-            attachmentTable = new MISAAttachmentTable(database, databaseIds,
+            attachmentTable = new MISAAttachmentTable(database, databaseFilters,
                     objectSelection.getSelectedItem().toString());
             if(backup == null) {
                 attachmentTable.addColumn(new MISAAttachmentTableSampleColumn());
@@ -151,8 +151,8 @@ public class MISAAttachmentTableBuilderUI extends JPanel {
         }
     }
 
-    public void setDatabaseIds(List<Integer> databaseIds) {
-        this.databaseIds = databaseIds;
+    public void setDatabaseFilters(List<String> databaseFilters) {
+        this.databaseFilters = databaseFilters;
         if(toggleAutoUpdate.isSelected()) {
             updateObjectSelection();
             updateTable();
@@ -164,7 +164,7 @@ public class MISAAttachmentTableBuilderUI extends JPanel {
 
         DefaultComboBoxModel<String> objectTypes = new DefaultComboBoxModel<>();
         ResultSet resultSet = database.query("distinct \"serialization-id\"",
-                Arrays.asList("id in (" + Joiner.on(',').join(databaseIds) + ")"), "");
+                databaseFilters, "");
         try {
             while(resultSet.next()) {
                 String item = resultSet.getString(1);

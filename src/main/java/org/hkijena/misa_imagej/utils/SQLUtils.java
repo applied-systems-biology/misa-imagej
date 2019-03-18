@@ -1,9 +1,22 @@
 package org.hkijena.misa_imagej.utils;
 
+import java.util.List;
+
 public class SQLUtils {
 
     private SQLUtils() {
 
+    }
+
+    public static String concatFilters(List<String> filters, String operator) {
+        StringBuilder result = new StringBuilder();
+        for(String filter : filters) {
+            if(result.length() > 0) {
+                result.append(" ").append(operator).append(" ");
+            }
+            result.append("(").append(filter).append(")");
+        }
+        return result.toString();
     }
 
     public static String column(String s) {

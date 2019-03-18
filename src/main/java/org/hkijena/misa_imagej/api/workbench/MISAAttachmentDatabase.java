@@ -229,6 +229,12 @@ public class MISAAttachmentDatabase {
         }
     }
 
+    public Iterator createAttachmentIterator(List<String> filters) {
+        ResultSet resultSet = query("id, sample, cache, property", filters, "");
+        return new Iterator(this, resultSet);
+    }
+
+
     @Subscribe
     public void handleFilterUpdateEvent(MISAAttachmentFilterChangedEvent event) {
         getEventBus().post(new UpdatedFiltersEvent(this));
@@ -289,6 +295,23 @@ public class MISAAttachmentDatabase {
 
         public MISAAttachmentDatabase getDatabase() {
             return database;
+        }
+    }
+
+    public static class Iterator {
+        private MISAAttachmentDatabase database;
+        private ResultSet resultSet;
+
+        public Iterator(MISAAttachmentDatabase database, ResultSet resultSet) {
+            this.database = database;
+            this.resultSet = resultSet;
+        }
+
+        public MISAAttachment nextAttachment() throws SQLException {
+            if(!resultSet.next())
+                return null;
+            String path = resultSet.getString(2) + "/" + resultSet.getString(3) + "/" + resultSet.getString(4);
+            return new MISAAttachment(database, resultSet.getInt(1), path);
         }
     }
 }

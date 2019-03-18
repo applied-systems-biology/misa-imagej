@@ -1,6 +1,5 @@
 package org.hkijena.misa_imagej.ui.workbench.objectbrowser;
 
-import com.google.common.primitives.Ints;
 import org.hkijena.misa_imagej.api.MISAAttachment;
 import org.hkijena.misa_imagej.api.workbench.MISAAttachmentDatabase;
 import org.hkijena.misa_imagej.utils.UIUtils;
@@ -9,6 +8,7 @@ import org.jdesktop.swingx.ScrollableSizeHint;
 
 import javax.swing.*;
 import java.awt.*;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,9 +18,10 @@ public class MISAAttachmentViewerListUI extends JPanel {
     private JLabel statsLabel;
 
     private MISAAttachmentDatabase database;
-    private int[] databaseIds;
-    private int lastDisplayedId;
+    private List<String> databaseFilters;
+    private int nextDisplayedId;
     private List<MISAAttachment> attachments = new ArrayList<>();
+    private MISAAttachmentDatabase.Iterator databaseIterator;
 
     public MISAAttachmentViewerListUI(MISAAttachmentDatabase database) {
         this.database = database;
@@ -68,11 +69,11 @@ public class MISAAttachmentViewerListUI extends JPanel {
     }
 
     private void exportData() {
-        if(databaseIds != null && databaseIds.length > 0) {
+        if(databaseFilters != null) {
             JFileChooser fileChooser = new JFileChooser();
             fileChooser.setDialogTitle("Export as *.json");
             if(fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-                MISAAttachmentSaverDialogUI dialog = new MISAAttachmentSaverDialogUI(fileChooser.getSelectedFile().toPath(), database, databaseIds);
+                MISAAttachmentSaverDialogUI dialog = new MISAAttachmentSaverDialogUI(fileChooser.getSelectedFile().toPath(), database, databaseFilters);
                 dialog.setModal(true);
                 dialog.pack();
                 dialog.setSize(400,300);
@@ -93,21 +94,19 @@ public class MISAAttachmentViewerListUI extends JPanel {
         dialog.setVisible(true);
     }
 
-    public void setDatabaseIds(List<Integer> databaseIds) {
-        this.databaseIds = Ints.toArray(databaseIds);
+    public void setDatabaseFilters(List<String> databaseFilters) {
+        this.databaseFilters = databaseFilters;
         reloadData();
     }
 
     private void reloadData() {
-        this.lastDisplayedId = -1;
+        this.nextDisplayedId = 0;
         this.attachments.clear();
         listPanel.removeAll();
         listPanel.revalidate();
         listPanel.repaint();
-        statsLabel.setText(databaseIds.length + " objects");
-        if(databaseIds.length > 0) {
-            addItem(0);
-        }
+        this.databaseIterator = database.createAttachmentIterator(databaseFilters);
+        addItem();
     }
 
     private void addItemIfNeeded() {
@@ -118,29 +117,28 @@ public class MISAAttachmentViewerListUI extends JPanel {
     }
 
     private void addItem() {
-        if(databaseIds != null) {
-            if(lastDisplayedId < databaseIds.length - 1) {
-                addItem(lastDisplayedId + 1);
-            }
+        MISAAttachment attachment;
+        try {
+            attachment = databaseIterator.nextAttachment();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
-    }
-
-    private void addItem(int i) {
-        MISAAttachment attachment = database.queryAttachmentAt(databaseIds[i]);
+        if(attachment == null)
+            return;
         attachments.add(attachment);
         MISAAttachmentViewerUI viewer = new MISAAttachmentViewerUI(this, attachment);
-        lastDisplayedId = i;
         viewer.setAlignmentY(Component.TOP_ALIGNMENT);
         listPanel.add(viewer, new GridBagConstraints() {
             {
                 gridx = 0;
-                gridy = i;
+                gridy = nextDisplayedId;
                 fill = GridBagConstraints.HORIZONTAL;
                 anchor = GridBagConstraints.NORTHWEST;
                 insets = UIUtils.UI_PADDING;
                 weightx = 1;
             }
         });
+        ++nextDisplayedId;
         revalidate();
         repaint();
 

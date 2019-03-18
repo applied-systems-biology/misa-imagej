@@ -13,14 +13,14 @@ import java.util.*;
 
 public class MISAAttachmentTable {
     private MISAAttachmentDatabase database;
-    private List<Integer> databaseIds;
+    private List<String> databaseFilters;
     private String serializationId;
     private List<MISAAttachmentTableColumn> columns = new ArrayList<>();
     private EventBus eventBus = new EventBus();
 
-    public MISAAttachmentTable(MISAAttachmentDatabase database, List<Integer> databaseIds, String serializationId) {
+    public MISAAttachmentTable(MISAAttachmentDatabase database, List<String> databaseFilters, String serializationId) {
         this.database = database;
-        this.databaseIds = databaseIds;
+        this.databaseFilters = databaseFilters;
         this.serializationId = serializationId;
     }
 
@@ -41,11 +41,11 @@ public class MISAAttachmentTable {
     }
 
     public Iterator createIterator() {
-        return new Iterator(this, columns,
-                database.query("id, sample, cache, property, \"serialization-id\"", Arrays.asList(
-                        "id in (" + Joiner.on(',').join(databaseIds) + ")",
-                        "\"serialization-id\" is '" + getSerializationId() + "'"
-                ), ""));
+        List<String> filters = new ArrayList<>(databaseFilters);
+        filters.add("\"serialization-id\" is '" + getSerializationId() + "'");
+        ResultSet resultSet = database.query("id, sample, cache, property, \"serialization-id\"",
+                filters, "" );
+        return new Iterator(this, columns, resultSet);
     }
 
     public List<MISAAttachmentTableColumn> getColumns() {

@@ -6,6 +6,7 @@ import org.hkijena.misa_imagej.api.workbench.MISAAttachmentDatabase;
 import org.hkijena.misa_imagej.api.workbench.filters.MISAAttachmentFilter;
 import org.hkijena.misa_imagej.ui.workbench.MISAWorkbenchUI;
 import org.hkijena.misa_imagej.ui.workbench.tablebuilder.MISAAttachmentTableBuilderUI;
+import org.hkijena.misa_imagej.utils.SQLUtils;
 import org.hkijena.misa_imagej.utils.UIUtils;
 
 import javax.swing.*;
@@ -248,21 +249,21 @@ public class MISAAttachmentBrowserUI extends JPanel {
         if(objectViewTree.getSelectionCount() == 1) {
             if(objectViewTree.getSelectionPath() != null && objectViewTree.getSelectionPath().getLastPathComponent() instanceof ObjectBrowserTreeNode) {
                 ObjectBrowserTreeNode node = (ObjectBrowserTreeNode)objectViewTree.getSelectionPath().getLastPathComponent();
-                List<Integer> ids = node.getSelectedDatabaseIndices();
-                objectView.setDatabaseIds(ids);
-                objectTableBuilder.setDatabaseIds(ids);
+                objectView.setDatabaseFilters(node.getFilters());
+                objectTableBuilder.setDatabaseFilters(node.getFilters());
             }
         }
         else if(objectViewTree.getSelectionPaths() != null) {
-            Set<Integer> ids = new HashSet<>();
+            List<String> selectedFilters = new ArrayList<>();
             for(TreePath selection : objectViewTree.getSelectionPaths()) {
                 if(selection.getLastPathComponent() instanceof ObjectBrowserTreeNode) {
                     ObjectBrowserTreeNode node = (ObjectBrowserTreeNode)selection.getLastPathComponent();
-                    ids.addAll(node.getSelectedDatabaseIndices());
+                    selectedFilters.add(SQLUtils.concatFilters(node.getFilters(), "and"));
                 }
             }
-            objectView.setDatabaseIds(new ArrayList<>(ids));
-            objectTableBuilder.setDatabaseIds(new ArrayList<>(ids));
+            String finalFilter = SQLUtils.concatFilters(selectedFilters, "or");
+            objectView.setDatabaseFilters(Arrays.asList(finalFilter));
+            objectTableBuilder.setDatabaseFilters(Arrays.asList(finalFilter));
         }
 
     }

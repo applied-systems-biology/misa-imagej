@@ -166,20 +166,6 @@ public class ObjectBrowserTreeNode extends DefaultMutableTreeNode {
         return database.query(sql.toString(), getFilters(), "");
     }
 
-    public List<Integer> getSelectedDatabaseIndices() {
-        ResultSet resultSet = database.query("id", getFilters(), "");
-        List<Integer> ids = new ArrayList<>();
-        try {
-            while(resultSet.next()) {
-                ids.add(resultSet.getInt(1));
-            }
-            resultSet.close();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-        return ids;
-    }
-
     private boolean hasUnknownValue() {
         return getFirstUnknownValue() != knownValues.length;
     }

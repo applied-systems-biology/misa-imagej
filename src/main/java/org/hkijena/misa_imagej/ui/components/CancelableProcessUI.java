@@ -31,7 +31,7 @@ public class CancelableProcessUI extends JDialog {
     private JProgressBar processProgress;
     private int currentTask = 0;
 
-    private static final Pattern percentagePattern = Pattern.compile("<(\\d+)%>.*");
+    private static final Pattern percentagePattern = Pattern.compile(".*<(\\d+) / (\\d+)>.*");
 
     public CancelableProcessUI(List<ProcessBuilder> processes) {
         setTitle("Working ...");
@@ -134,10 +134,11 @@ public class CancelableProcessUI extends JDialog {
         Matcher percentageMatch = percentagePattern.matcher(stdout.trim());
         if(percentageMatch.matches()) {
             try {
-                int percentage = Integer.parseInt(percentageMatch.group(1));
+                int progress = Integer.parseInt(percentageMatch.group(1));
+                int total = Integer.parseInt(percentageMatch.group(2));
                 currentTaskProgress.setIndeterminate(false);
-                currentTaskProgress.setMaximum(100);
-                currentTaskProgress.setValue(percentage);
+                currentTaskProgress.setMaximum(total);
+                currentTaskProgress.setValue(progress);
             }
             catch(NumberFormatException e) {
             }
