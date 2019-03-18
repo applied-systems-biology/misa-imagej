@@ -33,8 +33,13 @@ public class MISAOutputCacheUI extends JPanel {
      * @return
      */
     public Path getFilesystemPath() {
-        if(getCache().getIOType() == MISACacheIOType.Exported)
-            return misaOutput.getRootPath().resolve(cache.getSample().getName()).resolve(cache.getRelativePath());
+        if(getCache().getIOType() == MISACacheIOType.Exported) {
+            Path path = misaOutput.getRootPath().resolve(cache.getSample().getName()).resolve(cache.getRelativePath());
+            if(!Files.exists(path))
+                return null;
+            else
+                return path;
+        }
         else {
             if(misaOutput.getParameters() != null) {
                 if(misaOutput.getParameters().has("filesystem")) {
