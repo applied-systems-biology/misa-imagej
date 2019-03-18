@@ -149,17 +149,18 @@ public class MISAAttachmentSaverDialogUI extends JDialog {
                 writer.setSerializeNulls(true);
                 writer.beginObject();
                 int total = 0;
-                MISAAttachmentDatabase.Iterator iterator = database.createAttachmentIterator(databaseFilters);
-                MISAAttachment attachment;
-                while((attachment = iterator.nextAttachment()) != null) {
-                    writer.name(attachment.getAttachmentFullPath());
-                    gson.toJson(attachment.getFullJson(), JsonObject.class, writer);
-                    // Update progress
-                    ++total;
-                    int finalTotal = total;
-                    SwingUtilities.invokeLater(() -> eventBus.post(new ProgressEvent(finalTotal)));
+                try (MISAAttachmentDatabase.Iterator iterator = database.createAttachmentIterator(databaseFilters)) {
+                    MISAAttachment attachment;
+                    while((attachment = iterator.nextAttachment()) != null) {
+                        writer.name(attachment.getAttachmentFullPath());
+                        gson.toJson(attachment.getFullJson(), JsonObject.class, writer);
+                        // Update progress
+                        ++total;
+                        int finalTotal = total;
+                        SwingUtilities.invokeLater(() -> eventBus.post(new ProgressEvent(finalTotal)));
+                    }
+                    writer.endObject();
                 }
-                writer.endObject();
             }
 
             return null;

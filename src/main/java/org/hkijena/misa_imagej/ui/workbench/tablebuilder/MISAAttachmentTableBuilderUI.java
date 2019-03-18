@@ -163,9 +163,8 @@ public class MISAAttachmentTableBuilderUI extends JPanel {
         Object previousSelection = objectSelection.getSelectedItem();
 
         DefaultComboBoxModel<String> objectTypes = new DefaultComboBoxModel<>();
-        ResultSet resultSet = database.query("distinct \"serialization-id\"",
-                databaseFilters, "");
-        try {
+        try(ResultSet resultSet = database.query("distinct \"serialization-id\"",
+                databaseFilters, "")) {
             while(resultSet.next()) {
                 String item = resultSet.getString(1);
                 objectTypes.addElement(item);

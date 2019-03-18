@@ -9,6 +9,8 @@ import org.hkijena.misa_imagej.api.workbench.filters.MISAAttachmentFilter;
 import org.hkijena.misa_imagej.api.workbench.filters.MISAAttachmentFilterChangedEvent;
 import org.hkijena.misa_imagej.utils.GsonUtils;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -108,6 +110,7 @@ public class MISAAttachmentDatabase {
             for(MISAAttachmentFilter filter : enabledFilters) {
                 filter.setSQLStatementVariables(builder);
             }
+            statement.closeOnCompletion();
             return statement;
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -163,24 +166,7 @@ public class MISAAttachmentDatabase {
         return sql.toString();
     }
 
-    public ResultSet queryAt(String selectionStatement, int[] ids) {
-        StringBuilder sql = new StringBuilder();
-        sql.append("select ").append(selectionStatement).append(" from attachments").append(" where id in (");
-        for(int i = 0; i < ids.length; ++i) {
-            if(i != 0)
-                sql.append(",");
-            sql.append(ids[i]);
-        }
-        sql.append(")");
-        try {
-            PreparedStatement statement = databaseConnection.prepareStatement(sql.toString());
-            return statement.executeQuery();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public ResultSet queryAt(String selectionStatement, int id) {
+    private ResultSet queryAt(String selectionStatement, int id) {
         assert id > 0;
         StringBuilder sql = new StringBuilder();
         sql.append("select ").append(selectionStatement).append(" from attachments").append(" where id is ?");
@@ -201,8 +187,7 @@ public class MISAAttachmentDatabase {
      */
     public JsonElement queryJsonDataAt(int id) {
         assert id > 0;
-        ResultSet resultSet = queryAt("\"json-data\"", id);
-        try {
+        try (ResultSet resultSet = queryAt("\"json-data\"", id)) {
             assert resultSet.next();
             String json = resultSet.getString(1);
             Gson gson = GsonUtils.getGson();
@@ -219,8 +204,7 @@ public class MISAAttachmentDatabase {
      */
     public MISAAttachment queryAttachmentAt(int id) {
         assert id > 0;
-        ResultSet resultSet = queryAt("sample, cache, property", id);
-        try {
+        try (ResultSet resultSet =  queryAt("sample, cache, property", id)) {
             assert resultSet.next();
             String path = resultSet.getString(1) + "/" + resultSet.getString(2) + "/" + resultSet.getString(3);
             return new MISAAttachment(this, id, path);
@@ -238,16 +222,6 @@ public class MISAAttachmentDatabase {
     @Subscribe
     public void handleFilterUpdateEvent(MISAAttachmentFilterChangedEvent event) {
         getEventBus().post(new UpdatedFiltersEvent(this));
-    }
-
-    public int getDatasetCount() {
-        ResultSet resultSet = query("count()", Collections.emptyList(), "");
-        try {
-            assert resultSet.next();
-            return resultSet.getInt(1);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     public static class AddedFilterEvent {
@@ -298,7 +272,7 @@ public class MISAAttachmentDatabase {
         }
     }
 
-    public static class Iterator {
+    public static class Iterator implements AutoCloseable {
         private MISAAttachmentDatabase database;
         private ResultSet resultSet;
 
@@ -312,6 +286,11 @@ public class MISAAttachmentDatabase {
                 return null;
             String path = resultSet.getString(2) + "/" + resultSet.getString(3) + "/" + resultSet.getString(4);
             return new MISAAttachment(database, resultSet.getInt(1), path);
+        }
+
+        @Override
+        public void close() throws SQLException {
+            resultSet.close();
         }
     }
 }

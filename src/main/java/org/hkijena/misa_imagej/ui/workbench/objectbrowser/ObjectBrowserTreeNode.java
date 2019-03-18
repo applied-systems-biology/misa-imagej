@@ -57,9 +57,8 @@ public class ObjectBrowserTreeNode extends DefaultMutableTreeNode {
             return;
 
         int childrenRoleIndex = getFirstUnknownValue();
-        ResultSet resultSet = getChildDatabaseEntries();
         removeAllChildren();
-        try {
+        try (ResultSet resultSet = getChildDatabaseEntries()){
             Set<String > knownChildren = new HashSet<>();
             while(resultSet.next()) {
                 String childValue = resultSet.getString(1);

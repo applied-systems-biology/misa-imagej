@@ -72,7 +72,7 @@ public class MISAAttachmentTable {
         }
     }
 
-    public static class Iterator {
+    public static class Iterator implements AutoCloseable {
         private MISAAttachmentTable table;
         private List<MISAAttachmentTableColumn> columns;
         private ResultSet resultSet;
@@ -109,6 +109,11 @@ public class MISAAttachmentTable {
             attachment.stopLoadAllIteration(true);
 
             return rowBuffer;
+        }
+
+        @Override
+        public void close() throws SQLException {
+            resultSet.close();
         }
     }
 }

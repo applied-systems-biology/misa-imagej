@@ -11,6 +11,7 @@ public class DefaultBoxAndWhiskerBarCategoryPlot extends DefaultBoxAndWhiskerCat
 
     public DefaultBoxAndWhiskerBarCategoryPlot(List<MISAPlotSeriesData> seriesDataList) {
         super(seriesDataList);
+        setTitle("Box Plot");
     }
 
     @Override

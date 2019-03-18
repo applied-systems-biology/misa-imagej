@@ -79,6 +79,13 @@ public class MISAAttachmentTableUI extends JPanel {
             jTable.setModel(new DefaultTableModel());
         }
         else {
+            if(currentRow != null) {
+                try {
+                    currentRow.close();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
             currentRow = table.createIterator();
             DefaultTableModel model = new DefaultTableModel();
             for(MISAAttachmentTableColumn column : table.getColumns()) {

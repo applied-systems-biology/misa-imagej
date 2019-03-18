@@ -111,30 +111,31 @@ public class MISAAttachmentTableToModelExporterUI extends JDialog {
 
         @Override
         protected Object doInBackground() throws Exception {
-            MISAAttachmentTable.Iterator iterator = table.createIterator();
-            int progress = 0;
-            Object[] row;
-            long lastTime = System.currentTimeMillis();
+            try(MISAAttachmentTable.Iterator iterator = table.createIterator()) {
+                int progress = 0;
+                Object[] row;
+                long lastTime = System.currentTimeMillis();
 
-            DefaultTableModel model = new DefaultTableModel();
+                DefaultTableModel model = new DefaultTableModel();
 
-            for (int i = 0; i < table.getColumns().size(); ++i) {
-                model.addColumn(table.getColumns().get(i).getName());
-            }
-
-            while ((row = iterator.nextRow()) != null) {
-                ++progress;
-                if (System.currentTimeMillis() - lastTime > 1000) {
-                    int finalProgress = progress;
-                    SwingUtilities.invokeLater(() -> eventBus.post(new ProgressEvent(finalProgress)));
-                    lastTime = System.currentTimeMillis();
+                for (int i = 0; i < table.getColumns().size(); ++i) {
+                    model.addColumn(table.getColumns().get(i).getName());
                 }
 
-                model.addRow(row);
-            }
+                while ((row = iterator.nextRow()) != null) {
+                    ++progress;
+                    if (System.currentTimeMillis() - lastTime > 1000) {
+                        int finalProgress = progress;
+                        SwingUtilities.invokeLater(() -> eventBus.post(new ProgressEvent(finalProgress)));
+                        lastTime = System.currentTimeMillis();
+                    }
 
-            result = model;
-            return null;
+                    model.addRow(row);
+                }
+
+                result = model;
+                return null;
+            }
         }
 
         @Override

@@ -105,6 +105,13 @@ public class MISAAttachmentViewerListUI extends JPanel {
         listPanel.removeAll();
         listPanel.revalidate();
         listPanel.repaint();
+        if(this.databaseIterator != null) {
+            try {
+                this.databaseIterator.close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
         this.databaseIterator = database.createAttachmentIterator(databaseFilters);
         addItem();
     }

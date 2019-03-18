@@ -142,27 +142,28 @@ public class MISAAttachmentTableExporterUI extends JDialog {
         }
 
         private void writeCSV() throws Exception {
-            MISAAttachmentTable.Iterator iterator = table.createIterator();
-            int progress = 0;
-            Object[] row = new Object[table.getColumns().size()];
+            try(MISAAttachmentTable.Iterator iterator = table.createIterator()) {
+                int progress = 0;
+                Object[] row = new Object[table.getColumns().size()];
 
-            for(int i = 0; i < table.getColumns().size(); ++i) {
-                row[i] = table.getColumns().get(i).getName();
-            }
+                for(int i = 0; i < table.getColumns().size(); ++i) {
+                    row[i] = table.getColumns().get(i).getName();
+                }
 
-            long lastTime = System.currentTimeMillis();
+                long lastTime = System.currentTimeMillis();
 
-            try(BufferedOutputStream writer = new BufferedOutputStream(new FileOutputStream(exportPath.toFile()))) {
-                writeCSVRow(row, writer);
-                while((row = iterator.nextRow()) != null) {
-                    ++progress;
-                    if(System.currentTimeMillis() - lastTime > 1000) {
-                        int finalProgress = progress;
-                        SwingUtilities.invokeLater(() -> eventBus.post(new ProgressEvent(finalProgress)));
-                        lastTime = System.currentTimeMillis();
-                    }
-
+                try(BufferedOutputStream writer = new BufferedOutputStream(new FileOutputStream(exportPath.toFile()))) {
                     writeCSVRow(row, writer);
+                    while((row = iterator.nextRow()) != null) {
+                        ++progress;
+                        if(System.currentTimeMillis() - lastTime > 1000) {
+                            int finalProgress = progress;
+                            SwingUtilities.invokeLater(() -> eventBus.post(new ProgressEvent(finalProgress)));
+                            lastTime = System.currentTimeMillis();
+                        }
+
+                        writeCSVRow(row, writer);
+                    }
                 }
             }
         }
@@ -189,53 +190,54 @@ public class MISAAttachmentTableExporterUI extends JDialog {
         }
 
         private void writeXLSX() throws Exception {
-            MISAAttachmentTable.Iterator iterator = table.createIterator();
-            int processedRows = 0;
-            Object[] row;
+            try(MISAAttachmentTable.Iterator iterator = table.createIterator()) {
+                int processedRows = 0;
+                Object[] row;
 
-            XSSFWorkbook workbook = new XSSFWorkbook();
-            XSSFSheet sheet = workbook.createSheet("Quantification output");
+                XSSFWorkbook workbook = new XSSFWorkbook();
+                XSSFSheet sheet = workbook.createSheet("Quantification output");
 
-            Row xlsxHeaderRow = sheet.createRow(0);
-            for(int i = 0; i < table.getColumns().size(); ++i) {
-                Cell cell = xlsxHeaderRow.createCell(i, CellType.STRING);
-                cell.setCellValue(table.getColumns().get(i).getName());
-            }
+                Row xlsxHeaderRow = sheet.createRow(0);
+                for(int i = 0; i < table.getColumns().size(); ++i) {
+                    Cell cell = xlsxHeaderRow.createCell(i, CellType.STRING);
+                    cell.setCellValue(table.getColumns().get(i).getName());
+                }
 
-            long lastTime = System.currentTimeMillis();
+                long lastTime = System.currentTimeMillis();
 
-            while((row = iterator.nextRow()) != null) {
-                Row xlsxRow = sheet.createRow(processedRows + 1);
-                for(int i = 0; i < row.length; ++i) {
-                    if(row[i] instanceof Number) {
-                        Cell cell = xlsxRow.createCell(i, CellType.NUMERIC);
-                        cell.setCellValue(((Number)row[i]).doubleValue());
+                while((row = iterator.nextRow()) != null) {
+                    Row xlsxRow = sheet.createRow(processedRows + 1);
+                    for(int i = 0; i < row.length; ++i) {
+                        if(row[i] instanceof Number) {
+                            Cell cell = xlsxRow.createCell(i, CellType.NUMERIC);
+                            cell.setCellValue(((Number)row[i]).doubleValue());
+                        }
+                        else if(row[i] instanceof Boolean) {
+                            Cell cell = xlsxRow.createCell(i, CellType.BOOLEAN);
+                            cell.setCellValue((Boolean) row[i]);
+                        }
+                        else {
+                            Cell cell = xlsxRow.createCell(i, CellType.STRING);
+                            cell.setCellValue("" + row[i]);
+                        }
                     }
-                    else if(row[i] instanceof Boolean) {
-                        Cell cell = xlsxRow.createCell(i, CellType.BOOLEAN);
-                        cell.setCellValue((Boolean) row[i]);
-                    }
-                    else {
-                        Cell cell = xlsxRow.createCell(i, CellType.STRING);
-                        cell.setCellValue("" + row[i]);
+
+                    ++processedRows;
+                    if(System.currentTimeMillis() - lastTime > 1000) {
+                        int finalProgress = processedRows;
+                        SwingUtilities.invokeLater(() -> eventBus.post(new ProgressEvent(finalProgress)));
+                        lastTime = System.currentTimeMillis();
                     }
                 }
 
-                ++processedRows;
-                if(System.currentTimeMillis() - lastTime > 1000) {
-                    int finalProgress = processedRows;
-                    SwingUtilities.invokeLater(() -> eventBus.post(new ProgressEvent(finalProgress)));
-                    lastTime = System.currentTimeMillis();
+                for(int i = 0; i < table.getColumns().size(); ++i) {
+                    sheet.autoSizeColumn(i);
                 }
-            }
 
-            for(int i = 0; i < table.getColumns().size(); ++i) {
-                sheet.autoSizeColumn(i);
+                FileOutputStream stream = new FileOutputStream(exportPath.toFile());
+                workbook.write(stream);
+                workbook.close();
             }
-
-            FileOutputStream stream = new FileOutputStream(exportPath.toFile());
-            workbook.write(stream);
-            workbook.close();
         }
 
         @Override
