@@ -64,7 +64,7 @@ public class MISACache implements MISAValidatable {
      * @return
      */
     public String getRelativePath() {
-        return getFilesystemEntry().getInternalPath().toString();
+        return getFilesystemEntry().getInternalPath().toString().replace('\\', '/');
     }
 
     /**
