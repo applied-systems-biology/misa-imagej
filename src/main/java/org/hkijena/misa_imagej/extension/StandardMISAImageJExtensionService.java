@@ -118,12 +118,17 @@ public class StandardMISAImageJExtensionService extends AbstractService implemen
                 "Replaces each item with an ID that uniquely identifies the item.",
                 UIUtils.getIconFromResources("inplace-function.png"));
 
-        registryService.getPlotBuilderRegistry().register(StatisticalLineCategoryPlot.class,
-                StatisticalCategoryPlotSettingsUI.class,
+
+        registryService.getPlotBuilderRegistry().register(DefaultBoxAndWhiskerBarCategoryPlot.class,
+                CategoryPlotSettingsUI.class,
+                "Box Plot",
+                UIUtils.getIconFromResources("bar-chart.png"));
+        registryService.getPlotBuilderRegistry().register(DefaultStatisticalLineCategoryPlot.class,
+                CategoryPlotSettingsUI.class,
                 "Statistical Line Plot",
                 UIUtils.getIconFromResources("line-chart.png"));
-        registryService.getPlotBuilderRegistry().register(StatisticalBarCategoryPlot.class,
-                StatisticalCategoryPlotSettingsUI.class,
+        registryService.getPlotBuilderRegistry().register(DefaultStatisticalBarCategoryPlot.class,
+                CategoryPlotSettingsUI.class,
                 "Statistical Bar Plot",
                 UIUtils.getIconFromResources("bar-chart.png"));
         registryService.getPlotBuilderRegistry().register(LineCategoryPlot.class,

@@ -1,7 +1,8 @@
 package org.hkijena.misa_imagej.extension.plotbuilder;
 
-import org.hkijena.misa_imagej.ui.workbench.plotbuilder.*;
-import org.jfree.chart.JFreeChart;
+import org.hkijena.misa_imagej.ui.workbench.plotbuilder.MISAPlotSeries;
+import org.hkijena.misa_imagej.ui.workbench.plotbuilder.MISAPlotSeriesData;
+import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.statistics.DefaultStatisticalCategoryDataset;
 
 import java.util.ArrayList;
@@ -9,42 +10,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public abstract class StatisticalCategoryPlot extends MISAPlot {
+public abstract class DefaultStatisticalCategoryPlot extends CategoryPlot {
 
-    private String categoryAxisLabel;
-    private String valueAxisLabel;
     private DefaultStatisticalCategoryDataset dataset = new DefaultStatisticalCategoryDataset();
 
-    protected StatisticalCategoryPlot(List<MISAPlotSeriesData> seriesDataList) {
+    protected DefaultStatisticalCategoryPlot(List<MISAPlotSeriesData> seriesDataList) {
         super(seriesDataList);
         addSeries();
-    }
-
-    @Override
-    public boolean canRemoveSeries() {
-        return false;
-    }
-
-    @Override
-    public boolean canAddSeries() {
-        return getSeries().size() == 0;
-    }
-
-    @Override
-    protected MISAPlotSeries createSeries() {
-        MISAPlotSeries series = new MISAPlotSeries();
-        series.addColumn("X", new MISAStringPlotSeriesColumn(getSeriesDataList(),
-                new MISAPlotSeriesGenerator<>("No category", x -> "No category"),
-                new MISAPlotSeriesGenerator<>("Row number", x -> "x" + x)));
-        series.addColumn("Category", new MISAStringPlotSeriesColumn(getSeriesDataList(),
-                new MISAPlotSeriesGenerator<>("No category", x -> "No category")));
-        series.addColumn("Value", new MISANumericPlotSeriesColumn(getSeriesDataList(),
-                new MISAPlotSeriesGenerator<>("Row index", x -> (double)x)));
-        return series;
-    }
-
-    public DefaultStatisticalCategoryDataset getDataset() {
-        return dataset;
     }
 
     protected void updateDataset() {
@@ -86,29 +58,8 @@ public abstract class StatisticalCategoryPlot extends MISAPlot {
         }
     }
 
-    protected abstract JFreeChart createPlotFromDataset(DefaultStatisticalCategoryDataset dataset);
-
     @Override
-    public final JFreeChart createPlot() {
-        updateDataset();
-        return createPlotFromDataset(dataset);
-    }
-
-    public String getCategoryAxisLabel() {
-        return categoryAxisLabel;
-    }
-
-    public void setCategoryAxisLabel(String categoryAxisLabel) {
-        this.categoryAxisLabel = categoryAxisLabel;
-        getEventBus().post(new PlotChangedEvent(this));
-    }
-
-    public String getValueAxisLabel() {
-        return valueAxisLabel;
-    }
-
-    public void setValueAxisLabel(String valueAxisLabel) {
-        this.valueAxisLabel = valueAxisLabel;
-        getEventBus().post(new PlotChangedEvent(this));
+    public CategoryDataset getDataset() {
+        return dataset;
     }
 }

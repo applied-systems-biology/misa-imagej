@@ -6,20 +6,19 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.renderer.category.BarRenderer;
 import org.jfree.chart.renderer.category.StandardBarPainter;
 import org.jfree.chart.renderer.category.StatisticalBarRenderer;
-import org.jfree.data.statistics.DefaultStatisticalCategoryDataset;
 
 import java.util.List;
 
-public class StatisticalBarCategoryPlot extends StatisticalCategoryPlot {
+public class DefaultStatisticalBarCategoryPlot extends DefaultStatisticalCategoryPlot {
 
-    public StatisticalBarCategoryPlot(List<MISAPlotSeriesData> seriesDataList) {
+    public DefaultStatisticalBarCategoryPlot(List<MISAPlotSeriesData> seriesDataList) {
         super(seriesDataList);
         setTitle("Bar plot");
     }
 
     @Override
-    protected JFreeChart createPlotFromDataset(DefaultStatisticalCategoryDataset dataset) {
-        JFreeChart chart = ChartFactory.createBarChart(getTitle(), getCategoryAxisLabel(), getValueAxisLabel(), dataset);
+    protected JFreeChart createPlotFromDataset() {
+        JFreeChart chart = ChartFactory.createBarChart(getTitle(), getCategoryAxisLabel(), getValueAxisLabel(), getDataset());
         chart.getCategoryPlot().setRenderer(new StatisticalBarRenderer());
         ((BarRenderer)chart.getCategoryPlot().getRenderer()).setBarPainter(new StandardBarPainter());
         return chart;

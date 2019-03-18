@@ -2,7 +2,7 @@ package org.hkijena.misa_imagej.extension.plotbuilder;
 
 import org.hkijena.misa_imagej.ui.workbench.plotbuilder.*;
 import org.jfree.chart.JFreeChart;
-import org.jfree.data.category.DefaultCategoryDataset;
+import org.jfree.data.category.CategoryDataset;
 
 import java.util.List;
 
@@ -10,7 +10,6 @@ public abstract class CategoryPlot extends MISAPlot {
 
     private String categoryAxisLabel;
     private String valueAxisLabel;
-    private DefaultCategoryDataset dataset = new DefaultCategoryDataset();
 
     protected CategoryPlot(List<MISAPlotSeriesData> seriesDataList) {
         super(seriesDataList);
@@ -41,28 +40,16 @@ public abstract class CategoryPlot extends MISAPlot {
         return series;
     }
 
-    public DefaultCategoryDataset getDataset() {
-        return dataset;
-    }
+    public abstract CategoryDataset getDataset();
 
-    protected void updateDataset() {
-        dataset.clear();
-        MISAPlotSeries series = getSeries().get(0);
-        int rowCount = series.getMaximumRequiredRowCount();
-        List<String> xvalues = series.getAsStringColumn("X").getValues(rowCount);
-        List<String> categories = series.getAsStringColumn("Category").getValues(rowCount);
-        List<Double> values = series.getAsNumericColumn("Value").getValues(rowCount);
-        for(int i = 0; i < xvalues.size(); ++i) {
-            dataset.addValue(values.get(i), categories.get(i), xvalues.get(i));
-        }
-    }
+    protected abstract void updateDataset();
 
-    protected abstract JFreeChart createPlotFromDataset(DefaultCategoryDataset dataset);
+    protected abstract JFreeChart createPlotFromDataset();
 
     @Override
     public final JFreeChart createPlot() {
         updateDataset();
-        return createPlotFromDataset(dataset);
+        return createPlotFromDataset();
     }
 
     public String getCategoryAxisLabel() {

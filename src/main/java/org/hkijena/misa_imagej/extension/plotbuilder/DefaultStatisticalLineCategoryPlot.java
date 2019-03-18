@@ -4,20 +4,19 @@ import org.hkijena.misa_imagej.ui.workbench.plotbuilder.MISAPlotSeriesData;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.renderer.category.StatisticalLineAndShapeRenderer;
-import org.jfree.data.statistics.DefaultStatisticalCategoryDataset;
 
 import java.util.List;
 
-public class StatisticalLineCategoryPlot extends StatisticalCategoryPlot {
+public class DefaultStatisticalLineCategoryPlot extends DefaultStatisticalCategoryPlot {
 
-    public StatisticalLineCategoryPlot(List<MISAPlotSeriesData> seriesDataList) {
+    public DefaultStatisticalLineCategoryPlot(List<MISAPlotSeriesData> seriesDataList) {
         super(seriesDataList);
         setTitle("Line category plot");
     }
 
     @Override
-    protected JFreeChart createPlotFromDataset(DefaultStatisticalCategoryDataset dataset) {
-        JFreeChart chart = ChartFactory.createLineChart(getTitle(), getCategoryAxisLabel(), getValueAxisLabel(), dataset);
+    protected JFreeChart createPlotFromDataset() {
+        JFreeChart chart = ChartFactory.createLineChart(getTitle(), getCategoryAxisLabel(), getValueAxisLabel(), getDataset());
         chart.getCategoryPlot().setRenderer(new StatisticalLineAndShapeRenderer());
         return chart;
     }
