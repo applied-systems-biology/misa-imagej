@@ -50,6 +50,12 @@ public class StandardMISAImageJExtensionService extends AbstractService implemen
                 "COUNT",
                 "Counts all entries",
                 UIUtils.getIconFromResources("statistics.png"));
+        registryService.getTableAnalyzerUIOperationRegistry().register(StatisticsCountNonNullVectorOperation.class,
+                null,
+                "Count Non-Empty",
+                "COUNT_NON_EMPTY",
+                "Counts all non-empty entries",
+                UIUtils.getIconFromResources("statistics.png"));
         registryService.getTableAnalyzerUIOperationRegistry().register(StatisticsSumVectorOperation.class,
                 null,
                 "Sum",
