@@ -78,8 +78,8 @@ public class ObjectBrowserTreeNodeCellRenderer extends JPanel implements TreeCel
                     break;
                 case SerializationId: {
                     JSONSchemaObject schema = database.getMisaOutput().getAttachmentSchemas().getOrDefault(value, null);
-                    if (schema != null && schema.getDocumentationTitle() != null && !schema.getDocumentationTitle().isEmpty()) {
-                        mainLabel.setText(schema.getDocumentationTitle());
+                    if (schema != null && schema.getDocumentationTypeTitle() != null && !schema.getDocumentationTypeTitle().isEmpty()) {
+                        mainLabel.setText(schema.getDocumentationTypeTitle());
                         additionalInfoLabel.setText(value);
                         objectIcon.setColor(schema.toColor());
                         iconLabel.setIcon(objectIcon);

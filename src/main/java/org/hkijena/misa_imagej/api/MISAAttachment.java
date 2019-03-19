@@ -176,7 +176,7 @@ public class MISAAttachment {
                 schema = database.getMisaOutput().getAttachmentSchemas().getOrDefault(serializationId, null);
             }
 
-            loadProperties(object, schema, "");
+            loadProperties(object, schema, "", "");
             isLoaded = true;
         }
     }
@@ -185,44 +185,61 @@ public class MISAAttachment {
         return eventBus;
     }
 
-    private void loadProperties(JsonObject rootObject, JSONSchemaObject rootSchema, String subPath) {
+    private void loadProperties(JsonObject rootObject, JSONSchemaObject rootSchema, String subPath, String subNamePath) {
         Stack<JsonElement> elements = new Stack<>();
         Stack<String> paths = new Stack<>();
+        Stack<String> namePaths = new Stack<>();
         Stack<JSONSchemaObject> schemas = new Stack<>();
         elements.push(rootObject);
         paths.push(subPath);
+        namePaths.push(subNamePath);
         schemas.push(rootSchema);
 
         while (!elements.isEmpty()) {
             JsonElement top = elements.pop();
             String topPath = paths.pop();
+            String topNamePath = namePaths.pop();
             JSONSchemaObject topSchema = schemas.pop();
 
             if (top.isJsonPrimitive()) {
-                properties.add(new MemoryProperty(topPath, top.getAsJsonPrimitive(), topSchema));
+                String description = null;
+                if(topSchema != null && topSchema.getDocumentationDescription() != null && !topSchema.getDocumentationDescription().isEmpty())
+                    description = topSchema.getDocumentationDescription();
+                properties.add(new MemoryProperty(topPath, topNamePath, description, top.getAsJsonPrimitive(), topSchema));
             } else if (top.isJsonObject()) {
                 if (top.getAsJsonObject().has("misa-analyzer:database-index")) {
                     int dbId = top.getAsJsonObject().get("misa-analyzer:database-index").getAsInt();
-                    properties.add(new LazyProperty(this, topPath, dbId));
+                    String description = null;
+                    if(topSchema != null && topSchema.getDocumentationDescription() != null && !topSchema.getDocumentationDescription().isEmpty())
+                        description = topSchema.getDocumentationDescription();
+                    properties.add(new LazyProperty(this, topPath, topNamePath, description, dbId));
                 } else {
                     for (Map.Entry<String, JsonElement> entry : top.getAsJsonObject().entrySet()) {
                         if (entry.getKey().equals("misa:serialization-id") || entry.getKey().equals("misa:serialization-hierarchy"))
                             continue;
 
+                        String name = entry.getKey();
+
                         elements.push(entry.getValue());
                         paths.push(topPath + "/" + entry.getKey());
 
                         if (topSchema != null && topSchema.hasPropertyFromPath(entry.getKey())) {
-                            schemas.push(topSchema.getPropertyFromPath(entry.getKey()));
+                            JSONSchemaObject subSchema = topSchema.getPropertyFromPath(entry.getKey());
+                            if(subSchema != null && subSchema.getDocumentationTitle() != null && !subSchema.getDocumentationTitle().isEmpty())
+                                name = subSchema.getDocumentationTitle();
+                            schemas.push(subSchema);
                         } else {
                             schemas.push(null);
                         }
+
+                        namePaths.push(topNamePath + "/" + name);
                     }
                 }
             } else if (top.isJsonArray()) {
                 for (int i = 0; i < top.getAsJsonArray().size(); ++i) {
                     elements.push(top.getAsJsonArray().get(i));
                     paths.push(topPath + "/[" + i + "]");
+                    namePaths.push(topPath + "/[" + i + "]");
                     if (topSchema != null && topSchema.getAdditionalItems() != null) {
                         schemas.push(topSchema.getAdditionalItems());
                     } else {
@@ -299,6 +316,10 @@ public class MISAAttachment {
     public interface Property {
         String getPath();
 
+        String getNamePath();
+
+        String getDescription();
+
         JSONSchemaObject getSchema();
 
         void loadValue();
@@ -310,11 +331,15 @@ public class MISAAttachment {
 
     public static class MemoryProperty implements Property {
         private String path;
+        private String namePath;
+        private String description;
         private JsonPrimitive value;
         private JSONSchemaObject schema;
 
-        public MemoryProperty(String path, JsonPrimitive value, JSONSchemaObject schema) {
+        public MemoryProperty(String path, String namePath, String description, JsonPrimitive value, JSONSchemaObject schema) {
             this.path = path;
+            this.namePath = namePath;
+            this.description = description;
             this.value = value;
             this.schema = schema;
         }
@@ -347,18 +372,31 @@ public class MISAAttachment {
         public void cancelLoadValue() {
 
         }
+
+        public String getNamePath() {
+            return namePath;
+        }
+
+        @Override
+        public String getDescription() {
+            return description;
+        }
     }
 
     public static class LazyProperty implements Property {
         private String path;
+        private String namePath;
+        private String description;
         private boolean isLoaded;
         private JSONSchemaObject schema;
         private MISAAttachment parent;
         private int databaseIndex;
 
-        public LazyProperty(MISAAttachment parent, String path, int databaseIndex) {
+        public LazyProperty(MISAAttachment parent, String path, String namePath, String description, int databaseIndex) {
             this.path = path;
             this.parent = parent;
+            this.namePath = namePath;
+            this.description = description;
             this.databaseIndex = databaseIndex;
         }
 
@@ -388,7 +426,7 @@ public class MISAAttachment {
                 }
 
                 isLoaded = true;
-                parent.loadProperties(object, schema, path);
+                parent.loadProperties(object, schema, path, namePath);
             }
         }
 
@@ -410,6 +448,15 @@ public class MISAAttachment {
         @Override
         public JSONSchemaObject getSchema() {
             return schema;
+        }
+
+        public String getNamePath() {
+            return namePath;
+        }
+
+        @Override
+        public String getDescription() {
+            return description;
         }
     }
 

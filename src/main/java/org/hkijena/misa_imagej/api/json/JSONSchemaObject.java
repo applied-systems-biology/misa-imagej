@@ -64,6 +64,12 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
     @SerializedName("misa:documentation-description")
     private String documentationDescription = null;
 
+    @SerializedName("misa:documentation-type-title")
+    private String documentationTypeTitle = null;
+
+    @SerializedName("misa:documentation-type-description")
+    private String documentationTypeDescription = null;
+
     public JSONSchemaObject() {
     }
 
@@ -107,6 +113,8 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
 //        obj.setDescription(getDescription());
         obj.documentationTitle = this.documentationTitle;
         obj.documentationDescription = this.documentationDescription;
+        obj.documentationTypeTitle = this.documentationTypeTitle;
+        obj.documentationTypeDescription = this.documentationTypeDescription;
         obj.setDefaultValue(getDefaultValue());
         obj.setEnumValues(getEnumValues());
         obj.setValue(getValue());
@@ -524,6 +532,14 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
         }
         tooltip.append("</html>");
         return tooltip.toString();
+    }
+
+    public String getDocumentationTypeTitle() {
+        return documentationTypeTitle;
+    }
+
+    public String getDocumentationTypeDescription() {
+        return documentationTypeDescription;
     }
 
     public static class ValueChangedEvent {

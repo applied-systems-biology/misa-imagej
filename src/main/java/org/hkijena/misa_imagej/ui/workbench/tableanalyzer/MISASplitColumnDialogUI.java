@@ -116,7 +116,7 @@ public class MISASplitColumnDialogUI extends JDialog {
             }
 
             if(!columnStateAssignment.containsKey(category.toString())) {
-                result.addColumn(category.toString());
+                result.addColumn(tableModel.getColumnName(valueColumn) + " where " + category.toString());
                 columnStateAssignment.put(category.toString(), result.getColumnCount() - 1);
                 columnRowCounts.put(category.toString(), 0);
             }

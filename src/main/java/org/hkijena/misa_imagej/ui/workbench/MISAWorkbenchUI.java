@@ -126,6 +126,7 @@ public class MISAWorkbenchUI extends JFrame{
                 Path tmp = Files.createTempDirectory("misaxx-workbench");
                 Files.createDirectories(tmp.resolve("input"));
                 MISAModuleInstance moduleInstance = module.instantiate();
+                moduleInstance.getRuntimeParameters().getPropertyFromPath("request-skipping").setValue(true);
                 moduleInstance.addSample("misaxx-output");
 
                 MISACache ioCache = moduleInstance.getSample("misaxx-output").getImportedCaches().get(0);

@@ -87,11 +87,11 @@ public class MISAAttachmentViewerUI extends JPanel {
     private void exportToJson() {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setDialogTitle("Export object as *.json");
-        if(fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+        if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
             MISAAttachmentSaverDialogUI dialog = new MISAAttachmentSaverDialogUI(fileChooser.getSelectedFile().toPath(), attachment);
             dialog.setModal(true);
             dialog.pack();
-            dialog.setSize(400,300);
+            dialog.setSize(400, 300);
             dialog.setLocationRelativeTo(SwingUtilities.getWindowAncestor(this));
             dialog.startOperation();
             dialog.setVisible(true);
@@ -102,66 +102,83 @@ public class MISAAttachmentViewerUI extends JPanel {
         MISAAttachmentExpanderDialogUI dialog = new MISAAttachmentExpanderDialogUI(attachment);
         dialog.setModal(true);
         dialog.pack();
-        dialog.setSize(400,300);
+        dialog.setSize(400, 300);
         dialog.setLocationRelativeTo(SwingUtilities.getWindowAncestor(this));
         dialog.startOperation();
         dialog.setVisible(true);
     }
 
-    private void insertLabelFor(String propertyName, Icon icon, JPanel row) {
-        JLabel label = new JLabel(propertyName != null ? propertyName.substring(1) : null, icon, JLabel.LEFT);
+    private JLabel insertLabelFor(MISAAttachment.Property property, Icon icon, JPanel row) {
+        JLabel label = new JLabel(property.getNamePath() != null ? property.getNamePath().substring(1) : null, icon, JLabel.LEFT);
+        label.setToolTipText(createToolTipFor(property));
         propertyLabels.add(label);
         row.add(label, BorderLayout.WEST);
+        return label;
     }
 
     private void insertComponent(Component ui, JPanel row) {
         row.add(ui, BorderLayout.CENTER);
     }
 
+    private String createToolTipFor(MISAAttachment.Property property) {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("<html>");
+        stringBuilder.append("<i>").append(property.getPath().replace("/", "&frasl;")).append("</i><br/>");
+        if (property.getDescription() != null && !property.getDescription().isEmpty())
+            stringBuilder.append("<br/>").append(property.getDescription());
+        stringBuilder.append("</html>");
+        return stringBuilder.toString();
+    }
+
     private void insertDisplayFor(MISAAttachment.Property property) {
 
-        JPanel row = new JPanel(new BorderLayout(4,4));
-        row.setBorder(BorderFactory.createEmptyBorder(4,4,4,4));
+        JPanel row = new JPanel(new BorderLayout(4, 4));
+        row.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
 
         if (property.hasValue()) {
             if (property instanceof MISAAttachment.MemoryProperty) {
                 JsonPrimitive primitive = ((MISAAttachment.MemoryProperty) property).getValue();
 
                 if (primitive.isString()) {
-                    insertLabelFor(property.getPath(), UIUtils.getIconFromResources("text.png"), row);
-                    if(primitive.getAsString().contains("\n")) {
+                    insertLabelFor(property, UIUtils.getIconFromResources("text.png"), row);
+                    if (primitive.getAsString().contains("\n")) {
                         JTextArea textArea = new JTextArea(primitive.getAsString());
                         textArea.setEditable(false);
+                        textArea.setToolTipText(createToolTipFor(property));
                         JScrollPane scrollPane = new JScrollPane(textArea);
-                        scrollPane.setPreferredSize(new Dimension(100,200));
+                        scrollPane.setPreferredSize(new Dimension(100, 200));
                         insertComponent(scrollPane, row);
-                    }
-                    else {
+                    } else {
                         JTextField component = new JTextField(primitive.getAsString());
+                        component.setToolTipText(createToolTipFor(property));
                         component.setEditable(false);
                         insertComponent(component, row);
                     }
                 } else if (primitive.isBoolean()) {
-                    JCheckBox component = new JCheckBox(property.getPath().substring(1));
+                    JCheckBox component = new JCheckBox(property.getNamePath().substring(1));
+                    component.setToolTipText(createToolTipFor(property));
                     component.setModel(new ReadOnlyToggleButtonModel(primitive.getAsBoolean()));
-                    insertLabelFor(null, null, row);
+                    JLabel label = insertLabelFor(property, null, row);
+                    label.setText("");
+
                     insertComponent(component, row);
                 } else if (primitive.isNumber()) {
-                    insertLabelFor(property.getPath(), UIUtils.getIconFromResources("number.png"), row);
+                    insertLabelFor(property, UIUtils.getIconFromResources("number.png"), row);
                     JTextField component = new JTextField(primitive.getAsNumber() + "");
+                    component.setToolTipText(createToolTipFor(property));
                     component.setEditable(false);
                     insertComponent(component, row);
                 }
-            }
-            else if(property instanceof MISAAttachment.LazyProperty) {
-                insertLabelFor(property.getPath(), UIUtils.getIconFromResources("object.png"), row);
+            } else if (property instanceof MISAAttachment.LazyProperty) {
+                insertLabelFor(property, UIUtils.getIconFromResources("object.png"), row);
                 JLabel component = new JLabel(((MISAAttachment.LazyProperty) property).getDocumentationTitle(),
-                        new MonochromeColorIcon(UIUtils.getIconFromResources("object-template.png"), ((MISAAttachment.LazyProperty) property).toColor()),
+                        new MonochromeColorIcon(UIUtils.getIconFromResources("object-template.png"),
+                                ((MISAAttachment.LazyProperty) property).toColor()),
                         JLabel.LEFT);
                 insertComponent(component, row);
             }
         } else {
-            insertLabelFor(property.getPath(), UIUtils.getIconFromResources("object.png"), row);
+            insertLabelFor(property, UIUtils.getIconFromResources("object.png"), row);
             JButton loadButton = new JButton("Load missing data", UIUtils.getIconFromResources("database.png"));
             UIUtils.makeFlat(loadButton);
             loadButton.addActionListener(e -> property.loadValue());

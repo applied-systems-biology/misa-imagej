@@ -61,7 +61,7 @@ public class MISAAttachmentTableColumnEditor extends JDialog {
         add(new JScrollPane(initializeColumnsPanel()), BorderLayout.CENTER);
     }
 
-    private void insertColumnUI(JPanel columnPanel, String name, Icon icon,
+    private void insertColumnUI(JPanel columnPanel, String name, String tooltip, Icon icon,
                                 Class<? extends MISAAttachmentTableColumn> columnClass,
                                 Predicate<MISAAttachmentTableColumn> existsCheck) {
         final int row = columnPanel.getComponentCount();
@@ -82,6 +82,7 @@ public class MISAAttachmentTableColumnEditor extends JDialog {
         });
 
         JLabel label = new JLabel(name, icon, JLabel.LEFT);
+        label.setToolTipText(tooltip);
         columnPanel.add(label, new GridBagConstraints() {
             {
                 gridx = 1;
@@ -94,7 +95,7 @@ public class MISAAttachmentTableColumnEditor extends JDialog {
         });
     }
 
-    private void insertColumnUIForProperty(JPanel columnPanel, String name, Icon icon, String property) {
+    private void insertColumnUIForProperty(JPanel columnPanel, String name, String description, Icon icon, String property) {
         final int row = columnPanel.getComponentCount();
         JToggleButton toggleButton = createAddRemoveButton(aVoid -> new MISAAttachmentTableJsonValueColumn(property), e ->
                 (e instanceof MISAAttachmentTableJsonValueColumn) && ((MISAAttachmentTableJsonValueColumn) e).getPropertyName().equals(property));
@@ -108,6 +109,15 @@ public class MISAAttachmentTableColumnEditor extends JDialog {
         });
 
         JLabel label = new JLabel(name, icon, JLabel.LEFT);
+
+        StringBuilder toolTip = new StringBuilder();
+        toolTip.append("<html>");
+        toolTip.append("<i>").append(property.replace("/", "&frasl;")).append("</i><br/>");
+        if (description != null && !description.isEmpty())
+            toolTip.append("<br/>").append(description);
+        toolTip.append("</html>");
+        label.setToolTipText(toolTip.toString());
+
         columnPanel.add(label, new GridBagConstraints() {
             {
                 gridx = 1;
@@ -148,31 +158,37 @@ public class MISAAttachmentTableColumnEditor extends JDialog {
 
         insertColumnUI(columnPanel,
                 "Sample",
+                "The sample",
                 UIUtils.getIconFromResources("sample.png"),
                 MISAAttachmentTableSampleColumn.class,
                 misaAttachmentTableColumn -> misaAttachmentTableColumn instanceof MISAAttachmentTableSampleColumn);
         insertColumnUI(columnPanel,
                 "Full data",
+                "The full data path (Data and sub-data)",
                 UIUtils.getIconFromResources("database.png"),
                 MISAAttachmentTableCacheAndSubCacheColumn.class,
                 misaAttachmentTableColumn -> misaAttachmentTableColumn instanceof MISAAttachmentTableCacheAndSubCacheColumn);
         insertColumnUI(columnPanel,
                 "Data",
+                "The data path",
                 UIUtils.getIconFromResources("database.png"),
                 MISAAttachmentTableCacheColumn.class,
                 misaAttachmentTableColumn -> misaAttachmentTableColumn instanceof MISAAttachmentTableCacheColumn);
         insertColumnUI(columnPanel,
                 "Sub-data",
+                "The sub-data path",
                 UIUtils.getIconFromResources("open.png"),
                 MISAAttachmentTableSubCacheColumn.class,
                 misaAttachmentTableColumn -> misaAttachmentTableColumn instanceof MISAAttachmentTableSubCacheColumn);
         insertColumnUI(columnPanel,
                 "Property",
+                "The property within the root object",
                 UIUtils.getIconFromResources("object.png"),
                 MISAAttachmentTablePropertyColumn.class,
                 misaAttachmentTableColumn -> misaAttachmentTableColumn instanceof MISAAttachmentTablePropertyColumn);
         insertColumnUI(columnPanel,
                 "Object type",
+                "The object type",
                 UIUtils.getIconFromResources("object.png"),
                 MISAAttachmentTableTypeColumn.class,
                 misaAttachmentTableColumn -> misaAttachmentTableColumn instanceof MISAAttachmentTableTypeColumn);
@@ -194,28 +210,37 @@ public class MISAAttachmentTableColumnEditor extends JDialog {
             if (schema != null) {
                 Stack<JSONSchemaObject> stack = new Stack<>();
                 Stack<String> paths = new Stack<>();
+                Stack<String> pathNames = new Stack<>();
+
                 stack.push(schema);
                 paths.push("");
+                pathNames.push("");
 
                 while (!stack.isEmpty()) {
                     JSONSchemaObject object = stack.pop();
                     String path = paths.pop();
+                    String pathName = pathNames.pop();
+                    String description = object.getDocumentationDescription();
+
                     switch (object.getType()) {
                         case jsonString:
                             insertColumnUIForProperty(columnPanel,
-                                    path,
+                                    pathName,
+                                    description,
                                     UIUtils.getIconFromResources("text.png"),
                                     path);
                             break;
                         case jsonNumber:
                             insertColumnUIForProperty(columnPanel,
-                                    path,
+                                    pathName,
+                                    description,
                                     UIUtils.getIconFromResources("number.png"),
                                     path);
                             break;
                         case jsonBoolean:
                             insertColumnUIForProperty(columnPanel,
-                                    path,
+                                    pathName,
+                                    description,
                                     UIUtils.getIconFromResources("checkbox.png"),
                                     path);
                             break;
@@ -223,6 +248,12 @@ public class MISAAttachmentTableColumnEditor extends JDialog {
                             for (Map.Entry<String, JSONSchemaObject> entry : object.getProperties().entrySet()) {
                                 stack.push(entry.getValue());
                                 paths.push(path + "/" + entry.getKey());
+
+                                String name = entry.getKey();
+                                if(entry.getValue().getDocumentationTitle() != null && !entry.getValue().getDocumentationTitle().isEmpty()) {
+                                    name = entry.getValue().getDocumentationTitle();
+                                }
+                                pathNames.push(pathName + "/" + name);
                             }
                             break;
                     }

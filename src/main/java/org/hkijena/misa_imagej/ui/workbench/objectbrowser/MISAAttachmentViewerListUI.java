@@ -165,7 +165,6 @@ public class MISAAttachmentViewerListUI extends JPanel {
             if (listPanel.getComponent(i) instanceof MISAAttachmentViewerUI) {
                 for(JLabel component : ((MISAAttachmentViewerUI) listPanel.getComponent(i)).getPropertyLabels()) {
                     component.setPreferredSize(new Dimension(preferredWidth, component.getPreferredSize().height));
-                    component.setToolTipText(preferredWidth + "");
                     SwingUtilities.invokeLater(() -> {
                         component.revalidate();
                         component.repaint();
