@@ -172,6 +172,7 @@ public class MISACacheBrowserUI extends JPanel {
 
         JLabel description = new JLabel(ui.getCache().getCacheTypeName());
         description.setIcon(UIUtils.getIconFromColor(ui.getCache().toColor()));
+        description.setToolTipText(ui.getCache().getCacheTooltip());
         sampleBrowser.add(description, new GridBagConstraints() {
             {
                 anchor = GridBagConstraints.WEST;
@@ -185,6 +186,7 @@ public class MISACacheBrowserUI extends JPanel {
         JTextField internalPath = new JTextField(ui.getCache().getRelativePathName());
         internalPath.setEditable(false);
         internalPath.setBorder(null);
+        internalPath.setToolTipText(ui.getCache().getTooltip());
         sampleBrowser.add(internalPath, new GridBagConstraints() {
             {
                 anchor = GridBagConstraints.WEST;

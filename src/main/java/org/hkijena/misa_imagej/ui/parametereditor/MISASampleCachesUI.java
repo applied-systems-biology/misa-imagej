@@ -180,6 +180,7 @@ public class MISASampleCachesUI extends JPanel {
 
         JLabel description = new JLabel(ui.getCache().getCacheTypeName());
         description.setIcon(UIUtils.getIconFromColor(ui.getCache().toColor()));
+        description.setToolTipText(ui.getCache().getCacheTooltip());
         sampleEditor.add(description, new GridBagConstraints() {
             {
                 anchor = GridBagConstraints.WEST;
@@ -193,6 +194,7 @@ public class MISASampleCachesUI extends JPanel {
         JTextField internalPath = new JTextField(ui.getCache().getRelativePathName());
         internalPath.setEditable(false);
         internalPath.setBorder(null);
+        internalPath.setToolTipText(ui.getCache().getTooltip());
         sampleEditor.add(internalPath, new GridBagConstraints() {
             {
                 anchor = GridBagConstraints.WEST;

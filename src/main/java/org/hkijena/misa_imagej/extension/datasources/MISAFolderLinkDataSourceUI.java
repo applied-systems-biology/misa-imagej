@@ -24,16 +24,7 @@ public class MISAFolderLinkDataSourceUI extends MISADataSourceUI {
         if(getNativeDataSource().getCache().getCachePatternDocumentation() != null &&
                 !getNativeDataSource().getCache().getCachePatternDocumentation().isEmpty()) {
             JButton infoButton = new JButton(UIUtils.getIconFromResources("info.png"));
-            StringBuilder docString = new StringBuilder();
-            docString.append("<html>");
-            if(getNativeDataSource().getCache().getCachePatternTypeName() != null &&
-            !getNativeDataSource().getCache().getCachePatternTypeName().isEmpty()) {
-                docString.append(getNativeDataSource().getCache().getCachePatternTypeName());
-                docString.append("<br/><br/>");
-            }
-            docString.append(getNativeDataSource().getCache().getCachePatternDocumentation());
-            docString.append("</html>");
-            infoButton.setToolTipText(docString.toString());
+            infoButton.setToolTipText(getNativeDataSource().getCache().getCacheTooltip());
             add(infoButton);
         }
 

@@ -26,15 +26,17 @@ public class MISACache implements MISAValidatable {
 
     private EventBus eventBus = new EventBus();
 
-    /**
-     * List of attachments TODO
-     */
-//    private Map<MISAAttachmentLocation, MISAAttachment> attachments = new HashMap<>();
+    private String documentationTitle;
+
+    private String documentationDescription;
 
 
     public MISACache(MISASample sample, MISAFilesystemEntry filesystemEntry) {
         this.sample = sample;
         this.filesystemEntry = filesystemEntry;
+
+        this.documentationTitle = filesystemEntry.metadata.getDocumentationTitle();
+        this.documentationDescription = filesystemEntry.metadata.getDocumentationDescription();
 
         // Default data sources that are always available
         this.availableDatasources.add(new MISAFolderLinkDataSource(this));
@@ -46,6 +48,59 @@ public class MISACache implements MISAValidatable {
      */
     public MISAFilesystemEntry getFilesystemEntry() {
         return filesystemEntry;
+    }
+
+    /**
+     * Gets tooltip for the cache data type
+     * @return
+     */
+    public String getCacheTooltip() {
+        StringBuilder docString = new StringBuilder();
+        docString.append("<html>");
+        if(getCacheTypeName() != null && !getCacheTypeName().isEmpty()) {
+            docString.append("<b>");
+            docString.append(getCacheTypeName());
+            docString.append("</b>");
+            docString.append("<br/><br/>");
+        }
+        docString.append(getCacheDocumentation());
+        docString.append("</html>");
+        return docString.toString();
+    }
+
+    /**
+     * Gets tooltip for the cache data type
+     * @return
+     */
+    public String getPatternTooltip() {
+        StringBuilder docString = new StringBuilder();
+        docString.append("<html>");
+        if(getCachePatternTypeName() != null &&
+                !getCachePatternTypeName().isEmpty()) {
+            docString.append(getCachePatternTypeName());
+            docString.append("<br/><br/>");
+        }
+        docString.append(getCachePatternDocumentation());
+        docString.append("</html>");
+        return docString.toString();
+    }
+
+    /**
+     * Gets a tooltip for this cache
+     * @return
+     */
+    public String getTooltip() {
+        StringBuilder result = new StringBuilder();
+        result.append("<html>");
+        if(documentationTitle != null && !documentationTitle.isEmpty())
+            result.append("<b>").append(documentationTitle).append("</b>");
+        if(documentationDescription != null && !documentationDescription.isEmpty()) {
+            if(documentationTitle != null && !documentationTitle.isEmpty())
+                result.append("<br/><br/>");
+            result.append(documentationDescription);
+        }
+        result.append("</html>");
+        return result.toString();
     }
 
     /**
@@ -290,6 +345,14 @@ public class MISACache implements MISAValidatable {
 
     public EventBus getEventBus() {
         return eventBus;
+    }
+
+    public String getDocumentationTitle() {
+        return documentationTitle;
+    }
+
+    public String getDocumentationDescription() {
+        return documentationDescription;
     }
 
     public static class DataSourceChangeEvent {
