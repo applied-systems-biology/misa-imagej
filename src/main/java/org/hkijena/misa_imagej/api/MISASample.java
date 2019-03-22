@@ -35,6 +35,10 @@ public class MISASample implements MISAValidatable {
         // Look for caches
         importedFilesystem.findCaches(this, getImportedCaches());
         exportedFilesystem.findCaches(this, getExportedCaches());
+
+        // Update parameters
+        this.parameters.setId("Sample");
+        this.parameters.update();
     }
 
     public JSONSchemaObject getParameters() {
