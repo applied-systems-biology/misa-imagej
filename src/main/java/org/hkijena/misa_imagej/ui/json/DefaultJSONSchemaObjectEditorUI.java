@@ -40,7 +40,7 @@ public class DefaultJSONSchemaObjectEditorUI extends JSONSchemaObjectEditorUI {
 
             for(Object d : getJsonSchemaObject().getEnumValues()) {
                 model.addElement(d);
-                if(d.equals(getJsonSchemaObject().getDefaultValue())) {
+                if(d.equals(getJsonSchemaObject().getValue())) {
                     model.setSelectedItem(d);
                 }
             }
@@ -56,10 +56,10 @@ public class DefaultJSONSchemaObjectEditorUI extends JSONSchemaObjectEditorUI {
         else if(getJsonSchemaObject().getType() == JSONSchemaObjectType.jsonString) {
             // Create a string editor
             setLayout(new BorderLayout());
-            JTextField edit = new JTextField(getJsonSchemaObject().getDefaultValue() != null ? (String) getJsonSchemaObject().getDefaultValue() : "");
+            JTextField edit = new JTextField(getJsonSchemaObject().getValue() != null ? (String) getJsonSchemaObject().getValue() : "");
             edit.setToolTipText(getJsonSchemaObject().getTooltip());
-            if(getJsonSchemaObject().getDefaultValue() != null) {
-                edit.setText((String) getJsonSchemaObject().getDefaultValue());
+            if(getJsonSchemaObject().getValue() != null) {
+                edit.setText((String) getJsonSchemaObject().getValue());
             }
             add(edit, BorderLayout.CENTER);
 
@@ -77,8 +77,8 @@ public class DefaultJSONSchemaObjectEditorUI extends JSONSchemaObjectEditorUI {
             edit.setPreferredSize(dim);
             edit.setToolTipText(getJsonSchemaObject().getTooltip());
 
-            if(getJsonSchemaObject().getDefaultValue() != null) {
-                edit.setValue(getJsonSchemaObject().getDefaultValue());
+            if(getJsonSchemaObject().getValue() != null) {
+                edit.setValue(getJsonSchemaObject().getValue());
             }
             add(edit, BorderLayout.CENTER);
 
@@ -94,8 +94,8 @@ public class DefaultJSONSchemaObjectEditorUI extends JSONSchemaObjectEditorUI {
             checkBox.setToolTipText(getJsonSchemaObject().getTooltip());
             checkBox.setText(getJsonSchemaObject().getDocumentationTitle());
 
-            if(getJsonSchemaObject().getDefaultValue() != null) {
-                checkBox.setSelected((boolean) getJsonSchemaObject().getDefaultValue());
+            if(getJsonSchemaObject().getValue() != null) {
+                checkBox.setSelected((boolean) getJsonSchemaObject().getValue());
             }
             add(checkBox, BorderLayout.CENTER);
             checkBox.addActionListener(actionEvent -> {
