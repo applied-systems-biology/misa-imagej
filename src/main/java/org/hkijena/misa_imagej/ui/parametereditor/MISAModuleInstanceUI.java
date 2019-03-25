@@ -260,7 +260,6 @@ public class MISAModuleInstanceUI extends JFrame {
                 }
             }
             catch(IOException e) {
-                throw new RuntimeException(e);
             }
             try {
                 Path rootPath = fileChooser.getSelectedFile().toPath();
