@@ -8,6 +8,7 @@ import org.hkijena.misa_imagej.extension.datasources.MISAFolderLinkDataSource;
 import org.hkijena.misa_imagej.ui.components.CancelableProcessUI;
 import org.hkijena.misa_imagej.ui.components.MISAValidityReportStatusUI;
 import org.hkijena.misa_imagej.ui.components.MarkdownReader;
+import org.hkijena.misa_imagej.ui.components.PDFReader;
 import org.hkijena.misa_imagej.ui.repository.MISAModuleRepositoryUI;
 import org.hkijena.misa_imagej.ui.workbench.MISAWorkbenchUI;
 import org.hkijena.misa_imagej.utils.FilesystemUtils;
@@ -191,7 +192,7 @@ public class MISAModuleInstanceUI extends JFrame {
             }
         }, true);
         tabbedPane.addSingletonTab("HELP", "Documentation", UIUtils.getIconFromResources("help.png"),
-                MarkdownReader.fromResource("documentation/parameter-editor.md"), true);
+                PDFReader.fromResource("documentation/parameter-editor.pdf"), true);
 
         add(tabbedPane, BorderLayout.CENTER);
 

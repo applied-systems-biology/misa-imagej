@@ -6,6 +6,8 @@ import org.hkijena.misa_imagej.MISAImageJCommand;
 import org.hkijena.misa_imagej.api.repository.MISAModule;
 import org.hkijena.misa_imagej.api.repository.MISAModuleRepository;
 import org.hkijena.misa_imagej.ui.components.MarkdownReader;
+import org.hkijena.misa_imagej.ui.components.PDFReader;
+import org.hkijena.misa_imagej.ui.components.RTFReader;
 import org.hkijena.misa_imagej.ui.components.renderers.MISAModuleListCellRenderer;
 import org.hkijena.misa_imagej.ui.parametereditor.MISAModuleInstanceUI;
 import org.hkijena.misa_imagej.ui.perfanalysis.MISARuntimeLogFrameUI;
@@ -130,7 +132,7 @@ public class MISAModuleRepositoryUI extends JFrame {
             frame.setTitle("Module manager documentation - MISA++ for ImageJ");
             frame.setIconImage(UIUtils.getIconFromResources("misaxx.png").getImage());
 
-            MarkdownReader reader = MarkdownReader.fromResource("documentation/launcher.md");
+            PDFReader reader = PDFReader.fromResource("documentation/launcher.pdf");
             frame.setContentPane(reader);
 
             frame.pack();

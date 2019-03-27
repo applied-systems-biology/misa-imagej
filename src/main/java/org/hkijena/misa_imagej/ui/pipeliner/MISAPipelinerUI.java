@@ -9,10 +9,7 @@ import org.hkijena.misa_imagej.api.pipelining.MISAPipeline;
 import org.hkijena.misa_imagej.api.pipelining.MISAPipelineNode;
 import org.hkijena.misa_imagej.api.repository.MISAModule;
 import org.hkijena.misa_imagej.api.repository.MISAModuleRepository;
-import org.hkijena.misa_imagej.ui.components.CancelableProcessUI;
-import org.hkijena.misa_imagej.ui.components.MISACacheTreeUI;
-import org.hkijena.misa_imagej.ui.components.MISAValidityReportStatusUI;
-import org.hkijena.misa_imagej.ui.components.MarkdownReader;
+import org.hkijena.misa_imagej.ui.components.*;
 import org.hkijena.misa_imagej.ui.components.renderers.MISAModuleListCellRenderer;
 import org.hkijena.misa_imagej.ui.repository.MISAModuleRepositoryUI;
 import org.hkijena.misa_imagej.utils.GsonUtils;
@@ -107,7 +104,7 @@ public class MISAPipelinerUI extends JFrame {
 
         documentTabPane.addTab("Pipeline", UIUtils.getIconFromResources("connect.png"), splitPane, DocumentTabPane.CloseMode.withoutCloseButton);
         documentTabPane.addSingletonTab("HELP", "Documentation", UIUtils.getIconFromResources("help.png"),
-                MarkdownReader.fromResource("documentation/pipeliner.md"), true);
+                PDFReader.fromResource("documentation/pipeliner.pdf"), true);
 
         add(documentTabPane, BorderLayout.CENTER);
 
