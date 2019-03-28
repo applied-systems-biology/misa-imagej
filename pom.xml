@@ -159,7 +159,7 @@
         <dependency>
             <groupId>org.icepdf.os</groupId>
             <artifactId>icepdf-core</artifactId>
-            <version>6.2.2</version>
+            <version>6.2.2-FIX</version>
         </dependency>
         <dependency>
             <groupId>org.icepdf.os</groupId>
