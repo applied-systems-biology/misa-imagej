@@ -76,7 +76,7 @@ public class MISAModuleRepositoryUI extends JFrame {
 
             if(fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
                 MISAModule module = new MISAModule();
-                module.setExecutablePath(fileChooser.getSelectedFile().getAbsolutePath());
+                module.setExecutablePath(Paths.get(fileChooser.getSelectedFile().getAbsolutePath()));
                 module.setOperatingSystem(OSUtils.detectOperatingSystem());
                 module.setOperatingSystemArchitecture(OSUtils.detectArchitecture());
                 if(module.getModuleInfo() != null) {

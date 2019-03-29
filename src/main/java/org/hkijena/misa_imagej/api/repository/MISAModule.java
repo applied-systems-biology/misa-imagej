@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * MISA++ module located within a repository
@@ -114,7 +115,7 @@ public class MISAModule {
         try {
             Path tmppath = Files.createTempFile("MISAParameterSchema", ".json");
 //            System.out.println(executablePath + " " + tmppath.toString());
-            ProcessBuilder pb = new ProcessBuilder(getExecutablePath(), "--write-parameter-schema", tmppath.toString());
+            ProcessBuilder pb = new ProcessBuilder(getExecutablePath().toString(), "--write-parameter-schema", tmppath.toString());
             Process p = pb.start();
             if(p.waitFor() == 0) {
                 return new String(Files.readAllBytes(tmppath));
@@ -134,7 +135,7 @@ public class MISAModule {
         try {
             Path tmppath = Files.createTempFile("MISA_README", ".md");
 //            System.out.println(executablePath + " " + tmppath.toString());
-            ProcessBuilder pb = new ProcessBuilder(getExecutablePath(), "--write-readme", tmppath.toString());
+            ProcessBuilder pb = new ProcessBuilder(getExecutablePath().toString(), "--write-readme", tmppath.toString());
             Process p = pb.start();
             if(p.waitFor() == 0) {
                 return new String(Files.readAllBytes(tmppath));
@@ -147,12 +148,12 @@ public class MISAModule {
     }
 
     public ProcessBuilder run(Path parameters) {
-        return new ProcessBuilder(executablePath, "--parameters", parameters.toString());
+        return new ProcessBuilder(getExecutablePath().toString(), "--parameters", parameters.toString());
     }
 
     private String queryModuleInfo() {
         try {
-            ProcessBuilder pb = new ProcessBuilder(getExecutablePath(), "--module-info");
+            ProcessBuilder pb = new ProcessBuilder(getExecutablePath().toString(), "--module-info");
             Process p = pb.start();
             if(p.waitFor() == 0) {
                 try(BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
@@ -203,12 +204,16 @@ public class MISAModule {
         return instance;
     }
 
-    public String getExecutablePath() {
-        return executablePath;
+    public Path getExecutablePath() {
+        Path path = Paths.get(executablePath);
+        if(!path.isAbsolute()) {
+            return Paths.get(linkPath).getParent().resolve(executablePath);
+        }
+        return Paths.get(executablePath);
     }
 
-    public void setExecutablePath(String executablePath) {
-        this.executablePath = executablePath;
+    public void setExecutablePath(Path executablePath) {
+        this.executablePath = executablePath.toString();
     }
 
     public OperatingSystem getOperatingSystem() {

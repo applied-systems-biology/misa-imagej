@@ -1,6 +1,7 @@
 package org.hkijena.misa_imagej.api.repository;
 
 import com.google.gson.Gson;
+import ij.IJ;
 import org.hkijena.misa_imagej.utils.FilesystemUtils;
 import org.hkijena.misa_imagej.utils.GsonUtils;
 import org.hkijena.misa_imagej.utils.OSUtils;
@@ -42,6 +43,9 @@ public class MISAModuleRepository {
             for(String path : System.getenv("MISA_MODULE_LINK_PATHS").split(";")) {
                 paths.add(Paths.get(path));
             }
+        }
+        if(IJ.getDirectory("plugins") != null) {
+            paths.add(Paths.get(IJ.getDirectory("plugins")).resolve("misa-modules"));
         }
         if(OSUtils.detectOperatingSystem() == OperatingSystem.Linux) {
             paths.add(Paths.get("/usr/lib/misaxx/modules"));
