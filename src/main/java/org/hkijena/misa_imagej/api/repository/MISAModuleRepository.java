@@ -72,7 +72,8 @@ public class MISAModuleRepository {
                 File[] files = f.listFiles();
                 if(files != null) {
                     for(File entry : files) {
-                        tryLoadModule(entry.getAbsolutePath());
+                        if(entry.isFile())
+                            tryLoadModule(entry.getAbsolutePath());
                     }
                 }
             }
