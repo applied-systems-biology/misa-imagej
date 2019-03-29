@@ -81,6 +81,11 @@ public class MISAModuleRepositoryUI extends JFrame {
                 module.setOperatingSystemArchitecture(OSUtils.detectArchitecture());
                 if(module.getModuleInfo() != null) {
                     Gson gson = GsonUtils.getGson();
+                    try {
+                        Files.createDirectories(MISAModuleRepository.USER_MODULE_PATH);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                     try(JsonWriter writer = new JsonWriter(new FileWriter(MISAModuleRepository.USER_MODULE_PATH.resolve(module.getGeneratedFileName() + ".json").toString()))) {
                         gson.toJson(module, MISAModule.class, writer);
                     } catch (IOException e) {

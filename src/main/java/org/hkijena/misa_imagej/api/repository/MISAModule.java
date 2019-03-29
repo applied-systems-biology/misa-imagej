@@ -15,6 +15,7 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.concurrent.TimeUnit;
 
 /**
  * MISA++ module located within a repository
@@ -117,8 +118,11 @@ public class MISAModule {
 //            System.out.println(executablePath + " " + tmppath.toString());
             ProcessBuilder pb = new ProcessBuilder(getExecutablePath().toString(), "--write-parameter-schema", tmppath.toString());
             Process p = pb.start();
-            if(p.waitFor() == 0) {
+            if(p.waitFor(5, TimeUnit.SECONDS) && p.exitValue() == 0) {
                 return new String(Files.readAllBytes(tmppath));
+            }
+            else {
+                System.err.println("Unable to load parameter schema from " + getExecutablePath());
             }
         } catch (IOException | InterruptedException e) {
 //            throw new RuntimeException(e);
@@ -137,8 +141,11 @@ public class MISAModule {
 //            System.out.println(executablePath + " " + tmppath.toString());
             ProcessBuilder pb = new ProcessBuilder(getExecutablePath().toString(), "--write-readme", tmppath.toString());
             Process p = pb.start();
-            if(p.waitFor() == 0) {
+            if(p.waitFor(5, TimeUnit.SECONDS) && p.exitValue() == 0) {
                 return new String(Files.readAllBytes(tmppath));
+            }
+            else {
+                System.err.println("Unable to query README from " + getExecutablePath());
             }
         } catch (IOException | InterruptedException e) {
 //            throw new RuntimeException(e);
@@ -155,7 +162,7 @@ public class MISAModule {
         try {
             ProcessBuilder pb = new ProcessBuilder(getExecutablePath().toString(), "--module-info");
             Process p = pb.start();
-            if(p.waitFor() == 0) {
+            if(p.waitFor(5, TimeUnit.SECONDS) && p.exitValue() == 0) {
                 try(BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
                     StringBuilder builder = new StringBuilder();
                     String line = null;
@@ -165,6 +172,9 @@ public class MISAModule {
                     }
                     return builder.toString();
                 }
+            }
+            else {
+                System.err.println("Unable to query module info from " + getExecutablePath());
             }
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
