@@ -11,6 +11,7 @@ import org.hkijena.misa_imagej.api.json.JSONSchemaObject;
 import org.hkijena.misa_imagej.api.json.JSONSchemaObjectType;
 import org.hkijena.misa_imagej.api.repository.MISAModule;
 import org.hkijena.misa_imagej.api.repository.MISAModuleInfo;
+import org.hkijena.misa_imagej.utils.FilesystemUtils;
 import org.hkijena.misa_imagej.utils.GsonUtils;
 
 import java.io.IOException;
@@ -140,15 +141,49 @@ public class MISAModuleInstance implements MISAValidatable {
         parameters.addProperty("runtime", runtimeParameters);
         parameters.addProperty("samples", new JSONSchemaObject(JSONSchemaObjectType.jsonObject));
 
+        boolean filesystemNeeedsSymlinks = false;
         for (MISASample sample : samples.values()) {
             parameters.getPropertyFromPath("samples").addProperty(sample.getName(), sample.getParameters());
+
+            // Detect if we need symlinking
+            filesystemNeeedsSymlinks |= sample.getImportedFilesystem().hasExternalPathDefinitions();
+            filesystemNeeedsSymlinks |= sample.getExportedFilesystem().hasExternalPathDefinitions();
+
         }
 
-        parameters.ensurePropertyFromPath("filesystem").addProperty("source", JSONSchemaObject.createString("directories"));
-        parameters.ensurePropertyFromPath("filesystem").addProperty("input-directory",
-                JSONSchemaObject.createString(importedDirectory.toString()));
-        parameters.ensurePropertyFromPath("filesystem").addProperty("output-directory",
-                JSONSchemaObject.createString(exportedDirectory.toString()));
+        // Windows does not support creation of symlinks (by default)
+        // If we are on Windows, we need to use a "json-data" filesystem to redirect the symlinks
+        if(filesystemNeeedsSymlinks && !FilesystemUtils.symlinkCreationAvailable()) {
+            MISAFilesystemEntry rootImportFilesystem = new MISAFilesystemEntry(null, "", MISACacheIOType.Imported);
+            rootImportFilesystem.setExternalPath(importedDirectory);
+
+            MISAFilesystemEntry rootExportFilesystem = new MISAFilesystemEntry(null, "", MISACacheIOType.Exported);
+            rootExportFilesystem.setExternalPath(exportedDirectory);
+
+            for (MISASample sample : samples.values()) {
+                sample.getImportedFilesystem().setParent(rootImportFilesystem);
+                sample.getExportedFilesystem().setParent(rootExportFilesystem);
+                rootImportFilesystem.insert(sample.getName(), sample.getImportedFilesystem());
+                rootExportFilesystem.insert(sample.getName(), sample.getExportedFilesystem());
+            }
+
+            parameters.ensurePropertyFromPath("filesystem").addProperty("source", JSONSchemaObject.createString("json"));
+            parameters.ensurePropertyFromPath("filesystem", "json-data", "imported").setValue(rootImportFilesystem.toJson());
+            parameters.ensurePropertyFromPath("filesystem", "json-data", "exported").setValue(rootExportFilesystem.toJson());
+
+            // Undo changes to filesystem
+            for (MISASample sample : samples.values()) {
+                sample.getImportedFilesystem().setParent(null);
+                sample.getExportedFilesystem().setParent(null);
+            }
+        }
+        else {
+            parameters.ensurePropertyFromPath("filesystem").addProperty("source", JSONSchemaObject.createString("directories"));
+            parameters.ensurePropertyFromPath("filesystem").addProperty("input-directory",
+                    JSONSchemaObject.createString(importedDirectory.toString()));
+            parameters.ensurePropertyFromPath("filesystem").addProperty("output-directory",
+                    JSONSchemaObject.createString(exportedDirectory.toString()));
+        }
 
         return parameters.toJson();
     }
@@ -163,6 +198,19 @@ public class MISAModuleInstance implements MISAValidatable {
      */
     public void install(Path parameterJsonPath, Path importedDirectory, Path exportedDirectory, boolean forceCopy, boolean relativeDirectories) {
 
+        // Install imported data into their proper filesystem locations
+        // Important: This MUST be done before creating the parameter JSON!
+        for (MISASample sample : samples.values()) {
+            for (MISACache cache : sample.getImportedCaches()) {
+                // IMPORTANT: Reset external path
+                cache.getFilesystemEntry().setExternalPath(null);
+
+                Path cachePath = importedDirectory.resolve(sample.getName()).resolve(cache.getFilesystemEntry().getInternalPath());
+                cache.install(cachePath, forceCopy);
+            }
+        }
+
+        // Write Parameters
         JsonElement parameterJson;
         if (relativeDirectories) {
             parameterJson = getParametersAsJson(parameterJsonPath.getParent().relativize(importedDirectory),
@@ -171,20 +219,13 @@ public class MISAModuleInstance implements MISAValidatable {
             parameterJson = getParametersAsJson(importedDirectory, exportedDirectory);
         }
 
-        // Write the parameter schema
         try {
             GsonUtils.toJsonFile(GsonUtils.getGson(), parameterJson, parameterJsonPath);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
-        // Install imported data into their proper filesystem locations
-        for (MISASample sample : samples.values()) {
-            for (MISACache cache : sample.getImportedCaches()) {
-                Path cachePath = importedDirectory.resolve(sample.getName()).resolve(cache.getFilesystemEntry().getInternalPath());
-                cache.install(cachePath, forceCopy);
-            }
-        }
+
     }
 
     /**

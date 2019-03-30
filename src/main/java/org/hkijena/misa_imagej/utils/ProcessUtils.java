@@ -37,7 +37,7 @@ public class ProcessUtils {
         try {
             int exitValue = executor.execute(commandLine);
 
-            if(exitValue == 0) {
+            if(!executor.isFailure(exitValue)) {
                 return new String(standardOutputStream.toByteArray());
             }
             else {

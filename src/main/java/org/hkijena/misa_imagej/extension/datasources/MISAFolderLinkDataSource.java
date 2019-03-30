@@ -29,14 +29,18 @@ public class MISAFolderLinkDataSource implements MISADataSource {
                 throw new RuntimeException(e);
             }
         }
-        else {
+        else if(FilesystemUtils.symlinkCreationAvailable()) {
             try {
                 MoreFiles.createParentDirectories(installFolder);
                 Files.deleteIfExists(installFolder);
-                FilesystemUtils.createSymbolicLinkOrCopy(installFolder, getSourceFolder());
+                Files.createSymbolicLink(installFolder, getSourceFolder());
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
+        }
+        else {
+            // Redirect filesystem path
+            getCache().getFilesystemEntry().setExternalPath(sourceFolder);
         }
     }
 

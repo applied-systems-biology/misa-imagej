@@ -15,8 +15,8 @@ public class MISAFileCache extends MISACache {
         super(sample, filesystemEntry);
 
         // Try to extract the extensions from the pattern
-        if(filesystemEntry.metadata.hasPropertyFromPath("pattern", "extensions")) {
-            Object object = filesystemEntry.metadata.getPropertyFromPath("pattern", "extensions").getDefaultValue();
+        if(filesystemEntry.getMetadata().hasPropertyFromPath("pattern", "extensions")) {
+            Object object = filesystemEntry.getMetadata().getPropertyFromPath("pattern", "extensions").getDefaultValue();
             if(object instanceof List) {
                 extensions = (List<String>)object;
             }

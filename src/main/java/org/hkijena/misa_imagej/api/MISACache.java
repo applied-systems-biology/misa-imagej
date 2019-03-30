@@ -35,8 +35,8 @@ public class MISACache implements MISAValidatable {
         this.sample = sample;
         this.filesystemEntry = filesystemEntry;
 
-        this.documentationTitle = filesystemEntry.metadata.getDocumentationTitle();
-        this.documentationDescription = filesystemEntry.metadata.getDocumentationDescription();
+        this.documentationTitle = filesystemEntry.getMetadata().getDocumentationTitle();
+        this.documentationDescription = filesystemEntry.getMetadata().getDocumentationDescription();
 
         // Default data sources that are always available
         this.availableDatasources.add(new MISAFolderLinkDataSource(this));
@@ -141,8 +141,8 @@ public class MISACache implements MISAValidatable {
      * @return
      */
     public String getPatternSerializationID() {
-        if(getFilesystemEntry().metadata.hasPropertyFromPath("pattern")) {
-            return getFilesystemEntry().metadata.getPropertyFromPath("pattern").getSerializationId();
+        if(getFilesystemEntry().getMetadata().hasPropertyFromPath("pattern")) {
+            return getFilesystemEntry().getMetadata().getPropertyFromPath("pattern").getSerializationId();
         }
         return null;
     }
@@ -153,8 +153,8 @@ public class MISACache implements MISAValidatable {
      * @return
      */
     public String getDescriptionSerializationID() {
-        if(getFilesystemEntry().metadata.hasPropertyFromPath("description")) {
-            return getFilesystemEntry().metadata.getPropertyFromPath("description").getSerializationId();
+        if(getFilesystemEntry().getMetadata().hasPropertyFromPath("description")) {
+            return getFilesystemEntry().getMetadata().getPropertyFromPath("description").getSerializationId();
         }
         return null;
     }
@@ -164,7 +164,7 @@ public class MISACache implements MISAValidatable {
      * @return
      */
     public MISACacheIOType getIOType() {
-        return getFilesystemEntry().ioType;
+        return getFilesystemEntry().getIoType();
     }
 
     /**
@@ -180,8 +180,8 @@ public class MISACache implements MISAValidatable {
      * @return
      */
     public String getCacheTypeName() {
-        if(getFilesystemEntry().metadata.hasPropertyFromPath("description")) {
-            String name = getFilesystemEntry().metadata.getPropertyFromPath("description").getDocumentationTitle();
+        if(getFilesystemEntry().getMetadata().hasPropertyFromPath("description")) {
+            String name = getFilesystemEntry().getMetadata().getPropertyFromPath("description").getDocumentationTitle();
             if(name != null && !name.isEmpty())
                 return name;
         }
@@ -193,8 +193,8 @@ public class MISACache implements MISAValidatable {
      * @return
      */
     public String getCacheDocumentation() {
-        if(getFilesystemEntry().metadata.hasPropertyFromPath("description")) {
-           return getFilesystemEntry().metadata.getPropertyFromPath("description").getDocumentationDescription();
+        if(getFilesystemEntry().getMetadata().hasPropertyFromPath("description")) {
+           return getFilesystemEntry().getMetadata().getPropertyFromPath("description").getDocumentationDescription();
         }
         return null;
     }
@@ -204,8 +204,8 @@ public class MISACache implements MISAValidatable {
      * @return
      */
     public String getCachePatternTypeName() {
-        if(getFilesystemEntry().metadata.hasPropertyFromPath("pattern")) {
-            return getFilesystemEntry().metadata.getPropertyFromPath("pattern").getDocumentationTitle();
+        if(getFilesystemEntry().getMetadata().hasPropertyFromPath("pattern")) {
+            return getFilesystemEntry().getMetadata().getPropertyFromPath("pattern").getDocumentationTitle();
         }
         return null;
     }
@@ -215,8 +215,8 @@ public class MISACache implements MISAValidatable {
      * @return
      */
     public String getCachePatternDocumentation() {
-        if(getFilesystemEntry().metadata.hasPropertyFromPath("pattern")) {
-            return getFilesystemEntry().metadata.getPropertyFromPath("pattern").getDocumentationDescription();
+        if(getFilesystemEntry().getMetadata().hasPropertyFromPath("pattern")) {
+            return getFilesystemEntry().getMetadata().getPropertyFromPath("pattern").getDocumentationDescription();
         }
         return null;
     }

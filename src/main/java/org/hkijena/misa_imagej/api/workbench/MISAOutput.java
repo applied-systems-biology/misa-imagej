@@ -78,19 +78,19 @@ public class MISAOutput {
         if(parameters.getAsJsonObject("filesystem").get("source").getAsString().equals("directories")) {
             Path inputDirectory = Paths.get(parameters.getAsJsonObject("filesystem").get("input-directory").getAsString());
             for(MISASample sample : moduleInstance.getSamples().values()) {
-                sample.getImportedFilesystem().externalPath = inputDirectory.resolve(sample.getName()).toString();
-                sample.getExportedFilesystem().externalPath = rootPath.resolve(sample.getName()).toString(); // Can load it from the root path
+                sample.getImportedFilesystem().setExternalPath(inputDirectory.resolve(sample.getName()));
+                sample.getExportedFilesystem().setExternalPath(rootPath.resolve(sample.getName())); // Can load it from the root path
             }
         }
         else if(parameters.getAsJsonObject("filesystem").get("source").getAsString().equals("json")) {
             for(MISASample sample : moduleInstance.getSamples().values()) {
-                sample.getExportedFilesystem().externalPath = rootPath.resolve(sample.getName()).toString(); // Can load it from the root path
+                sample.getExportedFilesystem().setExternalPath(rootPath.resolve(sample.getName())); // Can load it from the root path
 
                 // Assign all other paths from JSON data
                 sample.getImportedFilesystem().setExternalPathFromJson(parameters.getAsJsonObject("filesystem").getAsJsonObject("json-data").
-                        getAsJsonObject("imported").getAsJsonObject(sample.getName()));
+                        getAsJsonObject("imported").getAsJsonObject("children").getAsJsonObject(sample.getName()));
                 sample.getImportedFilesystem().setExternalPathFromJson(parameters.getAsJsonObject("filesystem").getAsJsonObject("json-data").
-                        getAsJsonObject("exported").getAsJsonObject(sample.getName()));
+                        getAsJsonObject("exported").getAsJsonObject("children").getAsJsonObject(sample.getName()));
             }
         }
 

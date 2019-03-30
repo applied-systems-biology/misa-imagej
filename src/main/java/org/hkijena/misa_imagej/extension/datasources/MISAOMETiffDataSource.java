@@ -38,10 +38,10 @@ public class MISAOMETiffDataSource implements MISADataSource {
         String filename;
         if(tiffSwapper.isInFilesystem())
             filename = Paths.get(tiffSwapper.getPath()).getFileName().toString();
-        else if(cache.getFilesystemEntry().name == null || cache.getFilesystemEntry().name.isEmpty())
+        else if(cache.getFilesystemEntry().getName() == null || cache.getFilesystemEntry().getName().isEmpty())
             filename = "image.ome.tif";
         else
-            filename = cache.getFilesystemEntry().name + ".ome.tif";
+            filename = cache.getFilesystemEntry().getName() + ".ome.tif";
 
         tiffSwapper.installToFilesystem(installFolder.resolve(filename).toString(), forceCopy);
     }

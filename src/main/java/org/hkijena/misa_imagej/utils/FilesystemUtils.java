@@ -46,6 +46,14 @@ public class FilesystemUtils {
         }
     }
 
+    /**
+     * Returns whether we can create symlinks or not
+     * @return
+     */
+    public static boolean symlinkCreationAvailable() {
+        return OSUtils.detectOperatingSystem() != OperatingSystem.Windows;
+    }
+
     private static void copy(Path source, Path dest) {
         System.out.println("Copying " + source.toString() + " to " + dest.toString());
         try {

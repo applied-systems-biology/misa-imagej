@@ -255,11 +255,15 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
                 return GsonUtils.getGson().toJsonTree(getValue());
             }
             case jsonObject: {
-                JsonObject result = new JsonObject();
-                for (Map.Entry<String, JSONSchemaObject> kv : getProperties().entrySet()) {
-                    result.add(kv.getKey(), kv.getValue().toJson());
+                if(properties.isEmpty() && getValue() != null) {
+                    return GsonUtils.getGson().toJsonTree(getValue());
+                }else {
+                    JsonObject result = new JsonObject();
+                    for (Map.Entry<String, JSONSchemaObject> kv : getProperties().entrySet()) {
+                        result.add(kv.getKey(), kv.getValue().toJson());
+                    }
+                    return result;
                 }
-                return result;
             }
             default:
                 throw new RuntimeException("Unknown type " + getType());
@@ -503,6 +507,24 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
 
     public void setDocumentationDescription(String documentationDescription) {
         this.documentationDescription = documentationDescription;
+    }
+
+    /**
+     * Returns true if the default value is different to the current value
+     * For objects, the properties are compared
+     * @return
+     */
+    public boolean wasChanged() {
+        if(type == JSONSchemaObjectType.jsonObject) {
+            for(JSONSchemaObject object : properties.values()) {
+                if(object.wasChanged())
+                    return true;
+            }
+            return false;
+        }
+        else {
+            return getValue() == getDefaultValue() || Objects.equals(getValue(), getDefaultValue());
+        }
     }
 
     /**
