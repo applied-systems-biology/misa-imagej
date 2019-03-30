@@ -13,6 +13,8 @@ public class MISANumericPlotSeriesColumn extends MISAPlotSeriesColumn<Double> {
     protected List<Double> getValuesFromTable() {
         List<Double> result = new ArrayList<>(getSeriesData().getSize());
         for(Object value : getSeriesData().getData()) {
+            if(value == null)
+                continue;
             if(value instanceof Number) {
                 result.add(((Number) value).doubleValue());
             }
