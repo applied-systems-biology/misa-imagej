@@ -1,7 +1,5 @@
 package org.hkijena.misa_imagej.ui.components;
 
-import com.google.common.base.Charsets;
-import com.vladsch.flexmark.pdf.converter.PdfConverterExtension;
 import org.hkijena.misa_imagej.utils.ResourceUtils;
 import org.hkijena.misa_imagej.utils.UIUtils;
 
@@ -11,7 +9,6 @@ import javax.swing.text.rtf.RTFEditorKit;
 import java.awt.*;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
 
 public class RTFReader extends JPanel {
 

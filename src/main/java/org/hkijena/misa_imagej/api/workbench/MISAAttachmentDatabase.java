@@ -9,8 +9,6 @@ import org.hkijena.misa_imagej.api.workbench.filters.MISAAttachmentFilter;
 import org.hkijena.misa_imagej.api.workbench.filters.MISAAttachmentFilterChangedEvent;
 import org.hkijena.misa_imagej.utils.GsonUtils;
 
-import java.io.Closeable;
-import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collections;

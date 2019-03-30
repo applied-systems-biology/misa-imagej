@@ -7,7 +7,6 @@ import org.hkijena.misa_imagej.api.repository.MISAModuleRepository;
 import org.hkijena.misa_imagej.api.workbench.MISAOutput;
 import org.hkijena.misa_imagej.extension.datasources.MISAFolderLinkDataSource;
 import org.hkijena.misa_imagej.ui.components.CancelableProcessUI;
-import org.hkijena.misa_imagej.ui.components.MarkdownReader;
 import org.hkijena.misa_imagej.ui.components.MemoryStatusUI;
 import org.hkijena.misa_imagej.ui.components.PDFReader;
 import org.hkijena.misa_imagej.ui.perfanalysis.MISARuntimeLogUI;

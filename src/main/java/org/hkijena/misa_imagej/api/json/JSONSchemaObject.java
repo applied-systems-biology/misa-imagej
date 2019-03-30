@@ -12,8 +12,8 @@ import org.hkijena.misa_imagej.utils.GsonUtils;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.awt.*;
-import java.util.List;
 import java.util.*;
+import java.util.List;
 
 /**
  * Deserialized JSON Schema entry that allows editing and exporting to the final JSON

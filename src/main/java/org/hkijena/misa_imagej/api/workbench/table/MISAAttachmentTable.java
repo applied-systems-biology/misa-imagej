@@ -1,6 +1,5 @@
 package org.hkijena.misa_imagej.api.workbench.table;
 
-import com.google.common.base.Joiner;
 import com.google.common.eventbus.EventBus;
 import com.google.gson.Gson;
 import org.hkijena.misa_imagej.api.MISAAttachment;
@@ -9,7 +8,10 @@ import org.hkijena.misa_imagej.utils.GsonUtils;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 public class MISAAttachmentTable {
     private MISAAttachmentDatabase database;

@@ -9,8 +9,8 @@ import org.hkijena.misa_imagej.utils.ui.ReadOnlyToggleButtonModel;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.List;
 import java.util.*;
+import java.util.List;
 
 /**
  * Displays attachments from an attachment database

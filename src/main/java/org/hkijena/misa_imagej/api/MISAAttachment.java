@@ -8,8 +8,8 @@ import org.hkijena.misa_imagej.api.json.JSONSchemaObject;
 import org.hkijena.misa_imagej.api.workbench.MISAAttachmentDatabase;
 
 import java.awt.*;
-import java.util.List;
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**

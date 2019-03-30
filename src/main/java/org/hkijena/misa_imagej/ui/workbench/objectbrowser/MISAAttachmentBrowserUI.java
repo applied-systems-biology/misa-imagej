@@ -19,8 +19,8 @@ import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
-import java.util.List;
 import java.util.*;
+import java.util.List;
 
 public class MISAAttachmentBrowserUI extends JPanel {
 

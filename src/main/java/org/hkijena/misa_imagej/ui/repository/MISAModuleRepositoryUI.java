@@ -7,7 +7,6 @@ import org.hkijena.misa_imagej.api.repository.MISAModule;
 import org.hkijena.misa_imagej.api.repository.MISAModuleRepository;
 import org.hkijena.misa_imagej.ui.components.MarkdownReader;
 import org.hkijena.misa_imagej.ui.components.PDFReader;
-import org.hkijena.misa_imagej.ui.components.RTFReader;
 import org.hkijena.misa_imagej.ui.components.renderers.MISAModuleListCellRenderer;
 import org.hkijena.misa_imagej.ui.parametereditor.MISAModuleInstanceUI;
 import org.hkijena.misa_imagej.ui.perfanalysis.MISARuntimeLogFrameUI;

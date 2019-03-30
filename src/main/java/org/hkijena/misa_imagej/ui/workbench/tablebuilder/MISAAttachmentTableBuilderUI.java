@@ -1,6 +1,5 @@
 package org.hkijena.misa_imagej.ui.workbench.tablebuilder;
 
-import com.google.common.base.Joiner;
 import org.hkijena.misa_imagej.api.json.JSONSchemaObject;
 import org.hkijena.misa_imagej.api.workbench.MISAAttachmentDatabase;
 import org.hkijena.misa_imagej.api.workbench.MISAOutput;
@@ -16,7 +15,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.List;
 
 public class MISAAttachmentTableBuilderUI extends JPanel {

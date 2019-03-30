@@ -13,8 +13,8 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.Line2D;
-import java.util.List;
 import java.util.*;
+import java.util.List;
 
 public class MISAPipelineUI extends JPanel implements MouseMotionListener, MouseListener {
 

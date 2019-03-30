@@ -23,8 +23,8 @@ import java.awt.*;
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.List;
 import java.util.*;
+import java.util.List;
 
 public class MISATableAnalyzerUI extends JPanel {
     private MISAWorkbenchUI workbench;

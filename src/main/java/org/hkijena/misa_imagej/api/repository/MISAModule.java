@@ -7,14 +7,10 @@ import org.hkijena.misa_imagej.api.MISAModuleInstance;
 import org.hkijena.misa_imagej.api.json.JSONSchemaObject;
 import org.hkijena.misa_imagej.utils.*;
 
-import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.concurrent.TimeUnit;
 
 /**
  * MISA++ module located within a repository

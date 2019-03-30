@@ -10,7 +10,10 @@ import org.hkijena.misa_imagej.api.pipelining.MISAPipeline;
 import org.hkijena.misa_imagej.api.pipelining.MISAPipelineNode;
 import org.hkijena.misa_imagej.api.repository.MISAModule;
 import org.hkijena.misa_imagej.api.repository.MISAModuleRepository;
-import org.hkijena.misa_imagej.ui.components.*;
+import org.hkijena.misa_imagej.ui.components.CancelableProcessUI;
+import org.hkijena.misa_imagej.ui.components.MISACacheTreeUI;
+import org.hkijena.misa_imagej.ui.components.MISAValidityReportStatusUI;
+import org.hkijena.misa_imagej.ui.components.PDFReader;
 import org.hkijena.misa_imagej.ui.components.renderers.MISAModuleListCellRenderer;
 import org.hkijena.misa_imagej.ui.repository.MISAModuleRepositoryUI;
 import org.hkijena.misa_imagej.utils.GsonUtils;
@@ -24,8 +27,8 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.IOException;
-import java.util.List;
 import java.util.*;
+import java.util.List;
 
 public class MISAPipelinerUI extends JFrame {
 
