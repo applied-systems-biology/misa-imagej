@@ -4,12 +4,10 @@ import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 import org.hkijena.misa_imagej.api.MISAModuleInstance;
 import org.hkijena.misa_imagej.api.json.JSONSchemaObject;
-import org.hkijena.misa_imagej.utils.GsonUtils;
-import org.hkijena.misa_imagej.utils.OSUtils;
-import org.hkijena.misa_imagej.utils.OperatingSystem;
-import org.hkijena.misa_imagej.utils.OperatingSystemArchitecture;
+import org.hkijena.misa_imagej.utils.*;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
@@ -115,17 +113,14 @@ public class MISAModule {
     private String queryParameterSchema() {
         try {
             Path tmppath = Files.createTempFile("MISAParameterSchema", ".json");
-//            System.out.println(executablePath + " " + tmppath.toString());
-            ProcessBuilder pb = new ProcessBuilder(getExecutablePath().toString(), "--write-parameter-schema", tmppath.toString());
-            Process p = pb.start();
-            if(p.waitFor(5, TimeUnit.SECONDS) && p.exitValue() == 0) {
+            int result = ProcessUtils.executeFast(getExecutablePath(), "--write-parameter-schema", tmppath.toString());
+            if(result == 0) {
                 return new String(Files.readAllBytes(tmppath));
             }
             else {
                 System.err.println("Unable to load parameter schema from " + getExecutablePath());
             }
-        } catch (IOException | InterruptedException e) {
-//            throw new RuntimeException(e);
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return null;
@@ -138,17 +133,14 @@ public class MISAModule {
     private String queryReadme() {
         try {
             Path tmppath = Files.createTempFile("MISA_README", ".md");
-//            System.out.println(executablePath + " " + tmppath.toString());
-            ProcessBuilder pb = new ProcessBuilder(getExecutablePath().toString(), "--write-readme", tmppath.toString());
-            Process p = pb.start();
-            if(p.waitFor(5, TimeUnit.SECONDS) && p.exitValue() == 0) {
+            int result = ProcessUtils.executeFast(getExecutablePath(), "--write-readme", tmppath.toString());
+            if(result == 0) {
                 return new String(Files.readAllBytes(tmppath));
             }
             else {
                 System.err.println("Unable to query README from " + getExecutablePath());
             }
-        } catch (IOException | InterruptedException e) {
-//            throw new RuntimeException(e);
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return null;
@@ -159,27 +151,10 @@ public class MISAModule {
     }
 
     private String queryModuleInfo() {
-        try {
-            ProcessBuilder pb = new ProcessBuilder(getExecutablePath().toString(), "--module-info");
-            Process p = pb.start();
-            if(p.waitFor(5, TimeUnit.SECONDS) && p.exitValue() == 0) {
-                try(BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
-                    StringBuilder builder = new StringBuilder();
-                    String line = null;
-                    while ( (line = reader.readLine()) != null) {
-                        builder.append(line);
-                        builder.append(System.getProperty("line.separator"));
-                    }
-                    return builder.toString();
-                }
-            }
-            else {
-                System.err.println("Unable to query module info from " + getExecutablePath());
-            }
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-        }
-        return null;
+       String result = ProcessUtils.queryFast(getExecutablePath(), "--module-info");
+       if(result == null)
+           System.err.println("Unable to query module info from " + getExecutablePath());
+       return result;
     }
 
     @Override

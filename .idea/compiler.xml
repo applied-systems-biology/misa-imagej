@@ -6,8 +6,8 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="misa_imagej" />
         <module name="misa-imagej" />
+        <module name="misa_imagej" />
       </profile>
     </annotationProcessing>
   </component>
