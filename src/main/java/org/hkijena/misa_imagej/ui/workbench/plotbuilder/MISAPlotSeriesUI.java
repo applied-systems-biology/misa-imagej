@@ -15,6 +15,8 @@ public class MISAPlotSeriesUI extends JPanel {
     private MISAPlotSeries series;
     private JButton removeButton;
     private JButton enableToggleButton;
+    private JButton moveUpButton;
+    private JButton moveDownButton;
 
     public MISAPlotSeriesUI(MISAPlot plot, MISAPlotSeries series) {
         this.plot = plot;
@@ -42,6 +44,18 @@ public class MISAPlotSeriesUI extends JPanel {
         titlePanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 4, 0));
         titlePanel.setBackground(Color.LIGHT_GRAY);
         titlePanel.setOpaque(true);
+
+        moveDownButton = new JButton(UIUtils.getIconFromResources("arrow-down.png"));
+        UIUtils.makeFlatWithoutMargin(moveDownButton);
+        moveDownButton.setToolTipText("Move down");
+        moveDownButton.addActionListener(e -> plot.moveSeriesDown(series));
+        titlePanel.add(moveDownButton);
+
+        moveUpButton = new JButton(UIUtils.getIconFromResources("arrow-up.png"));
+        UIUtils.makeFlatWithoutMargin(moveUpButton);
+        moveUpButton.setToolTipText("Move up");
+        moveUpButton.addActionListener(e -> plot.moveSeriesUp(series));
+        titlePanel.add(moveUpButton);
 
         titlePanel.add(Box.createHorizontalGlue());
         titlePanel.add(Box.createHorizontalStrut(8));
@@ -76,6 +90,8 @@ public class MISAPlotSeriesUI extends JPanel {
     private void updateTitleBarButtons() {
         removeButton.setEnabled(plot.canRemoveSeries());
         enableToggleButton.setEnabled(plot.canRemoveSeries());
+        moveUpButton.setVisible(plot.canRemoveSeries());
+        moveDownButton.setVisible(plot.canRemoveSeries());
     }
 
     private void removeSeries() {

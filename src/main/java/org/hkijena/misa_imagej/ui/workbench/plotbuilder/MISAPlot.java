@@ -45,6 +45,26 @@ public abstract class MISAPlot {
         }
     }
 
+    public void moveSeriesUp(MISAPlotSeries series) {
+        int index = this.series.indexOf(series);
+        if(index > 0) {
+            this.series.set(index, this.series.get(index - 1));
+            this.series.set(index - 1, series);
+            eventBus.post(new PlotSeriesListChangedEvent(this));
+            eventBus.post(new PlotChangedEvent(this));
+        }
+    }
+
+    public void moveSeriesDown(MISAPlotSeries series) {
+        int index = this.series.indexOf(series);
+        if(index >= 0 && index < this.series.size() - 1) {
+            this.series.set(index, this.series.get(index + 1));
+            this.series.set(index + 1, series);
+            eventBus.post(new PlotSeriesListChangedEvent(this));
+            eventBus.post(new PlotChangedEvent(this));
+        }
+    }
+
     @Subscribe
     public void handleSeriesDataChangedEvent(MISAPlotSeries.DataChangedEvent event) {
         eventBus.post(new PlotChangedEvent(this));
