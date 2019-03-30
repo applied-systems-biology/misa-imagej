@@ -2,6 +2,7 @@ package org.hkijena.misa_imagej.ui.pipeliner;
 
 import com.google.common.eventbus.Subscribe;
 import com.google.gson.Gson;
+import org.apache.commons.exec.CommandLine;
 import org.hkijena.misa_imagej.api.MISACache;
 import org.hkijena.misa_imagej.api.MISAModuleInstance;
 import org.hkijena.misa_imagej.api.MISAValidityReport;
@@ -260,7 +261,7 @@ public class MISAPipelinerUI extends JFrame {
         if(dialogUI.showDialog() == MISARunPipelineDialogUI.ACCEPT_OPTION) {
             try {
                 pipeline.export(dialogUI.getExportPath(), false, false, true);
-                List<ProcessBuilder> processes = new ArrayList<>();
+                List<CommandLine> processes = new ArrayList<>();
                 for(MISAPipelineNode node : pipeline.traverse()) {
                     processes.add(node.getModuleInstance().getModule().run(dialogUI.getExportPath().resolve(node.getId()).resolve("parameters.json")));
                 }

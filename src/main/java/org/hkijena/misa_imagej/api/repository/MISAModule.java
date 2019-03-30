@@ -2,6 +2,7 @@ package org.hkijena.misa_imagej.api.repository;
 
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
+import org.apache.commons.exec.CommandLine;
 import org.hkijena.misa_imagej.api.MISAModuleInstance;
 import org.hkijena.misa_imagej.api.json.JSONSchemaObject;
 import org.hkijena.misa_imagej.utils.*;
@@ -146,8 +147,11 @@ public class MISAModule {
         return null;
     }
 
-    public ProcessBuilder run(Path parameters) {
-        return new ProcessBuilder(getExecutablePath().toString(), "--parameters", parameters.toString());
+    public CommandLine run(Path parameters) {
+        CommandLine commandLine = new CommandLine(getExecutablePath().toFile());
+        commandLine.addArgument("--parameters");
+        commandLine.addArgument(parameters.toString());
+        return commandLine;
     }
 
     private String queryModuleInfo() {

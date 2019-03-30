@@ -1,7 +1,7 @@
 package org.hkijena.misa_imagej.ui.components;
 
+import org.apache.commons.exec.*;
 import org.hkijena.misa_imagej.ui.repository.MISAModuleRepositoryUI;
-import org.hkijena.misa_imagej.utils.ProcessStreamToStringGobbler;
 
 import javax.swing.*;
 import java.awt.*;
@@ -33,7 +33,7 @@ public class CancelableProcessUI extends JDialog {
 
     private static final Pattern percentagePattern = Pattern.compile(".*<(\\d+) / (\\d+)>.*");
 
-    public CancelableProcessUI(List<ProcessBuilder> processes) {
+    public CancelableProcessUI(List<CommandLine> processes) {
         setTitle("Working ...");
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         setSize(500, 400);
@@ -148,28 +148,48 @@ public class CancelableProcessUI extends JDialog {
 
     public class Worker extends SwingWorker<Integer, Object> {
 
-        private final List<ProcessBuilder> processes;
-        private volatile Process currentProcess;
+        private final List<CommandLine> processes;
+        private volatile DefaultExecutor executor;
         private volatile int currentProcessIndex;
         private final CancelableProcessUI ui;
 
-        public Worker(CancelableProcessUI ui, List<ProcessBuilder> processes) {
+        public Worker(CancelableProcessUI ui, List<CommandLine> processes) {
             this.ui = ui;
             this.processes = processes;
+
+            // Setup the executor
+            this.executor = new DefaultExecutor();
+            this.executor.setWatchdog(new ExecuteWatchdog(ExecuteWatchdog.INFINITE_TIMEOUT));
+
+            LogOutputStream stdOutputStream = new LogOutputStream() {
+                @Override
+                protected void processLine(String s, int i) {
+                    MISAModuleRepositoryUI.getInstance().getCommand().getLogService().info(s);
+                    SwingUtilities.invokeLater(() -> {
+                        ui.updateProgressAndStatus(s, currentProcessIndex, processes.size());
+                    });
+                }
+            };
+            LogOutputStream stdErrorStream = new LogOutputStream() {
+                @Override
+                protected void processLine(String s, int i) {
+                    MISAModuleRepositoryUI.getInstance().getCommand().getLogService().error(s);
+                }
+            };
+            this.executor.setStreamHandler(new PumpStreamHandler(stdOutputStream, stdErrorStream));
         }
 
         @Override
         protected Integer doInBackground() throws Exception {
+            DefaultExecutor executor = new DefaultExecutor();
+
             for(int i = 0; i < processes.size(); ++i) {
                 if(this.isCancelled())
                     return 1;
-                currentProcess = processes.get(i).start();
+                int result = executor.execute(processes.get(i));
                 currentProcessIndex = i;
-                new ProcessStreamToStringGobbler(currentProcess.getInputStream(), this::processInput).start();
-                new ProcessStreamToStringGobbler(currentProcess.getErrorStream(), this::processError).start();
-                int ret = currentProcess.waitFor();
-                if(ret != 0)
-                    return ret;
+                if(result != 0)
+                    return result;
             }
             return 0;
         }
@@ -190,19 +210,7 @@ public class CancelableProcessUI extends JDialog {
         }
 
         public void cancelCurrentProcess() {
-            if(currentProcess != null)
-                currentProcess.destroy();
-        }
-
-        private void processInput(String s) {
-            MISAModuleRepositoryUI.getInstance().getCommand().getLogService().info(s);
-            SwingUtilities.invokeLater(() -> {
-                ui.updateProgressAndStatus(s, currentProcessIndex, processes.size());
-            });
-        }
-
-        private void processError(String s) {
-            MISAModuleRepositoryUI.getInstance().getCommand().getLogService().error(s);
+            executor.getWatchdog().destroyProcess();
         }
     }
 }

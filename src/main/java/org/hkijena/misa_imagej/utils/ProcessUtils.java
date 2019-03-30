@@ -29,15 +29,16 @@ public class ProcessUtils {
         executor.setWatchdog(watchdog);
 
         // Capture stdout
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        PumpStreamHandler outputStreamHandler = new PumpStreamHandler(outputStream);
+        ByteArrayOutputStream standardOutputStream = new ByteArrayOutputStream();
+        ByteArrayOutputStream errorOutputStream = new ByteArrayOutputStream();
+        PumpStreamHandler outputStreamHandler = new PumpStreamHandler(standardOutputStream, errorOutputStream);
         executor.setStreamHandler(outputStreamHandler);
 
         try {
             int exitValue = executor.execute(commandLine);
 
             if(exitValue == 0) {
-                return new String(outputStream.toByteArray());
+                return new String(standardOutputStream.toByteArray());
             }
             else {
                 return null;
