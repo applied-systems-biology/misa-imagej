@@ -3,6 +3,7 @@ package org.hkijena.misa_imagej.utils.swappers;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
+import org.hkijena.misa_imagej.utils.FilesystemUtils;
 
 import java.awt.*;
 import java.io.IOException;
@@ -109,7 +110,7 @@ public class OMETiffSwapper implements FileSwapper {
             }
             else {
                 try {
-                    Files.createSymbolicLink(Paths.get(path), Paths.get(this.path));
+                    FilesystemUtils.createSymbolicLinkOrCopy(Paths.get(path), Paths.get(this.path));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

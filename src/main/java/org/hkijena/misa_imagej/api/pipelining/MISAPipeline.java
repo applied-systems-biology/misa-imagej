@@ -380,7 +380,7 @@ public class MISAPipeline implements MISAValidatable {
                                 .resolve(pipelineNodeDataSource.getCache().getRelativePath());
                         Files.createDirectories(sourceLink);
                         Files.createDirectories(targetLink.getParent());
-                        Files.createSymbolicLink(targetLink, sourceLink);
+                        FilesystemUtils.createSymbolicLinkOrCopy(targetLink, sourceLink);
                     }
                 }
             }

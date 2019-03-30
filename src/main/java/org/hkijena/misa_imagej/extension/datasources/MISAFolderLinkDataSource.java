@@ -33,7 +33,7 @@ public class MISAFolderLinkDataSource implements MISADataSource {
             try {
                 MoreFiles.createParentDirectories(installFolder);
                 Files.deleteIfExists(installFolder);
-                Files.createSymbolicLink(installFolder, getSourceFolder());
+                FilesystemUtils.createSymbolicLinkOrCopy(installFolder, getSourceFolder());
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

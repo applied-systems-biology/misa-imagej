@@ -1,5 +1,6 @@
 package org.hkijena.misa_imagej.ui.parametereditor;
 
+import org.apache.commons.exec.ExecuteException;
 import org.hkijena.misa_imagej.api.MISACache;
 import org.hkijena.misa_imagej.api.MISAModuleInstance;
 import org.hkijena.misa_imagej.api.MISASamplePolicy;
@@ -157,8 +158,11 @@ public class MISAModuleInstanceUI extends JFrame {
                 setEnabled(false);
                 processUI.start();
 
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
+                JOptionPane.showMessageDialog(this, "There was an error during setting up the analysis. Please take a look at the console to find out more.",
+                        "Error", JOptionPane.ERROR_MESSAGE);
+                setEnabled(true);
             }
         }
     }

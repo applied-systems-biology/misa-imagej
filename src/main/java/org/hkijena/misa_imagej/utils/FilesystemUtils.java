@@ -1,7 +1,11 @@
 package org.hkijena.misa_imagej.utils;
 
+import com.google.common.io.MoreFiles;
+import com.google.common.io.RecursiveDeleteOption;
+
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileSystemException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -24,19 +28,44 @@ public class FilesystemUtils {
         }
     }
 
+    /**
+     * Creates a symbolic link if possible. Otherwise copies the data.
+     * This is required for Windows because Windows disables creation of symbolic links by default.
+     * @param link
+     * @param target
+     */
+    public static void createSymbolicLinkOrCopy(Path link, Path target) throws IOException {
+        try {
+            Files.createSymbolicLink(link, target);
+        }
+        catch (FileSystemException e) {
+            if(Files.exists(link)) {
+                MoreFiles.deleteRecursively(link, RecursiveDeleteOption.ALLOW_INSECURE);
+            }
+            copyFileOrFolder(target, link);
+        }
+    }
+
     private static void copy(Path source, Path dest) {
         System.out.println("Copying " + source.toString() + " to " + dest.toString());
         try {
+            if(!Files.exists(dest.getParent())) {
+                Files.createDirectories(dest.getParent());
+            }
             Files.copy(source, dest, REPLACE_EXISTING);
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }
+        
     }
 
     public static void copyFileOrFolder(Path src, Path dest) throws IOException {
         if(src.toFile().isDirectory()) {
             Files.walk(src)
-                    .forEach(source -> copy(source, dest.resolve(src.relativize(source))));
+                    .forEach(source -> {
+                        if(Files.isRegularFile(source))
+                            copy(source, dest.resolve(src.relativize(source)));
+                    });
         }
         else {
             copy(src, dest);
