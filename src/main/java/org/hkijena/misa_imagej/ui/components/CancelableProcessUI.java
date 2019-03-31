@@ -181,8 +181,6 @@ public class CancelableProcessUI extends JDialog {
 
         @Override
         protected Integer doInBackground() throws Exception {
-            DefaultExecutor executor = new DefaultExecutor();
-
             for(int i = 0; i < processes.size(); ++i) {
                 if(this.isCancelled())
                     return 1;
