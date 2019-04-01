@@ -91,7 +91,18 @@ public class MISAAttachmentTableBuilderUI extends JPanel {
         dialog.startOperation();
         dialog.setVisible(true);
         if(dialog.getModel() != null) {
-            workbench.addTab("Table",
+            String name = "Table";
+            if(objectSelection.getSelectedItem() != null) {
+                JSONSchemaObject schemaObject = workbench.getMisaOutput().getAttachmentSchemas()
+                        .getOrDefault(objectSelection.getSelectedItem().toString(), null);
+                if(schemaObject != null) {
+                    if(schemaObject.getDocumentationTypeTitle() != null && !schemaObject.getDocumentationTypeTitle().isEmpty())
+                        name = "Table (" + schemaObject.getDocumentationTypeTitle() + ")";
+                    else
+                        name = "Table (" + schemaObject.getSerializationId() + ")";
+                }
+            }
+            workbench.addTab(name,
                     UIUtils.getIconFromResources("table.png"),
                     new MISATableAnalyzerUI(workbench, dialog.getModel()),
                     DocumentTabPane.CloseMode.withAskOnCloseButton, true);
@@ -193,12 +204,12 @@ public class MISAAttachmentTableBuilderUI extends JPanel {
         public Component getListCellRendererComponent(JList<? extends String> list, String value, int index, boolean isSelected, boolean cellHasFocus) {
 
             JSONSchemaObject schemaObject = misaOutput.getAttachmentSchemas().getOrDefault(value, null);
-            if(schemaObject == null || schemaObject.getDocumentationTitle() == null || schemaObject.getDocumentationTitle().isEmpty()) {
+            if(schemaObject == null || schemaObject.getDocumentationTypeTitle() == null || schemaObject.getDocumentationTypeTitle().isEmpty()) {
                 setText(value);
                 icon.setColor(Color.GRAY);
             }
             else {
-                setText(schemaObject.getDocumentationTitle() + " (" + value + ")");
+                setText(schemaObject.getDocumentationTypeTitle() + " (" + value + ")");
                 icon.setColor(schemaObject.toColor());
             }
 
