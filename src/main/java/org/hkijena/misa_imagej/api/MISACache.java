@@ -35,8 +35,10 @@ public class MISACache implements MISAValidatable {
         this.sample = sample;
         this.filesystemEntry = filesystemEntry;
 
-        this.documentationTitle = filesystemEntry.getMetadata().getDocumentationTitle();
-        this.documentationDescription = filesystemEntry.getMetadata().getDocumentationDescription();
+        if(filesystemEntry != null && filesystemEntry.getMetadata() != null) {
+            this.documentationTitle = filesystemEntry.getMetadata().getDocumentationTitle();
+            this.documentationDescription = filesystemEntry.getMetadata().getDocumentationDescription();
+        }
 
         // Default data sources that are always available
         this.availableDatasources.add(new MISAFolderLinkDataSource(this));
@@ -141,8 +143,10 @@ public class MISACache implements MISAValidatable {
      * @return
      */
     public String getPatternSerializationID() {
-        if(getFilesystemEntry().getMetadata().hasPropertyFromPath("pattern")) {
-            return getFilesystemEntry().getMetadata().getPropertyFromPath("pattern").getSerializationId();
+        if(getFilesystemEntry() != null && getFilesystemEntry().getMetadata() != null) {
+            if(getFilesystemEntry().getMetadata().hasPropertyFromPath("pattern")) {
+                return getFilesystemEntry().getMetadata().getPropertyFromPath("pattern").getSerializationId();
+            }
         }
         return null;
     }
@@ -153,8 +157,10 @@ public class MISACache implements MISAValidatable {
      * @return
      */
     public String getDescriptionSerializationID() {
-        if(getFilesystemEntry().getMetadata().hasPropertyFromPath("description")) {
-            return getFilesystemEntry().getMetadata().getPropertyFromPath("description").getSerializationId();
+        if(getFilesystemEntry() != null && getFilesystemEntry().getMetadata() != null) {
+            if(getFilesystemEntry().getMetadata().hasPropertyFromPath("description")) {
+                return getFilesystemEntry().getMetadata().getPropertyFromPath("description").getSerializationId();
+            }
         }
         return null;
     }
