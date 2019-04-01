@@ -114,7 +114,7 @@ public class MISAWorkbenchUI extends JFrame{
         if(!misaOutput.hasAttachmentIndex()) {
             MISAModule module = MISAModuleRepository.getInstance().getModule("misaxx-analyzer");
             if(module == null) {
-                JOptionPane.showMessageDialog(this, "Please make sure that the 'MISA++ Analysis Helper' module is installed.",
+                JOptionPane.showMessageDialog(this, "Please make sure that the 'MISA++ Result Analyzer' module is installed.",
                         "Unable to analyze quantification results", JOptionPane.ERROR_MESSAGE);
                 return;
             }
