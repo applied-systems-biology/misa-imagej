@@ -378,7 +378,7 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
         return report;
     }
 
-    public void setValueFromJson(JsonElement json) {
+    public void setValueFromJson(JsonElement json, boolean createNewProperties) {
         if (json.isJsonNull())
             return;
         switch (getType()) {
@@ -396,7 +396,9 @@ public class JSONSchemaObject implements Cloneable, MISAValidatable {
                 break;
             case jsonObject:
                 for (Map.Entry<String, JsonElement> kv : json.getAsJsonObject().entrySet()) {
-                    ensurePropertyFromPath(kv.getKey()).setValueFromJson(kv.getValue());
+                    if(!hasPropertyFromPath(kv.getKey()) && !createNewProperties)
+                        continue;
+                    ensurePropertyFromPath(kv.getKey()).setValueFromJson(kv.getValue(), createNewProperties);
                 }
                 break;
         }

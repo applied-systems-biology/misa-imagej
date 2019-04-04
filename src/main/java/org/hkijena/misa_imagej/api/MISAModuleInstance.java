@@ -285,16 +285,16 @@ public class MISAModuleInstance implements MISAValidatable {
                         continue;
                     addSample(kv.getKey());
                 }
-                samples.get(kv.getKey()).getParameters().setValueFromJson(kv.getValue());
+                samples.get(kv.getKey()).getParameters().setValueFromJson(kv.getValue(), false);
             }
         }
 
         // Merge parameters
         if (root.has("algorithm")) {
-            algorithmParameters.setValueFromJson(root.get("algorithm"));
+            algorithmParameters.setValueFromJson(root.get("algorithm"), false);
         }
         if (root.has("runtime")) {
-            runtimeParameters.setValueFromJson(root.get("runtime"));
+            runtimeParameters.setValueFromJson(root.get("runtime"), false);
         }
 
     }
