@@ -99,7 +99,10 @@ public class MISAWorkbenchUI extends JFrame{
         toolBar.add(createAttachmentBrowserButton);
 
         JButton openRuntimeLogButton = new JButton("Analyze runtime",  UIUtils.getIconFromResources("clock.png"));
-        openRuntimeLogButton.addActionListener(e -> documentTabPane.selectSingletonTab("RUNTIME_LOG"));
+        openRuntimeLogButton.addActionListener(e -> {
+            documentTabPane.selectSingletonTab("RUNTIME_LOG");
+            runtimeLogUI.open(misaOutput.getRuntimeLog());
+        });
         toolBar.add(openRuntimeLogButton);
 
         toolBar.add(Box.createHorizontalGlue());
@@ -199,7 +202,6 @@ public class MISAWorkbenchUI extends JFrame{
             misaOutput = new MISAOutput(path);
             setTitle(misaOutput.getRootPath().toString() + " - MISA++ Workbench for ImageJ");
 
-            runtimeLogUI.open(misaOutput.getRuntimeLog());
             cacheBrowserUI.setMisaOutput(misaOutput);
         }
         catch (IOException e) {

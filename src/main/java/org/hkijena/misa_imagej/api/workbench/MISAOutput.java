@@ -47,7 +47,6 @@ public class MISAOutput {
     public MISAOutput(Path rootPath) throws IOException {
         this.rootPath = rootPath;
         loadParameterSchema();
-        loadRuntimeLog();
         loadModuleInfo();
         loadParameters();
         loadFilesystem();
@@ -168,6 +167,13 @@ public class MISAOutput {
     }
 
     public MISARuntimeLog getRuntimeLog() {
+        if(runtimeLog == null) {
+            try {
+                loadRuntimeLog();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
         return runtimeLog;
     }
 
