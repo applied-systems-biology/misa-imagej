@@ -64,7 +64,7 @@ public class MISAWorkbenchUI extends JFrame{
 
         documentTabPane = new DocumentTabPane();
         documentTabPane.addSingletonTab("DATA_BROWSER", "Data browser", UIUtils.getIconFromResources("database.png"), cacheBrowserUI, false);
-        documentTabPane.addSingletonTab("RUNTIME_LOG", "Runtime log",  UIUtils.getIconFromResources("clock.png"), runtimeLogUI, false);
+        documentTabPane.addSingletonTab("RUNTIME_LOG", "Runtime log",  UIUtils.getIconFromResources("clock.png"), runtimeLogUI, true);
 
         documentTabPane.addSingletonTab("HELP", "Documentation", UIUtils.getIconFromResources("help.png"),
                 PDFReader.fromResource("documentation/workbench.pdf"), true);
