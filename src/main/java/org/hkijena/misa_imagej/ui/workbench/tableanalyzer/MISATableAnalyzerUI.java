@@ -24,6 +24,7 @@ import org.hkijena.misa_imagej.MISAImageJRegistryService;
 import org.hkijena.misa_imagej.ui.registries.MISATableAnalyzerUIOperationRegistry;
 import org.hkijena.misa_imagej.ui.workbench.MISAWorkbenchUI;
 import org.hkijena.misa_imagej.ui.workbench.plotbuilder.MISAPlotBuilderUI;
+import org.hkijena.misa_imagej.utils.BusyCursor;
 import org.hkijena.misa_imagej.utils.TableUtils;
 import org.hkijena.misa_imagej.utils.UIUtils;
 import org.hkijena.misa_imagej.utils.ui.DocumentTabPane;
@@ -264,65 +265,69 @@ public class MISATableAnalyzerUI extends JPanel {
     }
 
     private void selectEquivalent() {
-        if(jxTable.getSelectedRowCount() > 0 && jxTable.getSelectedColumnCount() > 0) {
-            isRebuildingSelection = true;
-            List<Object[]> possibleValues = new ArrayList<>();
-            int[] columns = jxTable.getSelectedColumns().clone();
-            for(int i = 0; i < columns.length; ++i) {
-                columns[i] = jxTable.convertColumnIndexToModel(columns[i]);
-            }
-
-            // Query all possible values
-            for(int viewRow : jxTable.getSelectedRows()) {
-                Object[] tuple = new Object[columns.length];
-                for(int i = 0; i < columns.length; ++i) {
-                    tuple[i] = tableModel.getValueAt(jxTable.convertRowIndexToModel(viewRow), columns[i]);
+        try(BusyCursor busyCursor = new BusyCursor(this)) {
+            if (jxTable.getSelectedRowCount() > 0 && jxTable.getSelectedColumnCount() > 0) {
+                isRebuildingSelection = true;
+                List<Object[]> possibleValues = new ArrayList<>();
+                int[] columns = jxTable.getSelectedColumns().clone();
+                for (int i = 0; i < columns.length; ++i) {
+                    columns[i] = jxTable.convertColumnIndexToModel(columns[i]);
                 }
-                possibleValues.add(tuple);
-            }
 
-            jxTable.clearSelection();
+                // Query all possible values
+                for (int viewRow : jxTable.getSelectedRows()) {
+                    Object[] tuple = new Object[columns.length];
+                    for (int i = 0; i < columns.length; ++i) {
+                        tuple[i] = tableModel.getValueAt(jxTable.convertRowIndexToModel(viewRow), columns[i]);
+                    }
+                    possibleValues.add(tuple);
+                }
 
-            // Select all rows that match one of the possible values
-            jxTable.addColumnSelectionInterval(0, tableModel.getColumnCount() - 1);
-            for(int row = 0; row < tableModel.getRowCount(); ++row) {
-                boolean success = false;
-                for(Object[] possibleValue : possibleValues) {
-                    boolean valueSuccess = true;
-                    for(int i = 0; i < columns.length; ++i) {
-                        if(!Objects.equals(tableModel.getValueAt(row, columns[i]), possibleValue[i])) {
-                            valueSuccess = false;
+                jxTable.clearSelection();
+
+                // Select all rows that match one of the possible values
+                jxTable.addColumnSelectionInterval(0, tableModel.getColumnCount() - 1);
+                for (int row = 0; row < tableModel.getRowCount(); ++row) {
+                    boolean success = false;
+                    for (Object[] possibleValue : possibleValues) {
+                        boolean valueSuccess = true;
+                        for (int i = 0; i < columns.length; ++i) {
+                            if (!Objects.equals(tableModel.getValueAt(row, columns[i]), possibleValue[i])) {
+                                valueSuccess = false;
+                                break;
+                            }
+                        }
+                        if (valueSuccess) {
+                            success = true;
                             break;
                         }
                     }
-                    if(valueSuccess) {
-                        success = true;
-                        break;
+                    if (success) {
+                        jxTable.addRowSelectionInterval(jxTable.convertRowIndexToView(row), jxTable.convertRowIndexToView(row));
                     }
                 }
-                if(success) {
-                    jxTable.addRowSelectionInterval(jxTable.convertRowIndexToView(row), jxTable.convertRowIndexToView(row));
-                }
-            }
 
-            isRebuildingSelection = false;
-            updateConvertMenu();
+                isRebuildingSelection = false;
+                updateConvertMenu();
+            }
         }
     }
 
     private void invertSelection() {
-        int[] cols = jxTable.getSelectedColumns().clone();
-        int[] rows = jxTable.getSelectedRows().clone();
-        isRebuildingSelection = true;
-        jxTable.clearSelection();
-        for(int column : cols) {
-            jxTable.addColumnSelectionInterval(column, column);
+        try(BusyCursor busyCursor = new BusyCursor(this)) {
+            int[] cols = jxTable.getSelectedColumns().clone();
+            int[] rows = jxTable.getSelectedRows().clone();
+            isRebuildingSelection = true;
+            jxTable.clearSelection();
+            for (int column : cols) {
+                jxTable.addColumnSelectionInterval(column, column);
+            }
+            for (int row = 0; row < jxTable.getRowCount(); ++row) {
+                if (!Ints.contains(rows, row))
+                    jxTable.addRowSelectionInterval(row, row);
+            }
+            isRebuildingSelection = false;
         }
-        for(int row = 0; row < jxTable.getRowCount(); ++row) {
-            if(!Ints.contains(rows, row))
-                jxTable.addRowSelectionInterval(row, row);
-        }
-        isRebuildingSelection = false;
         updateConvertMenu();
     }
 
@@ -453,21 +458,23 @@ public class MISATableAnalyzerUI extends JPanel {
             String name = JOptionPane.showInputDialog(this,
                     "Please provide a name for the new column", generatedName.toString());
             if (name != null && !name.isEmpty()) {
-                createUndoSnapshot();
-                tableModel.addColumn(name);
+                try (BusyCursor busyCursor = new BusyCursor(this)) {
+                    createUndoSnapshot();
+                    tableModel.addColumn(name);
 
-                StringBuilder valueBuffer = new StringBuilder();
-                for(int row = 0; row < tableModel.getRowCount(); ++row) {
-                    valueBuffer.setLength(0);
-                    for(int i = 0; i < sourceColumns.length; ++i) {
-                        if (i > 0)
-                            valueBuffer.append(", ");
-                        valueBuffer.append(tableModel.getColumnName(sourceColumns[i]));
-                        valueBuffer.append("=");
-                        valueBuffer.append(tableModel.getValueAt(row, sourceColumns[i]));
+                    StringBuilder valueBuffer = new StringBuilder();
+                    for (int row = 0; row < tableModel.getRowCount(); ++row) {
+                        valueBuffer.setLength(0);
+                        for (int i = 0; i < sourceColumns.length; ++i) {
+                            if (i > 0)
+                                valueBuffer.append(", ");
+                            valueBuffer.append(tableModel.getColumnName(sourceColumns[i]));
+                            valueBuffer.append("=");
+                            valueBuffer.append(tableModel.getValueAt(row, sourceColumns[i]));
+                        }
+
+                        tableModel.setValueAt(valueBuffer.toString(), row, tableModel.getColumnCount() - 1);
                     }
-
-                    tableModel.setValueAt(valueBuffer.toString(), row, tableModel.getColumnCount() - 1);
                 }
             }
 
@@ -499,53 +506,57 @@ public class MISATableAnalyzerUI extends JPanel {
     }
 
     private void removeSelectedColumns() {
-        if (jxTable.getSelectedColumns() != null) {
-            createUndoSnapshot();
-            int[] newColumnIndices = new int[tableModel.getColumnCount()];
-            int newColumnCount = 0;
-            for (int i = 0; i < tableModel.getColumnCount(); ++i) {
-                if (!Ints.contains(jxTable.getSelectedColumns(), i)) {
-                    newColumnIndices[newColumnCount] = jxTable.convertColumnIndexToModel(i);
-                    ++newColumnCount;
+        try(BusyCursor busyCursor = new BusyCursor(this)) {
+            if (jxTable.getSelectedColumns() != null) {
+                createUndoSnapshot();
+                int[] newColumnIndices = new int[tableModel.getColumnCount()];
+                int newColumnCount = 0;
+                for (int i = 0; i < tableModel.getColumnCount(); ++i) {
+                    if (!Ints.contains(jxTable.getSelectedColumns(), i)) {
+                        newColumnIndices[newColumnCount] = jxTable.convertColumnIndexToModel(i);
+                        ++newColumnCount;
+                    }
                 }
-            }
 
-            DefaultTableModel newModel = new DefaultTableModel();
-            for (int i = 0; i < newColumnCount; ++i) {
-                newModel.addColumn(tableModel.getColumnName(newColumnIndices[i]));
-            }
-
-            Object[] rowBuffer = new Object[newColumnCount];
-            for (int i = 0; i < tableModel.getRowCount(); ++i) {
-                for (int j = 0; j < newColumnCount; ++j) {
-                    rowBuffer[j] = tableModel.getValueAt(i, newColumnIndices[j]);
+                DefaultTableModel newModel = new DefaultTableModel();
+                for (int i = 0; i < newColumnCount; ++i) {
+                    newModel.addColumn(tableModel.getColumnName(newColumnIndices[i]));
                 }
-                newModel.addRow(rowBuffer);
-            }
 
-            tableModel = newModel;
-            jxTable.setModel(tableModel);
-            jxTable.packAll();
+                Object[] rowBuffer = new Object[newColumnCount];
+                for (int i = 0; i < tableModel.getRowCount(); ++i) {
+                    for (int j = 0; j < newColumnCount; ++j) {
+                        rowBuffer[j] = tableModel.getValueAt(i, newColumnIndices[j]);
+                    }
+                    newModel.addRow(rowBuffer);
+                }
+
+                tableModel = newModel;
+                jxTable.setModel(tableModel);
+                jxTable.packAll();
+            }
         }
     }
 
     private void removeSelectedRows() {
-        if (jxTable.getSelectedRows() != null) {
-            createUndoSnapshot();
-            int[] rows = new int[jxTable.getSelectedRows().length];
-            for (int i = 0; i < jxTable.getSelectedRows().length; ++i) {
-                rows[i] = jxTable.convertRowIndexToModel(jxTable.getSelectedRows()[i]);
+        try(BusyCursor busyCursor = new BusyCursor(this)) {
+            if (jxTable.getSelectedRows() != null) {
+                createUndoSnapshot();
+                int[] rows = new int[jxTable.getSelectedRows().length];
+                for (int i = 0; i < jxTable.getSelectedRows().length; ++i) {
+                    rows[i] = jxTable.convertRowIndexToModel(jxTable.getSelectedRows()[i]);
+                }
+                Arrays.sort(rows);
+
+                Vector dataVector = tableModel.getDataVector();
+
+                for (int i = 0; i < rows.length; ++i) {
+                    dataVector.remove(rows[i] - i);
+                }
+
+                tableModel.setDataVector(dataVector, TableUtils.getColumnIdentifiers(tableModel));
+                jxTable.packAll();
             }
-            Arrays.sort(rows);
-
-            Vector dataVector = tableModel.getDataVector();
-
-            for (int i = 0; i < rows.length; ++i) {
-                dataVector.remove(rows[i] - i);
-            }
-
-            tableModel.setDataVector(dataVector, TableUtils.getColumnIdentifiers(tableModel));
-            jxTable.packAll();
         }
     }
 

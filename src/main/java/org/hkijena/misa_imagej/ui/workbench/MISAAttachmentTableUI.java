@@ -15,6 +15,7 @@ package org.hkijena.misa_imagej.ui.workbench;
 import com.google.common.eventbus.Subscribe;
 import org.hkijena.misa_imagej.api.workbench.table.MISAAttachmentTable;
 import org.hkijena.misa_imagej.api.workbench.table.MISAAttachmentTableColumn;
+import org.hkijena.misa_imagej.utils.BusyCursor;
 import org.jdesktop.swingx.JXTable;
 
 import javax.swing.*;
@@ -65,7 +66,7 @@ public class MISAAttachmentTableUI extends JPanel {
             JScrollBar scrollBar = scrollPane.getVerticalScrollBar();
             if(scrollBar.getMaximum() <= scrollBar.getVisibleAmount()
                     || (scrollBar.getValue() + scrollBar.getVisibleAmount()) > (scrollBar.getMaximum() * 0.9)) {
-                try {
+                try(BusyCursor busyCursor = new BusyCursor(this)) {
                     Object[] values = currentRow.nextRow();
                     if (values == null) {
                         currentRow = null;

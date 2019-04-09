@@ -14,6 +14,7 @@ package org.hkijena.misa_imagej.ui.workbench.tablebuilder;
 
 import org.hkijena.misa_imagej.api.json.JSONSchemaObject;
 import org.hkijena.misa_imagej.api.workbench.table.*;
+import org.hkijena.misa_imagej.utils.BusyCursor;
 import org.hkijena.misa_imagej.utils.UIUtils;
 
 import javax.swing.*;
@@ -147,13 +148,15 @@ public class MISAAttachmentTableColumnEditor extends JDialog {
         button.setToolTipText("Add as column");
         button.setSelected(columnsExists(existsCheck));
         button.addChangeListener(e -> {
-            if(button.isSelected()) {
-                if(table.getColumns().stream().noneMatch(existsCheck))
-                    table.addColumn(instantiator.apply(null));
-            }
-            else {
-                for(MISAAttachmentTableColumn column : table.getColumns().stream().filter(existsCheck).collect(Collectors.toList())) {
-                    table.removeColumn(column);
+            try(BusyCursor busyCursor = new BusyCursor(this)) {
+                if(button.isSelected()) {
+                    if(table.getColumns().stream().noneMatch(existsCheck))
+                        table.addColumn(instantiator.apply(null));
+                }
+                else {
+                    for(MISAAttachmentTableColumn column : table.getColumns().stream().filter(existsCheck).collect(Collectors.toList())) {
+                        table.removeColumn(column);
+                    }
                 }
             }
         });

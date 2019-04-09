@@ -18,6 +18,7 @@ import org.hkijena.misa_imagej.api.workbench.MISAAttachmentDatabase;
 import org.hkijena.misa_imagej.api.workbench.filters.MISAAttachmentFilter;
 import org.hkijena.misa_imagej.ui.workbench.MISAWorkbenchUI;
 import org.hkijena.misa_imagej.ui.workbench.tablebuilder.MISAAttachmentTableBuilderUI;
+import org.hkijena.misa_imagej.utils.BusyCursor;
 import org.hkijena.misa_imagej.utils.SQLUtils;
 import org.hkijena.misa_imagej.utils.UIUtils;
 
@@ -177,7 +178,9 @@ public class MISAAttachmentBrowserUI extends JPanel {
             public void treeWillExpand(TreeExpansionEvent treeExpansionEvent) throws ExpandVetoException {
                 if (treeExpansionEvent.getPath().getLastPathComponent() instanceof ObjectBrowserTreeNode) {
                     ObjectBrowserTreeNode node = (ObjectBrowserTreeNode) treeExpansionEvent.getPath().getLastPathComponent();
-                    node.loadDatabaseEntries((DefaultTreeModel)objectViewTree.getModel());
+                    try(BusyCursor busyCursor = new BusyCursor(objectViewTree)) {
+                        node.loadDatabaseEntries((DefaultTreeModel)objectViewTree.getModel());
+                    }
                 }
             }
 
@@ -203,29 +206,33 @@ public class MISAAttachmentBrowserUI extends JPanel {
     }
 
     private void createObjectBrowserModelByCache() {
-        ObjectBrowserTreeNode node = new ObjectBrowserTreeNode(attachmentDatabase, new ObjectBrowserTreeNode.Role[]{
-                ObjectBrowserTreeNode.Role.Sample,
-                ObjectBrowserTreeNode.Role.Cache,
-                ObjectBrowserTreeNode.Role.SubCache,
-                ObjectBrowserTreeNode.Role.SerializationId,
-                ObjectBrowserTreeNode.Role.Property
-        }, new String[5]);
-        DefaultTreeModel model = new DefaultTreeModel(node);
-        objectViewTree.setModel(model);
-        node.loadDatabaseEntries(model);
+        try(BusyCursor busyCursor = new BusyCursor(this)) {
+            ObjectBrowserTreeNode node = new ObjectBrowserTreeNode(attachmentDatabase, new ObjectBrowserTreeNode.Role[]{
+                    ObjectBrowserTreeNode.Role.Sample,
+                    ObjectBrowserTreeNode.Role.Cache,
+                    ObjectBrowserTreeNode.Role.SubCache,
+                    ObjectBrowserTreeNode.Role.SerializationId,
+                    ObjectBrowserTreeNode.Role.Property
+            }, new String[5]);
+            DefaultTreeModel model = new DefaultTreeModel(node);
+            objectViewTree.setModel(model);
+            node.loadDatabaseEntries(model);
+        }
     }
 
     private void createObjectBrowserModelByType() {
-        ObjectBrowserTreeNode node = new ObjectBrowserTreeNode(attachmentDatabase, new ObjectBrowserTreeNode.Role[]{
-                ObjectBrowserTreeNode.Role.SerializationNamespace,
-                ObjectBrowserTreeNode.Role.SerializationId,
-                ObjectBrowserTreeNode.Role.CacheAndSubCache,
-                ObjectBrowserTreeNode.Role.Sample,
-                ObjectBrowserTreeNode.Role.Property
-        }, new String[5]);
-        DefaultTreeModel model = new DefaultTreeModel(node);
-        objectViewTree.setModel(model);
-        node.loadDatabaseEntries(model);
+        try(BusyCursor busyCursor = new BusyCursor(this)) {
+            ObjectBrowserTreeNode node = new ObjectBrowserTreeNode(attachmentDatabase, new ObjectBrowserTreeNode.Role[]{
+                    ObjectBrowserTreeNode.Role.SerializationNamespace,
+                    ObjectBrowserTreeNode.Role.SerializationId,
+                    ObjectBrowserTreeNode.Role.CacheAndSubCache,
+                    ObjectBrowserTreeNode.Role.Sample,
+                    ObjectBrowserTreeNode.Role.Property
+            }, new String[5]);
+            DefaultTreeModel model = new DefaultTreeModel(node);
+            objectViewTree.setModel(model);
+            node.loadDatabaseEntries(model);
+        }
     }
 
     @Subscribe

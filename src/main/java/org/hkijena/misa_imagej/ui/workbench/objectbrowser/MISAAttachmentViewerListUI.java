@@ -14,6 +14,7 @@ package org.hkijena.misa_imagej.ui.workbench.objectbrowser;
 
 import org.hkijena.misa_imagej.api.MISAAttachment;
 import org.hkijena.misa_imagej.api.workbench.MISAAttachmentDatabase;
+import org.hkijena.misa_imagej.utils.BusyCursor;
 import org.hkijena.misa_imagej.utils.UIUtils;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.ScrollableSizeHint;
@@ -112,19 +113,21 @@ public class MISAAttachmentViewerListUI extends JPanel {
     }
 
     private void reloadData() {
-        this.nextDisplayedId = 0;
-        this.attachments.clear();
-        listPanel.removeAll();
-        listPanel.revalidate();
-        listPanel.repaint();
-        if(this.databaseIterator != null) {
-            try {
-                this.databaseIterator.close();
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
+        try(BusyCursor busyCursor = new BusyCursor(this)) {
+            this.nextDisplayedId = 0;
+            this.attachments.clear();
+            listPanel.removeAll();
+            listPanel.revalidate();
+            listPanel.repaint();
+            if (this.databaseIterator != null) {
+                try {
+                    this.databaseIterator.close();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
             }
+            this.databaseIterator = database.createAttachmentIterator(databaseFilters);
         }
-        this.databaseIterator = database.createAttachmentIterator(databaseFilters);
         addItem();
     }
 
@@ -136,28 +139,30 @@ public class MISAAttachmentViewerListUI extends JPanel {
     }
 
     private void addItem() {
-        MISAAttachment attachment;
-        try {
-            attachment = databaseIterator.nextAttachment();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-        if(attachment == null)
-            return;
-        attachments.add(attachment);
-        MISAAttachmentViewerUI viewer = new MISAAttachmentViewerUI(this, attachment);
-        viewer.setAlignmentY(Component.TOP_ALIGNMENT);
-        listPanel.add(viewer, new GridBagConstraints() {
-            {
-                gridx = 0;
-                gridy = nextDisplayedId;
-                fill = GridBagConstraints.HORIZONTAL;
-                anchor = GridBagConstraints.NORTHWEST;
-                insets = UIUtils.UI_PADDING;
-                weightx = 1;
+        try(BusyCursor busyCursor = new BusyCursor(this)) {
+            MISAAttachment attachment;
+            try {
+                attachment = databaseIterator.nextAttachment();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
             }
-        });
-        ++nextDisplayedId;
+            if (attachment == null)
+                return;
+            attachments.add(attachment);
+            MISAAttachmentViewerUI viewer = new MISAAttachmentViewerUI(this, attachment);
+            viewer.setAlignmentY(Component.TOP_ALIGNMENT);
+            listPanel.add(viewer, new GridBagConstraints() {
+                {
+                    gridx = 0;
+                    gridy = nextDisplayedId;
+                    fill = GridBagConstraints.HORIZONTAL;
+                    anchor = GridBagConstraints.NORTHWEST;
+                    insets = UIUtils.UI_PADDING;
+                    weightx = 1;
+                }
+            });
+            ++nextDisplayedId;
+        }
         revalidate();
         repaint();
 

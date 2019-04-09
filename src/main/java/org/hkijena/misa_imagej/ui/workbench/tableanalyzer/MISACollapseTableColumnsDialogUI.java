@@ -14,6 +14,7 @@ package org.hkijena.misa_imagej.ui.workbench.tableanalyzer;
 
 import org.hkijena.misa_imagej.MISAImageJRegistryService;
 import org.hkijena.misa_imagej.ui.registries.MISATableAnalyzerUIOperationRegistry;
+import org.hkijena.misa_imagej.utils.BusyCursor;
 import org.hkijena.misa_imagej.utils.UIUtils;
 
 import javax.swing.*;
@@ -99,11 +100,12 @@ public class MISACollapseTableColumnsDialogUI extends JDialog {
     }
 
     private void calculate() {
-        if(columnOperations.stream().anyMatch(entry -> entry.getSelectedItem() instanceof CategorizeColumnRole)) {
-            calculateWithCategorization();
-        }
-        else {
-            calculateWithoutCategorization();
+        try(BusyCursor busyCursor = new BusyCursor(this)) {
+            if (columnOperations.stream().anyMatch(entry -> entry.getSelectedItem() instanceof CategorizeColumnRole)) {
+                calculateWithCategorization();
+            } else {
+                calculateWithoutCategorization();
+            }
         }
     }
 

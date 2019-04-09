@@ -17,6 +17,7 @@ import com.google.common.eventbus.EventBus;
 import com.google.gson.Gson;
 import org.hkijena.misa_imagej.api.MISARuntimeLog;
 import org.hkijena.misa_imagej.ui.components.PlotReader;
+import org.hkijena.misa_imagej.utils.BusyCursor;
 import org.hkijena.misa_imagej.utils.GsonUtils;
 import org.hkijena.misa_imagej.utils.UIUtils;
 import org.jfree.chart.JFreeChart;
@@ -109,7 +110,7 @@ public class MISARuntimeLogUI extends JPanel {
 
     public void open(Path path) {
         Gson gson = GsonUtils.getGson();
-        try {
+        try(BusyCursor busyCursor = new BusyCursor(this)) {
             runtimeLog = gson.fromJson(new String(Files.readAllBytes(path)), MISARuntimeLog.class);
             eventBus.post(new RuntimeLogChangedEvent(runtimeLog, path));
         } catch (IOException e) {

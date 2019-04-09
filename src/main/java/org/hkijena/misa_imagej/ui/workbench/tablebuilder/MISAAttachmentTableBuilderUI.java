@@ -19,6 +19,7 @@ import org.hkijena.misa_imagej.api.workbench.table.*;
 import org.hkijena.misa_imagej.ui.workbench.MISAAttachmentTableUI;
 import org.hkijena.misa_imagej.ui.workbench.MISAWorkbenchUI;
 import org.hkijena.misa_imagej.ui.workbench.tableanalyzer.MISATableAnalyzerUI;
+import org.hkijena.misa_imagej.utils.BusyCursor;
 import org.hkijena.misa_imagej.utils.UIUtils;
 import org.hkijena.misa_imagej.utils.ui.DocumentTabPane;
 import org.hkijena.misa_imagej.utils.ui.MonochromeColorIcon;
@@ -184,20 +185,21 @@ public class MISAAttachmentTableBuilderUI extends JPanel {
         Object previousSelection = objectSelection.getSelectedItem();
 
         DefaultComboBoxModel<String> objectTypes = new DefaultComboBoxModel<>();
-        try(ResultSet resultSet = database.query("distinct \"serialization-id\"",
-                databaseFilters, "")) {
-            while(resultSet.next()) {
-                String item = resultSet.getString(1);
-                objectTypes.addElement(item);
+        try(BusyCursor cursor = new BusyCursor(this)) {
+            try(ResultSet resultSet = database.query("distinct \"serialization-id\"",
+                    databaseFilters, "")) {
+                while(resultSet.next()) {
+                    String item = resultSet.getString(1);
+                    objectTypes.addElement(item);
 
-                if(item.equals(previousSelection)) {
-                    objectTypes.setSelectedItem(item);
+                    if(item.equals(previousSelection)) {
+                        objectTypes.setSelectedItem(item);
+                    }
                 }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
             }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
         }
-
 
         objectSelection.setModel(objectTypes);
     }

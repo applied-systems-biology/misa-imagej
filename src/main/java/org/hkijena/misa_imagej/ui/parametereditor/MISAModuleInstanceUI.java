@@ -24,6 +24,7 @@ import org.hkijena.misa_imagej.ui.components.MarkdownReader;
 import org.hkijena.misa_imagej.ui.components.PDFReader;
 import org.hkijena.misa_imagej.ui.repository.MISAModuleRepositoryUI;
 import org.hkijena.misa_imagej.ui.workbench.MISAWorkbenchUI;
+import org.hkijena.misa_imagej.utils.BusyCursor;
 import org.hkijena.misa_imagej.utils.FilesystemUtils;
 import org.hkijena.misa_imagej.utils.UIUtils;
 import org.hkijena.misa_imagej.utils.ui.DocumentTabPane;
@@ -86,7 +87,7 @@ public class MISAModuleInstanceUI extends JFrame {
         chooser.setAcceptAllFileFilterUsed(false);
 
         if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-            try {
+            try (BusyCursor busyCursor = new BusyCursor(this)) {
                 Path exportRunPath = chooser.getSelectedFile().toPath();
 
                 if (!FilesystemUtils.directoryIsEmpty(exportRunPath)) {
@@ -128,7 +129,7 @@ public class MISAModuleInstanceUI extends JFrame {
         MISARunModuleDialogUI dialog = new MISARunModuleDialogUI(this);
         dialog.setLocationRelativeTo(this);
         if (dialog.showDialog() == MISARunModuleDialogUI.ACCEPT_OPTION) {
-            try {
+            try (BusyCursor busyCursor = new BusyCursor(this)) {
                 Files.createDirectories(dialog.getImportedPath());
                 Files.createDirectories(dialog.getExportedPath());
                 Files.createDirectories(dialog.getParameterFilePath().getParent());
