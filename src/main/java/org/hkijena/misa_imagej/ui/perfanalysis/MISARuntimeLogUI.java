@@ -203,6 +203,12 @@ public class MISARuntimeLogUI extends JPanel {
         renderer.setUseYInterval(true);
         XYPlot plot = new XYPlot(dataset, new SymbolAxis("Threads", threadList.toArray(new String[0])), new NumberAxis("Time (s)"), renderer);
         plot.setOrientation(PlotOrientation.HORIZONTAL);
+
+        for(int i = 0; i < dataset.getSeriesCount(); ++i) {
+            float h = Math.abs(dataset.getSeries(i).getKey().hashCode() % 256) / 255.0f;
+            plot.getRendererForDataset(dataset).setSeriesPaint(i, Color.getHSBColor(h, 0.8f, 1.0f));
+        }
+
         JFreeChart chart = new JFreeChart(plot);
 
         // Setup panel

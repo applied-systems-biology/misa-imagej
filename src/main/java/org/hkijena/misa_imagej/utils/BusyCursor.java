@@ -21,13 +21,15 @@ public class BusyCursor implements AutoCloseable {
 
     public BusyCursor(Component component) {
         this.window = SwingUtilities.getWindowAncestor(component);
-        if(window != null)
-            this.window.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+        if(window != null) {
+            window.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+        }
     }
 
     @Override
     public void close() {
-        if(window != null)
-            window.setCursor(Cursor.getDefaultCursor());
+        if(window != null) {
+            window.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+        }
     }
 }
