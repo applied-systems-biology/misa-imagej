@@ -196,8 +196,8 @@ public class CancelableProcessUI extends JDialog {
             for(int i = 0; i < processes.size(); ++i) {
                 if(this.isCancelled())
                     return 1;
-                int result = executor.execute(processes.get(i));
                 currentProcessIndex = i;
+                int result = executor.execute(processes.get(i));
                 if(executor.isFailure(result))
                     return result;
             }
