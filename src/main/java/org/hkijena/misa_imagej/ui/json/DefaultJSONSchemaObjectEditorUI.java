@@ -14,8 +14,10 @@ package org.hkijena.misa_imagej.ui.json;
 
 import org.hkijena.misa_imagej.api.json.JSONSchemaObject;
 import org.hkijena.misa_imagej.api.json.JSONSchemaObjectType;
+import org.hkijena.misa_imagej.utils.ui.DocumentChangeListener;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -75,9 +77,13 @@ public class DefaultJSONSchemaObjectEditorUI extends JSONSchemaObjectEditorUI {
             }
             add(edit, BorderLayout.CENTER);
 
-            edit.addActionListener(actionEvent -> {
-                getJsonSchemaObject().setValue(edit.getText());
+            edit.getDocument().addDocumentListener(new DocumentChangeListener() {
+                @Override
+                public void changed(DocumentEvent documentEvent) {
+                    getJsonSchemaObject().setValue(edit.getText());
+                }
             });
+
             schemaEditorUI.insertObjectEditorUI(this, true);
         }
         else if(getJsonSchemaObject().getType() == JSONSchemaObjectType.jsonNumber) {
