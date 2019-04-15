@@ -15,6 +15,7 @@ package org.hkijena.misa_imagej.extension.plotbuilder;
 import org.hkijena.misa_imagej.ui.workbench.plotbuilder.MISAPlotSeriesData;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.renderer.category.BoxAndWhiskerRenderer;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 
 import java.util.List;
@@ -28,6 +29,9 @@ public class DefaultBoxAndWhiskerBarCategoryPlot extends DefaultBoxAndWhiskerCat
 
     @Override
     protected JFreeChart createPlotFromDataset() {
-        return ChartFactory.createBoxAndWhiskerChart(getTitle(), getCategoryAxisLabel(), getValueAxisLabel(), (BoxAndWhiskerCategoryDataset)getDataset(), true);
+        JFreeChart chart = ChartFactory.createBoxAndWhiskerChart(getTitle(), getCategoryAxisLabel(), getValueAxisLabel(), (BoxAndWhiskerCategoryDataset)getDataset(), true);
+        CustomBoxAndWhiskerRenderer renderer = new CustomBoxAndWhiskerRenderer();
+        chart.getCategoryPlot().setRenderer(renderer);
+        return chart;
     }
 }
