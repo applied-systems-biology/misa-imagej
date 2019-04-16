@@ -17,10 +17,10 @@ See the LICENSE file provided with this code for the full license.
 
     <groupId>org.hkijena</groupId>
     <artifactId>misa_imagej</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <name>misa_imagej</name>
     <description>Allows running MISA++ workloads from within ImageJ</description>
-    <url>https://asb-git.hki-jena.de/RGerst/misa_imagej</url>
+    <url>https://applied-systems-biology.github.io/misa-framework/</url>
     <inceptionYear>2018</inceptionYear>
     <organization>
         <name>Leibniz Institute for Natural Product Research and Infection Biology - Hans Knöll Institute (HKI)</name>
@@ -52,18 +52,18 @@ See the LICENSE file provided with this code for the full license.
         </mailingList>
     </mailingLists>
     <scm>
-        <connection>scm:git:https://asb-git.hki-jena.de/RGerst/misa-imagej.git</connection>
-        <developerConnection>scm:git:https://rgerst@asb-git.hki-jena.de/RGerst/misa-imagej.git</developerConnection>
+        <connection>scm:git:https://github.com/applied-systems-biology/misa-imagej.git</connection>
+        <developerConnection>scm:git:https://github.com/applied-systems-biology/misa-imagej.git</developerConnection>
         <tag>HEAD</tag>
-        <url>https://asb-git.hki-jena.de/RGerst/misa-imagej</url>
+        <url>https://github.com/applied-systems-biology/misa-imagej</url>
     </scm>
     <issueManagement>
-        <system>GitLab Issues</system>
-        <url>https://asb-git.hki-jena.de/RGerst/misa-imagej/issues</url>
+        <system>GitHub Issues</system>
+        <url>https://github.com/applied-systems-biology/misa-imagej/issues</url>
     </issueManagement>
     <ciManagement>
-        <system>GitLab CI</system>
-        <url>https://asb-git.hki-jena.de/RGerst/misa-imagej/pipelines</url>
+        <system>GitHub CI</system>
+        <url>https://github.com/applied-systems-biology/misa-imagej</url>
     </ciManagement>
 
     <parent>
