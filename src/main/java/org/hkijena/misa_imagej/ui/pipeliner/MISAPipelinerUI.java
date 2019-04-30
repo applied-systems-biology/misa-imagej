@@ -376,7 +376,20 @@ public class MISAPipelinerUI extends JFrame {
 
     private void addInstance() {
         if(moduleList.getSelectedValue() != null) {
-            pipeline.addNode(moduleList.getSelectedValue());
+            MISAPipelineNode node = pipeline.addNode(moduleList.getSelectedValue());
+
+            if(synchronizeAllSamplesToggle.isSelected()) {
+                isCurrentlySynchronizing = true;
+                for(MISAPipelineNode nd : pipeline.getNodes()) {
+                    for(String sample : nd.getModuleInstance().getSamples().keySet()) {
+                        if(!node.getModuleInstance().getSamples().containsKey(sample)) {
+                            node.getModuleInstance().addSample(sample);
+                        }
+                    }
+                }
+                isCurrentlySynchronizing = false;
+                refreshSampleList();
+            }
         }
     }
 
