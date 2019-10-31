@@ -14,10 +14,7 @@ package org.hkijena.misa_imagej.api.repository;
 
 import com.google.gson.Gson;
 import ij.IJ;
-import org.hkijena.misa_imagej.utils.FilesystemUtils;
-import org.hkijena.misa_imagej.utils.GsonUtils;
-import org.hkijena.misa_imagej.utils.OSUtils;
-import org.hkijena.misa_imagej.utils.OperatingSystem;
+import org.hkijena.misa_imagej.utils.*;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -26,10 +23,9 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Manages MISA++ repositories
@@ -60,10 +56,13 @@ public class MISAModuleRepository {
             paths.add(Paths.get(IJ.getDirectory("plugins")).resolve("misa-modules"));
         }
         if(OSUtils.detectOperatingSystem() == OperatingSystem.Linux) {
-            paths.add(Paths.get("/usr/lib/misaxx/modules"));
-            paths.add(Paths.get("/usr/local/lib32/misaxx/modules"));
-            paths.add(Paths.get("/usr/local/lib64/misaxx/modules"));
-            paths.add(Paths.get("/usr/local/lib/misaxx/modules"));
+            // Detect the search path via ld
+            String result = ProcessUtils.queryFast(Paths.get("/usr/bin/ld"), "--verbose");
+            Pattern pattern = Pattern.compile("SEARCH_DIR\\(\"=([^\"]+)\"\\);");
+            Matcher matcher = pattern.matcher(result);
+            while(matcher.find()) {
+                paths.add(Paths.get(matcher.group(1) + "/misaxx/modules"));
+            }
         }
     }
 
@@ -106,6 +105,11 @@ public class MISAModuleRepository {
                 return;
             }
 
+            // Check if the executable was already loaded
+            if(modules.stream().anyMatch(m -> m.getExecutablePath().equals(module.getExecutablePath()))) {
+                return;
+            }
+
             modules.add(module);
 
         } catch (IOException e) {
@@ -117,5 +121,9 @@ public class MISAModuleRepository {
         if(instance == null)
             instance = new MISAModuleRepository();
         return instance;
+    }
+
+    public static void main(String[] args) {
+        MISAModuleRepository.getInstance();
     }
 }
