@@ -69,7 +69,7 @@ See the LICENSE file provided with this code for the full license.
     <parent>
         <groupId>org.scijava</groupId>
         <artifactId>pom-scijava</artifactId>
-        <version>16.1.0</version>
+        <version>28.0.0-SNAPSHOT</version>
         <relativePath />
     </parent>
 
@@ -192,11 +192,16 @@ See the LICENSE file provided with this code for the full license.
     </dependencies>
 
     <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
         <license.licenseName>BSD-2-Clause</license.licenseName>
         <license.copyrightOwners>N/A</license.copyrightOwners>
         <license.projectName>MISA ImageJ</license.projectName>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+        <!-- Needed for modern Java versions that actually still can be downloaded -->
+        <scijava.jvm.build.version>[1.8.0-101,]</scijava.jvm.build.version>
     </properties>
 
     <build>
@@ -225,7 +230,7 @@ See the LICENSE file provided with this code for the full license.
             <plugin>
                 <groupId>org.scijava</groupId>
                 <artifactId>scijava-maven-plugin</artifactId>
-                <version>1.1.0</version>
+                <version>1.1.1</version>
                 <executions>
                     <execution>
                         <id>set-rootdir</id>

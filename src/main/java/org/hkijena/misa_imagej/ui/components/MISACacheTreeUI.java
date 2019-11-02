@@ -13,7 +13,7 @@
 package org.hkijena.misa_imagej.ui.components;
 
 import com.google.common.eventbus.EventBus;
-import org.apache.commons.collections.ListUtils;
+import org.apache.commons.collections4.ListUtils;
 import org.hkijena.misa_imagej.api.MISACache;
 import org.hkijena.misa_imagej.api.MISASample;
 import org.hkijena.misa_imagej.utils.ui.ColorIcon;
