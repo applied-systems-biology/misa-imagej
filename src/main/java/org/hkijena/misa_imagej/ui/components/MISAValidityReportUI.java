@@ -63,7 +63,7 @@ public class MISAValidityReportUI extends JFrame {
             model.addColumn("Object");
             for(MISAValidityReport.Entry entry : report.getEntries().values()) {
                 model.addRow(new Object[]{
-                        entry.isValid() ? "OK" : "Error",
+                        entry.getEntryType().name(),
                         entry.getMessage(),
                         Joiner.on(", ").join(entry.getCategories()),
                         entry.getObject().toString()

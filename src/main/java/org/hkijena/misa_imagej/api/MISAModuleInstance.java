@@ -25,6 +25,8 @@ import org.hkijena.misa_imagej.api.repository.MISAModule;
 import org.hkijena.misa_imagej.api.repository.MISAModuleInfo;
 import org.hkijena.misa_imagej.utils.FilesystemUtils;
 import org.hkijena.misa_imagej.utils.GsonUtils;
+import org.hkijena.misa_imagej.utils.OSUtils;
+import org.hkijena.misa_imagej.utils.OperatingSystem;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -254,6 +256,16 @@ public class MISAModuleInstance implements MISAValidatable {
 
         for (MISASample sample : samples.values()) {
             report.merge(sample.getValidityReport(), "Samples", sample.getName());
+        }
+
+        if(OSUtils.detectOperatingSystem() == OperatingSystem.Windows) {
+            double num_threads = (double) runtimeParameters.getPropertyFromPath("num-threads").getValue();
+            if(num_threads > 1) {
+                report.report(runtimeParameters.getPropertyFromPath("num-threads"),
+                        "Known issues",
+                        MISAValidityReport.Entry.Type.Warning,
+                        "Running multi-threaded Windows-applications within ImageJ can cause freezes. Consider using the 'Export' functionality.");
+            }
         }
 
         return report;

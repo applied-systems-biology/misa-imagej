@@ -17,15 +17,45 @@ import java.util.*;
 public class MISAValidityReport {
 
     public static class Entry {
+
+        public enum Type {
+            Info,
+            Warning,
+            Error;
+
+            static Type merge(Type t0, Type t1) {
+                if(t0 == Error || t1 == Error) {
+                    return Error;
+                }
+                else if(t0 == Warning || t1 == Warning) {
+                    return  Warning;
+                }
+                else {
+                    return Info;
+                }
+            }
+
+            public boolean isAtLeast(Type comparison) {
+                switch (comparison) {
+                    case Info:
+                        return true;
+                    case Warning:
+                        return this == Warning || this == Error;
+                    default:
+                        return this == Error;
+                }
+            }
+        }
+
         private Object object;
         private List<String> categories;
-        private boolean valid;
+        private Type type;
         private String message;
 
-        public Entry(Object object, List<String> categories, boolean valid, String message) {
+        public Entry(Object object, List<String> categories, Type type, String message) {
             this.object = object;
             this.categories = categories;
-            this.valid = valid;
+            this.type = type;
             this.message = message;
         }
 
@@ -50,13 +80,17 @@ public class MISAValidityReport {
             return message;
         }
 
-        public boolean isValid() {
-            return valid;
+        public Type getEntryType() {
+            return type;
         }
 
-        public void markAsInvalid(String message) {
-            this.valid = false;
+        public void markAs(String message, Type type) {
+            this.type = type;
             this.message = message;
+        }
+
+        public void mergeWith(Type type) {
+            this.type = Type.merge(this.type, type);
         }
     }
 
@@ -66,29 +100,42 @@ public class MISAValidityReport {
 
     }
 
-    public MISAValidityReport(Object target, String category, boolean valid, String message) {
-        this.report(target, category, valid, message);
+    public MISAValidityReport(Object target, String category, Entry.Type type, String message) {
+        this.report(target, category, type, message);
+    }
+
+    public MISAValidityReport(Object target, String category, boolean isValid, String message) {
+        this.report(target, category, isValid ? Entry.Type.Info : Entry.Type.Error, message);
     }
 
     /**
      * Reports the target object to the validity report
      * @param target
      * @param category
-     * @param valid
+     * @param isValid
      */
-    public void report(Object target, String category, boolean valid, String message) {
+    public void report(Object target, String category, boolean isValid, String message) {
+        report(target, category, isValid ? Entry.Type.Info : Entry.Type.Error, message);
+    }
+
+    /**
+     * Reports the target object to the validity report
+     * @param target
+     * @param category
+     * @param type
+     */
+    public void report(Object target, String category, Entry.Type type, String message) {
         Entry e = entries.getOrDefault(target, null);
         if(e == null) {
             List<String> c = new ArrayList<>();
             if(category != null)
                 c.add(category);
-            e = new Entry(target, c, valid, message);
+            e = new Entry(target, c, type, message);
             entries.put(target, e);
         }
         else {
             e.addCategory(category);
-            if(!valid)
-                e.markAsInvalid(message);
+            e.markAs(message, Entry.Type.merge(e.getEntryType(), type));
         }
     }
 
@@ -103,8 +150,7 @@ public class MISAValidityReport {
                 Entry src = subreport.entries.get(key);
                 Entry dst = entries.get(key);
                 dst.addCategories(src.getCategories());
-                if(!src.isValid())
-                    dst.markAsInvalid(src.getMessage());
+                dst.markAs(src.getMessage(), Entry.Type.merge(src.getEntryType(), dst.getEntryType()));
             }
             else {
                 entries.put(key, subreport.entries.get(key));
@@ -116,24 +162,28 @@ public class MISAValidityReport {
      * Returns true if all reports are positive
      * @return
      */
-    public boolean isValid() {
+    public Entry.Type getResult() {
+        Entry.Type result = Entry.Type.Info;
         for(Entry entry : entries.values()) {
-            if(!entry.isValid()) {
-                return false;
-            }
+            result = Entry.Type.merge(result, entry.getEntryType());
         }
-        return true;
+        return result;
+    }
+
+    public boolean isValid() {
+        return getResult() != Entry.Type.Error;
     }
 
     public Map<Object, Entry> getEntries() {
         return Collections.unmodifiableMap(entries);
     }
 
-    public Map<Object, Entry> getInvalidEntries() {
+    public Map<Object, Entry> getEntriesOfAtLeast(Entry.Type type) {
         HashMap<Object, Entry> result = new HashMap<>();
         for(Map.Entry<Object, Entry> kv : entries.entrySet()) {
-            if(!kv.getValue().isValid())
+            if(kv.getValue().getEntryType().isAtLeast(type)) {
                 result.put(kv.getKey(), kv.getValue());
+            }
         }
         return Collections.unmodifiableMap(result);
     }
