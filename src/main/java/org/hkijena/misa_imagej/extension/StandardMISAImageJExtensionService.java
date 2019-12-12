@@ -17,8 +17,10 @@ import org.hkijena.misa_imagej.MISAImageJRegistryService;
 import org.hkijena.misa_imagej.extension.attachmentfilters.*;
 import org.hkijena.misa_imagej.extension.caches.MISAExportedAttachmentsCache;
 import org.hkijena.misa_imagej.extension.caches.MISAFileCache;
+import org.hkijena.misa_imagej.extension.caches.MISAImageCache;
 import org.hkijena.misa_imagej.extension.caches.MISAOMETiffCache;
 import org.hkijena.misa_imagej.extension.datasources.*;
+import org.hkijena.misa_imagej.extension.outputcaches.ImageOutputCacheUI;
 import org.hkijena.misa_imagej.extension.outputcaches.OMETiffOutputCacheUI;
 import org.hkijena.misa_imagej.extension.plotbuilder.*;
 import org.hkijena.misa_imagej.extension.tableanalyzer.*;
@@ -31,20 +33,24 @@ public class StandardMISAImageJExtensionService extends AbstractService implemen
 
     @Override
     public void register(MISAImageJRegistryService registryService) {
+
+        // Register caches
         registryService.getCacheRegistry().register("misa-ome:descriptions/ome-tiff", MISAOMETiffCache.class);
+        registryService.getCacheRegistry().register("misa:descriptions/image", MISAImageCache.class);
         registryService.getCacheRegistry().register("misa:descriptions/file", MISAFileCache.class);
         registryService.getCacheRegistry().register("misa:descriptions/exported-attachments", MISAExportedAttachmentsCache.class);
 
-//        registryService.getSerializableRegistry().register("misa:attachments/location", MISALocation.class);
-//        registryService.getSerializableRegistry().register("misa:attachments/locatable", MISALocatable.class);
-//        registryService.getSerializableRegistry().register("misa_ome:attachments/planes-location", MISAOMEPlanesLocation.class);
-
+        // Register data sources and their UI
         registryService.getDataSourceUIRegistry().register(MISAOMETiffDataSource.class, MISAOMETiffDataSourceUI.class);
+        registryService.getDataSourceUIRegistry().register(MISAImageDataSource.class, MISAImageDataSourceUI.class);
         registryService.getDataSourceUIRegistry().register(MISAFolderLinkDataSource.class, MISAFolderLinkDataSourceUI.class);
         registryService.getDataSourceUIRegistry().register(MISAPipelineNodeDataSource.class, MISAPipelineNodeDataSourceUI.class);
 
+        // Register output cache UI
         registryService.getOutputCacheUIRegistry().register(MISAOMETiffCache.class, OMETiffOutputCacheUI.class);
+        registryService.getOutputCacheUIRegistry().register(MISAImageCache.class, ImageOutputCacheUI.class);
 
+        // Register database filters
         registryService.getAttachmentFilterUIRegistry().register(MISAAttachmentSampleFilter.class, MISAAttachmentSampleFilterUI.class,
                 "Filter by sample", UIUtils.getIconFromResources("sample.png"));
         registryService.getAttachmentFilterUIRegistry().register(MISAAttachmentCacheFilter.class, MISAAttachmentCacheFilterUI.class,
@@ -56,6 +62,7 @@ public class StandardMISAImageJExtensionService extends AbstractService implemen
         registryService.getAttachmentFilterUIRegistry().register(MISAAttachmentSQLFilter.class, MISAAttachmentSQLFilterUI.class,
                 "Filter by SQL", UIUtils.getIconFromResources("cog.png"));
 
+        // Register spreadsheet operations
         registryService.getTableAnalyzerUIOperationRegistry().register(StatisticsCountVectorOperation.class,
                 null,
                 "Count",
@@ -136,7 +143,7 @@ public class StandardMISAImageJExtensionService extends AbstractService implemen
                 "Replaces each item with an ID that uniquely identifies the item.",
                 UIUtils.getIconFromResources("inplace-function.png"));
 
-
+        // Register plot types
         registryService.getPlotBuilderRegistry().register(DefaultBoxAndWhiskerBarCategoryPlot.class,
                 CategoryPlotSettingsUI.class,
                 "Box Plot",
