@@ -20,6 +20,7 @@ import org.hkijena.misa_imagej.extension.caches.MISAFileCache;
 import org.hkijena.misa_imagej.extension.caches.MISAImageCache;
 import org.hkijena.misa_imagej.extension.caches.MISAOMETiffCache;
 import org.hkijena.misa_imagej.extension.datasources.*;
+import org.hkijena.misa_imagej.extension.outputcaches.GenericImageOutputCacheUI;
 import org.hkijena.misa_imagej.extension.outputcaches.ImageOutputCacheUI;
 import org.hkijena.misa_imagej.extension.outputcaches.OMETiffOutputCacheUI;
 import org.hkijena.misa_imagej.extension.plotbuilder.*;

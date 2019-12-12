@@ -23,7 +23,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
 
-public class OMETiffOutputCacheUI extends ImageOutputCacheUI {
+public class OMETiffOutputCacheUI extends GenericImageOutputCacheUI {
     public OMETiffOutputCacheUI(MISAOutput misaOutput, MISACache cache) {
         super(misaOutput, cache);
     }

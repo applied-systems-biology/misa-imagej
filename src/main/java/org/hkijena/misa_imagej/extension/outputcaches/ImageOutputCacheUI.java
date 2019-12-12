@@ -12,14 +12,20 @@
 
 package org.hkijena.misa_imagej.extension.outputcaches;
 
-import ij.WindowManager;
+import ij.IJ;
+import loci.plugins.LociImporter;
 import org.hkijena.misa_imagej.api.MISACache;
 import org.hkijena.misa_imagej.api.workbench.MISAOutput;
 import org.hkijena.misa_imagej.utils.UIUtils;
 
 import javax.swing.*;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.Optional;
 
-public class ImageOutputCacheUI extends DefaultMISAOutputCacheUI {
+public class ImageOutputCacheUI extends GenericImageOutputCacheUI {
     public ImageOutputCacheUI(MISAOutput misaOutput, MISACache cache) {
         super(misaOutput, cache);
     }
@@ -30,15 +36,29 @@ public class ImageOutputCacheUI extends DefaultMISAOutputCacheUI {
         if(getFilesystemPath() == null)
             return;
 
-        AbstractButton renameCurrentImageButton = createButton("Set current image name", UIUtils.getIconFromResources("imagej.png"));
-        renameCurrentImageButton.addActionListener(e -> renameCurrentImage());
+        AbstractButton importBioformatsButton = createButton("Import", UIUtils.getIconFromResources("imagej.png"));
+        importBioformatsButton.addActionListener(e -> importImage());
 
         super.initialize();
     }
 
-    private void renameCurrentImage() {
-        if(WindowManager.getCurrentImage() != null) {
-            WindowManager.getCurrentImage().setTitle(getCache().getSample().getName() + "/" + getCache().getRelativePathName());
+    private static boolean isSupportedFileType(Path path) {
+        for(String extension : Arrays.asList(".bmp", ".pbm", ".pgm", ".ppm", ".sr", ".ras", ".jpeg", ".jpg", ".jpe", ".tiff", ".tif", ".png")) {
+            if(path.toString().endsWith(extension))
+                return true;
+        }
+        return false;
+    }
+
+    private void importImage() {
+        try {
+            Optional<Path> file = Files.list(getFilesystemPath()).filter(ImageOutputCacheUI::isSupportedFileType).findFirst();
+            if(!file.isPresent())
+                throw new IOException("Could not find a compatible file!");
+
+            IJ.open(file.get().toString());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 }
