@@ -21,6 +21,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Map;
 
 public class MISAValidityReportStatusUI extends JButton implements ActionListener {
 
@@ -51,7 +52,7 @@ public class MISAValidityReportStatusUI extends JButton implements ActionListene
     }
 
     private void refreshUI() {
-        if(report == null || report.isValid()) {
+        if(report == null || report.getResult() == MISAValidityReport.Entry.Type.Info) {
             this.setIcon(null);
             this.setText(getLastUpdateString() + " - No errors found");
         }
@@ -59,8 +60,11 @@ public class MISAValidityReportStatusUI extends JButton implements ActionListene
             StringBuilder message = new StringBuilder();
             message.append(getLastUpdateString());
             message.append(" - ");
-            if(!report.getInvalidEntries().isEmpty()) {
-                MISAValidityReport.Entry e = report.getInvalidEntries().values().stream().findFirst().get();
+            Map<Object, MISAValidityReport.Entry> interestingEntries =
+                    report.getEntriesOfAtLeast(MISAValidityReport.Entry.Type.Warning);
+            if(!interestingEntries.isEmpty()) {
+                MISAValidityReport.Entry e = interestingEntries
+                        .values().stream().findFirst().get();
                 if(!e.getCategories().isEmpty()) {
                     message.append(e.getCategories().stream().findFirst().get());
                     if(e.getCategories().size() > 1)
@@ -69,9 +73,9 @@ public class MISAValidityReportStatusUI extends JButton implements ActionListene
                 }
                 message.append(e.getMessage());
 
-                if(report.getInvalidEntries().size() > 1) {
+                if(interestingEntries.size() > 1) {
                     message.append(" (");
-                    message.append(report.getInvalidEntries().size() - 1);
+                    message.append(interestingEntries.size() - 1);
                     message.append(" more)");
                 }
             }
@@ -79,7 +83,15 @@ public class MISAValidityReportStatusUI extends JButton implements ActionListene
                 message.append("Parameters are invalid!");
             }
             this.setText(message.toString());
-            this.setIcon(UIUtils.getIconFromResources("error.png"));
+
+            switch(report.getResult()) {
+                case Warning:
+                    this.setIcon(UIUtils.getIconFromResources("warning.png"));
+                    break;
+                case Error:
+                    this.setIcon(UIUtils.getIconFromResources("error.png"));
+                    break;
+            }
         }
     }
 
