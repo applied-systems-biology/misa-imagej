@@ -15,13 +15,11 @@ package org.hkijena.misa_imagej.extension;
 import org.hkijena.misa_imagej.MISAImageJExtensionService;
 import org.hkijena.misa_imagej.MISAImageJRegistryService;
 import org.hkijena.misa_imagej.extension.attachmentfilters.*;
-import org.hkijena.misa_imagej.extension.caches.MISAExportedAttachmentsCache;
-import org.hkijena.misa_imagej.extension.caches.MISAFileCache;
-import org.hkijena.misa_imagej.extension.caches.MISAImageCache;
-import org.hkijena.misa_imagej.extension.caches.MISAOMETiffCache;
+import org.hkijena.misa_imagej.extension.caches.*;
 import org.hkijena.misa_imagej.extension.datasources.*;
 import org.hkijena.misa_imagej.extension.outputcaches.GenericImageOutputCacheUI;
 import org.hkijena.misa_imagej.extension.outputcaches.ImageOutputCacheUI;
+import org.hkijena.misa_imagej.extension.outputcaches.ImageStackOutputCacheUI;
 import org.hkijena.misa_imagej.extension.outputcaches.OMETiffOutputCacheUI;
 import org.hkijena.misa_imagej.extension.plotbuilder.*;
 import org.hkijena.misa_imagej.extension.tableanalyzer.*;
@@ -38,18 +36,21 @@ public class StandardMISAImageJExtensionService extends AbstractService implemen
         // Register caches
         registryService.getCacheRegistry().register("misa-ome:descriptions/ome-tiff", MISAOMETiffCache.class);
         registryService.getCacheRegistry().register("misa-imaging:descriptions/image", MISAImageCache.class);
+        registryService.getCacheRegistry().register("misa-imaging:descriptions/image-stack", MISAImageStackCache.class);
         registryService.getCacheRegistry().register("misa:descriptions/file", MISAFileCache.class);
         registryService.getCacheRegistry().register("misa:descriptions/exported-attachments", MISAExportedAttachmentsCache.class);
 
         // Register data sources and their UI
         registryService.getDataSourceUIRegistry().register(MISAOMETiffDataSource.class, MISAOMETiffDataSourceUI.class);
         registryService.getDataSourceUIRegistry().register(MISAImageDataSource.class, MISAImageDataSourceUI.class);
+        registryService.getDataSourceUIRegistry().register(MISAImageStackDataSource.class, MISAImageStackDataSourceUI.class);
         registryService.getDataSourceUIRegistry().register(MISAFolderLinkDataSource.class, MISAFolderLinkDataSourceUI.class);
         registryService.getDataSourceUIRegistry().register(MISAPipelineNodeDataSource.class, MISAPipelineNodeDataSourceUI.class);
 
         // Register output cache UI
         registryService.getOutputCacheUIRegistry().register(MISAOMETiffCache.class, OMETiffOutputCacheUI.class);
         registryService.getOutputCacheUIRegistry().register(MISAImageCache.class, ImageOutputCacheUI.class);
+        registryService.getOutputCacheUIRegistry().register(MISAImageStackCache.class, ImageStackOutputCacheUI.class);
 
         // Register database filters
         registryService.getAttachmentFilterUIRegistry().register(MISAAttachmentSampleFilter.class, MISAAttachmentSampleFilterUI.class,

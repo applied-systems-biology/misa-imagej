@@ -12,6 +12,8 @@
 
 package org.hkijena.misa_imagej.utils.swappers;
 
+import java.nio.file.Path;
+
 /**
  * Interface for all data that can be swapped between ImageJ and filesystem
  */

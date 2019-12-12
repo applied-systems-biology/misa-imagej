@@ -17,7 +17,7 @@ See the LICENSE file provided with this code for the full license.
 
     <groupId>org.hkijena</groupId>
     <artifactId>misa_imagej</artifactId>
-    <version>1.1.0</version>
+    <version>1.2.0</version>
     <name>misa_imagej</name>
     <description>Allows running MISA++ workloads from within ImageJ</description>
     <url>https://applied-systems-biology.github.io/misa-framework/</url>
